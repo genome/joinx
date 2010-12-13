@@ -6,3 +6,7 @@ CTestTestfile.cmake
 Makefile
 build/
 cmake_install.cmake
+bin/
+install_manifest.txt
+_CPack_Packages/
+*.deb
