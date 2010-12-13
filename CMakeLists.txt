@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(varicmp)
+project(snpcmp)
 add_definitions(-Wall -ansi)
 
 include(macros.cmake)
@@ -30,8 +30,8 @@ if(${CMAKE_SIZEOF_VOID_P} MATCHES 8)
     set(ARCH "x86_64")
 endif(${CMAKE_SIZEOF_VOID_P} MATCHES 8)
 
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tool for comparing variation files")
-set(CPACK_PACKAGE_NAME "varicmp")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tool for comparing snp bed files")
+set(CPACK_PACKAGE_NAME "snpcmp")
 set(CPACK_PACKAGE_VENDOR "wugsc")
 set(CPACK_PACKAGE_VERSION "0.1.0")
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
