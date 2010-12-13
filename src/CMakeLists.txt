@@ -9,7 +9,6 @@ set(LIB_SOURCES
     LineUtils.hpp
     NoReferenceFilter.hpp
     ConcordanceQuality.hpp
-    SnpBedReader.hpp
     SnpFilterBase.hpp
     SnpIntersector.cpp
     SnpIntersector.hpp
