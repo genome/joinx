@@ -8,10 +8,11 @@ PATCH=0
 VERS=0
 case $verstr in
     v[0-9]*)
-        MAJOR=`echo $verstr | sed 's;v\([0-9]*\)\..*;\1;'`
-        MINOR=`echo $verstr | sed 's;v[^.]*\.\([0-9]*\)\..*;\1;'`
-        PATCH=`echo $verstr | sed 's;v[^.]*\.[^.]*\.\([0-9]*\);\1;'`
         VERS=${verstr#v*}
+        VERS=${VERS%%-*}
+        MAJOR=`echo $VERS | sed 's;^\([0-9]*\)\..*;\1;'`
+        MINOR=`echo $VERS | sed 's;^[^.]*\.\([0-9]*\)\..*;\1;'`
+        PATCH=`echo $VERS | sed 's;^[^.]*\.[^.]*\.\([0-9]*\).*;\1;'`
         ;;
     *) VERS="0" ;;
 esac

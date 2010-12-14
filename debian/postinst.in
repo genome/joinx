@@ -1,0 +1,3 @@
+#!/bin/sh
+
+update-alternatives --install /usr/bin/snpcmp snpcmp /usr/lib/snpcmp-@PROJ_VERSION@/snpcmp 0
