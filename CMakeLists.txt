@@ -8,7 +8,8 @@ configure_file(debian/postinst.in debian/postinst @ONLY)
 configure_file(debian/prerm.in debian/prerm  @ONLY)
 
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE debug)
+    set(CMAKE_BUILD_TYPE debug CACHE STRING 
+        "Options: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
     message("No CMAKE_BUILD_TYPE specified, defaulting to debug")
 endif ()
 
