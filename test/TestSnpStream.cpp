@@ -18,11 +18,11 @@ TEST(SnpStream, nextSnp) {
     Bed snp;
     ASSERT_TRUE(ss.nextSnp(snp));
     ASSERT_EQ("1", snp.chrom);
-    ASSERT_EQ(2, snp.start);
-    ASSERT_EQ(3, snp.end);
+    ASSERT_EQ(2u, snp.start);
+    ASSERT_EQ(3u, snp.end);
     ASSERT_EQ("A/T", snp.refCall);
     ASSERT_EQ("44", snp.qual);
     ASSERT_TRUE(snp.isSnp());
 
-    ASSERT_EQ(2, ss.lineNum());
+    ASSERT_EQ(2u, ss.lineNum());
 }

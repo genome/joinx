@@ -10,8 +10,8 @@ TEST(Bed, parse) {
     string snpLine = "1\t2\t3\tA/T\t44";
     Bed snp = Bed::parseLine(snpLine);
     ASSERT_EQ("1", snp.chrom);
-    ASSERT_EQ(2, snp.start);
-    ASSERT_EQ(3, snp.end);
+    ASSERT_EQ(2u, snp.start);
+    ASSERT_EQ(3u, snp.end);
     ASSERT_EQ("A/T", snp.refCall);
     ASSERT_EQ("44", snp.qual);
 

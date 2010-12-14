@@ -26,5 +26,5 @@ TEST(NoReferenceFilter, exclude) {
         ASSERT_FALSE(filter.exclude(snp)) << 
             "don't exclude '" << snp.refCall << "' as reference value";
     }
-    ASSERT_EQ(4, filter.filtered());
+    ASSERT_EQ(4u, filter.filtered());
 }

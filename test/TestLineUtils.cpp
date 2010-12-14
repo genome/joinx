@@ -17,7 +17,7 @@ TEST(extractInt, ok) {
 
     uint32_t value;
     ASSERT_TRUE(extractInt(&intstr[0], &intstr[intstr.size()], value));
-    ASSERT_EQ(1234, value);
+    ASSERT_EQ(1234u, value);
     ASSERT_FALSE(extractInt(&badstr[0], &badstr[badstr.size()], value));
 }
 
@@ -28,29 +28,29 @@ TEST(extractField, sequential) {
     string fld;
 
     extractField(line, end, 0, start, end);
-    ASSERT_EQ(0, start) << "field 1 start position";
-    ASSERT_EQ(4, end) << "field 1 end position";
+    ASSERT_EQ(0u, start) << "field 1 start position";
+    ASSERT_EQ(4u, end) << "field 1 end position";
     fld = string(&line[start], &line[end]);
     ASSERT_EQ("fld1", fld) << "value of field 1";
 
     ++end;
     extractField(line, end, 0, start, end);
-    ASSERT_EQ(5, start) << "field 2 start position";
-    ASSERT_EQ(9, end) << "field 2 end position";
+    ASSERT_EQ(5u, start) << "field 2 start position";
+    ASSERT_EQ(9u, end) << "field 2 end position";
     fld = string(&line[start], &line[end]);
     ASSERT_EQ("fld2", fld) << "value of field 2";
 
     ++end;
     extractField(line, end, 0, start, end);
-    ASSERT_EQ(10, start) << "field 2 start position";
-    ASSERT_EQ(14, end) << "field 2 end position";
+    ASSERT_EQ(10u, start) << "field 2 start position";
+    ASSERT_EQ(14u, end) << "field 2 end position";
     fld = string(&line[start], &line[end]);
     ASSERT_EQ("fld3", fld) << "value of field 3";
 
     ++end;
     extractField(line, end, 0, start, end);
-    ASSERT_EQ(15, start) << "field 2 start position";
-    ASSERT_EQ(19, end) << "field 2 end position";
+    ASSERT_EQ(15u, start) << "field 2 start position";
+    ASSERT_EQ(19u, end) << "field 2 end position";
     fld = string(&line[start], &line[end]);
     ASSERT_EQ("fld4", fld) << "value of field 4";
 }
@@ -61,15 +61,15 @@ TEST(extractField, skipFields) {
     string fld;
 
     extractField(line, end, 1, start, end);
-    ASSERT_EQ(5, start) << "field 2 start position";
-    ASSERT_EQ(9, end) << "field 2 end position";
+    ASSERT_EQ(5u, start) << "field 2 start position";
+    ASSERT_EQ(9u, end) << "field 2 end position";
     fld = string(&line[start], &line[end]);
     ASSERT_EQ("fld2", fld) << "value of field 2";
 
     ++end;
     extractField(line, end, 1, start, end);
-    ASSERT_EQ(15, start) << "field 2 start position";
-    ASSERT_EQ(19, end) << "field 2 end position";
+    ASSERT_EQ(15u, start) << "field 2 start position";
+    ASSERT_EQ(19u, end) << "field 2 end position";
     fld = string(&line[start], &line[end]);
     ASSERT_EQ("fld4", fld) << "value of field 4";
 
@@ -79,8 +79,8 @@ TEST(extractField, skipFields) {
         <<  "trying to extract past end of line is an error";
 
     extractField(line, end, 2, start, end);
-    ASSERT_EQ(30, start) << "field 7 start position";
-    ASSERT_EQ(34, end) << "field 7 end position";
+    ASSERT_EQ(30u, start) << "field 7 start position";
+    ASSERT_EQ(34u, end) << "field 7 end position";
     fld = string(&line[start], &line[end]);
     ASSERT_EQ("fld7", fld) << "value of field 7";
 
