@@ -21,4 +21,4 @@ add_library(bed ${LIB_SOURCES})
 add_executable(snpcmp main.cpp)
 target_link_libraries(snpcmp bed)
 
-install(TARGETS snpcmp DESTINATION bin)
+install(TARGETS snpcmp DESTINATION lib/snpcmp-${PROJ_VERSION})
