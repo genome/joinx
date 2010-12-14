@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 2.6)
 
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+include(TestHelper)
+
 project(snpcmp)
 if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     add_definitions(-Wall -ansi)
 endif ()
-
-include(macros.cmake)
 
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
