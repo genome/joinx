@@ -12,10 +12,11 @@ find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # main project
-set(VERSION_MAJOR "0")
-set(VERSION_MINOR "1")
-set(VERSION_PATCH "0")
-set(PROJ_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+include(VersionHelper)
+#set(VERSION_MAJOR "2")
+#set(VERSION_MINOR "1")
+#set(VERSION_PATCH "0")
+#set(PROJ_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
 include_directories("src")
 add_subdirectory(src build/src)
