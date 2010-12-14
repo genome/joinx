@@ -10,4 +10,6 @@ _CPack_Packages/
 bin/
 build/
 cmake_install.cmake
+debian/postinst
+debian/prerm
 install_manifest.txt
