@@ -1,12 +1,13 @@
+*.deb
 CMakeCache.txt
 CMakeFiles/
 CPackConfig.cmake
 CPackSourceConfig.cmake
 CTestTestfile.cmake
 Makefile
+Testing/
+_CPack_Packages/
+bin/
 build/
 cmake_install.cmake
-bin/
 install_manifest.txt
-_CPack_Packages/
-*.deb
