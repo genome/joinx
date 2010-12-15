@@ -5,15 +5,17 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 set(LIB_SOURCES
     Bed.cpp
     Bed.hpp
+    BedFilterBase.hpp
+    BedStream.cpp
+    BedStream.hpp
+    ConcordanceQuality.hpp
     IResultCollector.hpp
     LineUtils.hpp
     NoReferenceFilter.hpp
-    ConcordanceQuality.hpp
-    SnvFilterBase.hpp
     SnvIntersector.cpp
     SnvIntersector.hpp
-    SnvStream.cpp
-    SnvStream.hpp
+    SortBed.cpp
+    SortBed.hpp
     intconfig.hpp
 )
 

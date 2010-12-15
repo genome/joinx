@@ -4,10 +4,10 @@
 
 class Bed;
 
-class SnvFilterBase {
+class BedFilterBase {
 public:
-    SnvFilterBase() : _filtered(0) {}
-    ~SnvFilterBase() {}
+    BedFilterBase() : _filtered(0) {}
+    ~BedFilterBase() {}
 
     uint64_t filtered() {
         return _filtered;

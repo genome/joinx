@@ -1,39 +1,39 @@
-#include "SnvStream.hpp"
+#include "BedStream.hpp"
 
 #include "Bed.hpp"
 #include "BedFilterBase.hpp"
 
 using namespace std;
 
-SnvStream::SnvStream(const std::string& name, std::istream& in)
+BedStream::BedStream(const std::string& name, std::istream& in)
     : _name(name)
     , _in(in)
     , _lineNum(0)
-    , _snvCount(0)
+    , _bedCount(0)
 {
 }
 
-void SnvStream::addFilter(BedFilterBase* s) {
+void BedStream::addFilter(BedFilterBase* s) {
     _filters.push_back(s);
 }
 
-bool SnvStream::eof() const {
+bool BedStream::eof() const {
     return _in.eof();
 }
 
-bool SnvStream::nextSnv(Bed& snv) {
+bool BedStream::next(Bed& bed) {
     do {
         string line = nextLine();
         if (line.empty())
             return false;
 
-        snv = Bed::parseLine(line);
-    } while (!snv.isSnv() || exclude(snv));
-    ++_snvCount;
+        bed = Bed::parseLine(line);
+    } while (exclude(bed));
+    ++_bedCount;
     return true;
 }
 
-string SnvStream::nextLine() {
+string BedStream::nextLine() {
     string line;
     do {
         getline(_in, line);
@@ -42,10 +42,10 @@ string SnvStream::nextLine() {
     return line;
 }
 
-bool SnvStream::exclude(const Bed& snv) {
+bool BedStream::exclude(const Bed& bed) {
     typedef vector<BedFilterBase*>::iterator IterType;
     for (IterType iter = _filters.begin(); iter != _filters.end(); ++iter) {
-        if ((*iter)->exclude(snv))
+        if ((*iter)->exclude(bed))
             return true;
     }
         

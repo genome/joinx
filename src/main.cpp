@@ -1,7 +1,9 @@
-#include "SnvStream.hpp"
-#include "SnvIntersector.hpp"
-#include "NoReferenceFilter.hpp"
+#include "Bed.hpp"
+#include "BedStream.hpp"
 #include "ConcordanceQuality.hpp"
+#include "NoReferenceFilter.hpp"
+#include "SnvIntersector.hpp"
+#include "TypeFilter.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -13,22 +15,24 @@ using namespace std;
 
 void snvIntersection(const string& fileA, const string& fileB) {
     NoReferenceFilter nref;
+    TypeFilter snvOnly(Bed::SNV);
     ConcordanceQuality qc;
 
     ifstream inA(fileA.c_str());
     if (!inA) throw runtime_error("Failed to open input file " + fileA);
     ifstream inB(fileB.c_str());
     if (!inB) throw runtime_error("Failed to open input file " + fileB);
-    SnvStream fa(fileA, inA);
-    SnvStream fb(fileB, inB);
+    BedStream fa(fileA, inA);
+    BedStream fb(fileB, inB);
 
     fa.addFilter(&nref);
+    fa.addFilter(&snvOnly);
 
     SnvIntersector snvi(fa, fb, qc);
     snvi.exec();
     qc.report(cout); 
 
-    cout << "Total Snvs: " << fa.snvCount() << endl;
+    cout << "Total Snvs: " << fa.bedCount() << endl;
     cout << "      Hits: " << qc.hits() << endl;
     cout << "    Misses: " << qc.misses() << endl;
 }

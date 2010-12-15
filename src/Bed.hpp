@@ -5,6 +5,11 @@
 
 struct Bed
 {
+    enum Type {
+        SNV,
+        INDEL
+    };
+
     Bed()
         : start(0)
         , end(0)
@@ -27,9 +32,12 @@ struct Bed
     std::string line;
 
     int cmp(const Bed& rhs) const;
+    bool operator<(const Bed& rhs) const {
+        return cmp(rhs) < 0;
+    }
 
-    bool isSnv() const {
-        return end == start+1;
+    bool type() const {
+        return (end == start+1) ? SNV : INDEL;
     }
 
     static Bed parseLine(const std::string& line);

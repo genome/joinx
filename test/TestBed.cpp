@@ -15,10 +15,10 @@ TEST(Bed, parse) {
     ASSERT_EQ("A/T", snv.refCall);
     ASSERT_EQ("44", snv.qual);
 
-    ASSERT_TRUE(snv.isSnv());
+    ASSERT_EQ(Bed::SNV, snv.type());
 
     snv.end += 1;
-    ASSERT_FALSE(snv.isSnv());
+    ASSERT_EQ(Bed::INDEL, snv.type());
 }
 
 TEST(Bed, parseBad) {

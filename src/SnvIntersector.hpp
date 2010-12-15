@@ -3,17 +3,17 @@
 #include "intconfig.hpp"
 
 class Bed;
-class SnvStream;
+class BedStream;
 class IResultCollector;
 
 class SnvIntersector {
 public:
-    SnvIntersector(SnvStream& a, SnvStream& b, IResultCollector& rc);
+    SnvIntersector(BedStream& a, BedStream& b, IResultCollector& rc);
 
     void exec();
 
 protected:
-    SnvStream& _a;
-    SnvStream& _b;
+    BedStream& _a;
+    BedStream& _b;
     IResultCollector& _rc;
 };
