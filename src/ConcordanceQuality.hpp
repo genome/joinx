@@ -15,14 +15,14 @@ class ConcordanceQuality : public IResultCollector {
 public:
     ConcordanceQuality() : _hitCount(0), _missCount(0) {}
 
-    unsigned qualityLevel(const Bed& snp) {
+    unsigned qualityLevel(const Bed& snv) {
         using namespace std;
 
         char* end = NULL;
-        unsigned qual = strtoul(snp.qual.c_str(), &end, 10);
-        if (end != &snp.qual[snp.qual.size()]) {
+        unsigned qual = strtoul(snv.qual.c_str(), &end, 10);
+        if (end != &snv.qual[snv.qual.size()]) {
             stringstream ss;
-            ss << "Failed to extract quality value from string '" << snp.qual 
+            ss << "Failed to extract quality value from string '" << snv.qual 
                 << "'.";
             throw runtime_error(ss.str());
         }
@@ -30,27 +30,27 @@ public:
         return qual;
     }
 
-    void hit(const Bed& snp, const Bed& junk) {
-        hit(snp);
+    void hit(const Bed& snv, const Bed& junk) {
+        hit(snv);
     }
 
-    void hit(const Bed& snp) {
+    void hit(const Bed& snv) {
         using namespace std; 
-        unsigned qual = qualityLevel(snp);
+        unsigned qual = qualityLevel(snv);
         ++_hitCount;
         pair<MapType::iterator,bool> p = _hitMap.insert(make_pair(qual, 1));
         if (!p.second)
             ++p.first->second;
     }
 
-    void miss(const Bed& snp, const Bed& junk) {
-        miss(snp);
+    void miss(const Bed& snv, const Bed& junk) {
+        miss(snv);
     }
 
-    void miss(const Bed& snp) {
+    void miss(const Bed& snv) {
         using namespace std; 
         ++_missCount;
-        unsigned qual = qualityLevel(snp);
+        unsigned qual = qualityLevel(snv);
 
         pair<MapType::iterator,bool> p = _missMap.insert(make_pair(qual, 1));
         if (!p.second)

@@ -7,18 +7,18 @@
 using namespace std;
 
 TEST(Bed, parse) {
-    string snpLine = "1\t2\t3\tA/T\t44";
-    Bed snp = Bed::parseLine(snpLine);
-    ASSERT_EQ("1", snp.chrom);
-    ASSERT_EQ(2u, snp.start);
-    ASSERT_EQ(3u, snp.end);
-    ASSERT_EQ("A/T", snp.refCall);
-    ASSERT_EQ("44", snp.qual);
+    string snvLine = "1\t2\t3\tA/T\t44";
+    Bed snv = Bed::parseLine(snvLine);
+    ASSERT_EQ("1", snv.chrom);
+    ASSERT_EQ(2u, snv.start);
+    ASSERT_EQ(3u, snv.end);
+    ASSERT_EQ("A/T", snv.refCall);
+    ASSERT_EQ("44", snv.qual);
 
-    ASSERT_TRUE(snp.isSnp());
+    ASSERT_TRUE(snv.isSnv());
 
-    snp.end += 1;
-    ASSERT_FALSE(snp.isSnp());
+    snv.end += 1;
+    ASSERT_FALSE(snv.isSnv());
 }
 
 TEST(Bed, parseBad) {

@@ -4,17 +4,17 @@
 
 class Bed;
 
-class SnpFilterBase {
+class SnvFilterBase {
 public:
-    SnpFilterBase() : _filtered(0) {}
-    ~SnpFilterBase() {}
+    SnvFilterBase() : _filtered(0) {}
+    ~SnvFilterBase() {}
 
     uint64_t filtered() {
         return _filtered;
     }
 
-    bool exclude(const Bed& snp) {
-        if (_exclude(snp)) {
+    bool exclude(const Bed& snv) {
+        if (_exclude(snv)) {
             ++_filtered;
             return true;
         }
@@ -22,7 +22,7 @@ public:
     }
 
 protected:
-    virtual bool _exclude(const Bed& snp) = 0;
+    virtual bool _exclude(const Bed& snv) = 0;
 
 protected:
     uint64_t _filtered;

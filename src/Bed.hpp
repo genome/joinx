@@ -28,7 +28,7 @@ struct Bed
 
     int cmp(const Bed& rhs) const;
 
-    bool isSnp() const {
+    bool isSnv() const {
         return end == start+1;
     }
 

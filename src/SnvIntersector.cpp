@@ -1,50 +1,50 @@
-#include "SnpIntersector.hpp"
+#include "SnvIntersector.hpp"
 
 #include "Bed.hpp"
 #include "IResultCollector.hpp"
-#include "SnpStream.hpp"
+#include "SnvStream.hpp"
 
-SnpIntersector::SnpIntersector(SnpStream& a, SnpStream& b, IResultCollector& rc)
+SnvIntersector::SnvIntersector(SnvStream& a, SnvStream& b, IResultCollector& rc)
     : _a(a)
     , _b(b)
     , _rc(rc)
 {
 }
 
-void SnpIntersector::exec() {
-    Bed snpA;
-    Bed snpB;
-    _a.nextSnp(snpA);
-    _b.nextSnp(snpB);
+void SnvIntersector::exec() {
+    Bed snvA;
+    Bed snvB;
+    _a.nextSnv(snvA);
+    _b.nextSnv(snvB);
 
     while (!_a.eof() && !_b.eof()) {
         // TODO: burn off repeats
 
-        int c = snpA.cmp(snpB);
+        int c = snvA.cmp(snvB);
         if (c < 0) {
-            _rc.miss(snpA, snpB);
-            if (!_a.nextSnp(snpA)) break;
+            _rc.miss(snvA, snvB);
+            if (!_a.nextSnv(snvA)) break;
         } else if (c > 0) {
-            if (!_b.nextSnp(snpB)) break;
+            if (!_b.nextSnv(snvB)) break;
         } else {
-                _rc.hit(snpA, snpB);
-            if (!_a.nextSnp(snpA)) break;
+                _rc.hit(snvA, snvB);
+            if (!_a.nextSnv(snvA)) break;
 
             // NOTE: do not uncomment this. we do not advance B here because
             // we want to allow for the possibility of repetitions in A.
             // if we advanced B, these would be seen as misses. B will advance
             // naturally once A has passed it
             //
-            // if (!_b.nextSnp(snpB)) break;
+            // if (!_b.nextSnv(snvB)) break;
         }
     }
 
     while (!_a.eof()) {
-        _a.nextSnp(snpA);
-        _rc.miss(snpA, snpB);
+        _a.nextSnv(snvA);
+        _rc.miss(snvA, snvB);
     }
 
     while (!_b.eof()) {
-        _b.nextSnp(snpB);
+        _b.nextSnv(snvB);
     }
 }

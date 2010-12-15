@@ -9,16 +9,16 @@ set(LIB_SOURCES
     LineUtils.hpp
     NoReferenceFilter.hpp
     ConcordanceQuality.hpp
-    SnpFilterBase.hpp
-    SnpIntersector.cpp
-    SnpIntersector.hpp
-    SnpStream.cpp
-    SnpStream.hpp
+    SnvFilterBase.hpp
+    SnvIntersector.cpp
+    SnvIntersector.hpp
+    SnvStream.cpp
+    SnvStream.hpp
     intconfig.hpp
 )
 
 add_library(bed ${LIB_SOURCES})
-add_executable(snpcmp main.cpp)
-target_link_libraries(snpcmp bed)
+add_executable(snvcmp main.cpp)
+target_link_libraries(snvcmp bed)
 
-install(TARGETS snpcmp DESTINATION lib/snpcmp-${PROJ_VERSION})
+install(TARGETS snvcmp DESTINATION lib/snvcmp-${PROJ_VERSION})

@@ -1,5 +1,5 @@
-#include "SnpStream.hpp"
-#include "SnpIntersector.hpp"
+#include "SnvStream.hpp"
+#include "SnvIntersector.hpp"
 #include "NoReferenceFilter.hpp"
 #include "ConcordanceQuality.hpp"
 
@@ -11,7 +11,7 @@
 
 using namespace std;
 
-void snpIntersection(const string& fileA, const string& fileB) {
+void snvIntersection(const string& fileA, const string& fileB) {
     NoReferenceFilter nref;
     ConcordanceQuality qc;
 
@@ -19,16 +19,16 @@ void snpIntersection(const string& fileA, const string& fileB) {
     if (!inA) throw runtime_error("Failed to open input file " + fileA);
     ifstream inB(fileB.c_str());
     if (!inB) throw runtime_error("Failed to open input file " + fileB);
-    SnpStream fa(fileA, inA);
-    SnpStream fb(fileB, inB);
+    SnvStream fa(fileA, inA);
+    SnvStream fb(fileB, inB);
 
     fa.addFilter(&nref);
 
-    SnpIntersector snpi(fa, fb, qc);
-    snpi.exec();
+    SnvIntersector snvi(fa, fb, qc);
+    snvi.exec();
     qc.report(cout); 
 
-    cout << "Total Snps: " << fa.snpCount() << endl;
+    cout << "Total Snvs: " << fa.snvCount() << endl;
     cout << "      Hits: " << qc.hits() << endl;
     cout << "    Misses: " << qc.misses() << endl;
 }
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
     }
 
     try {
-        snpIntersection(argv[1], argv[2]);
+        snvIntersection(argv[1], argv[2]);
     } catch (const exception& e) {
         cerr << "ERROR: " << e.what() << endl;
     }
