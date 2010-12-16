@@ -26,8 +26,8 @@ int main(int argc, char** argv) {
     po::options_description opts("Available Options");
     opts.add_options()
         ("help", "this message")
-        ("file-a", "input file a (required)")
-        ("file-b", "input file b (required)");
+        ("file-a,a", po::value<string>(), "input file a (required)")
+        ("file-b,b", po::value<string>(), "input file b (required)");
     po::positional_options_description posOpts;
     posOpts.add("file-a", 1);
     posOpts.add("file-b", 1);
@@ -38,6 +38,7 @@ int main(int argc, char** argv) {
             .positional(posOpts).run(),
         vm
     );
+    po::notify(vm);
 
     if (vm.count("help")) {
         cerr << opts << endl;
