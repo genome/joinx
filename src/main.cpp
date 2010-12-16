@@ -2,6 +2,7 @@
 #include "BedStream.hpp"
 #include "ConcordanceQuality.hpp"
 #include "NoReferenceFilter.hpp"
+#include "SortBed.hpp"
 #include "SnvIntersector.hpp"
 #include "TypeFilter.hpp"
 
@@ -22,11 +23,14 @@ void snvIntersection(const string& fileA, const string& fileB) {
     if (!inA) throw runtime_error("Failed to open input file " + fileA);
     ifstream inB(fileB.c_str());
     if (!inB) throw runtime_error("Failed to open input file " + fileB);
-    BedStream fa(fileA, inA);
-    BedStream fb(fileB, inB);
 
-    fa.addFilter(&nref);
-    fa.addFilter(&snvOnly);
+
+    vector<BedFilterBase*> filters;
+    filters.push_back(&nref);
+    filters.push_back(&snvOnly);
+    BedStream fa(fileA, inA, filters);
+    BedStream fb(fileB, inB, filters);
+
 
     SnvIntersector snvi(fa, fb, qc);
     snvi.exec();
@@ -37,16 +41,34 @@ void snvIntersection(const string& fileA, const string& fileB) {
     cout << "    Misses: " << qc.misses() << endl;
 }
 
+void doSort(const string& infile, const string& outfile) {
+    ifstream in(infile.c_str());
+    if (!in) throw runtime_error("Failed to open input file " + infile);
+    BedStream inp(infile, in);
+    SortBed sorter(inp, cout, 1000000);
+    sorter.exec();
+}
+
 int main(int argc, char** argv) {
-    if (argc < 3) {
-        cerr << "usage: " << argv[0] << " <file_a> <file_b>" << endl;
+    if (argc < 4) {
+        cerr << "usage: " << argv[0] << " {sort|intersect} <file_a> <file_b>" << endl;
         return 1;
     }
 
-    try {
-        snvIntersection(argv[1], argv[2]);
-    } catch (const exception& e) {
-        cerr << "ERROR: " << e.what() << endl;
+    if (string(argv[1]) == "sort") {
+        try {
+            doSort(argv[2], argv[3]); 
+        } catch (const exception& e) {
+            cerr << "ERROR: " << e.what() << endl;
+        }
+    }
+
+    if (string(argv[1]) == "intersect") {
+        try {
+            snvIntersection(argv[2], argv[3]);
+        } catch (const exception& e) {
+            cerr << "ERROR: " << e.what() << endl;
+        }
     }
 
 

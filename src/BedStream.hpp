@@ -1,25 +1,31 @@
 #pragma once
 
+#include "Bed.hpp"
 #include "intconfig.hpp"
 
 #include <iostream>
 #include <string>
 #include <vector>
 
-class Bed;
 class BedFilterBase;
 
 class BedStream {
 public:
     BedStream(const std::string& name, std::istream& in);
+    BedStream(const std::string& name, std::istream& in, BedFilterBase* filter);
+    BedStream(const std::string& name, std::istream& in, const std::vector<BedFilterBase*>& filters);
+
+    operator bool() const {
+        return _lastGood;
+    }
 
     const std::string& name() const;
     uint64_t lineNum() const;
     uint64_t bedCount() const;
-    void addFilter(BedFilterBase* s);
 
     bool eof() const;
-    bool next(Bed& bed);
+    const Bed& peek() const;
+    void advance();
 
 protected:
     std::string nextLine();
@@ -31,7 +37,13 @@ protected:
     uint64_t _lineNum;
     uint64_t _bedCount;
     std::vector<BedFilterBase*> _filters;
+
+    bool _good;
+    bool _lastGood;
+    Bed _bed;
 };
+
+BedStream& operator>>(BedStream& s, Bed& bed);
 
 inline const std::string& BedStream::name() const {
     return _name;

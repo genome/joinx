@@ -14,8 +14,8 @@ SnvIntersector::SnvIntersector(BedStream& a, BedStream& b, IResultCollector& rc)
 void SnvIntersector::exec() {
     Bed snvA;
     Bed snvB;
-    _a.next(snvA);
-    _b.next(snvB);
+    _a >> snvA;
+    _b >> snvB;
 
     while (!_a.eof() && !_b.eof()) {
         // TODO: burn off repeats
@@ -23,28 +23,27 @@ void SnvIntersector::exec() {
         int c = snvA.cmp(snvB);
         if (c < 0) {
             _rc.miss(snvA, snvB);
-            if (!_a.next(snvA)) break;
+            _a >> snvA;
         } else if (c > 0) {
-            if (!_b.next(snvB)) break;
+            _b >> snvB;
         } else {
-                _rc.hit(snvA, snvB);
-            if (!_a.next(snvA)) break;
+            _rc.hit(snvA, snvB);
+            _a >> snvA;
 
             // NOTE: do not uncomment this. we do not advance B here because
             // we want to allow for the possibility of repetitions in A.
             // if we advanced B, these would be seen as misses. B will advance
             // naturally once A has passed it
             //
-            // if (!_b.next(snvB)) break;
+            // _b >> snvB
         }
     }
 
     while (!_a.eof()) {
-        _a.next(snvA);
+        _a >> snvA;
         _rc.miss(snvA, snvB);
     }
 
-    while (!_b.eof()) {
-        _b.next(snvB);
-    }
+    while (!_b.eof())
+        _b >> snvB;
 }

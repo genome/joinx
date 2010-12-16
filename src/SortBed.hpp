@@ -1,17 +1,30 @@
 #pragma once
 
-#include <iostream>
+#include <fstream>
 #include <vector>
 #include <string>
 
+#include <set>
+
+class Bed;
+class BedStream;
+
 class SortBed {
 public:
-    SortBed(std::istream& in, std::ostream& out);
+    SortBed(BedStream& in, std::ostream& out, unsigned maxInMem = 1000000);
+    ~SortBed();
 
     void exec();
 
 protected:
-    std::vector<std::ostream*> _tmpfiles;
-    std::istream& _in;
+    void createTempFile(const std::multiset<Bed>& beds);
+    bool getNextSortedFromFiles(Bed& b);
+
+protected:
+    class TempFile;
+
+    std::vector<TempFile*> _tmpfiles;
+    BedStream& _in;
     std::ostream& _out;
+    unsigned _maxInMem;
 };

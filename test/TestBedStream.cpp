@@ -18,25 +18,24 @@ TEST(BedStream, next) {
     BedStream ss("test", data);
     
     Bed bed;
-    ASSERT_TRUE(ss.next(bed));
+    ASSERT_TRUE(ss >> bed);
     ASSERT_EQ("1", bed.chrom);
     ASSERT_EQ(3u, bed.start);
     ASSERT_EQ(5u, bed.end);
     ASSERT_EQ("A/T", bed.refCall);
     ASSERT_EQ("43", bed.qual);
     ASSERT_EQ(Bed::INDEL, bed.type());
-    ASSERT_EQ(1u, ss.lineNum());
 
-    ASSERT_TRUE(ss.next(bed));
+    ASSERT_TRUE(ss >> bed);
     ASSERT_EQ("1", bed.chrom);
     ASSERT_EQ(2u, bed.start);
     ASSERT_EQ(3u, bed.end);
     ASSERT_EQ("A/T", bed.refCall);
     ASSERT_EQ("44", bed.qual);
     ASSERT_EQ(Bed::SNV, bed.type());
-    ASSERT_EQ(2u, ss.lineNum());
 
-    ASSERT_FALSE(ss.next(bed));
+    ASSERT_TRUE(ss.eof());
+    ASSERT_THROW(ss >> bed, runtime_error);
 }
 
 TEST(BedStream, TypeFilterSnv) {
@@ -45,21 +44,21 @@ TEST(BedStream, TypeFilterSnv) {
         "1\t2\t3\tA/T\t44\n"
     );
         
-    BedStream ss("test", data);
     TypeFilter f(Bed::SNV);
-    ss.addFilter(&f);
+    BedStream ss("test", data, &f);
 
     Bed bed;
-    ASSERT_TRUE(ss.next(bed));
+    ASSERT_TRUE(ss >> bed);
     ASSERT_EQ("1", bed.chrom);
     ASSERT_EQ(2u, bed.start);
     ASSERT_EQ(3u, bed.end);
     ASSERT_EQ("A/T", bed.refCall);
     ASSERT_EQ("44", bed.qual);
     ASSERT_EQ(Bed::SNV, bed.type());
-    ASSERT_EQ(2u, ss.lineNum());
+//    ASSERT_EQ(2u, ss.lineNum());
 
-    ASSERT_FALSE(ss.next(bed));
+    ASSERT_TRUE(ss.eof());
+    ASSERT_THROW(ss >> bed, runtime_error);
 }
 
 TEST(BedStream, TypeFilterIndel) {
@@ -68,19 +67,19 @@ TEST(BedStream, TypeFilterIndel) {
         "1\t2\t3\tA/T\t44\n"
     );
         
-    BedStream ss("test", data);
     TypeFilter f(Bed::INDEL);
-    ss.addFilter(&f);
+    BedStream ss("test", data, &f);
 
     Bed bed;
-    ASSERT_TRUE(ss.next(bed));
+    ASSERT_TRUE(ss >> bed);
     ASSERT_EQ("1", bed.chrom);
     ASSERT_EQ(3u, bed.start);
     ASSERT_EQ(5u, bed.end);
     ASSERT_EQ("A/T", bed.refCall);
     ASSERT_EQ("43", bed.qual);
     ASSERT_EQ(Bed::INDEL, bed.type());
-    ASSERT_EQ(1u, ss.lineNum());
+//    ASSERT_EQ(1u, ss.lineNum());
 
-    ASSERT_FALSE(ss.next(bed));
+    ASSERT_TRUE(ss.eof());
+    ASSERT_THROW(ss >> bed, runtime_error);
 }
