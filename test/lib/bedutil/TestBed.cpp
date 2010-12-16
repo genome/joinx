@@ -1,4 +1,4 @@
-#include "Bed.hpp"
+#include "bedutil/Bed.hpp"
 
 #include <stdexcept>
 #include <string>

@@ -1,5 +1,5 @@
-#include "NoReferenceFilter.hpp"
-#include "Bed.hpp"
+#include "bedutil/NoReferenceFilter.hpp"
+#include "bedutil/Bed.hpp"
 
 #include <stdexcept>
 #include <string>

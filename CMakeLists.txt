@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(TestHelper)
 include(VersionHelper)
+include(ProjectHelper)
 
 configure_file(debian/postinst.in debian/postinst @ONLY)
 configure_file(debian/prerm.in debian/prerm  @ONLY)
@@ -18,20 +19,20 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     add_definitions(-Wall -ansi)
 endif ()
 
-find_package(Boost REQUIRED)
+find_package(Boost COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # main project
 
-include_directories("src")
-add_subdirectory(src build/src)
+include_directories("src/lib")
+add_subdirectory(src)
 
 # unit tests
 find_package(GTest)
 if(GTEST_FOUND)
     message("Google Test framework found, building unit tests")
     enable_testing(true)
-    add_subdirectory(test build/test)
+    add_projects(test/lib)
 else()
     message("Google Test framework not found, no tests will be built")
     message("GTest is available at http://code.google.com/p/googletest/")

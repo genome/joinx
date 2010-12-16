@@ -1,4 +1,4 @@
-#include "LineUtils.hpp"
+#include "bedutil/LineUtils.hpp"
 
 #include <stdexcept>
 #include <string>

@@ -1,6 +1,6 @@
-#include "BedStream.hpp"
-#include "TypeFilter.hpp"
-#include "Bed.hpp"
+#include "bedutil/BedStream.hpp"
+#include "bedutil/TypeFilter.hpp"
+#include "bedutil/Bed.hpp"
 
 #include <sstream>
 #include <stdexcept>
