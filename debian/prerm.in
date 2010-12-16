@@ -1,3 +1,10 @@
 #!/bin/sh
 
-update-alternatives --remove snvcmp /usr/lib/snvcmp-@PROJ_VERSION@/snvcmp
+PROJDIR=/usr/lib/snvcmp-@PROJ_VERSION@
+EXECUTABLES="snvcmp bedsort"
+
+for e in $EXECUTABLES
+do
+    update-alternatives --remove $e $PROJDIR/$e
+done
+
