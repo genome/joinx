@@ -30,10 +30,6 @@ public:
         return qual;
     }
 
-    void hit(const Bed& snv, const Bed& junk) {
-        hitA(snv);
-    }
-
     void hitA(const Bed& snv) {
         using namespace std; 
         unsigned qual = qualityLevel(snv);

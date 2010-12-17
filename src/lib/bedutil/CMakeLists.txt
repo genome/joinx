@@ -12,10 +12,14 @@ set(SOURCES
     IResultCollector.hpp
     LineUtils.hpp
     NoReferenceFilter.hpp
+    ResultStreamWriter.cpp
+    ResultStreamWriter.hpp
     SnvComparator.cpp
     SnvComparator.hpp
     SortBed.cpp
     SortBed.hpp
+    SortTempFile.hpp
+    TypeFilter.hpp
     intconfig.hpp
 )
 

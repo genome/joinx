@@ -37,7 +37,8 @@ void SnvComparator::exec() {
             }
             _b >> snvB;
         } else {
-            _rc.hit(snvA, snvB);
+            _rc.hitA(snvA);
+            _rc.hitB(snvB);
             while (_a.peek(&peek) && peek->cmp(snvA) == 0) {
                 _a >> snvA;
                 _rc.hitA(snvA);
