@@ -51,8 +51,10 @@ public:
         return in().eof();
     }
 
-    bool operator<(const TempFile& rhs) const {
-        return in().peek() < rhs.in().peek();
+    bool operator<(TempFile& rhs) {
+        Bed a;
+        Bed b;
+        return in().peek(a) && rhs.in().peek(b) && a < b;
     }
 
 protected:

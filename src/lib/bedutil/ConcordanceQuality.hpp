@@ -43,11 +43,11 @@ public:
             ++p.first->second;
     }
 
-    void miss(const Bed& snv, const Bed& junk) {
-        miss(snv);
+    // don't care about misses in B
+    void missB(const Bed& b) {
     }
 
-    void miss(const Bed& snv) {
+    void missA(const Bed& snv) {
         using namespace std; 
         ++_missCount;
         unsigned qual = qualityLevel(snv);

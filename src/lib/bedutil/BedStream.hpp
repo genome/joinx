@@ -16,7 +16,7 @@ public:
     BedStream(const std::string& name, std::istream& in, const std::vector<BedFilterBase*>& filters);
 
     operator bool() const {
-        return _lastGood;
+        return !eof();
     }
 
     const std::string& name() const;
@@ -24,8 +24,9 @@ public:
     uint64_t bedCount() const;
 
     bool eof() const;
-    const Bed& peek() const;
-    void advance();
+    void checkEof() const; // check and throw
+    bool peek(Bed& bed);
+    bool next(Bed& bed);
 
 protected:
     std::string nextLine();
@@ -38,9 +39,8 @@ protected:
     uint64_t _bedCount;
     std::vector<BedFilterBase*> _filters;
 
-    bool _good;
-    bool _lastGood;
-    Bed _bed;
+    bool _cached;
+    Bed _cachedBed;
 };
 
 BedStream& operator>>(BedStream& s, Bed& bed);

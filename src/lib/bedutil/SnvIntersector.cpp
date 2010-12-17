@@ -14,6 +14,7 @@ SnvIntersector::SnvIntersector(BedStream& a, BedStream& b, IResultCollector& rc)
 void SnvIntersector::exec() {
     Bed snvA;
     Bed snvB;
+    Bed peek;
     _a >> snvA;
     _b >> snvB;
 
@@ -22,13 +23,32 @@ void SnvIntersector::exec() {
 
         int c = snvA.cmp(snvB);
         if (c < 0) {
-            _rc.miss(snvA, snvB);
+            _rc.missA(snvA);
+            while (_a.peek(peek) && peek.cmp(snvA) == 0) {
+                _a >> snvA;
+                _rc.missA(snvA);
+            }
             _a >> snvA;
         } else if (c > 0) {
+            _rc.missB(snvB);
+            while (_b.peek(peek) && peek.cmp(snvB) == 0) {
+                _b >> snvB;
+                _rc.missB(snvB);
+            }
             _b >> snvB;
         } else {
             _rc.hit(snvA, snvB);
+            while (_a.peek(peek) && peek.cmp(snvA) == 0) {
+                _a >> snvA;
+                _rc.hit(snvA, snvB);
+            }
+
+            while (_b.peek(peek) && peek.cmp(snvB) == 0) {
+                _b >> snvB;
+                _rc.hit(snvA, snvB);
+            }
             _a >> snvA;
+            _b >> snvB;
 
             // NOTE: do not uncomment this. we do not advance B here because
             // we want to allow for the possibility of repetitions in A.
@@ -41,9 +61,11 @@ void SnvIntersector::exec() {
 
     while (!_a.eof()) {
         _a >> snvA;
-        _rc.miss(snvA, snvB);
+        _rc.missA(snvA);
     }
 
-    while (!_b.eof())
+    while (!_b.eof()) {
         _b >> snvB;
+        _rc.missB(snvB);
+    }
 }
