@@ -65,3 +65,4 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& s, const Bed& bed);
+std::istream& operator>>(std::istream& s, Bed& bed);

@@ -60,3 +60,11 @@ std::ostream& operator<<(std::ostream& s, const Bed& bed) {
     return s;
 }
 
+
+std::istream& operator>>(std::istream& s, Bed& bed) {
+    bool rv = s >> bed.chrom >> bed.start >> bed.end >> bed.refCall >> bed.qual;
+    if (rv)
+        getline(s, bed.line);
+    return s;
+}
+

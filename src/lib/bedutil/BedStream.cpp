@@ -60,9 +60,8 @@ bool BedStream::next(Bed& bed) {
 
     do {
         string line = nextLine();
-        if (line.empty()) {
+        if (line.empty())
             return false;
-        }
 
         Bed::parseLine(line, bed);
     } while (exclude(bed));
