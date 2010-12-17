@@ -34,7 +34,7 @@ void Bed::parseLine(std::string& line, Bed& bed) {
     extractField(line, fldEnd+1, 0, fldBegin, fldEnd);
     bed.qual = line.substr(fldBegin, fldEnd-fldBegin);
 
-    line.swap(line);
+    bed.line.swap(line);
 }
 
 int Bed::cmp(const Bed& rhs) const {
