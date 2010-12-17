@@ -6,9 +6,9 @@ class Bed;
 class BedStream;
 class IResultCollector;
 
-class SnvIntersector {
+class SnvComparator {
 public:
-    SnvIntersector(BedStream& a, BedStream& b, IResultCollector& rc);
+    SnvComparator(BedStream& a, BedStream& b, IResultCollector& rc);
 
     void exec();
 

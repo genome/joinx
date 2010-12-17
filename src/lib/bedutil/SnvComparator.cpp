@@ -1,17 +1,17 @@
-#include "SnvIntersector.hpp"
+#include "SnvComparator.hpp"
 
 #include "Bed.hpp"
 #include "IResultCollector.hpp"
 #include "BedStream.hpp"
 
-SnvIntersector::SnvIntersector(BedStream& a, BedStream& b, IResultCollector& rc)
+SnvComparator::SnvComparator(BedStream& a, BedStream& b, IResultCollector& rc)
     : _a(a)
     , _b(b)
     , _rc(rc)
 {
 }
 
-void SnvIntersector::exec() {
+void SnvComparator::exec() {
     Bed snvA;
     Bed snvB;
     Bed peek;
@@ -40,12 +40,12 @@ void SnvIntersector::exec() {
             _rc.hit(snvA, snvB);
             while (_a.peek(peek) && peek.cmp(snvA) == 0) {
                 _a >> snvA;
-                _rc.hit(snvA, snvB);
+                _rc.hitA(snvA);
             }
 
             while (_b.peek(peek) && peek.cmp(snvB) == 0) {
                 _b >> snvB;
-                _rc.hit(snvA, snvB);
+                _rc.hitB(snvB);
             }
             _a >> snvA;
             _b >> snvB;

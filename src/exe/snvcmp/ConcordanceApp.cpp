@@ -3,7 +3,7 @@
 #include "bedutil/BedStream.hpp"
 #include "bedutil/ConcordanceQuality.hpp"
 #include "bedutil/NoReferenceFilter.hpp"
-#include "bedutil/SnvIntersector.hpp"
+#include "bedutil/SnvComparator.hpp"
 #include "bedutil/TypeFilter.hpp"
 
 #include <boost/program_options.hpp>
@@ -77,7 +77,7 @@ void ConcordanceApp::exec() {
     BedStream fb(_fileB, inB, filters);
 
     ConcordanceQuality qc;
-    SnvIntersector snvi(fa, fb, qc);
+    SnvComparator snvi(fa, fb, qc);
     snvi.exec();
     qc.report(cout); 
 

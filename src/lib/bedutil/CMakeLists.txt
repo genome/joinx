@@ -12,8 +12,8 @@ set(SOURCES
     IResultCollector.hpp
     LineUtils.hpp
     NoReferenceFilter.hpp
-    SnvIntersector.cpp
-    SnvIntersector.hpp
+    SnvComparator.cpp
+    SnvComparator.hpp
     SortBed.cpp
     SortBed.hpp
     intconfig.hpp

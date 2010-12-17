@@ -31,16 +31,19 @@ public:
     }
 
     void hit(const Bed& snv, const Bed& junk) {
-        hit(snv);
+        hitA(snv);
     }
 
-    void hit(const Bed& snv) {
+    void hitA(const Bed& snv) {
         using namespace std; 
         unsigned qual = qualityLevel(snv);
         ++_hitCount;
         pair<MapType::iterator,bool> p = _hitMap.insert(make_pair(qual, 1));
         if (!p.second)
             ++p.first->second;
+    }
+
+    void hitB(const Bed& snv) {
     }
 
     // don't care about misses in B
