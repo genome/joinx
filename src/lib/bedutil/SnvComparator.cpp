@@ -14,7 +14,7 @@ SnvComparator::SnvComparator(BedStream& a, BedStream& b, IResultCollector& rc)
 void SnvComparator::exec() {
     Bed snvA;
     Bed snvB;
-    Bed peek;
+    Bed *peek = NULL;
     _a >> snvA;
     _b >> snvB;
 
@@ -24,26 +24,26 @@ void SnvComparator::exec() {
         int c = snvA.cmp(snvB);
         if (c < 0) {
             _rc.missA(snvA);
-            while (_a.peek(peek) && peek.cmp(snvA) == 0) {
+            while (_a.peek(&peek) && peek->cmp(snvA) == 0) {
                 _a >> snvA;
                 _rc.missA(snvA);
             }
             _a >> snvA;
         } else if (c > 0) {
             _rc.missB(snvB);
-            while (_b.peek(peek) && peek.cmp(snvB) == 0) {
+            while (_b.peek(&peek) && peek->cmp(snvB) == 0) {
                 _b >> snvB;
                 _rc.missB(snvB);
             }
             _b >> snvB;
         } else {
             _rc.hit(snvA, snvB);
-            while (_a.peek(peek) && peek.cmp(snvA) == 0) {
+            while (_a.peek(&peek) && peek->cmp(snvA) == 0) {
                 _a >> snvA;
                 _rc.hitA(snvA);
             }
 
-            while (_b.peek(peek) && peek.cmp(snvB) == 0) {
+            while (_b.peek(&peek) && peek->cmp(snvB) == 0) {
                 _b >> snvB;
                 _rc.hitB(snvB);
             }

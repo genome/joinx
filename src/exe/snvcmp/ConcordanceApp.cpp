@@ -67,14 +67,15 @@ void ConcordanceApp::exec() {
     if (!inB) throw runtime_error("Failed to open input file '" + _fileB + "'");
 
     // set up input filters, keep SNV only, and reject entries with N ref value
-    vector<BedFilterBase*> filters;
     NoReferenceFilter nref;
     TypeFilter snvOnly(Bed::SNV);
-    filters.push_back(&nref);
-    filters.push_back(&snvOnly);
 
-    BedStream fa(_fileA, inA, filters);
-    BedStream fb(_fileB, inB, filters);
+    BedStream fa(_fileA, inA);
+    fa.addFilter(&snvOnly);
+    fa.addFilter(&nref);
+
+    BedStream fb(_fileB, inB);
+    fb.addFilter(&snvOnly);
 
     ConcordanceQuality qc;
     SnvComparator snvi(fa, fb, qc);

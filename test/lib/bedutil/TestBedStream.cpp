@@ -47,8 +47,9 @@ TEST(BedStream, next) {
 TEST(BedStream, TypeFilterSnv) {
     stringstream data(BEDZ);
         
+    BedStream ss("test", data);
     TypeFilter f(Bed::SNV);
-    BedStream ss("test", data, &f);
+    ss.addFilter(&f);
     ASSERT_FALSE(ss.eof());
 
     Bed bed;
@@ -68,8 +69,9 @@ TEST(BedStream, TypeFilterSnv) {
 TEST(BedStream, TypeFilterIndel) {
     stringstream data(BEDZ);
         
+    BedStream ss("test", data);
     TypeFilter f(Bed::INDEL);
-    BedStream ss("test", data, &f);
+    ss.addFilter(&f);
     ASSERT_FALSE(ss.eof());
 
     Bed bed;
@@ -92,9 +94,11 @@ TEST(BedStream, peek) {
     BedStream ss("test", data); 
     ASSERT_FALSE(ss.eof());
     
+    Bed* peek;
     Bed bed;
-    for (unsigned i = 0; i < 5; ++i) {
-        ASSERT_TRUE(ss.peek(bed));
+    for (unsigned i = 0; i < 2; ++i) {
+        ASSERT_TRUE(ss.peek(&peek));
+        bed = *peek;
         ASSERT_EQ("1", bed.chrom);
         ASSERT_EQ(3u, bed.start);
         ASSERT_EQ(5u, bed.end);
@@ -113,7 +117,8 @@ TEST(BedStream, peek) {
     ASSERT_EQ(Bed::INDEL, bed.type());
     ASSERT_FALSE(ss.eof());
 
-    ASSERT_TRUE(ss.peek(bed));
+    ASSERT_TRUE(ss.peek(&peek));
+    bed = *peek;
     ASSERT_EQ("1", bed.chrom);
     ASSERT_EQ(2u, bed.start);
     ASSERT_EQ(3u, bed.end);
@@ -127,14 +132,14 @@ TEST(BedStream, peek) {
     ASSERT_FALSE(ss.eof());
     // make sure we can peek at EOF multiple times, and then read once more
     // before getting an exception
-    ASSERT_FALSE(ss.peek(bed));
-    ASSERT_FALSE(ss.peek(bed));
+    ASSERT_FALSE(ss.peek(&peek));
+    ASSERT_FALSE(ss.peek(&peek));
     ASSERT_FALSE(ss >> bed);
     ASSERT_TRUE(ss.eof());
 
     // only now, after attempting to read (>>) a bed and getting EOF should
     // an exception be thrown
-    ASSERT_THROW(ss.peek(bed), runtime_error);
+    ASSERT_THROW(ss.peek(&peek), runtime_error);
     ASSERT_THROW(ss >> bed, runtime_error);
 }
 

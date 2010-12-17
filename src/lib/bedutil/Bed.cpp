@@ -5,9 +5,7 @@
 
 using namespace std;
 
-Bed Bed::parseLine(const std::string& line) {
-    Bed bed;
-    bed.line = line;
+void Bed::parseLine(std::string& line, Bed& bed) {
 
     string::size_type fldBegin = 0;
     string::size_type fldEnd = 0;
@@ -36,7 +34,7 @@ Bed Bed::parseLine(const std::string& line) {
     extractField(line, fldEnd+1, 0, fldBegin, fldEnd);
     bed.qual = line.substr(fldBegin, fldEnd-fldBegin);
 
-    return bed;
+    line.swap(line);
 }
 
 int Bed::cmp(const Bed& rhs) const {
@@ -56,3 +54,9 @@ int Bed::cmp(const Bed& rhs) const {
 
     return 0;
 }
+
+std::ostream& operator<<(std::ostream& s, const Bed& bed) {
+    s << bed.line;
+    return s;
+}
+

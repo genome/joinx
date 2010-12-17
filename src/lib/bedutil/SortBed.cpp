@@ -52,9 +52,9 @@ public:
     }
 
     bool operator<(TempFile& rhs) {
-        Bed a;
-        Bed b;
-        return in().peek(a) && rhs.in().peek(b) && a < b;
+        Bed* a = NULL;
+        Bed* b = NULL;
+        return in().peek(&a) && rhs.in().peek(&b) && *a < *b;
     }
 
 protected:

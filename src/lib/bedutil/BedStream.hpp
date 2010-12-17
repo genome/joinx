@@ -12,8 +12,8 @@ class BedFilterBase;
 class BedStream {
 public:
     BedStream(const std::string& name, std::istream& in);
-    BedStream(const std::string& name, std::istream& in, BedFilterBase* filter);
-    BedStream(const std::string& name, std::istream& in, const std::vector<BedFilterBase*>& filters);
+
+    void addFilter(BedFilterBase* filter);
 
     operator bool() const {
         return !eof();
@@ -25,7 +25,7 @@ public:
 
     bool eof() const;
     void checkEof() const; // check and throw
-    bool peek(Bed& bed);
+    bool peek(Bed** bed);
     bool next(Bed& bed);
 
 protected:

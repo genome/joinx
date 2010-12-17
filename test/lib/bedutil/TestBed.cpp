@@ -8,7 +8,8 @@ using namespace std;
 
 TEST(Bed, parse) {
     string snvLine = "1\t2\t3\tA/T\t44";
-    Bed snv = Bed::parseLine(snvLine);
+    Bed snv;
+    Bed::parseLine(snvLine, snv);
     ASSERT_EQ("1", snv.chrom);
     ASSERT_EQ(2u, snv.start);
     ASSERT_EQ(3u, snv.end);
@@ -21,14 +22,41 @@ TEST(Bed, parse) {
     ASSERT_EQ(Bed::INDEL, snv.type());
 }
 
+TEST(Bed, swap) {
+    string snvLine1 = "1\t2\t3\tA/T\t44";
+    string snvLine2 = "2\t3\t4\tA/T\t44";
+    Bed a, b, oa, ob;
+    Bed::parseLine(snvLine1, oa);
+    Bed::parseLine(snvLine2, ob);
+
+    a = oa;
+    b = ob;
+
+    a.swap(b);
+    ASSERT_EQ(a, ob);
+    ASSERT_EQ(b, oa);
+
+    a.swap(b);
+    ASSERT_EQ(a, oa);
+    ASSERT_EQ(b, ob);
+
+    a.swap(a);
+    ASSERT_EQ(a, oa);
+}
+
 TEST(Bed, parseBad) {
-    ASSERT_THROW(Bed::parseLine(""), runtime_error);
-    ASSERT_THROW(Bed::parseLine("1"), runtime_error);
-    ASSERT_THROW(Bed::parseLine("1\t2"), runtime_error);
-    ASSERT_THROW(Bed::parseLine("1\t2\t3"), runtime_error);
-    ASSERT_THROW(Bed::parseLine("1\t2\t3\tA/T"), runtime_error);
-    ASSERT_THROW(Bed::parseLine("1\tK\t3\tA/T\t44"), runtime_error);
-    ASSERT_THROW(Bed::parseLine("1\t1\tK\tA/T\t44"), runtime_error);
+    Bed b;
+    string baddies[] = {
+        "",
+        "1",
+        "1\t2",
+        "1\t2\t3",
+        "1\t2\t3\tA/T",
+        "1\tK\t3\tA/T\t44",
+        "1\t1\tK\tA/T\t44"
+    };
+    for (unsigned i = 0; i < sizeof(baddies)/sizeof(baddies[0]); ++i)
+        ASSERT_THROW(Bed::parseLine(baddies[i], b), runtime_error);
 }
 
 TEST(Bed, cmp) {

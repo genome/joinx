@@ -16,24 +16,8 @@ BedStream::BedStream(const string& name, istream& in)
 {
 }
 
-BedStream::BedStream(const string& name, istream& in, BedFilterBase* filter)
-    : _name(name)
-    , _in(in)
-    , _lineNum(0)
-    , _bedCount(0)
-    , _cached(false)
-{
+void BedStream::addFilter(BedFilterBase* filter) {
     _filters.push_back(filter);
-}
-
-BedStream::BedStream(const string& name, istream& in, const vector<BedFilterBase*>& filters)
-    : _name(name)
-    , _in(in)
-    , _lineNum(0)
-    , _bedCount(0)
-    , _filters(filters)
-    , _cached(false)
-{
 }
 
 void BedStream::checkEof() const {
@@ -41,14 +25,14 @@ void BedStream::checkEof() const {
         throw runtime_error("Attempted to read past eof of stream " + name());
 }
 
-bool BedStream::peek(Bed& bed) {
+bool BedStream::peek(Bed** bed) {
     // already peeked and have a value to return
     if (_cached) {
         // we peeked but got EOF
         if (_in.eof())
             return false;
 
-        bed = _cachedBed;
+        *bed = &_cachedBed;
         return true;
     }
 
@@ -58,7 +42,7 @@ bool BedStream::peek(Bed& bed) {
     // note: next() may return false (because of EOF). we want to take care
     // when using _cachedBed to make sure that EOF is false.
     bool rv = next(_cachedBed);
-    bed = _cachedBed;
+    *bed = &_cachedBed;
     _cached = true;
     return rv;
 }
@@ -69,7 +53,7 @@ bool BedStream::eof() const {
 
 bool BedStream::next(Bed& bed) {
     if (_cached) {
-        bed = _cachedBed;
+        bed.swap(_cachedBed);
         _cached = false;
         return !eof(); // to handle the case where we peeked at EOF
     }
@@ -80,7 +64,7 @@ bool BedStream::next(Bed& bed) {
             return false;
         }
 
-        bed = Bed::parseLine(line);
+        Bed::parseLine(line, bed);
     } while (exclude(bed));
     ++_bedCount;
     return true;
