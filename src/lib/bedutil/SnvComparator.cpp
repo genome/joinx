@@ -50,13 +50,6 @@ void SnvComparator::exec() {
             }
             _a >> snvA;
             _b >> snvB;
-
-            // NOTE: do not uncomment this. we do not advance B here because
-            // we want to allow for the possibility of repetitions in A.
-            // if we advanced B, these would be seen as misses. B will advance
-            // naturally once A has passed it
-            //
-            // _b >> snvB
         }
     }
 
