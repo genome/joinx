@@ -73,14 +73,14 @@ public:
 
     void report(std::ostream& s) {
         using namespace std;
-        s << "Results by quality level:" << endl;
+        s << "Results by quality level:" << endl << endl;
         unsigned total = 0;
         unsigned hits = 0;
         typedef MapType::const_reverse_iterator IterType;
         for(IterType iter = _hitMap.rbegin(); iter != _hitMap.rend(); ++iter) {
             total += iter->second + missCount(iter->first);
             hits += iter->second;
-            s << iter->first << ": " << hits << "/" << total << " ";
+            s << iter->first << ": " << hits << "/" << total << "\t";
             if (total == 0)
                 s << "-%" << endl;
             else
