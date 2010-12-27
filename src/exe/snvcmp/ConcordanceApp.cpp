@@ -65,7 +65,7 @@ void ConcordanceApp::parseArguments(int argc, char** argv) {
 
 void ConcordanceApp::exec() {
 
-    auto_ptr<ResultStreamWriter> rsw;
+    auto_ptr<ResultStreamWriter> resultStreamWriter;
 
     ifstream inA(_fileA.c_str());
     if (!inA)
@@ -78,7 +78,7 @@ void ConcordanceApp::exec() {
         outA.open(_outFileA.c_str(), ios::out|ios::binary);
         if (!outA)
             throw runtime_error("Failed to open output file '" + _outFileA + "'");
-        rsw.reset(new ResultStreamWriter(&outA, NULL, NULL, NULL));
+        resultStreamWriter.reset(new ResultStreamWriter(&outA, NULL, NULL, NULL));
     }
 
     // set up input filters, keep SNV only, and reject entries with N ref value
@@ -93,11 +93,11 @@ void ConcordanceApp::exec() {
     fb.addFilter(&snvOnly);
 
     ConcordanceQuality qc;
-    ResultMultiplexer rmx;
-    rmx.add(&qc);
-    if (rsw.get())
-        rmx.add(rsw.get());
-    SnvComparator snvi(fa, fb, rmx);
+    ResultMultiplexer rmux;
+    rmux.add(&qc);
+    if (resultStreamWriter.get())
+        rmux.add(resultStreamWriter.get());
+    SnvComparator snvi(fa, fb, rmux);
     snvi.exec();
     qc.report(cout); 
 
