@@ -29,7 +29,10 @@ void ConcordanceApp::parseArguments(int argc, char** argv) {
         ("help", "this message")
         ("file-a,a", po::value<string>(&_fileA), "input file a (required)")
         ("file-b,b", po::value<string>(&_fileB), "input file b (required)")
-        ("output-a", po::value<string>(&_outFileA), "output hits in a to file");
+        ("hits-a",   po::value<string>(&_hitFileA), "output hits in 'a' to this file")
+        ("hits-b",   po::value<string>(&_hitFileB), "output hits in 'b' to this file")
+        ("miss-a",   po::value<string>(&_missFileA), "output misses in 'a' to this file")
+        ("miss-b",   po::value<string>(&_missFileB), "output misses in 'b' to this file");
 
     po::positional_options_description posOpts;
     posOpts.add("file-a", 1);
@@ -63,9 +66,47 @@ void ConcordanceApp::parseArguments(int argc, char** argv) {
     }
 }
 
-void ConcordanceApp::exec() {
-
+auto_ptr<ResultStreamWriter> ConcordanceApp::setupStreamWriter() {
     auto_ptr<ResultStreamWriter> resultStreamWriter;
+
+    ofstream* hitA(NULL);
+    ofstream* hitB(NULL);
+    ofstream* missA(NULL);
+    ofstream* missB(NULL);
+
+    if (!_hitFileA.empty()) {
+        _hitA.open(_hitFileA.c_str(), ios::out|ios::binary);
+        if (!_hitA)
+            throw runtime_error("Failed to open output file for hits in 'a': '" + _hitFileA + "'");
+        hitA = &_hitA;
+    }
+
+    if (!_hitFileB.empty()) {
+        _hitB.open(_hitFileB.c_str(), ios::out|ios::binary);
+        if (!_hitB)
+            throw runtime_error("Failed to open output file for hits in 'a': '" + _hitFileB + "'");
+        hitB = &_hitB;
+    }
+
+    if (!_missFileA.empty()) {
+        _missA.open(_missFileA.c_str(), ios::out|ios::binary);
+        if (!_missA)
+            throw runtime_error("Failed to open output file for misss in 'a': '" + _missFileA + "'");
+        missA = &_missA;
+    }
+
+    if (!_missFileB.empty()) {
+        _missB.open(_missFileB.c_str(), ios::out|ios::binary);
+        if (!_missB)
+            throw runtime_error("Failed to open output file for misss in 'a': '" + _missFileB + "'");
+        missB = &_missB;
+    }
+
+    resultStreamWriter.reset(new ResultStreamWriter(hitA, hitB, missA, missB));
+    return resultStreamWriter;
+}
+
+void ConcordanceApp::exec() {
 
     ifstream inA(_fileA.c_str());
     if (!inA)
@@ -73,13 +114,6 @@ void ConcordanceApp::exec() {
     ifstream inB(_fileB.c_str());
     if (!inB)
         throw runtime_error("Failed to open input file '" + _fileB + "'");
-    ofstream outA;
-    if (!_outFileA.empty()) {
-        outA.open(_outFileA.c_str(), ios::out|ios::binary);
-        if (!outA)
-            throw runtime_error("Failed to open output file '" + _outFileA + "'");
-        resultStreamWriter.reset(new ResultStreamWriter(&outA, NULL, NULL, NULL));
-    }
 
     // set up input filters, keep SNV only, and reject entries with N ref value
     NoReferenceFilter nref;
@@ -95,6 +129,8 @@ void ConcordanceApp::exec() {
     ConcordanceQuality qc;
     ResultMultiplexer rmux;
     rmux.add(&qc);
+
+    auto_ptr<ResultStreamWriter> resultStreamWriter = setupStreamWriter();
     if (resultStreamWriter.get())
         rmux.add(resultStreamWriter.get());
     SnvComparator snvi(fa, fb, rmux);
