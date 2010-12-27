@@ -17,4 +17,5 @@ protected:
 protected:
     std::string _fileA;
     std::string _fileB;
+    std::string _outFileA;
 };

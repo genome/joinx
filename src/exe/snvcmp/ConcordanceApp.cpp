@@ -3,12 +3,15 @@
 #include "bedutil/BedStream.hpp"
 #include "bedutil/ConcordanceQuality.hpp"
 #include "bedutil/NoReferenceFilter.hpp"
+#include "bedutil/ResultMultiplexer.hpp"
+#include "bedutil/ResultStreamWriter.hpp"
 #include "bedutil/SnvComparator.hpp"
 #include "bedutil/TypeFilter.hpp"
 
 #include <boost/program_options.hpp>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 
@@ -25,7 +28,8 @@ void ConcordanceApp::parseArguments(int argc, char** argv) {
     opts.add_options()
         ("help", "this message")
         ("file-a,a", po::value<string>(&_fileA), "input file a (required)")
-        ("file-b,b", po::value<string>(&_fileB), "input file b (required)");
+        ("file-b,b", po::value<string>(&_fileB), "input file b (required)")
+        ("output-a", po::value<string>(&_outFileA), "output hits in a to file");
 
     po::positional_options_description posOpts;
     posOpts.add("file-a", 1);
@@ -61,10 +65,21 @@ void ConcordanceApp::parseArguments(int argc, char** argv) {
 
 void ConcordanceApp::exec() {
 
+    auto_ptr<ResultStreamWriter> rsw;
+
     ifstream inA(_fileA.c_str());
-    if (!inA) throw runtime_error("Failed to open input file '" + _fileA + "'");
+    if (!inA)
+        throw runtime_error("Failed to open input file '" + _fileA + "'");
     ifstream inB(_fileB.c_str());
-    if (!inB) throw runtime_error("Failed to open input file '" + _fileB + "'");
+    if (!inB)
+        throw runtime_error("Failed to open input file '" + _fileB + "'");
+    ofstream outA;
+    if (!_outFileA.empty()) {
+        outA.open(_outFileA.c_str(), ios::out|ios::binary);
+        if (!outA)
+            throw runtime_error("Failed to open output file '" + _outFileA + "'");
+        rsw.reset(new ResultStreamWriter(&outA, NULL, NULL, NULL));
+    }
 
     // set up input filters, keep SNV only, and reject entries with N ref value
     NoReferenceFilter nref;
@@ -78,7 +93,11 @@ void ConcordanceApp::exec() {
     fb.addFilter(&snvOnly);
 
     ConcordanceQuality qc;
-    SnvComparator snvi(fa, fb, qc);
+    ResultMultiplexer rmx;
+    rmx.add(&qc);
+    if (rsw.get())
+        rmx.add(rsw.get());
+    SnvComparator snvi(fa, fb, rmx);
     snvi.exec();
     qc.report(cout); 
 
