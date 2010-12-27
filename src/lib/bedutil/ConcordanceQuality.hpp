@@ -77,17 +77,18 @@ public:
         unsigned total = 0;
         unsigned hits = 0;
         typedef MapType::const_reverse_iterator IterType;
-        for(IterType iter = _hitMap.rbegin(); iter != _hitMap.rend(); ++iter) {
-            total += iter->second + missCount(iter->first);
-            hits += iter->second;
-            s << iter->first << ": " << hits << "/" << total << "\t";
+
+        unsigned maxQuality = max(_hitMap.rbegin()->first, _missMap.rbegin()->first);
+        for(int i = maxQuality; i >= 0; --i) {
+            total += _hitMap[i] + _missMap[i];
+            hits += _hitMap[i];
+            s << i << ": " << hits << "/" << total << "\t";
             if (total == 0)
-                s << "-%" << endl;
+                s << "0%" << endl;
             else
                 s << 100.0 * hits / float(total) << "%" << endl;
         }
-
-        cout << "Overall concordance: " << _hitCount/float(_hitCount+_missCount)*100.0 << endl;
+        s << "Overall concordance: " << _hitCount/float(_hitCount+_missCount)*100.0 << endl;
     }
 
 protected:
