@@ -1,7 +1,7 @@
 #!/bin/sh
 
 PROJDIR=/usr/lib/snvcmp-@PROJ_VERSION@
-EXECUTABLES="snvcmp bedsort"
+EXECUTABLES="snvcmp"
 
 for e in $EXECUTABLES
 do
