@@ -1,9 +1,9 @@
 #!/bin/sh
 
 EXECUTABLES="snvcmp"
-
 for e in $EXECUTABLES
 do
-    VERSIONED_EXE="/usr/bin/$e@VERSION_MAJOR"
-    update-alternatives --install /usr/bin/$e $e $VERSIONED_EXE @VERSION_MAJOR@
+    BARE_EXE=/usr/bin/$e
+    VERSIONED_EXE="/usr/bin/${e}@VERSION_MAJOR@.@VERSION_MINOR@"
+    update-alternatives --install $BARE_EXE $e $VERSIONED_EXE @VERSION_MAJOR@
 done
