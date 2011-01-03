@@ -1,10 +1,10 @@
 #!/bin/sh
 
-PROJDIR=/usr/lib/snvcmp-@PROJ_VERSION@
 EXECUTABLES="snvcmp"
 
 for e in $EXECUTABLES
 do
-    update-alternatives --remove $e $PROJDIR/$e
+    VERSIONED_EXE="/usr/bin/$e@VERSION_MAJOR"
+    update-alternatives --remove $e /usr/bin/$VERSIONED_EXE @VERSION_MAJOR@
 done
 

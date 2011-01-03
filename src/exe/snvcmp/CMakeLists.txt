@@ -8,7 +8,8 @@ set(SOURCES
     main.cpp
 )
 
-add_executable(snvcmp ${SOURCES})
-target_link_libraries(snvcmp bedutil ${Boost_LIBRARIES})
+set(EXECUTABLE_NAME snvcmp${VERSION_MAJOR}.${VERSION_MINOR})
+add_executable(${EXECUTABLE_NAME} ${SOURCES})
+target_link_libraries(${EXECUTABLE_NAME} bedutil ${Boost_LIBRARIES})
 
-install(TARGETS snvcmp DESTINATION lib/snvcmp-${PROJ_VERSION})
+install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin/)

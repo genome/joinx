@@ -1,9 +1,9 @@
 #!/bin/sh
 
-PROJDIR=/usr/lib/snvcmp-@PROJ_VERSION@
 EXECUTABLES="snvcmp"
 
 for e in $EXECUTABLES
 do
-    update-alternatives --install /usr/bin/$e $e $PROJDIR/$e @VERSION_MAJOR@
+    VERSIONED_EXE="/usr/bin/$e@VERSION_MAJOR"
+    update-alternatives --install /usr/bin/$e $e $VERSIONED_EXE @VERSION_MAJOR@
 done
