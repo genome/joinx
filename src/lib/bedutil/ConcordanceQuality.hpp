@@ -78,7 +78,13 @@ public:
         unsigned hits = 0;
         typedef MapType::const_reverse_iterator IterType;
 
-        unsigned maxQuality = max(_hitMap.rbegin()->first, _missMap.rbegin()->first);
+        unsigned maxHit = 0;
+        unsigned maxMiss = 0;
+        if (_hitMap.rbegin() != _hitMap.rend())
+            maxHit = _hitMap.rbegin()->first;
+        if (_missMap.rbegin() != _missMap.rend())
+            maxHit = _missMap.rbegin()->first;
+        unsigned maxQuality = max(maxHit, maxMiss);
         for(int i = maxQuality; i >= 0; --i) {
             total += _hitMap[i] + _missMap[i];
             hits += _hitMap[i];
