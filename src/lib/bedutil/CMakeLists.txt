@@ -10,6 +10,10 @@ set(SOURCES
     BedStream.hpp
     ConcordanceQuality.hpp
     IResultCollector.hpp
+    IntersectAnnotation.cpp
+    IntersectAnnotation.hpp
+    IntersectBed.cpp
+    IntersectBed.hpp
     LineUtils.hpp
     NoReferenceFilter.hpp
     ResultStreamWriter.cpp
@@ -19,6 +23,8 @@ set(SOURCES
     SortBed.cpp
     SortBed.hpp
     SortTempFile.hpp
+    TranscriptStructure.cpp
+    TranscriptStructure.hpp
     TypeFilter.hpp
     intconfig.hpp
 )

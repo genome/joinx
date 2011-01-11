@@ -17,7 +17,7 @@ struct Bed
         , end(0)
     {}
 
-    Bed(const std::string& chrom, uint64_t start, uint64_t end, const std::string& refCall, const std::string& qual)
+    Bed(const std::string& chrom, int64_t start, int64_t end, const std::string& refCall, const std::string& qual)
         : chrom(chrom)
         , start(start)
         , end(end)
@@ -31,8 +31,8 @@ struct Bed
     }
 
     std::string chrom;
-    uint64_t start;
-    uint64_t end;
+    int64_t start;
+    int64_t end;
     std::string refCall;
     std::string qual;
     std::string line;
