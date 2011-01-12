@@ -1,22 +1,21 @@
-#include "bedutil/TranscriptStructure.hpp"
+#include "annotate/TranscriptStructure.hpp"
 
 #include <string>
 #include <gtest/gtest.h>
 
 using namespace std;
 
-namespace {
-
-const string DATA = "618374,1\t6\t606\thuman\tgenbank\t54_36p\t26381,flank,-49994,5,2,,,human,genbank,54_36p,543,0,1,0,NULL,NULL,26381,21462\thuman\tgenbank\t54_36p,6,606,XM_001713842,model,-1,1,human,genbank,54_36p,LOC653884,no_start_codon:pseudogene,6,548,181";
-}
 
 TEST(TranscriptStructure, parseLine) {
+    string entry = "618374,1\t6\t606\thuman\tgenbank\t54_36p\t26381,flank,-49994,5,2,,,human,genbank,54_36p,543,0,1,0,NULL,NULL,26381,21462\thuman\tgenbank\t54_36p,6,606,XM_001713842,model,-1,1,human,genbank,54_36p,LOC653884,no_start_codon:pseudogene,6,548,181";
+
     TranscriptStructure ts;
-    TranscriptStructure::parseLine(DATA, ts);
+    TranscriptStructure::parseLine(entry, ts);
 
     ASSERT_EQ("1", ts.chrom());
-    ASSERT_EQ(-49994, ts.start());
-    ASSERT_EQ(5, ts.end());
+    ASSERT_EQ(-1, ts.region().strand());
+    ASSERT_EQ(-49994, ts.region().start());
+    ASSERT_EQ(5, ts.region().stop());
 
     ASSERT_EQ("618374",
         ts.get(TranscriptStructure::transcript_structure_id));
@@ -69,7 +68,7 @@ TEST(TranscriptStructure, parseLine) {
 	ASSERT_EQ("model",
         ts.get(TranscriptStructure::transcript_transcript_status));
 	ASSERT_EQ("-1",
-        ts.get(TranscriptStructure::transcript_strand));
+        ts.get(TranscriptStructure::strand));
 	ASSERT_EQ("1",
         ts.get(TranscriptStructure::transcript_chrom_name));
 	ASSERT_EQ("human",

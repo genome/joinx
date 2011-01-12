@@ -1,8 +1,9 @@
-#include "CmpBedApp.hpp"
+#include "AnnotateApp.hpp"
 
+#include "annotate/IntersectAnnotation.hpp"
+#include "annotate/TranscriptStructure.hpp"
 #include "bedutil/Bed.hpp"
 #include "bedutil/BedStream.hpp"
-#include "bedutil/IntersectBed.hpp"
 #include "bedutil/intconfig.hpp"
 
 #include <boost/program_options.hpp>
@@ -17,14 +18,14 @@
 using namespace std;
 namespace po = boost::program_options;
 
-CmpBedApp::CmpBedApp(int argc, char** argv)
+AnnotateApp::AnnotateApp(int argc, char** argv)
     : _firstOnly(false)
     , _outputBoth(false)
 {
     parseArguments(argc, argv);
 }
 
-void CmpBedApp::parseArguments(int argc, char** argv) {
+void AnnotateApp::parseArguments(int argc, char** argv) {
     po::options_description opts("Available Options");
     opts.add_options()
         ("help", "this message")
@@ -73,7 +74,7 @@ void CmpBedApp::parseArguments(int argc, char** argv) {
 
 namespace {
     // TODO: refactor these output functions into a class
-    void onHit(const Bed& a, const Bed& b) {
+    void onHit(const Bed& a, const TranscriptStructure& b) {
         // mimic what bedtools does
         //unsigned start = std::max(a.start, b.start);
         //unsigned end = std::min(a.end, b.end);
@@ -81,12 +82,33 @@ namespace {
         cout << a << "\n";
     }
 
-    void onHitBoth(const Bed& a, const Bed& b) {
-        cout << a << "\t" << b << "\n";
+    void onHitBoth(const Bed& a, const TranscriptStructure& b) {
+        const static TranscriptStructure::Field outputFields[] = {
+            TranscriptStructure::transcript_gene_name,
+            TranscriptStructure::transcript_transcript_name,
+            TranscriptStructure::transcript_species,
+            TranscriptStructure::transcript_source,
+            TranscriptStructure::transcript_version,
+            TranscriptStructure::strand,
+            TranscriptStructure::transcript_transcript_status,
+//            trv_type,
+//            c_position,
+//            amino_acid_change,
+//            ucsc_cons,
+//            domain,
+//            all_domains,
+//            deletion_substructures,
+            TranscriptStructure::transcript_transcript_error
+        };
+        cout << a << "\t";
+        unsigned numFields = sizeof(outputFields)/sizeof(outputFields[0]); 
+        for (unsigned i = 0; i < numFields-1; ++i)
+            cout << b.get(outputFields[i]) << "\t";
+        cout << b.get(outputFields[numFields-1]) << "\n";
     }
 }
 
-void CmpBedApp::exec() {
+void AnnotateApp::exec() {
     ifstream inA(_fileA.c_str());
     if (!inA)
         throw runtime_error("Failed to open input file '" + _fileA + "'");
@@ -95,12 +117,11 @@ void CmpBedApp::exec() {
         throw runtime_error("Failed to open input file '" + _fileB + "'");
 
     BedStream fa(_fileA, inA);
-    BedStream fb(_fileB, inA);
 
-    boost::function<void(const Bed&, const Bed&)> action = onHit;
+    boost::function<void(const Bed&, const TranscriptStructure&)> action = onHit;
     if (_outputBoth)
         action = onHitBoth;
-    IntersectBed intersector(fb, action, _firstOnly);
+    IntersectAnnotation intersector(inB, action, _firstOnly);
     
     Bed bed;
     uint64_t lineNo = 0;

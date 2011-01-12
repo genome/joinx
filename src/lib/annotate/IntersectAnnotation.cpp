@@ -1,7 +1,8 @@
 #include "IntersectAnnotation.hpp"
 
-#include "Bed.hpp"
+#include "Variant.hpp"
 #include "TranscriptStructure.hpp"
+#include "bedutil/Bed.hpp"
 
 #include <cstring>
 
@@ -14,9 +15,11 @@ IntersectAnnotation::Compare IntersectAnnotation::cmp(const Bed& a, const Transc
     if (rv > 0)
         return AFTER;
 
-    if (a.end <= b.start())
+    // 1 based hack! 
+    // if (a.end <= b.region().start())
+    if (a.end <= b.region().start())
         return BEFORE;
-    if (b.end() <= a.start)
+    if (b.region().stop() <= a.start)
         return AFTER;
 
     return INTERSECT;
@@ -35,6 +38,7 @@ bool IntersectAnnotation::eof() const {
 
 bool IntersectAnnotation::intersect(const Bed& bed) {
     TranscriptStructure next;
+    Variant var(&bed);
 
     // burn off beds from the cache
     while (!_cache.empty() && cmp(bed, _cache.front()) == AFTER)

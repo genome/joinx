@@ -1,13 +1,16 @@
 #pragma once
 
-#include "intconfig.hpp"
+#include "Region.hpp"
+#include "bedutil/intconfig.hpp"
 
+#include <boost/function.hpp>
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <string>
 
 class TranscriptStructure {
 public:
+    // TODO: clean up these names, copied from perl
     enum Field {
         transcript_structure_id = 0,
         transcript_id,
@@ -33,7 +36,7 @@ public:
         transcript_transcript_stop,
         transcript_transcript_name,
         transcript_transcript_status,
-        transcript_strand,
+        strand,
         transcript_chrom_name,
         transcript_species,
         transcript_source,
@@ -58,14 +61,30 @@ public:
 
     const std::string& line() const;
     const std::string& chrom() const;
-    int64_t start() const;
-    int64_t end() const;
+
+    bool errorContains(const std::string& value) const;
+
+    const Region& region() const;
+    const Region& transcriptRegion() const;
+    bool hasCodingRegion() const;
+    const Region& codingRegion() const;
+
+    int64_t numPhaseBasesBefore() const;
+    int64_t sequencePosition(int64_t pos, int64_t& borrowed) const;
 
 protected:
     std::string _line;
     std::string _fields[NUM_FIELDS];
-    int64_t _start;
-    int64_t _end;
+
+    int _strand;
+    Region _region;
+    Region _transcriptRegion;
+    bool _hasCodingRegion;
+    Region _codingRegion;
+    int64_t _numPhaseBasesBefore;
+
+private:
+    bool (*_strandedLessThan)(int64_t, int64_t);
 };
 
 inline const std::string& TranscriptStructure::line() const {
@@ -76,10 +95,22 @@ inline const std::string& TranscriptStructure::chrom() const {
     return get(transcript_chrom_name);
 }
 
-inline int64_t TranscriptStructure::start() const {
-    return _start;
+inline const Region& TranscriptStructure::region() const {
+    return _region;
 }
 
-inline int64_t TranscriptStructure::end() const {
-    return _end;
+inline const Region& TranscriptStructure::transcriptRegion() const {
+    return _transcriptRegion;
+}
+
+inline bool TranscriptStructure::hasCodingRegion() const {
+    return _hasCodingRegion;
+}
+
+inline const Region& TranscriptStructure::codingRegion() const {
+    return _codingRegion;
+}
+
+inline int64_t TranscriptStructure::numPhaseBasesBefore() const {
+    return _numPhaseBasesBefore;
 }
