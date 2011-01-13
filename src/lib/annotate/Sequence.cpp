@@ -26,19 +26,29 @@ namespace {
 
 Sequence::Sequence() {}
 
-Sequence::Sequence(const std::string& data) : _data(data) {
+Sequence::Sequence(const string& data) : _data(data) {
     boost::to_upper(_data);
 }
 
-std::string Sequence::reverseComplement(const std::string& data) {
-    std::string rv;
+Sequence::Sequence(char data) : _data(&data, 1) {
+    boost::to_upper(_data);
+}
+
+Sequence::Sequence(istream& s, uint64_t count) {
+    _data.resize(count);
+    s.read(&_data[0], count);
+    boost::to_upper(_data);
+}
+
+string Sequence::reverseComplement(const string& data) {
+    string rv;
     rv.resize(data.size());
     for (string::size_type i = 0; i < data.size(); ++i)
         rv[i] = translationTable()[int(data[data.size()-1-i])];
     return rv;
 }
 
-const std::string& Sequence::reverseComplementData() const {
+const string& Sequence::reverseComplementData() const {
     if (_reverseComplement.empty() && !_data.empty())
         _reverseComplement = reverseComplement(data());
     return _reverseComplement;

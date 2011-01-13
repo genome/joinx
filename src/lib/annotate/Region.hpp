@@ -2,6 +2,8 @@
 
 #include "bedutil/intconfig.hpp"
 
+#include <sstream>
+
 class Region {
 public:
     struct RelativePos {
@@ -14,7 +16,24 @@ public:
 
         RelativePos() : type(ERROR), dist(0) {}
         RelativePos(Type t, int64_t d) : type(t), dist(d) {}
-        
+        std::string toString() const {
+            std::stringstream rv;
+            switch (type) {
+                case BEFORE: rv << "-"; break;
+                case IN: break;
+                case AFTER:  rv << "*"; break;
+
+                case ERROR:
+                default: return ""; break;
+            }
+            rv << dist;
+            return rv.str();
+        }
+
+        bool in() const { return type == IN; }
+        bool before() const { return type == BEFORE; }
+        bool after() const { return type == AFTER; }
+
         Type type;
         int64_t dist;
     };
@@ -25,10 +44,13 @@ public:
     int strand() const;
     int64_t start() const;
     int64_t stop() const;
+    int64_t length() const;
     int64_t strandedStart() const;
     int64_t strandedStop() const;
 
     RelativePos distance(int64_t pos) const;
+    int64_t distanceFromStart(int64_t pos) const;
+    int64_t distanceFromStop(int64_t pos) const;
 
 protected:
     int _strand;
@@ -52,6 +74,10 @@ inline int64_t Region::start() const {
 
 inline int64_t Region::stop() const {
     return _stop;
+}
+
+inline int64_t Region::length() const {
+    return stop()-start()+1;
 }
 
 inline int64_t Region::strandedStart() const {

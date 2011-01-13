@@ -1,7 +1,9 @@
 #pragma once
 
-#include <string>
+#include "bedutil/intconfig.hpp"
 
+#include <string>
+#include <iostream>
 
 class Sequence {
 public:
@@ -9,9 +11,12 @@ public:
 
     Sequence();
     Sequence(const std::string& data);
+    Sequence(char data);
+    Sequence(std::istream& s, uint64_t count);
 
     Sequence& operator=(const std::string& rhs);
 
+    bool null() const;
     bool empty() const;
     const std::string& data() const;
     const std::string& reverseComplementData() const;
@@ -35,4 +40,6 @@ inline Sequence& Sequence::operator=(const std::string& rhs) {
     return *this;
 }
 
-
+inline bool Sequence::null() const {
+    return empty() || _data == "-" || _data == "0";
+}

@@ -1,25 +1,24 @@
 #include "IntersectAnnotation.hpp"
 
-#include "Variant.hpp"
+#include "Iub.hpp"
 #include "TranscriptStructure.hpp"
+#include "Variant.hpp"
 #include "bedutil/Bed.hpp"
 
 #include <cstring>
 
 using namespace std;
 
-IntersectAnnotation::Compare IntersectAnnotation::cmp(const Bed& a, const TranscriptStructure& b) {
-    int rv = strverscmp(a.chrom.c_str(), b.chrom().c_str());
+IntersectAnnotation::Compare IntersectAnnotation::cmp(const Variant& a, const TranscriptStructure& b) {
+    int rv = strverscmp(a.chrom().c_str(), b.chrom().c_str());
     if (rv < 0)
         return BEFORE;
     if (rv > 0)
         return AFTER;
 
-    // 1 based hack! 
-    // if (a.end <= b.region().start())
-    if (a.end <= b.region().start())
+    if (a.end() < b.region().start())
         return BEFORE;
-    if (b.region().stop() <= a.start)
+    if (b.region().stop() < a.start())
         return AFTER;
 
     return INTERSECT;
@@ -37,24 +36,42 @@ bool IntersectAnnotation::eof() const {
 }
 
 bool IntersectAnnotation::intersect(const Bed& bed) {
-    TranscriptStructure next;
-    Variant var(&bed);
+    Variant v(bed);
+
+    if (v.start() == v.end() && v.variant().data().size() == 1 && v.variant().data() != "-") {
+        string iub = translateIub(v.variant().data());
+        for (string::size_type i = 0; i < iub.size(); ++i) {
+            if (v.reference().data()[0] == iub[i])
+                continue;
+
+            Variant newVariant(v);
+            newVariant.setVariantSequence(Sequence(iub[i]));
+            if (!doIntersect(newVariant))
+                break;
+        }
+        return !eof();
+    }
+    return doIntersect(v);
+}
+
+bool IntersectAnnotation::doIntersect(const Variant& v) {
+    TranscriptStructure structure;
 
     // burn off beds from the cache
-    while (!_cache.empty() && cmp(bed, _cache.front()) == AFTER)
+    while (!_cache.empty() && cmp(v, _cache.front()) == AFTER)
         _cache.pop_front();
 
     if (_cache.empty()) {
-        while (!_s.eof() && nextStructure(next)) {
-            if (cmp(bed, next) != AFTER) {
-                _cache.push_back(next);
+        while (!_s.eof() && nextStructure(structure)) {
+            if (cmp(v, structure) != AFTER) {
+                _cache.push_back(structure);
                 break;
             }
         }
     }
 
     for (deque<TranscriptStructure>::iterator iter = _cache.begin(); iter != _cache.end();) {
-        Compare c = cmp(bed, *iter);
+        Compare c = cmp(v, *iter);
         if (c == BEFORE)
             return !eof();
         else if (c == AFTER) {
@@ -62,25 +79,25 @@ bool IntersectAnnotation::intersect(const Bed& bed) {
             continue;
         }
 
-        _hitFunc(bed, *iter);
+        _hitFunc(v, *iter);
         if (_firstOnly)
             iter = _cache.erase(iter);
         else
             ++iter;
     }
 
-    while (!_s.eof() && nextStructure(next)) {
-        Compare c = cmp(bed, next);
+    while (!_s.eof() && nextStructure(structure)) {
+        Compare c = cmp(v, structure);
         if (c == BEFORE) {
-            _cache.push_back(next);
+            _cache.push_back(structure);
             return !eof();
         } else if (c == AFTER) {
             continue;
         }
 
-        _hitFunc(bed, next);
+        _hitFunc(v, structure);
         if (!_firstOnly)
-            _cache.push_back(next);
+            _cache.push_back(structure);
     }
 
     return !eof();

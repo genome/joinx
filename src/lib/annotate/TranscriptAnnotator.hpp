@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Region.hpp"
 #include <vector>
 #include <string>
+#include <map>
 
 class Variant;
 class TranscriptStructure;
@@ -25,8 +25,10 @@ struct Annotation {
 
 class TranscriptAnnotator {
 public:
+    typedef std::map<std::string,std::string> PropertyMapType;
+    
     virtual ~TranscriptAnnotator() {}
 
-    virtual Region::RelativePos determineCodingRegion(const Variant& v, const TranscriptStructure& structure) const = 0;
-    virtual void annotate(const Variant& v, const TranscriptStructure& structure) const = 0;
+    virtual std::string codingRegionString(const Variant& v, const TranscriptStructure& structure) const = 0;
+    virtual PropertyMapType annotate(const Variant& v, const TranscriptStructure& structure) const = 0;
 };

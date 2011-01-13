@@ -19,7 +19,7 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     add_definitions(-Wall -ansi)
 endif ()
 
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost COMPONENTS system program_options filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # main project

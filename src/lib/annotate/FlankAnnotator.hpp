@@ -6,5 +6,5 @@
 
 class FlankAnnotator : public TranscriptAnnotator {
 public:
-    Region::RelativePos determineCodingPosition(const Variant& v, const TranscriptStructure& structure) const;
+    std::string codingRegionString(const Variant& v, const TranscriptStructure& structure) const;
 };

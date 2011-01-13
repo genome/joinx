@@ -2,6 +2,7 @@
 
 #include "annotate/IntersectAnnotation.hpp"
 #include "annotate/TranscriptStructure.hpp"
+#include "annotate/Variant.hpp"
 #include "bedutil/Bed.hpp"
 #include "bedutil/BedStream.hpp"
 #include "bedutil/intconfig.hpp"
@@ -74,16 +75,13 @@ void AnnotateApp::parseArguments(int argc, char** argv) {
 
 namespace {
     // TODO: refactor these output functions into a class
-    void onHit(const Bed& a, const TranscriptStructure& b) {
-        // mimic what bedtools does
-        //unsigned start = std::max(a.start, b.start);
-        //unsigned end = std::min(a.end, b.end);
-        //cout << a.chrom << "\t" << start << "\t" << end << "\t" << a.refCall << "\t" << a.qual << "\n";
-        cout << a << "\n";
+    void onHit(const Variant& v, const TranscriptStructure& b) {
+        v.toStream(cout) << "\n";
     }
 
-    void onHitBoth(const Bed& a, const TranscriptStructure& b) {
+    void onHitBoth(const Variant& v, const TranscriptStructure& b) {
         const static TranscriptStructure::Field outputFields[] = {
+            TranscriptStructure::structure_type,
             TranscriptStructure::transcript_gene_name,
             TranscriptStructure::transcript_transcript_name,
             TranscriptStructure::transcript_species,
@@ -100,7 +98,10 @@ namespace {
 //            deletion_substructures,
             TranscriptStructure::transcript_transcript_error
         };
-        cout << a << "\t";
+        v.toStream(cout) << "\t";
+        cout << b.line() << "\n";
+        return;
+
         unsigned numFields = sizeof(outputFields)/sizeof(outputFields[0]); 
         for (unsigned i = 0; i < numFields-1; ++i)
             cout << b.get(outputFields[i]) << "\t";
@@ -118,7 +119,7 @@ void AnnotateApp::exec() {
 
     BedStream fa(_fileA, inA);
 
-    boost::function<void(const Bed&, const TranscriptStructure&)> action = onHit;
+    boost::function<void(const Variant&, const TranscriptStructure&)> action = onHit;
     if (_outputBoth)
         action = onHitBoth;
     IntersectAnnotation intersector(inB, action, _firstOnly);

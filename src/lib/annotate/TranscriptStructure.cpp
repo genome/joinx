@@ -58,11 +58,23 @@ void TranscriptStructure::parseLine(const string& line, TranscriptStructure& ts)
         );
     }
 
-    const string& bases = ts.get(phase_bases_before);
-    if (bases == "NULL")
+    const string& phaseBases = ts.get(phase_bases_before);
+    if (phaseBases == "NULL")
         ts._numPhaseBasesBefore = 0;
     else
-        ts._numPhaseBasesBefore = bases.size();
+        ts._numPhaseBasesBefore = phaseBases.size();
+
+    const string& codingBases = ts.get(coding_bases_before);
+    if (codingBases == "NULL")
+        ts._numCodingBasesBefore = 0;
+    else
+        ts._numCodingBasesBefore = ts.getAs<int64_t>(coding_bases_before);
+
+    if (ts.get(cds_exons_before) != "NULL")
+        ts._cdsExonsBefore = ts.getAs<int64_t>(cds_exons_before);
+
+    if (ts.get(cds_exons_after) != "NULL")
+        ts._cdsExonsAfter = ts.getAs<int64_t>(cds_exons_after);
 }
 
 TranscriptStructure::TranscriptStructure()

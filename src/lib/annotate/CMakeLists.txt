@@ -3,10 +3,17 @@ cmake_minimum_required(VERSION 2.6)
 project(annotate)
 
 set(SOURCES
+    CdsExonAnnotator.cpp
+    CdsExonAnnotator.hpp
     FlankAnnotator.cpp
     FlankAnnotator.hpp
     IntersectAnnotation.cpp
     IntersectAnnotation.hpp
+    IntronAnnotator.cpp
+    IntronAnnotator.hpp
+    Iub.hpp
+    ReferenceSequence.cpp
+    ReferenceSequence.hpp
     Region.cpp
     Region.hpp
     RnaAnnotator.cpp

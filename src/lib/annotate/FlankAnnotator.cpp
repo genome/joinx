@@ -3,13 +3,15 @@
 #include "Variant.hpp"
 #include "TranscriptStructure.hpp"
 
-using boost::lexical_cast;
+#include <sstream>
 
+using boost::lexical_cast;
 using namespace std;
 
-Region::RelativePos FlankAnnotator::determineCodingPosition(const Variant& v, const TranscriptStructure& structure) const {
+string FlankAnnotator::codingRegionString(const Variant& v, const TranscriptStructure& structure) const {
     const Region& region = structure.hasCodingRegion() ? structure.codingRegion() : structure.transcriptRegion();
-    return region.distance(v.start());
+
+    return region.distance(v.start()).toString();
 }
 
 

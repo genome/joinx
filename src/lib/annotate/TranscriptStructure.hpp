@@ -69,8 +69,16 @@ public:
     bool hasCodingRegion() const;
     const Region& codingRegion() const;
 
+    int64_t numCodingBasesBefore() const;
     int64_t numPhaseBasesBefore() const;
     int64_t sequencePosition(int64_t pos, int64_t& borrowed) const;
+    int64_t sequencePosition(int64_t pos) const {
+        int64_t tmp;
+        return sequencePosition(pos, tmp);
+    }
+
+    int64_t cdsExonsBefore() const;
+    int64_t cdsExonsAfter() const;
 
 protected:
     std::string _line;
@@ -81,7 +89,10 @@ protected:
     Region _transcriptRegion;
     bool _hasCodingRegion;
     Region _codingRegion;
+    int64_t _numCodingBasesBefore;
     int64_t _numPhaseBasesBefore;
+    int64_t _cdsExonsBefore;
+    int64_t _cdsExonsAfter;
 
 private:
     bool (*_strandedLessThan)(int64_t, int64_t);
@@ -111,6 +122,19 @@ inline const Region& TranscriptStructure::codingRegion() const {
     return _codingRegion;
 }
 
+inline int64_t TranscriptStructure::numCodingBasesBefore() const {
+    return _numCodingBasesBefore;
+}
+
 inline int64_t TranscriptStructure::numPhaseBasesBefore() const {
     return _numPhaseBasesBefore;
 }
+
+inline int64_t TranscriptStructure::cdsExonsBefore() const {
+    return _cdsExonsBefore;
+}
+
+inline int64_t TranscriptStructure::cdsExonsAfter() const {
+    return _cdsExonsAfter;
+}
+

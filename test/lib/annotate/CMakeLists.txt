@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 2.6)
 
-set(TEST_LIBS bedutil annotate)
+set(TEST_LIBS bedutil annotate ${Boost_LIBRARIES})
 include_directories(${GTEST_INCLUDE_DIRS})
 
-def_test(TranscriptStructure)
+def_test(ReferenceSequence)
 def_test(Region)
 def_test(Sequence)
+def_test(TranscriptStructure)

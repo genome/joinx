@@ -45,3 +45,12 @@ Region::RelativePos Region::distance(int64_t pos) const {
 
     return RelativePos();
 }
+
+int64_t Region::distanceFromStart(int64_t pos) const {
+    return abs(pos-_strandedStart);
+}
+
+int64_t Region::distanceFromStop(int64_t pos) const {
+    return abs(pos-_strandedStop);
+}
+
