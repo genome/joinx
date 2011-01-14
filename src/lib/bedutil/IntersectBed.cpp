@@ -14,9 +14,9 @@ IntersectBed::BedCompare IntersectBed::cmpBeds(const Bed& a, const Bed& b) {
     if (rv > 0)
         return AFTER;
 
-    if (a.end <= b.start)
+    if (a.stop <= b.start)
         return BEFORE;
-    if (b.end <= a.start)
+    if (b.stop <= a.start)
         return AFTER;
 
     return INTERSECT;

@@ -15,7 +15,7 @@ using namespace std;
 string IntronAnnotator::codingRegionString(const Variant& v, const TranscriptStructure& structure) const {
     stringstream rv;
     int64_t start = v.start();
-    int64_t stop = v.end();
+    int64_t stop = v.stop();
     if (structure.region().strand() == -1)
         swap(start, stop);
 
@@ -67,7 +67,7 @@ IntronAnnotator::PropertyMapType IntronAnnotator::annotate(const Variant& v, con
     rv["c_position"] = codingRegionString(v, structure);
 
     int64_t distToStart = v.start() - (structure.region().start() - 1);
-    int64_t distToStop = (structure.region().stop() + 1) - v.end();
+    int64_t distToStop = (structure.region().stop() + 1) - v.stop();
     int64_t edgeDist = min(distToStart, distToStop);
 
     int64_t intronPosition;

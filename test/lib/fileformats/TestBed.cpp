@@ -12,13 +12,13 @@ TEST(Bed, parse) {
     Bed::parseLine(snvLine, snv);
     ASSERT_EQ("1", snv.chrom);
     ASSERT_EQ(2u, snv.start);
-    ASSERT_EQ(3u, snv.end);
+    ASSERT_EQ(3u, snv.stop);
     ASSERT_EQ("A/T", snv.refCall);
     ASSERT_EQ("44", snv.qual);
 
     ASSERT_EQ(Bed::SNV, snv.type());
 
-    snv.end += 1;
+    snv.stop += 1;
     ASSERT_EQ(Bed::INDEL, snv.type());
 }
 
@@ -65,7 +65,7 @@ TEST(Bed, parseBad) {
 TEST(Bed, cmp) {
     Bed a("1", 1, 1, "A/T", "44");
     Bed b = a;
-    b.end++;
+    b.stop++;
 
     ASSERT_EQ(0, a.cmp(a)) << "bed chromosome sort: 1 == 1";
     ASSERT_GT(0, a.cmp(b)) << "bed chromosome sort: 1 < 2";

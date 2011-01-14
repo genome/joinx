@@ -25,7 +25,7 @@ TEST(BedStream, next) {
     ASSERT_TRUE(ss >> bed);
     ASSERT_EQ("1", bed.chrom);
     ASSERT_EQ(3u, bed.start);
-    ASSERT_EQ(5u, bed.end);
+    ASSERT_EQ(5u, bed.stop);
     ASSERT_EQ("A/T", bed.refCall);
     ASSERT_EQ("43", bed.qual);
     ASSERT_EQ(Bed::INDEL, bed.type());
@@ -34,7 +34,7 @@ TEST(BedStream, next) {
     ASSERT_TRUE(ss >> bed);
     ASSERT_EQ("1", bed.chrom);
     ASSERT_EQ(2u, bed.start);
-    ASSERT_EQ(3u, bed.end);
+    ASSERT_EQ(3u, bed.stop);
     ASSERT_EQ("A/T", bed.refCall);
     ASSERT_EQ("44", bed.qual);
     ASSERT_EQ(Bed::SNV, bed.type());
@@ -56,7 +56,7 @@ TEST(BedStream, TypeFilterSnv) {
     ASSERT_TRUE(ss >> bed);
     ASSERT_EQ("1", bed.chrom);
     ASSERT_EQ(2u, bed.start);
-    ASSERT_EQ(3u, bed.end);
+    ASSERT_EQ(3u, bed.stop);
     ASSERT_EQ("A/T", bed.refCall);
     ASSERT_EQ("44", bed.qual);
     ASSERT_EQ(Bed::SNV, bed.type());
@@ -78,7 +78,7 @@ TEST(BedStream, TypeFilterIndel) {
     ASSERT_TRUE(ss >> bed);
     ASSERT_EQ("1", bed.chrom);
     ASSERT_EQ(3u, bed.start);
-    ASSERT_EQ(5u, bed.end);
+    ASSERT_EQ(5u, bed.stop);
     ASSERT_EQ("A/T", bed.refCall);
     ASSERT_EQ("43", bed.qual);
     ASSERT_EQ(Bed::INDEL, bed.type());
@@ -101,7 +101,7 @@ TEST(BedStream, peek) {
         bed = *peek;
         ASSERT_EQ("1", bed.chrom);
         ASSERT_EQ(3u, bed.start);
-        ASSERT_EQ(5u, bed.end);
+        ASSERT_EQ(5u, bed.stop);
         ASSERT_EQ("A/T", bed.refCall);
         ASSERT_EQ("43", bed.qual);
         ASSERT_EQ(Bed::INDEL, bed.type());
@@ -111,7 +111,7 @@ TEST(BedStream, peek) {
     ASSERT_TRUE(ss >> bed);
     ASSERT_EQ("1", bed.chrom);
     ASSERT_EQ(3u, bed.start);
-    ASSERT_EQ(5u, bed.end);
+    ASSERT_EQ(5u, bed.stop);
     ASSERT_EQ("A/T", bed.refCall);
     ASSERT_EQ("43", bed.qual);
     ASSERT_EQ(Bed::INDEL, bed.type());
@@ -121,7 +121,7 @@ TEST(BedStream, peek) {
     bed = *peek;
     ASSERT_EQ("1", bed.chrom);
     ASSERT_EQ(2u, bed.start);
-    ASSERT_EQ(3u, bed.end);
+    ASSERT_EQ(3u, bed.stop);
     ASSERT_EQ("A/T", bed.refCall);
     ASSERT_EQ("44", bed.qual);
     ASSERT_EQ(Bed::SNV, bed.type());

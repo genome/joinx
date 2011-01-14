@@ -11,7 +11,7 @@ using namespace std;
 
 string CdsExonAnnotator::codingRegionString(const Variant& v, const TranscriptStructure& structure) const {
     int64_t start = structure.sequencePosition(v.start());
-    int64_t stop = structure.sequencePosition(v.end());
+    int64_t stop = structure.sequencePosition(v.stop());
     int64_t phaseBases = structure.numPhaseBasesBefore();
     int64_t codingBasesBefore = structure.numCodingBasesBefore();
     stringstream rv;

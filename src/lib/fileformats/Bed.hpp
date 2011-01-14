@@ -14,25 +14,25 @@ struct Bed
 
     Bed()
         : start(0)
-        , end(0)
+        , stop(0)
     {}
 
-    Bed(const std::string& chrom, int64_t start, int64_t end, const std::string& refCall, const std::string& qual)
+    Bed(const std::string& chrom, int64_t start, int64_t stop, const std::string& refCall, const std::string& qual)
         : chrom(chrom)
         , start(start)
-        , end(end)
+        , stop(stop)
         , refCall(refCall)
         , qual(qual)
     {
         std::stringstream ss;
-        ss << chrom << "\t" << start << "\t" << end << "\t" << refCall << "\t"
+        ss << chrom << "\t" << start << "\t" << stop << "\t" << refCall << "\t"
             << qual;
         line = ss.str();
     }
 
     std::string chrom;
     int64_t start;
-    int64_t end;
+    int64_t stop;
     std::string refCall;
     std::string qual;
     std::string line;
@@ -40,7 +40,7 @@ struct Bed
     void swap(Bed& rhs) {
         chrom.swap(rhs.chrom);
         std::swap(start, rhs.start);
-        std::swap(end, rhs.end);
+        std::swap(stop, rhs.stop);
         refCall.swap(rhs.refCall);
         qual.swap(rhs.qual);
         line.swap(rhs.line);
@@ -56,7 +56,7 @@ struct Bed
     }
 
     bool type() const {
-        return (end == start+1) ? SNV : INDEL;
+        return (stop == start+1) ? SNV : INDEL;
     }
 
     static void parseLine(std::string& line, Bed& bed);

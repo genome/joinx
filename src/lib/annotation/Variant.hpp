@@ -36,8 +36,8 @@ public:
         return _start;
     }
 
-    int64_t end() const {
-        return _end;
+    int64_t stop() const {
+        return _stop;
     }
 
     bool valid() const;
@@ -65,7 +65,7 @@ protected:
 protected:
     std::string _chrom;
     uint64_t _start;
-    uint64_t _end;
+    uint64_t _stop;
     Sequence _reference;
     Sequence _variant;
     Type _type;

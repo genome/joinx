@@ -32,9 +32,9 @@ string Variant::typeToString(Type t) {
 }
 
 Variant::Type Variant::inferType() const {
-    if (_end == _start && !reference().null() && !variant().null())
+    if (_stop  == _start && !reference().null() && !variant().null())
         return SNP;
-    else if (_end == _start+1 && !reference().null() && !variant().null())
+    else if (_stop  == _start+1 && !reference().null() && !variant().null())
         return DNP;
     else if (_reference.null())
         return INS;
@@ -53,7 +53,7 @@ Variant::Variant() : _type(INVALID) {}
 Variant::Variant(const Bed& bed)
     : _chrom(bed.chrom)
     , _start(bed.start)
-    , _end(bed.end)
+    , _stop (bed.stop)
 {
     typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
     boost::char_separator<char> sep("/", "", boost::keep_empty_tokens);
@@ -72,7 +72,7 @@ Variant::Variant(const Bed& bed)
     _type = inferType();
     // convert from 0 based bed format
     if (_type == INS)
-        ++_end;
+        ++_stop;
     else
         ++_start;
 }
@@ -80,7 +80,7 @@ Variant::Variant(const Bed& bed)
 ostream& Variant::toStream(ostream& s) const {
     s << chrom() << "\t" <<
         start() << "\t" <<
-        end() << "\t" <<
+        stop() << "\t" <<
         reference().data() << "\t" <<
         variant().data() << "\t" <<
         typeToString(type());

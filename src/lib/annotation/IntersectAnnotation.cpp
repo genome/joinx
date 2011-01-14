@@ -16,7 +16,7 @@ IntersectAnnotation::Compare IntersectAnnotation::cmp(const Variant& a, const Tr
     if (rv > 0)
         return AFTER;
 
-    if (a.end() < b.region().start())
+    if (a.stop() < b.region().start())
         return BEFORE;
     if (b.region().stop() < a.start())
         return AFTER;
@@ -38,7 +38,7 @@ bool IntersectAnnotation::eof() const {
 bool IntersectAnnotation::intersect(const Bed& bed) {
     Variant v(bed);
 
-    if (v.start() == v.end() && v.variant().data().size() == 1 && v.variant().data() != "-") {
+    if (v.start() == v.stop() && v.variant().data().size() == 1 && v.variant().data() != "-") {
         string iub = translateIub(v.variant().data());
         for (string::size_type i = 0; i < iub.size(); ++i) {
             if (v.reference().data()[0] == iub[i])
