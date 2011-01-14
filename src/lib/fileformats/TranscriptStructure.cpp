@@ -19,7 +19,7 @@ void TranscriptStructure::parseLine(const string& line, TranscriptStructure& ts)
     
     Tokenizer tokenizer(line, ',');
     unsigned idx = 0;
-    while (idx < NUM_FIELDS && tokenizer.extractString(ts._fields[idx++]));
+    while (idx < NUM_FIELDS && tokenizer.extract(ts._fields[idx++]));
     assert(idx <= NUM_FIELDS);
     ts._line = line;
 

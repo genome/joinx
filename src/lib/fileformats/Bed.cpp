@@ -11,19 +11,19 @@ using namespace std;
 
 void Bed::parseLine(std::string& line, Bed& bed) {
     Tokenizer tokenizer(line);
-    if (!tokenizer.extractString(bed.chrom))
+    if (!tokenizer.extract(bed.chrom))
         throw runtime_error(str(format("Failed to extract chromosome from bed line '%1%'") %line));
 
-    if (!tokenizer.extractSigned(bed.start))
+    if (!tokenizer.extract(bed.start))
         throw runtime_error(str(format("Failed to extract start position from bed line '%1%'") %line));
 
-    if (!tokenizer.extractSigned(bed.stop))
+    if (!tokenizer.extract(bed.stop))
         throw runtime_error(str(format("Failed to extract stop position from bed line '%1%'") %line));
 
-    if (!tokenizer.extractString(bed.refCall))
+    if (!tokenizer.extract(bed.refCall))
         throw runtime_error(str(format("Failed to extract ref/call from bed line '%1%'") %line));
 
-    if (!tokenizer.extractString(bed.qual))
+    if (!tokenizer.extract(bed.qual))
         throw runtime_error(str(format("Failed to extract quality from bed line '%1%'") %line));
 
     bed.line.swap(line);
