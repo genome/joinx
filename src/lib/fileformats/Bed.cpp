@@ -11,7 +11,7 @@ using namespace std;
 
 void Bed::parseLine(std::string& line, Bed& bed) {
     Tokenizer tokenizer(line);
-    if (tokenizer.extractString(bed.chrom) == 0)
+    if (!tokenizer.extractString(bed.chrom))
         throw runtime_error(str(format("Failed to extract chromosome from bed line '%1%'") %line));
 
     if (!tokenizer.extractSigned(bed.start))
@@ -20,10 +20,10 @@ void Bed::parseLine(std::string& line, Bed& bed) {
     if (!tokenizer.extractSigned(bed.stop))
         throw runtime_error(str(format("Failed to extract stop position from bed line '%1%'") %line));
 
-    if (tokenizer.extractString(bed.refCall) == 0)
+    if (!tokenizer.extractString(bed.refCall))
         throw runtime_error(str(format("Failed to extract ref/call from bed line '%1%'") %line));
 
-    if (tokenizer.extractString(bed.qual) == 0)
+    if (!tokenizer.extractString(bed.qual))
         throw runtime_error(str(format("Failed to extract quality from bed line '%1%'") %line));
 
     bed.line.swap(line);

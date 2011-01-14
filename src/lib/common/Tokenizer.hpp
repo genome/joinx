@@ -22,12 +22,16 @@ public:
         rewind();
     }
 
-    std::string::size_type extractString(std::string& value) {
+    bool extractString(std::string& value) {
         using std::string;
+
+        if (eof())
+            return false;
+
         string::size_type len = _end-_pos;
         value = _s.substr(_pos, len);
         advance();
-        return len;
+        return true;
     }
 
     template<typename T>
@@ -64,12 +68,16 @@ public:
     bool advance() {
         _pos = std::min(_s.size(), _end+1);
         _end = std::min(_s.size(), _s.find_first_of(_delim, _pos));
-        return _pos != _end;
+        return !eof();
     }
 
     void rewind() {
         _pos = 0;        
         _end = _s.find_first_of(_delim);
+    }
+
+    bool eof() {
+        return _pos == _s.size();
     }
 
 protected:

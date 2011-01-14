@@ -1,8 +1,8 @@
 // TODO: get rid of getAs<>/lexical_cast calls as possible
 
 #include "TranscriptStructure.hpp"
+#include "common/Tokenizer.hpp"
 
-#include <boost/tokenizer.hpp>
 #include <algorithm>
 #include <cassert>
 #include <functional>
@@ -16,14 +16,11 @@ namespace {
 }
 
 void TranscriptStructure::parseLine(const string& line, TranscriptStructure& ts) {
-    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-    boost::char_separator<char> sep(",", "", boost::keep_empty_tokens);
-    tokenizer tokens(line, sep);
+    
+    Tokenizer tokenizer(line, ',');
     unsigned idx = 0;
-    for (tokenizer::iterator iter = tokens.begin(); iter != tokens.end(); ++iter, ++idx) {
-        assert(idx < NUM_FIELDS);
-        ts._fields[idx] = *iter;
-    }
+    while (idx < NUM_FIELDS && tokenizer.extractString(ts._fields[idx++]));
+    assert(idx <= NUM_FIELDS);
     ts._line = line;
 
     if (ts.get(strand) == "+1") {
