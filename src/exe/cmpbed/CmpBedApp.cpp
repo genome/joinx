@@ -91,7 +91,7 @@ void CmpBedApp::exec() {
         throw runtime_error("Failed to open input file '" + _fileB + "'");
 
     BedStream fa(_fileA, inA, 0);
-    BedStream fb(_fileB, inA, 0);
+    BedStream fb(_fileB, inB, 0);
 
     boost::function<void(const Bed&, const Bed&)> action = onHit;
     if (_outputBoth)
