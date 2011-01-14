@@ -6,28 +6,35 @@
 
 using namespace std;
 
+class TestableBed : public Bed {
+public:
+    using Bed::_chrom;
+    using Bed::_start;
+    using Bed::_stop;
+};
+
 TEST(Bed, parse) {
     string snvLine = "1\t2\t3\tA/T\t44";
-    Bed snv;
-    Bed::parseLine(snvLine, snv);
-    ASSERT_EQ("1", snv.chrom);
-    ASSERT_EQ(2u, snv.start);
-    ASSERT_EQ(3u, snv.stop);
-    ASSERT_EQ("A/T", snv.refCall);
-    ASSERT_EQ("44", snv.qual);
+    TestableBed snv;
+    Bed::parseLine(snvLine, snv, 2);
+    ASSERT_EQ("1", snv.chrom());
+    ASSERT_EQ(2u, snv.start());
+    ASSERT_EQ(3u, snv.stop());
+    ASSERT_EQ("A/T", snv.extraFields()[0]);
+    ASSERT_EQ("44", snv.extraFields()[1]);
 
     ASSERT_EQ(Bed::SNV, snv.type());
 
-    snv.stop += 1;
+    snv._stop += 1;
     ASSERT_EQ(Bed::INDEL, snv.type());
 }
 
 TEST(Bed, swap) {
-    string snvLine1 = "1\t2\t3\tA/T\t44";
-    string snvLine2 = "2\t3\t4\tA/T\t44";
+    string snvLine1 = "1\t2\t3\tA/T\t44\t19";
+    string snvLine2 = "2\t3\t4\tA/T\t44\t20";
     Bed a, b, oa, ob;
-    Bed::parseLine(snvLine1, oa);
-    Bed::parseLine(snvLine2, ob);
+    Bed::parseLine(snvLine1, oa, 3);
+    Bed::parseLine(snvLine2, ob, 3);
 
     a = oa;
     b = ob;
@@ -50,10 +57,6 @@ TEST(Bed, parseBad) {
         "",
         "1",
         "1\t2",
-        "1\t2\t3",
-        "1\t2\t3\tA/T",
-        "1\tK\t3\tA/T\t44",
-        "1\t1\tK\tA/T\t44"
     };
     for (unsigned i = 0; i < sizeof(baddies)/sizeof(baddies[0]); ++i) {
         string tmp = baddies[i]; // string gets swapped
@@ -63,27 +66,30 @@ TEST(Bed, parseBad) {
 }
 
 TEST(Bed, cmp) {
-    Bed a("1", 1, 1, "A/T", "44");
-    Bed b = a;
-    b.stop++;
+    TestableBed a;
+    string data ("1\t1\t1\tA/T\t44");
+    Bed::parseLine(data, a, 2);
+
+    TestableBed b = a;
+    b._stop++;
 
     ASSERT_EQ(0, a.cmp(a)) << "bed chromosome sort: 1 == 1";
     ASSERT_GT(0, a.cmp(b)) << "bed chromosome sort: 1 < 2";
     ASSERT_LT(0, b.cmp(a));
 
     b = a;
-    b.start++;
+    b._start++;
     ASSERT_GT(0, a.cmp(b));
     ASSERT_LT(0, b.cmp(a));
 
     b = a;
-    b.chrom = "2";
+    b._chrom = "2";
     ASSERT_GT(0, a.cmp(b));
     ASSERT_LT(0, b.cmp(a));
 
-    a.chrom = "22";
+    a._chrom = "22";
     b = a;
-    b.chrom = "X";
+    b._chrom = "X";
     ASSERT_GT(0, a.cmp(b)) << "bed chromosome sort: 22 < X";
     ASSERT_LT(0, b.cmp(a)) << "bed chromosome sort: X > 22";
 }

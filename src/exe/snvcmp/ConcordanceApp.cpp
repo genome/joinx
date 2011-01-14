@@ -119,11 +119,11 @@ void ConcordanceApp::exec() {
     NoReferenceFilter nref;
     TypeFilter snvOnly(Bed::SNV);
 
-    BedStream fa(_fileA, inA);
+    BedStream fa(_fileA, inA, 2);
     fa.addFilter(&snvOnly);
     fa.addFilter(&nref);
 
-    BedStream fb(_fileB, inB);
+    BedStream fb(_fileB, inB, 0);
     fb.addFilter(&snvOnly);
 
     ConcordanceQuality qc;

@@ -8,27 +8,13 @@
 #include <map>
 #include <ostream>
 #include <sstream>
-#include <stdexcept>
 #include <utility>
 
 class ConcordanceQuality : public IResultCollector {
 public:
     ConcordanceQuality() : _hitCount(0), _missCount(0) {}
 
-    unsigned qualityLevel(const Bed& snv) {
-        using namespace std;
-
-        char* end = NULL;
-        unsigned qual = strtoul(snv.qual.c_str(), &end, 10);
-        if (end != &snv.qual[snv.qual.size()]) {
-            stringstream ss;
-            ss << "Failed to extract quality value from string '" << snv.qual 
-                << "'.";
-            throw runtime_error(ss.str());
-        }
-
-        return qual;
-    }
+    unsigned qualityLevel(const Bed& snv); 
 
     void hitA(const Bed& snv) {
         using namespace std; 

@@ -23,26 +23,31 @@ public:
         rewind();
     }
 
-    bool extract(std::string& value);
-    bool extract(int8_t&  value) { return extractSigned(value); }
-    bool extract(int16_t& value) { return extractSigned(value); }
-    bool extract(int32_t& value) { return extractSigned(value); }
-    bool extract(int64_t& value) { return extractSigned(value); }
-    bool extract(uint8_t&  value) { return extractUnsigned(value); }
-    bool extract(uint16_t& value) { return extractUnsigned(value); }
-    bool extract(uint32_t& value) { return extractUnsigned(value); }
-    bool extract(uint64_t& value) { return extractUnsigned(value); }
-
     template<typename T>
-    bool extractSigned(T& value);
-    template<typename T>
-    bool extractUnsigned(T& value);
-
+    bool extract(T& value);
+    void remaining(std::string& s);
+    
     bool advance();
     // returns # of tokens actually skipped
     uint32_t advance(uint32_t count);
     void rewind();
     bool eof();
+
+protected:
+    bool _extract(std::string& value);
+    bool _extract(int8_t&  value) { return _extractSigned(value); }
+    bool _extract(int16_t& value) { return _extractSigned(value); }
+    bool _extract(int32_t& value) { return _extractSigned(value); }
+    bool _extract(int64_t& value) { return _extractSigned(value); }
+    bool _extract(uint8_t&  value) { return _extractUnsigned(value); }
+    bool _extract(uint16_t& value) { return _extractUnsigned(value); }
+    bool _extract(uint32_t& value) { return _extractUnsigned(value); }
+    bool _extract(uint64_t& value) { return _extractUnsigned(value); }
+    template<typename T>
+    bool _extractSigned(T& value);
+    template<typename T>
+    bool _extractUnsigned(T& value);
+
 
 protected:
     const std::string& _s;
@@ -52,9 +57,18 @@ protected:
     uint32_t _eofCalls;
 };
 
-inline bool Tokenizer::extract(std::string& value) {
+template<typename T>
+bool Tokenizer::extract(T& value) {
     if (eof())
         return false;
+    return _extract(value);
+}
+
+inline void Tokenizer::remaining(std::string& s) {
+    s = _s.substr(_pos);
+}
+ 
+inline bool Tokenizer::_extract(std::string& value) {
 
     std::string::size_type len = _end-_pos;
     value = _s.substr(_pos, len);
@@ -106,7 +120,7 @@ inline bool Tokenizer::eof() {
 }
 
 template<typename T>
-bool Tokenizer::extractSigned(T& value) {
+bool Tokenizer::_extractSigned(T& value) {
     char* realEnd = NULL;
     string::size_type expectedLen =_end-_pos;
     value = strtoll(&_s[_pos], &realEnd, 10);
@@ -118,7 +132,7 @@ bool Tokenizer::extractSigned(T& value) {
 }
 
 template<typename T>
-bool Tokenizer::extractUnsigned(T& value) {
+bool Tokenizer::_extractUnsigned(T& value) {
     char* realEnd = NULL;
     string::size_type expectedLen =_end-_pos;
     value = strtoull(&_s[_pos], &realEnd, 10);

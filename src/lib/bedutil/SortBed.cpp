@@ -28,10 +28,10 @@ public:
 
         typedef multiset<Bed>::const_iterator IterType;
         for (IterType iter = beds.begin(); iter != beds.end(); ++iter)
-            _f << iter->line << endl;
+            _f << *iter << endl;
 
         _f.seekg(0);
-        _in.reset(new BedStream(_path, _f));
+        _in.reset(new BedStream(_path, _f, 0));
     }
 
     ~TempFile() {
@@ -90,13 +90,13 @@ void SortBed::exec() {
 
     if (_tmpfiles.empty()) { 
         for (multiset<Bed>::const_iterator iter = beds.begin(); iter != beds.end(); ++iter)
-            _out << iter->line << endl;
+            _out << *iter << endl;
     } else {
         if (!beds.empty())
             createTempFile(beds);
 
         while (getNextSortedFromFiles(bed))
-            _out << bed.line << endl;
+            _out << bed << endl;
     }
 }
 

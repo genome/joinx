@@ -34,8 +34,8 @@ const string BEDB =
 TEST(SnvComparator, intersectAll) {
     stringstream A(BEDA);
     stringstream B(BEDA);
-    BedStream sA("a", A);
-    BedStream sB("b", B);
+    BedStream sA("a", A, 2);
+    BedStream sB("b", B, 0);
     MockResultCollector rc;
 
     SnvComparator ss(sA, sB, rc);
@@ -50,8 +50,8 @@ TEST(SnvComparator, intersectAll) {
 TEST(SnvComparator, intersectSome) {
     stringstream A(BEDA);
     stringstream B(BEDB);
-    BedStream sA("a", A);
-    BedStream sB("b", B);
+    BedStream sA("a", A, 2);
+    BedStream sB("b", B, 0);
     MockResultCollector rc;
 
     SnvComparator ss(sA, sB, rc);

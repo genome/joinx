@@ -18,20 +18,20 @@ ResultStreamWriter::ResultStreamWriter(
 
 void ResultStreamWriter::hitA(const Bed& a) {
     if (_hitA)
-        *_hitA << a.line << endl;
+        *_hitA << a << endl;
 }
 
 void ResultStreamWriter::hitB(const Bed& b) {
     if (_hitB)
-        *_hitB << b.line << endl;
+        *_hitB << b << endl;
 }
 
 void ResultStreamWriter::missA(const Bed& a) {
     if (_missA)
-        *_missA << a.line << endl;
+        *_missA << a << endl;
 }
 
 void ResultStreamWriter::missB(const Bed& b) {
     if (_missB)
-        *_missB << b.line << endl;
+        *_missB << b << endl;
 }

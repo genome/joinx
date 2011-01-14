@@ -74,10 +74,6 @@ void CmpBedApp::parseArguments(int argc, char** argv) {
 namespace {
     // TODO: refactor these output functions into a class
     void onHit(const Bed& a, const Bed& b) {
-        // mimic what bedtools does
-        //unsigned start = std::max(a.start, b.start);
-        //unsigned end = std::min(a.end, b.end);
-        //cout << a.chrom << "\t" << start << "\t" << end << "\t" << a.refCall << "\t" << a.qual << "\n";
         cout << a << "\n";
     }
 
@@ -94,8 +90,8 @@ void CmpBedApp::exec() {
     if (!inB)
         throw runtime_error("Failed to open input file '" + _fileB + "'");
 
-    BedStream fa(_fileA, inA);
-    BedStream fb(_fileB, inA);
+    BedStream fa(_fileA, inA, 0);
+    BedStream fb(_fileB, inA, 0);
 
     boost::function<void(const Bed&, const Bed&)> action = onHit;
     if (_outputBoth)

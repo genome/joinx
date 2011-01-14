@@ -117,7 +117,7 @@ void AnnotateApp::exec() {
     if (!inB)
         throw runtime_error("Failed to open input file '" + _fileB + "'");
 
-    BedStream fa(_fileA, inA);
+    BedStream fa(_fileA, inA, 1);
 
     boost::function<void(const Variant&, const TranscriptStructure&)> action = onHit;
     if (_outputBoth)

@@ -51,13 +51,13 @@ Variant::Type Variant::inferType() const {
 Variant::Variant() : _type(INVALID) {}
 
 Variant::Variant(const Bed& bed)
-    : _chrom(bed.chrom)
-    , _start(bed.start)
-    , _stop (bed.stop)
+    : _chrom(bed.chrom())
+    , _start(bed.start())
+    , _stop (bed.stop())
 {
     typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
     boost::char_separator<char> sep("/", "", boost::keep_empty_tokens);
-    tokenizer tokens(bed.refCall, sep);
+    tokenizer tokens(bed.extraFields()[0], sep);
     tokenizer::iterator iter = tokens.begin();
     if (iter != tokens.end())
         _reference = *iter++;

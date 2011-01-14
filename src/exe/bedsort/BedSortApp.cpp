@@ -67,7 +67,7 @@ void BedSortApp::exec() {
     if (!out)
         throw runtime_error("Failed to open ouput file '" + _fileOut + "'");
 
-    BedStream inp(_fileIn, in);
+    BedStream inp(_fileIn, in, 0);
     SortBed sorter(inp, out, _maxLinesInMem);
     sorter.exec();
 }

@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 project(bedutil)
 
 set(SOURCES
+    ConcordanceQuality.cpp
     ConcordanceQuality.hpp
     IResultCollector.hpp
     IntersectBed.cpp

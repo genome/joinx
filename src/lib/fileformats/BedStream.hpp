@@ -11,7 +11,8 @@ class BedFilterBase;
 
 class BedStream {
 public:
-    BedStream(const std::string& name, std::istream& in);
+    // maxExtraFields == -1 => no limit
+    BedStream(const std::string& name, std::istream& in, int maxExtraFields);
 
     void addFilter(BedFilterBase* filter);
 
@@ -35,6 +36,7 @@ protected:
 protected:
     std::string _name;
     std::istream& _in;
+    int _maxExtraFields;
     uint64_t _lineNum;
     uint64_t _bedCount;
     std::vector<BedFilterBase*> _filters;

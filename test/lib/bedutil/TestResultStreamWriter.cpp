@@ -1,12 +1,14 @@
 #include "bedutil/ResultStreamWriter.hpp"
 #include "fileformats/Bed.hpp"
 
+#include <boost/assign/list_of.hpp>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 #include <gtest/gtest.h>
 
+using boost::assign::list_of;
 using namespace std;
 
 // TODO: use a text fixture for this and hold expected Bed objects to test for
@@ -22,11 +24,12 @@ class TestResultStreamWriter : public ::testing::Test {
 protected:
 
     void SetUp() {
-        _beds.push_back(Bed("1", 2, 3, "A/T", "1")); 
-        _beds.push_back(Bed("2", 2, 3, "A/T", "1")); 
-        _beds.push_back(Bed("3", 2, 3, "A/T", "1")); 
-        _beds.push_back(Bed("4", 2, 3, "A/T", "1")); 
-        _beds.push_back(Bed("5", 2, 3, "A/T", "1")); 
+        vector<string> extraFields = list_of("A/T")("1");
+        _beds.push_back(Bed("1", 2, 3, extraFields));
+        _beds.push_back(Bed("2", 2, 3, extraFields));
+        _beds.push_back(Bed("3", 2, 3, extraFields));
+        _beds.push_back(Bed("4", 2, 3, extraFields));
+        _beds.push_back(Bed("5", 2, 3, extraFields));
     }
 
     vector<Bed> _beds;
@@ -46,15 +49,15 @@ TEST_F(TestResultStreamWriter, all) {
 
     string line;
     getline(hitA, line);
-    ASSERT_EQ(_beds[0].line, line);
+    ASSERT_EQ(_beds[0].toString(), line);
 
     getline(hitB, line);
-    ASSERT_EQ(_beds[1].line, line);
+    ASSERT_EQ(_beds[1].toString(), line);
 
     getline(missA, line);
-    ASSERT_EQ(_beds[2].line, line);
+    ASSERT_EQ(_beds[2].toString(), line);
 
     getline(missB, line);
-    ASSERT_EQ(_beds[3].line, line);
+    ASSERT_EQ(_beds[3].toString(), line);
 
 }

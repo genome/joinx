@@ -71,7 +71,6 @@ TEST(TestTokenizer, nullFields) {
     string input(",1,,3,");
     string s;
 
-
     Tokenizer t(input, ',');
     ASSERT_FALSE(t.eof());
 
@@ -84,4 +83,39 @@ TEST(TestTokenizer, nullFields) {
     t.extract(s);
     ASSERT_EQ("", s);
     ASSERT_TRUE(t.eof());
+}
+
+TEST(TestTokenizer, eof) {
+    string input("1,2,3");
+    int n;
+    Tokenizer t(input, ',');
+
+    for (int i = 0; i < 3; ++i) {
+        ASSERT_FALSE(t.eof());
+        ASSERT_TRUE(t.extract(n));
+    }
+    
+    ASSERT_TRUE(t.eof());
+    ASSERT_FALSE(t.extract(n));
+    ASSERT_TRUE(t.eof());
+}
+
+TEST(TestTokenizer, remaining) {
+    string input("1,2,3");
+    Tokenizer t(input, ',');
+    string s;
+
+    t.remaining(s); 
+    ASSERT_EQ("1,2,3", s);
+    ASSERT_TRUE(t.extract(s));
+    t.remaining(s); 
+    ASSERT_EQ("2,3", s);
+    ASSERT_TRUE(t.extract(s));
+    t.remaining(s); 
+    ASSERT_EQ("3", s);
+    ASSERT_TRUE(t.extract(s));
+    t.remaining(s); 
+    ASSERT_EQ("", s);
+    t.remaining(s); 
+    ASSERT_EQ("", s);
 }

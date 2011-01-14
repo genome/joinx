@@ -8,15 +8,15 @@
 using namespace std;
 
 IntersectBed::BedCompare IntersectBed::cmpBeds(const Bed& a, const Bed& b) {
-    int rv = strverscmp(a.chrom.c_str(), b.chrom.c_str());
+    int rv = strverscmp(a.chrom().c_str(), b.chrom().c_str());
     if (rv < 0)
         return BEFORE;
     if (rv > 0)
         return AFTER;
 
-    if (a.stop <= b.start)
+    if (a.stop() <= b.start())
         return BEFORE;
-    if (b.stop <= a.start)
+    if (b.stop() <= a.start())
         return AFTER;
 
     return INTERSECT;

@@ -7,9 +7,10 @@
 
 using namespace std;
 
-BedStream::BedStream(const string& name, istream& in)
+BedStream::BedStream(const string& name, istream& in, int maxExtraFields /* = -1 */)
     : _name(name)
     , _in(in)
+    , _maxExtraFields(maxExtraFields)
     , _lineNum(0)
     , _bedCount(0)
     , _cached(false)
@@ -63,7 +64,7 @@ bool BedStream::next(Bed& bed) {
         if (line.empty())
             return false;
 
-        Bed::parseLine(line, bed);
+        Bed::parseLine(line, bed, _maxExtraFields);
     } while (exclude(bed));
     ++_bedCount;
     return true;

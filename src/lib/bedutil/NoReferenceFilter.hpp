@@ -7,9 +7,10 @@
 class NoReferenceFilter : public BedFilterBase {
 public:
     bool _exclude(const Bed& snv) {
-        return snv.refCall.size() != 3 ||
-            snv.refCall[0] == '\0' || 
-            snv.refCall[0] == 'N' || 
-            snv.refCall[0] == ' ';
+        const std::string& refCall = snv.extraFields()[0];
+        return refCall.size() != 3 ||
+            refCall[0] == '\0' || 
+            refCall[0] == 'N' || 
+            refCall[0] == ' ';
     }
 };
