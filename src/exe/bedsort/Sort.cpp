@@ -1,5 +1,5 @@
 #include "Sort.hpp"
-#include "bedutil/BedStream.hpp"
+#include "fileformats/BedStream.hpp"
 #include "bedutil/SortBed.hpp"
 
 #include <fstream>

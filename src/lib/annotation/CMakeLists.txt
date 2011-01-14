@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(annotate)
+project(annotation)
 
 set(SOURCES
     CdsExonAnnotator.cpp
@@ -14,20 +14,17 @@ set(SOURCES
     Iub.hpp
     ReferenceSequence.cpp
     ReferenceSequence.hpp
-    Region.cpp
-    Region.hpp
     RnaAnnotator.cpp
     RnaAnnotator.hpp
     Sequence.cpp
     Sequence.hpp
     TranscriptAnnotator.cpp
     TranscriptAnnotator.hpp
-    TranscriptStructure.cpp
-    TranscriptStructure.hpp
     UtrExonAnnotator.cpp
     UtrExonAnnotator.hpp
     Variant.cpp
     Variant.hpp
 )
 
-add_library(annotate ${SOURCES})
+add_library(annotation ${SOURCES})
+target_link_libraries(annotation common fileformats bedutil)

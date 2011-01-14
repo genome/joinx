@@ -8,8 +8,8 @@ set(SOURCES
     main.cpp
 )
 
-set(EXECUTABLE_NAME annotate${VERSION_MAJOR}.${VERSION_MINOR})
+set(EXECUTABLE_NAME annotate${EXE_VERSION_SUFFIX})
 add_executable(${EXECUTABLE_NAME} ${SOURCES})
-target_link_libraries(${EXECUTABLE_NAME} bedutil annotate ${Boost_LIBRARIES})
+target_link_libraries(${EXECUTABLE_NAME} bedutil fileformats annotation ${Boost_LIBRARIES})
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin/)

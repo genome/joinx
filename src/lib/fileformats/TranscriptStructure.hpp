@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Region.hpp"
-#include "bedutil/intconfig.hpp"
+#include "common/Region.hpp"
+#include "common/intconfig.hpp"
 
 #include <boost/function.hpp>
 #include <boost/lexical_cast.hpp>

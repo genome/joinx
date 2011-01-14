@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Bed.hpp"
-#include "intconfig.hpp"
+#include "common/intconfig.hpp"
 
 #include <iostream>
 #include <string>

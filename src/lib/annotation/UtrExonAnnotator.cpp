@@ -1,7 +1,7 @@
 #include "UtrExonAnnotator.hpp"
 
 #include "Variant.hpp"
-#include "TranscriptStructure.hpp"
+#include "fileformats/TranscriptStructure.hpp"
 
 using namespace std;
 

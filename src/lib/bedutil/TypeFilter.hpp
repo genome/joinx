@@ -1,7 +1,7 @@
 #pragma once
 
-#include "BedFilterBase.hpp"
-#include "Bed.hpp"
+#include "fileformats/BedFilterBase.hpp"
+#include "fileformats/Bed.hpp"
 
 // filter entries with no data for the reference sequence allele
 class TypeFilter : public BedFilterBase {

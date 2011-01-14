@@ -1,5 +1,5 @@
-#include "annotate/ReferenceSequence.hpp"
-#include "annotate/Sequence.hpp"
+#include "annotation/ReferenceSequence.hpp"
+#include "annotation/Sequence.hpp"
 
 #include <boost/filesystem.hpp>
 #include <cstdlib>

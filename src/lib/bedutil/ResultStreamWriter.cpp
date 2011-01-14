@@ -1,6 +1,6 @@
 #include "ResultStreamWriter.hpp"
 
-#include "Bed.hpp"
+#include "fileformats/Bed.hpp"
 
 using namespace std;
 

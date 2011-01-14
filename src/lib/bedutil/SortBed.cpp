@@ -1,7 +1,7 @@
 #include "SortBed.hpp"
 
-#include "Bed.hpp"
-#include "BedStream.hpp"
+#include "fileformats/Bed.hpp"
+#include "fileformats/BedStream.hpp"
 
 #include <boost/bind.hpp>
 

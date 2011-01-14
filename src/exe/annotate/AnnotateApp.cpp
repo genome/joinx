@@ -1,11 +1,11 @@
 #include "AnnotateApp.hpp"
 
-#include "annotate/IntersectAnnotation.hpp"
-#include "annotate/TranscriptStructure.hpp"
-#include "annotate/Variant.hpp"
-#include "bedutil/Bed.hpp"
-#include "bedutil/BedStream.hpp"
-#include "bedutil/intconfig.hpp"
+#include "annotation/IntersectAnnotation.hpp"
+#include "annotation/Variant.hpp"
+#include "common/intconfig.hpp"
+#include "fileformats/Bed.hpp"
+#include "fileformats/BedStream.hpp"
+#include "fileformats/TranscriptStructure.hpp"
 
 #include <boost/program_options.hpp>
 #include <algorithm>

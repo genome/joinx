@@ -1,6 +1,6 @@
 #pragma once
 
-#include "bedutil/intconfig.hpp"
+#include "common/intconfig.hpp"
 
 #include <string>
 #include <iostream>

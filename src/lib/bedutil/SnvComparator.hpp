@@ -1,6 +1,6 @@
 #pragma once
 
-#include "intconfig.hpp"
+#include "common/intconfig.hpp"
 
 class Bed;
 class BedStream;

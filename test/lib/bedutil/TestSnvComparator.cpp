@@ -1,6 +1,6 @@
 #include "bedutil/SnvComparator.hpp"
-#include "bedutil/BedStream.hpp"
-#include "bedutil/Bed.hpp"
+#include "fileformats/BedStream.hpp"
+#include "fileformats/Bed.hpp"
 
 #include "MockResultCollector.hpp"
 

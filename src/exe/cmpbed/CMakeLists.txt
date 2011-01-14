@@ -8,8 +8,8 @@ set(SOURCES
     main.cpp
 )
 
-set(EXECUTABLE_NAME cmpbed${VERSION_MAJOR}.${VERSION_MINOR})
+set(EXECUTABLE_NAME cmpbed${EXE_VERSION_SUFFIX})
 add_executable(${EXECUTABLE_NAME} ${SOURCES})
-target_link_libraries(${EXECUTABLE_NAME} bedutil ${Boost_LIBRARIES})
+target_link_libraries(${EXECUTABLE_NAME} bedutil fileformats ${Boost_LIBRARIES})
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin/)

@@ -1,9 +1,9 @@
 #include "CmpBedApp.hpp"
 
-#include "bedutil/Bed.hpp"
-#include "bedutil/BedStream.hpp"
+#include "fileformats/Bed.hpp"
+#include "fileformats/BedStream.hpp"
 #include "bedutil/IntersectBed.hpp"
-#include "bedutil/intconfig.hpp"
+#include "common/intconfig.hpp"
 
 #include <boost/program_options.hpp>
 #include <algorithm>

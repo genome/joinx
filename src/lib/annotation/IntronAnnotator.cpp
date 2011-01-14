@@ -1,7 +1,7 @@
 #include "IntronAnnotator.hpp"
 
 #include "Variant.hpp"
-#include "TranscriptStructure.hpp"
+#include "fileformats/TranscriptStructure.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>

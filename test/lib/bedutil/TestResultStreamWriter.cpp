@@ -1,5 +1,5 @@
 #include "bedutil/ResultStreamWriter.hpp"
-#include "bedutil/Bed.hpp"
+#include "fileformats/Bed.hpp"
 
 #include <sstream>
 #include <stdexcept>

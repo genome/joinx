@@ -1,4 +1,4 @@
-#include "bedutil/Bed.hpp"
+#include "fileformats/Bed.hpp"
 
 #include <stdexcept>
 #include <string>
@@ -55,8 +55,11 @@ TEST(Bed, parseBad) {
         "1\tK\t3\tA/T\t44",
         "1\t1\tK\tA/T\t44"
     };
-    for (unsigned i = 0; i < sizeof(baddies)/sizeof(baddies[0]); ++i)
-        ASSERT_THROW(Bed::parseLine(baddies[i], b), runtime_error);
+    for (unsigned i = 0; i < sizeof(baddies)/sizeof(baddies[0]); ++i) {
+        string tmp = baddies[i]; // string gets swapped
+        ASSERT_THROW(Bed::parseLine(tmp, b), runtime_error) <<
+            "i is " << i << ", input was: '" << baddies[i] << "', got: " << b;
+    }
 }
 
 TEST(Bed, cmp) {

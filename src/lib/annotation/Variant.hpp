@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Sequence.hpp"
-#include "bedutil/intconfig.hpp"
+#include "common/intconfig.hpp"
 
 #include <cassert>
 #include <iostream>

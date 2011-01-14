@@ -1,8 +1,8 @@
 #pragma once
 
 #include "IResultCollector.hpp"
-#include "Bed.hpp"
-#include "intconfig.hpp"
+#include "fileformats/Bed.hpp"
+#include "common/intconfig.hpp"
 
 #include <cstdlib>
 #include <map>

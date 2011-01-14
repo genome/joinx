@@ -1,4 +1,4 @@
-#include "annotate/TranscriptStructure.hpp"
+#include "fileformats/TranscriptStructure.hpp"
 
 #include <string>
 #include <gtest/gtest.h>

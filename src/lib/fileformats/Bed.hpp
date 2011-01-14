@@ -1,6 +1,6 @@
 #pragma once
 
-#include "intconfig.hpp"
+#include "common/intconfig.hpp"
 #include <algorithm>
 #include <string>
 #include <sstream>

@@ -1,6 +1,6 @@
 #include "Variant.hpp"
 
-#include "bedutil/Bed.hpp"
+#include "fileformats/Bed.hpp"
 #include <boost/tokenizer.hpp>
 #include <stdexcept>
 #include <sstream>

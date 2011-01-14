@@ -1,6 +1,6 @@
 #include "ConcordanceApp.hpp"
 
-#include "bedutil/BedStream.hpp"
+#include "fileformats/BedStream.hpp"
 #include "bedutil/ConcordanceQuality.hpp"
 #include "bedutil/NoReferenceFilter.hpp"
 #include "bedutil/ResultMultiplexer.hpp"

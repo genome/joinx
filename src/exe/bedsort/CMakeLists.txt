@@ -9,6 +9,6 @@ set(SOURCES
 )
 
 add_executable(bedsort ${SOURCES})
-target_link_libraries(bedsort bedutil ${Boost_LIBRARIES})
+target_link_libraries(bedsort bedutil fileformats ${Boost_LIBRARIES})
 
 #install(TARGETS bedsort DESTINATION lib/snvcmp-${PROJ_VERSION})

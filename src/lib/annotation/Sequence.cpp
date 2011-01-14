@@ -1,6 +1,6 @@
 #include "Sequence.hpp"
 
-#include "bedutil/intconfig.hpp"
+#include "common/intconfig.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <cassert>

@@ -1,8 +1,8 @@
 #include "SnvComparator.hpp"
 
-#include "Bed.hpp"
+#include "fileformats/Bed.hpp"
 #include "IResultCollector.hpp"
-#include "BedStream.hpp"
+#include "fileformats/BedStream.hpp"
 
 SnvComparator::SnvComparator(BedStream& a, BedStream& b, IResultCollector& rc)
     : _a(a)
