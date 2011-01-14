@@ -1,6 +1,6 @@
 #include "ReferenceSequence.hpp"
 
-#include "Sequence.hpp"
+#include "common/Sequence.hpp"
 
 #include <boost/format.hpp>
 #include <stdexcept>

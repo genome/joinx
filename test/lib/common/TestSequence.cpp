@@ -1,4 +1,4 @@
-#include "annotation/Sequence.hpp"
+#include "common/Sequence.hpp"
 
 #include <sstream>
 #include <string>

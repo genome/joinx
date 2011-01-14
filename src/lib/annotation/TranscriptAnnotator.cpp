@@ -1,6 +1,6 @@
 #include "TranscriptAnnotator.hpp"
 
-#include "Variant.hpp"
+#include "common/Variant.hpp"
 #include "fileformats/TranscriptStructure.hpp"
 
 using namespace std;

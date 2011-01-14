@@ -5,7 +5,11 @@ project(common)
 set(SOURCES
     Region.cpp
     Region.hpp
+    Sequence.cpp
+    Sequence.hpp
     Tokenizer.hpp
+    Variant.cpp
+    Variant.hpp
     intconfig.hpp
 )
 

@@ -1,7 +1,7 @@
 #include "AnnotateApp.hpp"
 
 #include "annotation/IntersectAnnotation.hpp"
-#include "annotation/Variant.hpp"
+#include "common/Variant.hpp"
 #include "common/intconfig.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/BedStream.hpp"

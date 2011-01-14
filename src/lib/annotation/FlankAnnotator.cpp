@@ -1,6 +1,6 @@
 #include "FlankAnnotator.hpp"
 
-#include "Variant.hpp"
+#include "common/Variant.hpp"
 #include "fileformats/TranscriptStructure.hpp"
 
 #include <sstream>

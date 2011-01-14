@@ -4,4 +4,3 @@ set(TEST_LIBS bedutil annotation ${Boost_LIBRARIES})
 include_directories(${GTEST_INCLUDE_DIRS})
 
 def_test(ReferenceSequence)
-def_test(Sequence)

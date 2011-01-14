@@ -16,14 +16,10 @@ set(SOURCES
     ReferenceSequence.hpp
     RnaAnnotator.cpp
     RnaAnnotator.hpp
-    Sequence.cpp
-    Sequence.hpp
     TranscriptAnnotator.cpp
     TranscriptAnnotator.hpp
     UtrExonAnnotator.cpp
     UtrExonAnnotator.hpp
-    Variant.cpp
-    Variant.hpp
 )
 
 add_library(annotation ${SOURCES})

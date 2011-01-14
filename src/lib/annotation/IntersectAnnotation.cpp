@@ -2,7 +2,7 @@
 
 #include "Iub.hpp"
 #include "fileformats/TranscriptStructure.hpp"
-#include "Variant.hpp"
+#include "common/Variant.hpp"
 #include "fileformats/Bed.hpp"
 
 #include <cstring>
