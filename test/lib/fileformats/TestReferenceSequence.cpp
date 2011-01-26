@@ -1,8 +1,9 @@
-#include "annotation/ReferenceSequence.hpp"
+#include "fileformats/ReferenceSequence.hpp"
 #include "common/Sequence.hpp"
 
 #include <boost/filesystem.hpp>
 #include <cstdlib>
+#include <fstream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -23,7 +24,7 @@ namespace {
         {"Y", "CC"},
         {"MT", "GG"}
     };
-};
+}
 
 class TestReferenceSequence : public ::testing::Test {
 protected:

@@ -4,8 +4,8 @@
 
 #include <string>
 #include <map>
-#include <fstream>
 
+class BasesFile;
 class Sequence;
 
 class ReferenceSequence {
@@ -17,10 +17,10 @@ public:
 
 protected:
     std::string getPathForChrom(const std::string& chrom) const;
-    std::ifstream* getFileForChrom(const std::string& chrom);
+    BasesFile* getFileForChrom(const std::string& chrom);
 
 protected:
-    typedef std::map<std::string, std::ifstream*> MapType;
+    typedef std::map<std::string, BasesFile*> MapType;
     std::string _dataDir;
     MapType _files;
 };

@@ -57,6 +57,8 @@ public:
         return type() == INS || type() == DEL;
     }
 
+    bool operator==(const Variant& rhs) const;
+
     std::ostream& toStream(std::ostream& stream) const;
 
 protected:
@@ -101,4 +103,11 @@ inline bool Variant::valid() const {
         return false;
 
     return true;
+}
+
+inline bool Variant::operator==(const Variant& rhs) const {
+    return
+        type() == rhs.type() &&
+        start() == rhs.start() &&
+        stop() == rhs.stop();
 }

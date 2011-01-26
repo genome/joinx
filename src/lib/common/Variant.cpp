@@ -13,10 +13,6 @@ string Variant::typeToString(Type t) {
         return "SNP";
         break;
 
-    case DNP:
-        return "DNP";
-        break;
-
     case INS:
         return "INS";
         break;
@@ -32,13 +28,11 @@ string Variant::typeToString(Type t) {
 }
 
 Variant::Type Variant::inferType() const {
-    if (_stop  == _start && !reference().null() && !variant().null())
+    if (_stop  == _start+1 && !reference().null() && !variant().null())
         return SNP;
-    else if (_stop  == _start+1 && !reference().null() && !variant().null())
-        return DNP;
-    else if (_reference.null())
+    else if (_stop == _start && reference().null() && !variant().null())
         return INS;
-    else if (_variant.null())
+    else if (_stop != _start && variant().null())
         return DEL;
     else {
         stringstream ss;

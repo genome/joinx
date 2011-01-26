@@ -6,6 +6,7 @@ set(SOURCES
     ConcordanceQuality.cpp
     ConcordanceQuality.hpp
     IResultCollector.hpp
+    Intersect.hpp
     IntersectBed.cpp
     IntersectBed.hpp
     NoReferenceFilter.hpp

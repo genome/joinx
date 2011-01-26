@@ -1,13 +1,15 @@
 #pragma once
 
+#include "IGenomicPosition.hpp"
 #include "common/intconfig.hpp"
+
 #include <algorithm>
 #include <string>
 #include <sstream>
 #include <vector>
 #include <stdexcept>
 
-class Bed {
+class Bed : public IGenomicPosition {
 public:
     typedef std::vector<std::string> ExtraFieldsType;
 

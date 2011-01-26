@@ -12,8 +12,6 @@ set(SOURCES
     IntronAnnotator.cpp
     IntronAnnotator.hpp
     Iub.hpp
-    ReferenceSequence.cpp
-    ReferenceSequence.hpp
     RnaAnnotator.cpp
     RnaAnnotator.hpp
     TranscriptAnnotator.cpp

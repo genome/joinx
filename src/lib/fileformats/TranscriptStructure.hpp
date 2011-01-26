@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IGenomicPosition.hpp"
 #include "common/Region.hpp"
 #include "common/intconfig.hpp"
 
@@ -8,7 +9,7 @@
 #include <iostream>
 #include <string>
 
-class TranscriptStructure {
+class TranscriptStructure : public IGenomicPosition {
 public:
     // TODO: clean up these names, copied from perl
     enum Field {
@@ -61,6 +62,8 @@ public:
 
     const std::string& line() const;
     const std::string& chrom() const;
+    int64_t start() const;
+    int64_t stop() const;
 
     bool errorContains(const std::string& value) const;
 
@@ -104,6 +107,14 @@ inline const std::string& TranscriptStructure::line() const {
 
 inline const std::string& TranscriptStructure::chrom() const {
     return get(transcript_chrom_name);
+}
+
+inline int64_t TranscriptStructure::start() const {
+    return region().start();
+}
+
+inline int64_t TranscriptStructure::stop() const {
+    return region().stop();
 }
 
 inline const Region& TranscriptStructure::region() const {

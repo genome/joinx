@@ -11,6 +11,8 @@ class BedFilterBase;
 
 class BedStream {
 public:
+    typedef Bed ValueType;
+
     // maxExtraFields == -1 => no limit
     BedStream(const std::string& name, std::istream& in, int maxExtraFields);
 

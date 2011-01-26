@@ -1,11 +1,13 @@
 #include "AnnotateApp.hpp"
 
+#include "bedutil/Intersect.hpp"
 #include "annotation/IntersectAnnotation.hpp"
 #include "common/Variant.hpp"
 #include "common/intconfig.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/BedStream.hpp"
 #include "fileformats/TranscriptStructure.hpp"
+#include "fileformats/TranscriptStructureStream.hpp"
 
 #include <boost/program_options.hpp>
 #include <algorithm>
@@ -107,6 +109,13 @@ namespace {
             cout << b.get(outputFields[i]) << "\t";
         cout << b.get(outputFields[numFields-1]) << "\n";
     }
+
+    class Collector {
+    public:
+        void hit(const Bed& a, const TranscriptStructure& b) {
+            cout << a << "\t" << b.line() << "\n";
+        }
+    };
 }
 
 void AnnotateApp::exec() {
@@ -118,10 +127,17 @@ void AnnotateApp::exec() {
         throw runtime_error("Failed to open input file '" + _fileB + "'");
 
     BedStream fa(_fileA, inA, 1);
+    TranscriptStructureStream fb(_fileB, inB);
+    Collector rc;
 
     boost::function<void(const Variant&, const TranscriptStructure&)> action = onHit;
     if (_outputBoth)
         action = onHitBoth;
+
+    Intersect<BedStream, TranscriptStructureStream, Collector> intersector(fa, fb, rc);
+    intersector.execute();
+
+/*
     IntersectAnnotation intersector(inB, action, _firstOnly);
     
     Bed bed;
@@ -131,4 +147,5 @@ void AnnotateApp::exec() {
         if (lineNo % 10000 == 0)
             cerr << "Processed " << lineNo << " lines" << endl;
     }
+*/
 }

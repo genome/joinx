@@ -1,6 +1,5 @@
 #include "BedStream.hpp"
 
-#include "Bed.hpp"
 #include "BedFilterBase.hpp"
 
 #include <stdexcept>

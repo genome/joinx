@@ -1,6 +1,7 @@
 #include "ReferenceSequence.hpp"
 
 #include "common/Sequence.hpp"
+#include "fileformats/BasesFile.hpp"
 
 #include <boost/format.hpp>
 #include <stdexcept>
@@ -13,36 +14,30 @@ ReferenceSequence::ReferenceSequence(const string& dataDir)
 {}
 
 ReferenceSequence::~ReferenceSequence() {
-    for (MapType::iterator iter = _files.begin(); iter != _files.end(); ++iter) {
-        iter->second->close();
+    for (MapType::iterator iter = _files.begin(); iter != _files.end(); ++iter)
         delete iter->second;
-    }
 }
 
 Sequence ReferenceSequence::lookup(const string& chrom, uint64_t start, uint64_t end) {
-    ifstream* f = getFileForChrom(chrom);
-    f->seekg(start-1);
-
-    Sequence rv(*f, end-start+1); 
-    if (!f->good()) {
-        throw runtime_error(str(format("Failed to seek to position %1% in chromosome %2%") %(start-1) %chrom));
-    }
-    return rv;
+    return getFileForChrom(chrom)->lookup(start, end);;
 }
 
 string ReferenceSequence::getPathForChrom(const string& chrom) const {
     return _dataDir + "/" + chrom + ".bases";
 }
 
-ifstream* ReferenceSequence::getFileForChrom(const string& chrom) {
-    ifstream* p(NULL);
+BasesFile* ReferenceSequence::getFileForChrom(const string& chrom) {
+    BasesFile* p(NULL);
     pair<MapType::iterator, bool> result = _files.insert(make_pair(chrom, p));
     if (result.second) {
         string path = getPathForChrom(chrom);
-        result.first->second = new ifstream(path.c_str());
-        if (!result.first->second->is_open()) {
+
+        try {
+            result.first->second = new BasesFile(path);
+        } catch (...) {
+            // make sure to clean up the map if we didn't get the bases file
             _files.erase(result.first);
-            throw runtime_error("Failed to open reference sequence file: " + path);
+            throw; // just rethrow whatever we caught
         }
     }
     return result.first->second;

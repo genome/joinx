@@ -8,9 +8,9 @@
 
 class ResultStreamWriter;
 
-class CmpBedApp {
+class JoinXApp {
 public:
-    CmpBedApp(int argc, char** argv);
+    JoinXApp(int argc, char** argv);
 
     void usage();
     void exec();
@@ -23,6 +23,8 @@ protected:
 protected:
     std::string _fileA;
     std::string _fileB;
+    std::string _outputFile;
     bool _firstOnly;
     bool _outputBoth;
+    bool _exact;
 };
