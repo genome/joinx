@@ -1,6 +1,6 @@
 #!/bin/sh
 
-EXECUTABLES="snvcmp"
+EXECUTABLES="snvcmp joinx"
 
 for e in $EXECUTABLES
 do
