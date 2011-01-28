@@ -26,5 +26,6 @@ protected:
     std::string _outputFile;
     bool _firstOnly;
     bool _outputBoth;
-    bool _exact;
+    bool _exactPos;
+    bool _exactAllele;
 };

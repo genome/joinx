@@ -21,6 +21,7 @@ public:
     const std::string& data() const;
     const std::string& reverseComplementData() const;
 
+    bool operator==(const Sequence& rhs) const;
 
 protected:
     std::string _data;
@@ -42,4 +43,8 @@ inline Sequence& Sequence::operator=(const std::string& rhs) {
 
 inline bool Sequence::null() const {
     return empty() || _data == "-" || _data == "0";
+}
+
+inline bool Sequence::operator==(const Sequence& rhs) const {
+    return _data == rhs._data;
 }

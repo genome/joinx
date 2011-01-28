@@ -22,7 +22,8 @@ JoinXApp::JoinXApp(int argc, char** argv)
     : _outputFile("-")
     , _firstOnly(false)
     , _outputBoth(false)
-    , _exact(false)
+    , _exactPos(false)
+    , _exactAllele(false)
 {
     parseArguments(argc, argv);
 }
@@ -30,13 +31,14 @@ JoinXApp::JoinXApp(int argc, char** argv)
 void JoinXApp::parseArguments(int argc, char** argv) {
     po::options_description opts("Available Options");
     opts.add_options()
-        ("help", "this message")
+        ("help,h", "this message")
         ("file-a,a", po::value<string>(&_fileA), "input .bed file a (required, - for stdin)")
         ("file-b,b", po::value<string>(&_fileB), "input .bed file b (required, - for stdin)")
         ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
         ("first-only,f", "notice only the first thing to hit records in b, not the full intersection")
         ("output-both", "concatenate intersecting lines in output (vs writing out only lines from 'a')")
-        ("exact,e", "require exact match of coordinates (default is to count overlaps)");
+        ("exact-pos", "require exact match of coordinates (default is to count overlaps)")
+        ("exact-allele", "require exact match of coordinates AND allele values");
 
     po::positional_options_description posOpts;
     posOpts.add("file-a", 1);
@@ -75,17 +77,23 @@ void JoinXApp::parseArguments(int argc, char** argv) {
     if (vm.count("output-both"))
         _outputBoth = true;
 
-    if (vm.count("exact"))
-        _exact = true;
+    if (vm.count("exact-pos"))
+        _exactPos = true;
+
+    if (vm.count("exact-allele")) {
+        _exactAllele = true;
+        _exactPos = true;
+    }
 }
 
 namespace {
     // TODO: make more configurable
     class Collector {
     public:
-        Collector(bool outputBoth, bool exact, ostream& s)
+        Collector(bool outputBoth, bool exactPos, bool exactAllele, ostream& s)
             : _outputBoth(outputBoth)
-            , _exact(exact)
+            , _exactPos(exactPos)
+            , _exactAllele(exactAllele)
             , _s(s)
             , _hitCount(0)
         {}
@@ -101,25 +109,30 @@ namespace {
             // each time A intersects something in B, an identical line
             // will be printed.
             if (_hitCount > 0 && !_outputBoth) {
-                if (_lastA == a)
+                if (_lastA.positionMatch(va) && _lastA.alleleMatch(va))
                     return;
             }
 
             ++_hitCount;
 
-            if (!_exact || va == vb) {
-                _lastA = a;
-                _s << a;
-                if (_outputBoth)
-                    _s << "\t" << b;
-                _s << "\n";
-            }
+            if (_exactPos && !va.positionMatch(vb))
+                return;
+
+            if (_exactAllele && !va.alleleMatch(vb))
+                return;
+
+            _lastA = a;
+            _s << a;
+            if (_outputBoth)
+                _s << "\t" << b;
+            _s << "\n";
         }
 
     protected:
         Variant _lastA;
         bool _outputBoth;
-        bool _exact;
+        bool _exactPos;
+        bool _exactAllele;
         bool _unique;
         ostream& _s;
         uint32_t _hitCount;
@@ -170,7 +183,7 @@ void JoinXApp::exec() {
     // these bedstreams will read 1 extra field, which is ref/call
     BedStream fa(_fileA, *inA, 1);
     BedStream fb(_fileB, *inB, 1);
-    Collector c(_outputBoth, _exact, *out);
+    Collector c(_outputBoth, _exactPos, _exactAllele, *out);
 
     Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c);
 

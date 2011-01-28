@@ -57,7 +57,18 @@ public:
         return type() == INS || type() == DEL;
     }
 
-    bool operator==(const Variant& rhs) const;
+    bool positionMatch(const Variant& rhs) const {
+        return 
+            type() == rhs.type() &&
+            start() == rhs.start() &&
+            stop() == rhs.stop();
+    }
+
+    bool alleleMatch(const Variant& rhs) const {
+        return
+            reference() == rhs.reference()
+            && variant() == rhs.variant();
+    }
 
     std::ostream& toStream(std::ostream& stream) const;
 
@@ -103,11 +114,4 @@ inline bool Variant::valid() const {
         return false;
 
     return true;
-}
-
-inline bool Variant::operator==(const Variant& rhs) const {
-    return
-        type() == rhs.type() &&
-        start() == rhs.start() &&
-        stop() == rhs.stop();
 }
