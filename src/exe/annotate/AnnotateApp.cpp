@@ -112,8 +112,11 @@ namespace {
 
     class Collector {
     public:
-        void hit(const Bed& a, const TranscriptStructure& b) {
+        void missA(const Bed& a) {}
+        void missB(const TranscriptStructure& b) {}
+        bool hit(const Bed& a, const TranscriptStructure& b) {
             cout << a << "\t" << b.line() << "\n";
+            return true;
         }
     };
 }

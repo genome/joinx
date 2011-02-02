@@ -3,6 +3,9 @@
 #include <cstring>
 #include <deque>
 
+#include <iostream>
+using std::cout;
+
 template<typename StreamTypeA, typename StreamTypeB, typename CollectorType>
 class Intersect {
 public:
@@ -43,56 +46,90 @@ public:
         return _a.eof() || _b.eof();
     }
 
-    void execute() {
-        while (!_a.eof()) {
-            TypeA valueA;
-            _a.next(valueA);
+    bool checkCache(const TypeA& valueA) {
+        for (CacheIterator iter = _cache.begin(); iter != _cache.end(); ++iter) {
+            Compare cmp = compare(valueA, iter->value);
+            if (cmp == BEFORE)
+                return false;
 
+            else if (cmp == AFTER) {
+                iter = _cache.erase(iter);
+                continue;
+            }
+
+            bool rv = _rc.hit(valueA, iter->value);
+            iter->hit |= rv;
+            return rv;
+        }
+        return false;
+    }
+
+    void execute() {
+        TypeA valueA;
+        while (!_a.eof() && _a.next(valueA)) {
             // burn entries from the cache
-            while (!_cache.empty() && compare(valueA, _cache.front()) == AFTER)
-                _cache.pop_front();
+            while (!_cache.empty() && compare(valueA, _cache.front().value) == AFTER)
+                popCache();
 
             // look ahead and burn entries from the input file
             TypeB valueB;
             TypeB* peek = NULL;
-            if (_cache.empty())
-                while (!_b.eof() && _b.peek(&peek) && compare(valueA, *peek) == AFTER)
+            if (_cache.empty()) {
+                while (!_b.eof() && _b.peek(&peek) && compare(valueA, *peek) == AFTER) {
                     _b.next(valueB);
-
-            for (CacheIterator iter = _cache.begin(); iter != _cache.end(); ++iter) {
-                Compare cmp = compare(valueA, *iter);
-                if (cmp == BEFORE)
-                    break;
-
-                else if (cmp == AFTER) {
-                    iter = _cache.erase(iter);
-                    continue;
+                    _rc.missB(valueB);
                 }
-
-                _rc.hit(valueA, *iter);
             }
 
+            bool hitA = checkCache(valueA);
             while (!_b.eof() && _b.next(valueB)) {
                 Compare cmp = compare(valueA, valueB);
                 if (cmp == BEFORE) {
-                    _cache.push_back(valueB);
+                    cache(valueB, false);
                     break;
                 } else if (cmp == AFTER) {
+                    _rc.missB(valueB);
                     continue;
                 }
 
-                _rc.hit(valueA, valueB);
-                _cache.push_back(valueB);
+                bool rv = _rc.hit(valueA, valueB);
+                hitA |= rv;
+                cache(valueB, rv);
+            }
+
+            if (!hitA) {
+                _rc.missA(valueA);
             }
         }
+        while (!_cache.empty())
+            popCache();
+    }
+
+    void cache(const TypeB& valueB, bool hit) {
+        _cache.push_back(CacheEntry(valueB, hit));
+    }
+
+    void popCache() {
+        const CacheEntry& ce = _cache.front();
+        if (!ce.hit)
+            _rc.missB(ce.value);
+        _cache.pop_front();
     }
     
 protected:
-    typedef typename std::deque<TypeB> CacheType;
-    typedef typename std::deque<TypeB>::iterator CacheIterator;
+    struct CacheEntry {
+        CacheEntry(const TypeB& v) : value(v), hit(false) {}
+        CacheEntry(const TypeB& v, bool hit) : value(v), hit(hit) {}
+
+        TypeB value;
+        bool hit;
+    };
+
+    typedef typename std::deque<CacheEntry> CacheType;
+    typedef typename CacheType::iterator CacheIterator;
 
     StreamTypeA& _a;
     StreamTypeB& _b;
     CollectorType& _rc;
-    std::deque<TypeB> _cache;
+    CacheType _cache;
 };

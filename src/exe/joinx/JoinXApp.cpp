@@ -1,9 +1,8 @@
 #include "JoinXApp.hpp"
+#include "Collector.hpp"
 
 #include "bedutil/Intersect.hpp"
-#include "common/Variant.hpp"
 #include "common/intconfig.hpp"
-#include "fileformats/Bed.hpp"
 #include "fileformats/BedStream.hpp"
 
 #include <boost/program_options.hpp>
@@ -35,6 +34,8 @@ void JoinXApp::parseArguments(int argc, char** argv) {
         ("file-a,a", po::value<string>(&_fileA), "input .bed file a (required, - for stdin)")
         ("file-b,b", po::value<string>(&_fileB), "input .bed file b (required, - for stdin)")
         ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
+        ("miss-a", po::value<string>(&_missFileA), "output misses in A to file")
+        ("miss-b", po::value<string>(&_missFileB), "output misses in B to file")
         ("first-only,f", "notice only the first thing to hit records in b, not the full intersection")
         ("output-both", "concatenate intersecting lines in output (vs writing out only lines from 'a')")
         ("exact-pos", "require exact match of coordinates (default is to count overlaps)")
@@ -86,57 +87,67 @@ void JoinXApp::parseArguments(int argc, char** argv) {
     }
 }
 
-namespace {
-    // TODO: make more configurable
-    class Collector {
-    public:
-        Collector(bool outputBoth, bool exactPos, bool exactAllele, ostream& s)
-            : _outputBoth(outputBoth)
-            , _exactPos(exactPos)
-            , _exactAllele(exactAllele)
-            , _s(s)
-            , _hitCount(0)
-        {}
+void JoinXApp::setupStreams(Streams& s) const {
+    unsigned cinReferences = 0;
+    unsigned coutReferences = 0;
 
-        void hit(const Bed& a, const Bed& b) {
-            Variant va(a);
-            Variant vb(b);
+    fstream* fs;
 
-            // If we are only outputting A or have set 'unique', then skip 
-            // things that we just printed.
-            // The core intersector returns the full join of A and B.
-            // If we are only outputing A, this can look confusing as
-            // each time A intersects something in B, an identical line
-            // will be printed.
-            if (_hitCount > 0 && !_outputBoth) {
-                if (_lastA.positionMatch(va) && _lastA.alleleMatch(va))
-                    return;
-            }
+    if (_fileA != "-") {
+        s.inA = fs = new fstream(_fileA.c_str(), ios::in);
+        if (!*s.inA)
+            throw runtime_error("Failed to open input file '" + _fileA + "'");
+        s.cleanup.push_back(fs);
+    } else {
+        s.inA = &cin;
+        ++cinReferences;
+    }
 
-            ++_hitCount;
+    if (_fileB != "-") {
+        s.inB = fs = new fstream(_fileB.c_str(), ios::in);
+        if (!*s.inB)
+            throw runtime_error("Failed to open input file '" + _fileB + "'");
+        s.cleanup.push_back(fs);
+    } else {
+        s.inB = &cin;
+        ++cinReferences;
+    }
 
-            if (_exactPos && !va.positionMatch(vb))
-                return;
+    if (cinReferences > 1)
+        throw runtime_error("Multiple input streams from stdin specified. Abort.");
 
-            if (_exactAllele && !va.alleleMatch(vb))
-                return;
+    if (!_outputFile.empty() && _outputFile != "-") {
+        s.outHit = fs = new fstream(_outputFile.c_str(), ios::out);
+        if (!*s.outHit)
+            throw runtime_error("Failed to open output file '" + _outputFile + "'");
+        s.cleanup.push_back(fs);
+    } else {
+        s.outHit = &cout;
+        ++coutReferences; 
+    }
 
-            _lastA = a;
-            _s << a;
-            if (_outputBoth)
-                _s << "\t" << b;
-            _s << "\n";
-        }
+    if (!_missFileA.empty() && _missFileA != "-") {
+        s.outMissA = fs = new fstream(_missFileA.c_str(), ios::out);
+        if (!*s.outMissA)
+            throw runtime_error("failed to open output file '" + _missFileA + "'");
+        s.cleanup.push_back(fs);
+    } else if (!_missFileA.empty()) {
+        s.outMissA = &cout;
+        ++coutReferences;
+    }
 
-    protected:
-        Variant _lastA;
-        bool _outputBoth;
-        bool _exactPos;
-        bool _exactAllele;
-        bool _unique;
-        ostream& _s;
-        uint32_t _hitCount;
-    };
+    if (!_missFileB.empty() && _missFileB != "-") {
+        s.outMissB = fs = new fstream(_missFileB.c_str(), ios::out);
+        if (!*s.outMissB)
+            throw runtime_error("failed to open output file '" + _missFileB + "'");
+        s.cleanup.push_back(fs);
+    } else if (!_missFileB.empty()) {
+        s.outMissB = &cout;
+        ++coutReferences;
+    }
+
+    if (coutReferences > 1)
+        throw runtime_error("Multiple output streams to stdout specified. Abort.");
 }
 
 void JoinXApp::exec() {
@@ -144,46 +155,13 @@ void JoinXApp::exec() {
         throw runtime_error("Input files have the same name, '" + _fileA + "', not good.");
     }
 
-    istream* inA(NULL);
-    istream* inB(NULL);
-    ostream* out(NULL);
-
-    ifstream fA;
-    ifstream fB;
-    ofstream fOut;
-
-    if (_fileA != "-") {
-        fA.open(_fileA.c_str());
-        if (!fA)
-            throw runtime_error("Failed to open input file '" + _fileA + "'");
-        inA = &fA;
-    } else {
-        inA = &cin;
-    }
-
-    if (_fileB != "-") {
-        fB.open(_fileB.c_str());
-        if (!fB)
-            throw runtime_error("Failed to open input file '" + _fileB + "'");
-        inB = &fB;
-    } else {
-        inB = &cin;
-    }
-
-    if (!_outputFile.empty() && _outputFile != "-") {
-        fOut.open(_outputFile.c_str(), ios::out);
-        if (!fOut)
-            throw runtime_error("Failed to open output file '" + _outputFile + "'");
-        out = &fOut;
-    } else {
-        out = &cout;
-    }
-        
+    Streams s;
+    setupStreams(s);
 
     // these bedstreams will read 1 extra field, which is ref/call
-    BedStream fa(_fileA, *inA, 1);
-    BedStream fb(_fileB, *inB, 1);
-    Collector c(_outputBoth, _exactPos, _exactAllele, *out);
+    BedStream fa(_fileA, *s.inA, 1);
+    BedStream fb(_fileB, *s.inB, 1);
+    Collector c(_outputBoth, _exactPos, _exactAllele, *s.outHit, s.outMissA, s.outMissB);
 
     Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c);
 
