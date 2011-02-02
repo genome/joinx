@@ -25,7 +25,7 @@ CommandBase::ptr SortCommand::create(int argc, char** argv) {
 
 SortCommand::SortCommand()
     : _outputFile("-")
-    , _maxInMem(100000)
+    , _maxInMem(1000000)
     , _mergeOnly(false)
     , _stable(false)
 {
@@ -45,7 +45,8 @@ void SortCommand::parseArguments(int argc, char** argv) {
         ("merge-only,m", "merge pre-sorted input files (do not sort)")
         ("input-file,i", po::value< vector<string> >(&_filenames), "input file(s) (empty or - means stdin, which is the default)")
         ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
-        ("max-mem-lines,M", po::value<uint64_t>(&_maxInMem), "maximum number of lines to hold in memory at once (default=100000)")
+        ("max-mem-lines,M", po::value<uint64_t>(&_maxInMem),
+            str(format("maximum number of lines to hold in memory at once (default=%1%)") %_maxInMem).c_str())
         ("stable,s", "perform a 'stable' sort (default=false)");
 
     po::positional_options_description posOpts;
