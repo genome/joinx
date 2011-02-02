@@ -14,8 +14,6 @@ set(SOURCES
     ResultStreamWriter.hpp
     SnvComparator.cpp
     SnvComparator.hpp
-    SortBed.cpp
-    SortBed.hpp
     TypeFilter.hpp
 )
 
