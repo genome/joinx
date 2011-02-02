@@ -3,8 +3,13 @@ cmake_minimum_required(VERSION 2.6)
 project(joinx_app)
 
 set(SOURCES 
-    JoinXApp.cpp
-    JoinXApp.hpp
+    Collector.hpp
+    CommandBase.cpp
+    CommandBase.hpp
+    IntersectApp.cpp
+    IntersectApp.hpp
+    JoinX.cpp
+    JoinX.hpp
     main.cpp
 )
 

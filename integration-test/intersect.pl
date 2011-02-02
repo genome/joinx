@@ -9,7 +9,7 @@ use Test::More tests => 12;
 
 my $dir = dirname($0);
 # TODO: get rid of hard coded version # here
-my $exe = "$dir/../bin/joinx1.0";
+my $exe = "$dir/../../bin/joinx1.0 intersect";
 my $data_dir = "$dir/data"; 
 my $input = "$data_dir/a.bed $data_dir/b.bed";
 my %data = (

@@ -1,20 +1,27 @@
 #pragma once
 
-#include "common/intconfig.hpp"
+#include "CommandBase.hpp"
 
 #include <fstream>
 #include <string>
 #include <vector>
 
-class ResultStreamWriter;
-
-class JoinXApp {
+class IntersectApp : public CommandBase {
 public:
-    JoinXApp(int argc, char** argv);
+    using CommandBase::ptr;
 
-    void usage();
+    IntersectApp();
+    ptr create(int argc, char** argv);
+
+    std::string name() const { return "intersect"; }
+    std::string description() const {
+        return "intersect variant files";
+    }
+
     void exec();
-
+    
+protected:
+    void parseArguments(int argc, char** argv);
 
 protected:
     struct Streams {
@@ -40,7 +47,6 @@ protected:
         std::vector<std::fstream*> cleanup;
     };
 
-    void parseArguments(int argc, char** argv);
     void setupStreams(Streams& s) const;
 
 protected:

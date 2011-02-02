@@ -1,4 +1,4 @@
-#include "JoinXApp.hpp"
+#include "IntersectApp.hpp"
 #include "Collector.hpp"
 
 #include "bedutil/Intersect.hpp"
@@ -17,17 +17,22 @@
 using namespace std;
 namespace po = boost::program_options;
 
-JoinXApp::JoinXApp(int argc, char** argv)
+CommandBase::ptr IntersectApp::create(int argc, char** argv) {
+    boost::shared_ptr<IntersectApp> app(new IntersectApp);
+    app->parseArguments(argc, argv);
+    return app;
+}
+
+IntersectApp::IntersectApp()
     : _outputFile("-")
     , _firstOnly(false)
     , _outputBoth(false)
     , _exactPos(false)
     , _exactAllele(false)
 {
-    parseArguments(argc, argv);
 }
 
-void JoinXApp::parseArguments(int argc, char** argv) {
+void IntersectApp::parseArguments(int argc, char** argv) {
     po::options_description opts("Available Options");
     opts.add_options()
         ("help,h", "this message")
@@ -87,7 +92,7 @@ void JoinXApp::parseArguments(int argc, char** argv) {
     }
 }
 
-void JoinXApp::setupStreams(Streams& s) const {
+void IntersectApp::setupStreams(Streams& s) const {
     unsigned cinReferences = 0;
     unsigned coutReferences = 0;
 
@@ -150,7 +155,7 @@ void JoinXApp::setupStreams(Streams& s) const {
         throw runtime_error("Multiple output streams to stdout specified. Abort.");
 }
 
-void JoinXApp::exec() {
+void IntersectApp::exec() {
     if (_fileA == _fileB) {
         throw runtime_error("Input files have the same name, '" + _fileA + "', not good.");
     }
