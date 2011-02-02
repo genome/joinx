@@ -3,9 +3,6 @@
 #include <cstring>
 #include <deque>
 
-#include <iostream>
-using std::cout;
-
 template<typename StreamTypeA, typename StreamTypeB, typename CollectorType>
 class Intersect {
 public:
