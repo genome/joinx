@@ -74,7 +74,7 @@ string BedStream::nextLine() {
     do {
         getline(_in, line);
         ++_lineNum;
-    } while (!eof() && line.empty());
+    } while (!eof() && (line.empty() || line[0] == '#'));
     return line;
 }
 
