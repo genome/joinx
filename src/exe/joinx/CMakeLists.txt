@@ -10,6 +10,8 @@ set(SOURCES
     IntersectApp.hpp
     JoinX.cpp
     JoinX.hpp
+    SortCommand.cpp
+    SortCommand.hpp
     main.cpp
 )
 

@@ -13,7 +13,9 @@ using namespace std;
 // .extraFields()[1]ity for 1 ASSERT_EQ instead of 6.
 
 const string BEDZ = 
+    "# I am a bed file\n"
     "1\t3\t5\tA/T\t43\n"
+    "# and I have some comments\n"
     "1\t2\t3\tA/T\t44\n";
 
 TEST(BedStream, next) {
