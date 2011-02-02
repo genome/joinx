@@ -16,9 +16,8 @@ set(SOURCES
     SnvComparator.hpp
     SortBed.cpp
     SortBed.hpp
-    SortTempFile.hpp
     TypeFilter.hpp
 )
 
 add_library(bedutil ${SOURCES})
-target_link_libraries(bedutil common fileformats)
+target_link_libraries(bedutil common fileformats ${Boost_LIBRARIES})
