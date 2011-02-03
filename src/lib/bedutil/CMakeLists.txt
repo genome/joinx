@@ -14,6 +14,8 @@ set(SOURCES
     ResultStreamWriter.hpp
     SnvComparator.cpp
     SnvComparator.hpp
+    SnvConcordance.cpp
+    SnvConcordance.hpp
     TypeFilter.hpp
 )
 
