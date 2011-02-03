@@ -13,10 +13,6 @@ namespace po = boost::program_options;
 using boost::format;
 using namespace std;
 
-struct Stream {
-
-};
-
 CommandBase::ptr SortCommand::create(int argc, char** argv) {
     boost::shared_ptr<SortCommand> app(new SortCommand);
     app->parseArguments(argc, argv);
