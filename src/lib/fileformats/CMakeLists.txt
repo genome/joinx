@@ -11,6 +11,7 @@ set(SOURCES
     BedStream.cpp
     BedStream.hpp
     IGenomicPosition.hpp
+    ISequenceReader.hpp
     ReferenceSequence.cpp
     ReferenceSequence.hpp
     TranscriptStructure.cpp

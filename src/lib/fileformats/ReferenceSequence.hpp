@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ISequenceReader.hpp"
 #include "common/intconfig.hpp"
 
 #include <string>
@@ -8,12 +9,12 @@
 class BasesFile;
 class Sequence;
 
-class ReferenceSequence {
+class ReferenceSequence : public ISequenceReader{
 public:
     ReferenceSequence(const std::string& dataDir);
     ~ReferenceSequence();
 
-    Sequence lookup(const std::string& chrom, uint64_t start, uint64_t end);
+    Sequence lookup(const std::string& chrom, int64_t start, int64_t end);
 
 protected:
     std::string getPathForChrom(const std::string& chrom) const;

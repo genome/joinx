@@ -18,7 +18,7 @@ ReferenceSequence::~ReferenceSequence() {
         delete iter->second;
 }
 
-Sequence ReferenceSequence::lookup(const string& chrom, uint64_t start, uint64_t end) {
+Sequence ReferenceSequence::lookup(const string& chrom, int64_t start, int64_t end) {
     return getFileForChrom(chrom)->lookup(start, end);;
 }
 
