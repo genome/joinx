@@ -35,7 +35,7 @@ inline const char* translateIub(const std::string& base) {
         return "AT";
         break;
     case 'S':
-        return "GC";
+        return "CG";
         break;
     case 'D':
         return "AGT";
