@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 project(common)
 
 set(SOURCES
+    Iub.hpp
     Region.cpp
     Region.hpp
     Sequence.cpp

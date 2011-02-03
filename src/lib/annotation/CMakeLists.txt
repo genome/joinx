@@ -11,7 +11,6 @@ set(SOURCES
     IntersectAnnotation.hpp
     IntronAnnotator.cpp
     IntronAnnotator.hpp
-    Iub.hpp
     RnaAnnotator.cpp
     RnaAnnotator.hpp
     TranscriptAnnotator.cpp

@@ -1,9 +1,9 @@
 #include "IntersectAnnotation.hpp"
 
-#include "Iub.hpp"
-#include "fileformats/TranscriptStructure.hpp"
+#include "common/Iub.hpp"
 #include "common/Variant.hpp"
 #include "fileformats/Bed.hpp"
+#include "fileformats/TranscriptStructure.hpp"
 
 #include <cstring>
 
