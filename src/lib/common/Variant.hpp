@@ -77,8 +77,8 @@ protected:
 
 protected:
     std::string _chrom;
-    uint64_t _start;
-    uint64_t _stop;
+    int64_t _start;
+    int64_t _stop;
     Sequence _reference;
     Sequence _variant;
     Type _type;
