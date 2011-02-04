@@ -51,7 +51,12 @@ struct MatchDescription {
 
 class SnvConcordance {
 public:
-    SnvConcordance();
+    enum DepthOrQual {
+        DEPTH,
+        QUAL
+    };
+
+    SnvConcordance(DepthOrQual depthOrQual);
 
     void missA(const Bed& a);
     void missB(const Bed& b);
@@ -87,6 +92,8 @@ protected:
     typedef std::map<std::string, MapMatchTypeToDescCount> MapType;
     MapType _results;
     std::map<std::string, uint64_t> _categoryTotals;
+
+    DepthOrQual _depthOrQual;
 };
 
 inline Zygosity SnvConcordance::zygosity(const std::string& callIub) {

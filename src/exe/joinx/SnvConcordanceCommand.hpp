@@ -56,8 +56,5 @@ protected:
     std::string _missFileA;
     std::string _missFileB;
     std::string _outputFile;
-    bool _firstOnly;
-    bool _outputBoth;
-    bool _exactPos;
-    bool _exactAllele;
+    bool _useDepth;
 };

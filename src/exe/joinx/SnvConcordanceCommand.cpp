@@ -23,7 +23,9 @@ CommandBase::ptr SnvConcordanceCommand::create(int argc, char** argv) {
     return app;
 }
 
-SnvConcordanceCommand::SnvConcordanceCommand() {
+SnvConcordanceCommand::SnvConcordanceCommand()
+    : _useDepth(false)
+{
 }
 
 void SnvConcordanceCommand::parseArguments(int argc, char** argv) {
@@ -32,6 +34,7 @@ void SnvConcordanceCommand::parseArguments(int argc, char** argv) {
         ("help,h", "this message")
         ("file-a,a", po::value<string>(&_fileA), "input .bed file a (required, - for stdin)")
         ("file-b,b", po::value<string>(&_fileB), "input .bed file b (required, - for stdin)")
+        ("depth,d", "use read depth metric in place of quality")
         ("hits", po::value<string>(&_outputFile), "output intersection to file, discarded by default")
         ("miss-a", po::value<string>(&_missFileA), "output misses in A to file")
         ("miss-b", po::value<string>(&_missFileB), "output misses in B to file");
@@ -48,6 +51,9 @@ void SnvConcordanceCommand::parseArguments(int argc, char** argv) {
         vm
     );
     po::notify(vm);
+
+    if (vm.count("depth"))
+        _useDepth = true;
 
     if (vm.count("help")) {
         stringstream ss;
@@ -174,10 +180,11 @@ void SnvConcordanceCommand::exec() {
     setupStreams(s);
 
     // these bedstreams will read 1 extra field, which is ref/call
-    BedStream fa(_fileA, *s.inA, 1);
-    BedStream fb(_fileB, *s.inB, 1);
+    BedStream fa(_fileA, *s.inA);
+    BedStream fb(_fileB, *s.inB);
 
-    SnvConcordance concordance;
+    SnvConcordance::DepthOrQual depthOrQual = _useDepth ? SnvConcordance::DEPTH : SnvConcordance::QUAL;
+    SnvConcordance concordance(depthOrQual);
     Collector c(concordance, s);
     Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c);
     intersector.execute();

@@ -4,10 +4,11 @@
 #include "common/Variant.hpp"
 #include "fileformats/Bed.hpp"
 
+#include <boost/lexical_cast.hpp>
 #include <iomanip>
 #include <sstream>
 
-
+using boost::lexical_cast;
 using namespace std;
 
 string SnvDescription::category() const {
@@ -56,7 +57,9 @@ string SnvDescription::toString(bool detail) const {
    return rv.str();
 }
 
-SnvConcordance::SnvConcordance() {
+SnvConcordance::SnvConcordance(DepthOrQual depthOrQual)
+    : _depthOrQual(depthOrQual)
+{
 }
 
 // NOTE: input strings must be sorted lexically (i.e., ACGT)
@@ -154,11 +157,18 @@ void SnvConcordance::updateResult(const MatchDescription& md, const ResultCounte
 }
 
 bool SnvConcordance::hit(const Bed& a, const Bed& b) {
-    MatchDescription m = matchDescription(Variant(a), Variant(b));
+    Variant va(a);
+    Variant vb(b);
+    MatchDescription m = matchDescription(va, vb);
 
     ResultCounter rc;
     rc.hits = 1;
-    rc.depth = 0;
+
+    if (_depthOrQual == DEPTH)
+        rc.depth = vb.depth();
+    else
+        rc.depth = vb.quality();
+
     updateResult(m, rc);
     return true;
 }
@@ -179,13 +189,13 @@ void SnvConcordance::missB(const Bed& a) {
 void SnvConcordance::reportText(std::ostream& s) {
     for (MapType::const_iterator i1 = _results.begin(); i1 != _results.end(); ++i1) {
         uint64_t total = _categoryTotals[i1->first];
-        s << i1->first << "\t" << total << endl;
+        s << i1->first << "\t" << total << "\n";
         for (MapMatchTypeToDescCount::const_iterator i2 = i1->second.begin(); i2 != i1->second.end(); ++i2) {
-            s << "\t" << matchTypeString(i2->first) << endl;
+            s << "\t" << matchTypeString(i2->first) << "\n";
             for (MapDescToCount::const_iterator i3 = i2->second.begin(); i3 != i2->second.end(); ++i3) {
-                double percent = 100 * i3->second.hits / double(total);
-                s << "\t\t" << i3->first << ": " << i3->second.hits << "\t" <<
-                    fixed << setprecision(2) << percent << "%" << endl;
+                double meanDepth = i3->second.depth / double(i3->second.hits);
+                s << "\t\t" << i3->first << "\t" << i3->second.hits << "\t" <<
+                    fixed << setprecision(2) << meanDepth << "\n";
             }
         }
     }
