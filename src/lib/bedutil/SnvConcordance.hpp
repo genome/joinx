@@ -57,7 +57,7 @@ public:
     void missB(const Bed& b);
     bool hit(const Bed& a, const Bed& b);
 
-    void report(std::ostream& s);
+    void reportText(std::ostream& s);
 
     // NOTE: input strings must be sorted lexically (i.e., ACGT)
     static unsigned overlap(const std::string& sa, const std::string& sb);
@@ -68,18 +68,17 @@ public:
 
 protected:
     struct ResultCounter {
-        uint64_t total;
         uint64_t hits;
         uint64_t depth;
 
         ResultCounter& operator+=(const ResultCounter& rhs) {
-            total += rhs.total;
             hits += rhs.hits;
             depth += rhs.depth;
             return *this;
         }
     };
 
+    void incrementTotal(const std::string& category);
     void updateResult(const MatchDescription& md, const ResultCounter& rc);
 
 protected:
@@ -87,6 +86,7 @@ protected:
     typedef std::map<MatchType, MapDescToCount> MapMatchTypeToDescCount;
     typedef std::map<std::string, MapMatchTypeToDescCount> MapType;
     MapType _results;
+    std::map<std::string, uint64_t> _categoryTotals;
 };
 
 inline Zygosity SnvConcordance::zygosity(const std::string& callIub) {

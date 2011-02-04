@@ -4,13 +4,14 @@
 #include "common/Variant.hpp"
 #include "fileformats/Bed.hpp"
 
+#include <iomanip>
 #include <sstream>
 
 
 using namespace std;
 
 string SnvDescription::category() const {
-    return toString(false); 
+    return toString(false);
 }
 
 string SnvDescription::toString(bool detail) const {
@@ -19,8 +20,8 @@ string SnvDescription::toString(bool detail) const {
         case HETEROZYGOUS:
             rv << "heterozygous ";
             if (detail) {
-                rv << "(" << zygosity.alleleCount << " alleles, " << 
-                    overlap << " matching reference) ";
+                unsigned nAlleles = zygosity.alleleCount - overlap;
+                rv << "(" << nAlleles << " alleles) ";
             }
             break;
 
@@ -52,7 +53,7 @@ string SnvDescription::toString(bool detail) const {
             break;
     }
 
-   return rv.str(); 
+   return rv.str();
 }
 
 SnvConcordance::SnvConcordance() {
@@ -63,7 +64,7 @@ unsigned SnvConcordance::overlap(const string& sa, const string& sb) {
     unsigned count = 0;
     const char* a = sa.data();
     const char* b = sb.data();
-    
+
     while (*a != 0 && *b != 0) {
         if (*a < *b)
             ++a;
@@ -135,19 +136,27 @@ std::string SnvConcordance::matchTypeString(MatchType type) {
     }
 }
 
+void SnvConcordance::incrementTotal(const string& category) {
+    pair<map<string,uint64_t>::iterator, bool> tr = _categoryTotals.insert(make_pair(category, 1));
+    if (!tr.second)
+        ++tr.first->second;
+}
+
 void SnvConcordance::updateResult(const MatchDescription& md, const ResultCounter& rc) {
+    string category = md.descA.category();
     string descB = md.descB.toString();
-    pair<MapDescToCount::iterator, bool> result = _results[md.descA.category()][md.matchType].insert(
+    pair<MapDescToCount::iterator, bool> result = _results[category][md.matchType].insert(
         make_pair(descB, rc));
     if (!result.second)
         result.first->second += rc;
+
+    incrementTotal(category);
 }
 
 bool SnvConcordance::hit(const Bed& a, const Bed& b) {
     MatchDescription m = matchDescription(Variant(a), Variant(b));
 
     ResultCounter rc;
-    rc.total = 1;
     rc.hits = 1;
     rc.depth = 0;
     updateResult(m, rc);
@@ -156,20 +165,28 @@ bool SnvConcordance::hit(const Bed& a, const Bed& b) {
 
 
 void SnvConcordance::missA(const Bed& a) {
+    Variant va(a);
+    string refIub(translateIub(va.reference().data()));
+    string aIub(translateIub(va.variant().data()));
+
+    SnvDescription descA = describeSnv(refIub, aIub);
+    incrementTotal(descA.category());
 }
 
 void SnvConcordance::missB(const Bed& a) {
 }
 
-void SnvConcordance::report(std::ostream& s) {
+void SnvConcordance::reportText(std::ostream& s) {
     for (MapType::const_iterator i1 = _results.begin(); i1 != _results.end(); ++i1) {
-        s << i1->first << endl;
+        uint64_t total = _categoryTotals[i1->first];
+        s << i1->first << "\t" << total << endl;
         for (MapMatchTypeToDescCount::const_iterator i2 = i1->second.begin(); i2 != i1->second.end(); ++i2) {
             s << "\t" << matchTypeString(i2->first) << endl;
             for (MapDescToCount::const_iterator i3 = i2->second.begin(); i3 != i2->second.end(); ++i3) {
-                s << "\t\t" << i3->first << ": " << i3->second.hits << endl;
+                double percent = 100 * i3->second.hits / double(total);
+                s << "\t\t" << i3->first << ": " << i3->second.hits << "\t" <<
+                    fixed << setprecision(2) << percent << "%" << endl;
             }
         }
     }
 }
-

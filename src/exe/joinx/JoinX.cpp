@@ -1,5 +1,6 @@
 #include "JoinX.hpp"
 #include "IntersectCommand.hpp"
+#include "SnvConcordanceCommand.hpp"
 #include "SortCommand.hpp"
 
 #include <boost/format.hpp>
@@ -13,6 +14,7 @@ JoinX::JoinX(int argc, char** argv)
 {
     registerSubCommand(IntersectCommand::ptr(new IntersectCommand));
     registerSubCommand(SortCommand::ptr(new SortCommand));
+    registerSubCommand(SnvConcordanceCommand::ptr(new SnvConcordanceCommand));
 
     stringstream cmdHelp;
     cmdHelp << "Valid subcommands:" << endl << endl;

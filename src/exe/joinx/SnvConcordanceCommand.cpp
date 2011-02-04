@@ -1,5 +1,5 @@
-#include "IntersectCommand.hpp"
-#include "Collector.hpp"
+#include "SnvConcordanceCommand.hpp"
+#include "bedutil/SnvConcordance.hpp"
 
 #include "bedutil/Intersect.hpp"
 #include "common/intconfig.hpp"
@@ -17,34 +17,24 @@
 using namespace std;
 namespace po = boost::program_options;
 
-CommandBase::ptr IntersectCommand::create(int argc, char** argv) {
-    boost::shared_ptr<IntersectCommand> app(new IntersectCommand);
+CommandBase::ptr SnvConcordanceCommand::create(int argc, char** argv) {
+    boost::shared_ptr<SnvConcordanceCommand> app(new SnvConcordanceCommand);
     app->parseArguments(argc, argv);
     return app;
 }
 
-IntersectCommand::IntersectCommand()
-    : _outputFile("-")
-    , _firstOnly(false)
-    , _outputBoth(false)
-    , _exactPos(false)
-    , _exactAllele(false)
-{
+SnvConcordanceCommand::SnvConcordanceCommand() {
 }
 
-void IntersectCommand::parseArguments(int argc, char** argv) {
+void SnvConcordanceCommand::parseArguments(int argc, char** argv) {
     po::options_description opts("Available Options");
     opts.add_options()
         ("help,h", "this message")
         ("file-a,a", po::value<string>(&_fileA), "input .bed file a (required, - for stdin)")
         ("file-b,b", po::value<string>(&_fileB), "input .bed file b (required, - for stdin)")
-        ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
+        ("hits", po::value<string>(&_outputFile), "output intersection to file, discarded by default")
         ("miss-a", po::value<string>(&_missFileA), "output misses in A to file")
-        ("miss-b", po::value<string>(&_missFileB), "output misses in B to file")
-        ("first-only,f", "notice only the first thing to hit records in b, not the full intersection")
-        ("output-both", "concatenate intersecting lines in output (vs writing out only lines from 'a')")
-        ("exact-pos", "require exact match of coordinates (default is to count overlaps)")
-        ("exact-allele", "require exact match of coordinates AND allele values");
+        ("miss-b", po::value<string>(&_missFileB), "output misses in B to file");
 
     po::positional_options_description posOpts;
     posOpts.add("file-a", 1);
@@ -76,23 +66,9 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
         ss << "no file-b specified!" << endl << endl << opts;
         throw runtime_error(ss.str());
     }
-
-    if (vm.count("first-only"))
-        _firstOnly = true;
-    
-    if (vm.count("output-both"))
-        _outputBoth = true;
-
-    if (vm.count("exact-pos"))
-        _exactPos = true;
-
-    if (vm.count("exact-allele")) {
-        _exactAllele = true;
-        _exactPos = true;
-    }
 }
 
-void IntersectCommand::setupStreams(Streams& s) const {
+void SnvConcordanceCommand::setupStreams(Streams& s) const {
     unsigned cinReferences = 0;
     unsigned coutReferences = 0;
 
@@ -126,7 +102,7 @@ void IntersectCommand::setupStreams(Streams& s) const {
         if (!*s.outHit)
             throw runtime_error("Failed to open output file '" + _outputFile + "'");
         s.cleanup.push_back(fs);
-    } else {
+    } else if (_outputFile == "-") {
         s.outHit = &cout;
         ++coutReferences; 
     }
@@ -155,7 +131,41 @@ void IntersectCommand::setupStreams(Streams& s) const {
         throw runtime_error("Multiple output streams to stdout specified. Abort.");
 }
 
-void IntersectCommand::exec() {
+namespace {
+    class Collector {
+    public:
+        Collector(SnvConcordance& concordance, SnvConcordanceCommand::Streams& s)
+            : _concordance(concordance)
+            , _s(s)
+        {
+        }
+
+    bool hit(const Bed& a, const Bed& b) {
+        if (_s.outHit)
+            *_s.outHit << a << "\t" << b << endl;
+ 
+        return _concordance.hit(a, b);
+    }
+
+    void missA(const Bed& a) {
+        if (_s.outMissA)
+            *_s.outMissA << a;
+        _concordance.missA(a);
+    }
+
+    void missB(const Bed& b) {
+        if (_s.outMissB)
+            *_s.outMissB << b;
+        _concordance.missB(b);
+    }
+
+    protected:
+        SnvConcordance& _concordance;
+        SnvConcordanceCommand::Streams& _s;
+    };
+}
+
+void SnvConcordanceCommand::exec() {
     if (_fileA == _fileB) {
         throw runtime_error("Input files have the same name, '" + _fileA + "', not good.");
     }
@@ -167,7 +177,9 @@ void IntersectCommand::exec() {
     BedStream fa(_fileA, *s.inA, 1);
     BedStream fb(_fileB, *s.inB, 1);
 
-    Collector c(_outputBoth, _exactPos, _exactAllele, *s.outHit, s.outMissA, s.outMissB);
+    SnvConcordance concordance;
+    Collector c(concordance, s);
     Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c);
     intersector.execute();
+    concordance.reportText(cout);
 }

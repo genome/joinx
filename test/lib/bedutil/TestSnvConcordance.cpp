@@ -107,5 +107,5 @@ TEST(TestSnvConcordance, snvDescriptionString) {
     v.zygosity.type = HETEROZYGOUS;
     v.zygosity.alleleCount = 3;
     v.overlap = 1;
-    ASSERT_EQ("heterozygous (3 alleles, 1 matching reference) snv", v.toString());
+    ASSERT_EQ("heterozygous (2 alleles) snv", v.toString());
 }
