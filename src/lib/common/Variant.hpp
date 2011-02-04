@@ -40,6 +40,14 @@ public:
         return _stop;
     }
 
+    int32_t quality() const {
+        return _quality;
+    }
+
+    int32_t depth() const {
+        return _depth;
+    }        
+
     bool valid() const;
     Type type() const;
     std::string typeString() const {
@@ -79,6 +87,8 @@ protected:
     std::string _chrom;
     int64_t _start;
     int64_t _stop;
+    int32_t _quality;
+    int32_t _depth;
     Sequence _reference;
     Sequence _variant;
     Type _type;

@@ -1,10 +1,13 @@
 #include "Variant.hpp"
 
 #include "fileformats/Bed.hpp"
-#include <boost/tokenizer.hpp>
-#include <stdexcept>
-#include <sstream>
 
+#include <boost/lexical_cast.hpp>
+#include <boost/tokenizer.hpp>
+#include <sstream>
+#include <stdexcept>
+
+using boost::lexical_cast;
 using namespace std;
 
 string Variant::typeToString(Type t) {
@@ -48,6 +51,8 @@ Variant::Variant(const Bed& bed)
     : _chrom(bed.chrom())
     , _start(bed.start())
     , _stop (bed.stop())
+    , _quality(0)
+    , _depth(0)
 {
     typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
     boost::char_separator<char> sep("/", "", boost::keep_empty_tokens);
@@ -63,12 +68,13 @@ Variant::Variant(const Bed& bed)
     else
         _variant= "-";
 
+    if (bed.extraFields().size() >= 2)
+        _quality = lexical_cast<int32_t>(bed.extraFields()[1]);
+
+    if (bed.extraFields().size() >= 3)
+        _depth = lexical_cast<int32_t>(bed.extraFields()[2]);
+
     _type = inferType();
-    // convert from 0 based bed format
-    if (_type == INS)
-        ++_stop;
-    else
-        ++_start;
 }
 
 ostream& Variant::toStream(ostream& s) const {
