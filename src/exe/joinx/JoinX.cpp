@@ -1,5 +1,5 @@
 #include "JoinX.hpp"
-#include "IntersectApp.hpp"
+#include "IntersectCommand.hpp"
 #include "SortCommand.hpp"
 
 #include <boost/format.hpp>
@@ -11,7 +11,7 @@ using namespace std;
 
 JoinX::JoinX(int argc, char** argv)
 {
-    registerSubCommand(IntersectApp::ptr(new IntersectApp));
+    registerSubCommand(IntersectCommand::ptr(new IntersectCommand));
     registerSubCommand(SortCommand::ptr(new SortCommand));
 
     stringstream cmdHelp;

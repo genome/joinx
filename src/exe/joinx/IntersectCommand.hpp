@@ -6,11 +6,11 @@
 #include <string>
 #include <vector>
 
-class IntersectApp : public CommandBase {
+class IntersectCommand : public CommandBase {
 public:
     using CommandBase::ptr;
 
-    IntersectApp();
+    IntersectCommand();
     ptr create(int argc, char** argv);
 
     std::string name() const { return "intersect"; }

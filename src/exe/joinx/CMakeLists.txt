@@ -6,8 +6,8 @@ set(SOURCES
     Collector.hpp
     CommandBase.cpp
     CommandBase.hpp
-    IntersectApp.cpp
-    IntersectApp.hpp
+    IntersectCommand.cpp
+    IntersectCommand.hpp
     JoinX.cpp
     JoinX.hpp
     SortCommand.cpp

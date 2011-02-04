@@ -1,5 +1,6 @@
-#include "IntersectApp.hpp"
+#include "IntersectCommand.hpp"
 #include "Collector.hpp"
+#include "bedutil/SnvConcordance.hpp"
 
 #include "bedutil/Intersect.hpp"
 #include "common/intconfig.hpp"
@@ -17,13 +18,13 @@
 using namespace std;
 namespace po = boost::program_options;
 
-CommandBase::ptr IntersectApp::create(int argc, char** argv) {
-    boost::shared_ptr<IntersectApp> app(new IntersectApp);
+CommandBase::ptr IntersectCommand::create(int argc, char** argv) {
+    boost::shared_ptr<IntersectCommand> app(new IntersectCommand);
     app->parseArguments(argc, argv);
     return app;
 }
 
-IntersectApp::IntersectApp()
+IntersectCommand::IntersectCommand()
     : _outputFile("-")
     , _firstOnly(false)
     , _outputBoth(false)
@@ -32,7 +33,7 @@ IntersectApp::IntersectApp()
 {
 }
 
-void IntersectApp::parseArguments(int argc, char** argv) {
+void IntersectCommand::parseArguments(int argc, char** argv) {
     po::options_description opts("Available Options");
     opts.add_options()
         ("help,h", "this message")
@@ -92,7 +93,7 @@ void IntersectApp::parseArguments(int argc, char** argv) {
     }
 }
 
-void IntersectApp::setupStreams(Streams& s) const {
+void IntersectCommand::setupStreams(Streams& s) const {
     unsigned cinReferences = 0;
     unsigned coutReferences = 0;
 
@@ -155,7 +156,7 @@ void IntersectApp::setupStreams(Streams& s) const {
         throw runtime_error("Multiple output streams to stdout specified. Abort.");
 }
 
-void IntersectApp::exec() {
+void IntersectCommand::exec() {
     if (_fileA == _fileB) {
         throw runtime_error("Input files have the same name, '" + _fileA + "', not good.");
     }
@@ -166,9 +167,11 @@ void IntersectApp::exec() {
     // these bedstreams will read 1 extra field, which is ref/call
     BedStream fa(_fileA, *s.inA, 1);
     BedStream fb(_fileB, *s.inB, 1);
-    Collector c(_outputBoth, _exactPos, _exactAllele, *s.outHit, s.outMissA, s.outMissB);
 
-    Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c);
-
+//    Collector c(_outputBoth, _exactPos, _exactAllele, *s.outHit, s.outMissA, s.outMissB);
+//    Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c);
+    SnvConcordance c;
+    Intersect<BedStream,BedStream,SnvConcordance> intersector(fa, fb, c);
     intersector.execute();
+    c.reportText(*s.outHit);
 }
