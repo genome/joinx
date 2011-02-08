@@ -4,6 +4,6 @@ EXECUTABLES="snvcmp joinx"
 for e in $EXECUTABLES
 do
     BARE_EXE=/usr/bin/$e
-    VERSIONED_EXE="/usr/bin/${e}@VERSION_MAJOR@.@VERSION_MINOR@"
+    VERSIONED_EXE="/usr/bin/${e}@EXE_VERSION_SUFFIX@"
     update-alternatives --install $BARE_EXE $e $VERSIONED_EXE @VERSION_MAJOR@
 done

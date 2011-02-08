@@ -4,7 +4,7 @@ EXECUTABLES="snvcmp joinx"
 
 for e in $EXECUTABLES
 do
-    VERSIONED_EXE="/usr/bin/${e}@VERSION_MAJOR@.@VERSION_MINOR@"
+    VERSIONED_EXE="/usr/bin/${e}@EXE_VERSION_SUFFIX@"
     update-alternatives --remove $e $VERSIONED_EXE
 done
 

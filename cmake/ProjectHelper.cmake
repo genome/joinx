@@ -1,3 +1,12 @@
+set(CMAKE_CXX_FLAGS_PACKAGE ${CMAKE_CXX_FLAGS_RELEASE})
+set(CMAKE_C_FLAGS_PACKAGE ${CMAKE_CXX_FLAGS_RELEASE})
+
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE debug CACHE STRING 
+        "Options: None Debug Release Package RelWithDebInfo MinSizeRel." FORCE)
+    message("No CMAKE_BUILD_TYPE specified, defaulting to debug")
+endif ()
+
 macro(add_projects dir)
     file(GLOB projects RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${dir}/[a-z]*")
     foreach( proj ${projects} )

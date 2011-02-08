@@ -8,8 +8,8 @@ set(SOURCES
     main.cpp
 )
 
-set(EXECUTABLE_NAME snvcmp${EXE_VERSION_SUFFIX})
+set(EXECUTABLE_NAME snvcmp)
 add_executable(${EXECUTABLE_NAME} ${SOURCES})
 target_link_libraries(${EXECUTABLE_NAME} bedutil fileformats ${Boost_LIBRARIES})
-
+set_target_properties(${EXECUTABLE_NAME} PROPERTIES PACKAGE_OUTPUT_NAME ${EXECUTABLE_NAME}${EXE_VERSION_SUFFIX})
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin/)
