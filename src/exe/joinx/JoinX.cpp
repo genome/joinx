@@ -1,9 +1,9 @@
-#include "version.h"
-
 #include "JoinX.hpp"
 #include "IntersectCommand.hpp"
 #include "SnvConcordanceCommand.hpp"
 #include "SortCommand.hpp"
+
+#include "common/ProgramVersion.hpp"
 
 #include <boost/format.hpp>
 #include <sstream>
@@ -22,9 +22,7 @@ JoinX::JoinX(int argc, char** argv)
     cmdHelp << "Valid subcommands:" << endl << endl;
     describeSubCommands(cmdHelp, "\t");
 
-    stringstream verInfo;
-    verInfo << "joinx version " << __g_prog_version << " (commit " << __g_commit_hash << ")";
- 
+
     if (argc < 2)
         throw runtime_error(str(format("No subcommand specified. %1%") %cmdHelp.str()));
 
@@ -33,7 +31,7 @@ JoinX::JoinX(int argc, char** argv)
         throw runtime_error(cmdHelp.str());
 
     if (cmdstr == "-v" || cmdstr == "--version")
-        throw runtime_error(verInfo.str());
+        throw runtime_error(makeProgramVersionInfo("snvcmp"));
 
     _cmd = subCommand(cmdstr, argc-1, &argv[1]);
     if (!_cmd)
