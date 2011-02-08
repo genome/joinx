@@ -1,5 +1,5 @@
 execute_process(
-    COMMAND ${CMAKE_SOURCE_DIR}/buildutil/getversion --major
+    COMMAND ${CMAKE_SOURCE_DIR}/cmake/getversion --major
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     OUTPUT_VARIABLE VERSION_MAJOR
     ERROR_VARIABLE VERSION_ERR
@@ -7,21 +7,21 @@ execute_process(
 )
 
 execute_process(
-    COMMAND ${CMAKE_SOURCE_DIR}/buildutil/getversion --minor
+    COMMAND ${CMAKE_SOURCE_DIR}/cmake/getversion --minor
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     OUTPUT_VARIABLE VERSION_MINOR
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
 execute_process(
-    COMMAND ${CMAKE_SOURCE_DIR}/buildutil/getversion --patch
+    COMMAND ${CMAKE_SOURCE_DIR}/cmake/getversion --patch
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     OUTPUT_VARIABLE VERSION_PATCH
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
 execute_process(
-    COMMAND ${CMAKE_SOURCE_DIR}/buildutil/getversion
+    COMMAND ${CMAKE_SOURCE_DIR}/cmake/getversion
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     OUTPUT_VARIABLE PROJ_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE

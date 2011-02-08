@@ -1,6 +1,6 @@
 #!/bin/bash
 
-verstr=`git describe 2> /dev/null`
+verstr=`git describe --tags 2> /dev/null`
 
 MAJOR=0
 MINOR=0
