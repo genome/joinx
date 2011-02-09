@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 
+project(joinx)
+
 set(CMAKE_INSTALL_PREFIX "/usr")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(TestHelper)
@@ -12,18 +14,19 @@ configure_file(debian/control.in debian/control @ONLY)
 configure_file(version/version.h.in version/version.h @ONLY)
 include_directories(version)
 
-project(joinx)
-if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-    add_definitions(-Wall -ansi)
+if (CMAKE_COMPILER_IS_GNUCC)
+    set(CMAKE_C_FLAGS "-std=c99 -Wall -ansi -pedantic")
 endif ()
 
-find_package(Boost COMPONENTS system program_options filesystem REQUIRED)
+if (CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "-Wall -ansi -pedantic")
+endif ()
+
+find_package(Boost COMPONENTS program_options filesystem system REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-# main project
-
+# make sure to pick up headers from library dirs
 include_directories("src/lib")
-add_subdirectory(src)
 
 # unit tests
 find_package(GTest)
@@ -37,8 +40,8 @@ else()
     message("Ubuntu users can likely sudo apt-get install gtest")
 endif()
 
-# .deb packaging
-set(ARCH "i686")
-if(${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-    set(ARCH "x86_64")
-endif ()
+# main project
+
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+add_projects(src/lib)
+add_projects(src/exe)
