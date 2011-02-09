@@ -9,7 +9,7 @@ use Test::More tests => 4;
 
 my $dir = dirname($0);
 # TODO: get rid of hard coded version # here
-my $exe = "$dir/../../bin/joinx1.0 sort";
+my $exe = "$dir/../../bin/joinx sort";
 my $data_dir = "$dir/data"; 
 my $input = join(" ", glob("$data_dir/input*.bed"));
 my $expected = "$data_dir/expected.bed";
