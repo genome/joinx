@@ -15,3 +15,7 @@ debian/prerm
 debian/control
 version/version.h
 install_manifest.txt
+debian/files
+debian/joinx*/
+debian/*.log
+debian/*.substvars

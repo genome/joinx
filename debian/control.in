@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Travis Abbott <tabbott@genome.wustl.edu>
 Standards-Version: 3.8.3
 
-Package: joinx
+Package: joinx@EXE_VERSION_SUFFIX@
 Architecture: amd64
 Build-Depends: debhelper (>= 7), gcc, make, cmake, libboost-all-dev
 Depends: ${shlibs:Depends}, ${misc:Depends}
