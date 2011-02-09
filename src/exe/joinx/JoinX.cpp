@@ -31,7 +31,7 @@ JoinX::JoinX(int argc, char** argv)
         throw runtime_error(cmdHelp.str());
 
     if (cmdstr == "-v" || cmdstr == "--version")
-        throw runtime_error(makeProgramVersionInfo("snvcmp"));
+        throw runtime_error(makeProgramVersionInfo("joinx"));
 
     _cmd = subCommand(cmdstr, argc-1, &argv[1]);
     if (!_cmd)
