@@ -5,5 +5,5 @@ for e in $EXECUTABLES
 do
     BARE_EXE=/usr/bin/$e
     VERSIONED_EXE="/usr/bin/${e}@EXE_VERSION_SUFFIX@"
-    update-alternatives --install $BARE_EXE $e $VERSIONED_EXE @VERSION_MAJOR@
+    update-alternatives --install $BARE_EXE $e $VERSIONED_EXE 10
 done
