@@ -1,0 +1,7 @@
+#!/usr/bin/make -f
+
+PACKAGE=$(shell dh_listpackages)
+
+%:
+	dh $@
+

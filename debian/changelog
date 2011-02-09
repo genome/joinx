@@ -1,0 +1,5 @@
+joinx (1.0.3) lucid; urgency=low
+
+  * initial debian release
+
+ -- Travis Abbott <tabbott@genome.wustl.edu>  Wed, 09 Feb 2011 13:50:45 -0600

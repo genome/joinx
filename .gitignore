@@ -12,5 +12,6 @@ build/
 cmake_install.cmake
 debian/postinst
 debian/prerm
+debian/control
 version/version.h
 install_manifest.txt

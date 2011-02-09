@@ -1,0 +1,17 @@
+Source: joinx
+Section: science
+Priority: optional
+Maintainer: Travis Abbott <tabbott@genome.wustl.edu>
+Standards-Version: 3.8.3
+
+Package: joinx
+Architecture: amd64
+Build-Depends: debhelper (>= 7), gcc, make, cmake, libboost-all-dev
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Replaces: snvcmp1.0
+Description: Tool for comparing snv bed files
+ Joinx is a tool that operates in genetic data stored
+ in bed files (http://genome.ucsc.edu/FAQ/FAQformat.html).
+ It can perform set operations (intersection, union,
+ difference) as well as produce various types of
+ reports (concordance).
