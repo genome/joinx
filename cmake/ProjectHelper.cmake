@@ -2,9 +2,9 @@ set(CMAKE_CXX_FLAGS_PACKAGE ${CMAKE_CXX_FLAGS_RELEASE})
 set(CMAKE_C_FLAGS_PACKAGE ${CMAKE_CXX_FLAGS_RELEASE})
 
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE debug CACHE STRING 
+    set(CMAKE_BUILD_TYPE release CACHE STRING
         "Options: None Debug Release Package RelWithDebInfo MinSizeRel." FORCE)
-    message("No CMAKE_BUILD_TYPE specified, defaulting to debug")
+    message("No CMAKE_BUILD_TYPE specified, defaulting to release")
 endif ()
 
 macro(add_projects dir)
