@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 
 project(joinx)
 
@@ -8,9 +8,6 @@ include(TestHelper)
 include(VersionHelper)
 include(ProjectHelper)
 
-configure_file(debian/postinst.in debian/postinst @ONLY)
-configure_file(debian/prerm.in debian/prerm @ONLY)
-configure_file(debian/control.in debian/control @ONLY)
 configure_file(version/version.h.in version/version.h @ONLY)
 include_directories(version)
 
@@ -45,3 +42,5 @@ endif()
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 add_projects(src/lib)
 add_projects(src/exe)
+
+include(PackageInfo.cmake)
