@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 project(joinx)
 
 set(CMAKE_INSTALL_PREFIX "/usr")
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/build-common/cmake")
 include(TestHelper)
 include(VersionHelper)
 include(ProjectHelper)
