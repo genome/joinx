@@ -17,6 +17,7 @@
 
 
 EXECUTABLES="snvcmp joinx"
+PRIORITY=@DEFAULT_ETC_ALTERNATIVES_PRIORITY@
 
 set -e
 
@@ -26,7 +27,7 @@ case "$1" in
         do
             BARE_EXE=/usr/bin/$e
             VERSIONED_EXE="/usr/bin/${e}@EXE_VERSION_SUFFIX@"
-            update-alternatives --install $BARE_EXE $e $VERSIONED_EXE 10
+            update-alternatives --install $BARE_EXE $e $VERSIONED_EXE $PRIORITY
         done
     ;;
 
