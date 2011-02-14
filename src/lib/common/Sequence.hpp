@@ -43,7 +43,7 @@ inline Sequence& Sequence::operator=(const std::string& rhs) {
 }
 
 inline bool Sequence::null() const {
-    return empty() || _data == "-" || _data == "0";
+    return empty() || _data == "-" || _data == "0" || _data == "*";
 }
 
 inline bool Sequence::operator==(const Sequence& rhs) const {
