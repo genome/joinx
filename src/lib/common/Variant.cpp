@@ -2,12 +2,13 @@
 
 #include "fileformats/Bed.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 #include <boost/tokenizer.hpp>
+#include <sstream>
 #include <sstream>
 #include <stdexcept>
 
-using boost::lexical_cast;
+using boost::format;
 using namespace std;
 
 string Variant::typeToString(Type t) {
@@ -68,11 +69,19 @@ Variant::Variant(const Bed& bed)
     else
         _variant= "-";
 
-    if (bed.extraFields().size() >= 2)
-        _quality = lexical_cast<int32_t>(bed.extraFields()[1]);
+    if (bed.extraFields().size() >= 2) {
+        stringstream ss(bed.extraFields()[1]);
+        ss >> _quality;
+        if (ss.fail())
+            throw runtime_error(str(format("Failed converting quality value %1% to number for record '%2%'") %bed.extraFields()[1] %bed.toString()));
+    }
 
-    if (bed.extraFields().size() >= 3)
-        _depth = lexical_cast<int32_t>(bed.extraFields()[2]);
+    if (bed.extraFields().size() >= 3) {
+        stringstream ss(bed.extraFields()[2]);
+        ss >> _depth;
+        if (ss.fail())
+            throw runtime_error(str(format("Failed converting read depth value %1% to number for record '%2%'") %bed.extraFields()[2] %bed.toString()));
+    }
 
     _type = inferType();
 }

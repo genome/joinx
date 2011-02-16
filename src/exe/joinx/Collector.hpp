@@ -52,7 +52,7 @@ public:
             (_exactAllele && !va.alleleMatch(vb)))
             return false; // reject!
 
-        _lastA = a;
+        _lastA = va;
         _s << a;
         if (_outputBoth)
             _s << "\t" << b;

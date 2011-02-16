@@ -22,7 +22,7 @@ public:
     static std::string typeToString(Type t);
 
     Variant();
-    Variant(const Bed& bed);
+    explicit Variant(const Bed& bed);
 
     void setVariantSequence(const Sequence& v) {
         _variant = v;
