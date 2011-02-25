@@ -9,7 +9,7 @@ include(VersionHelper)
 include(ProjectHelper)
 
 configure_file(version/version.h.in version/version.h @ONLY)
-include_directories(version)
+include_directories(${PROJECT_BINARY_DIR}/version)
 
 if (CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_C_FLAGS "-std=c99 -Wall -ansi -pedantic")
