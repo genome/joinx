@@ -63,13 +63,13 @@ public:
 
     void execute() {
         TypeA valueA;
+        TypeB valueB;
         while (!_a.eof() && _a.next(valueA)) {
             // burn entries from the cache
             while (!_cache.empty() && compare(valueA, _cache.front().value) == AFTER)
                 popCache();
 
             // look ahead and burn entries from the input file
-            TypeB valueB;
             TypeB* peek = NULL;
             if (_cache.empty()) {
                 while (!_b.eof() && _b.peek(&peek) && compare(valueA, *peek) == AFTER) {
@@ -100,6 +100,8 @@ public:
         }
         while (!_cache.empty())
             popCache();
+        while (!_b.eof() && _b.next(valueB))
+            _rc.missB(valueB);
     }
 
     void cache(const TypeB& valueB, bool hit) {
