@@ -29,7 +29,7 @@ for my $args (keys %data) {
     my $rv = system($cmd);
     is($rv&127, 0, "executed $cmd");
     my $diff = `diff $tmpfile $data_dir/$data{$args}`;
-    is($diff, '', "results are as expected for '$args'");
+    is($diff, '', "results are as expected for args '$args'");
 }
 $fh->close();
 

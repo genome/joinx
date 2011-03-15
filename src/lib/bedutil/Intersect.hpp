@@ -44,21 +44,21 @@ public:
     }
 
     bool checkCache(const TypeA& valueA) {
+        bool rv = false;
         for (CacheIterator iter = _cache.begin(); iter != _cache.end(); ++iter) {
             Compare cmp = compare(valueA, iter->value);
-            if (cmp == BEFORE)
-                return false;
-
-            else if (cmp == AFTER) {
+            if (cmp == BEFORE) {
+                break;
+            } else if (cmp == AFTER) {
                 iter = _cache.erase(iter);
                 continue;
             }
 
-            bool rv = _rc.hit(valueA, iter->value);
-            iter->hit |= rv;
-            return rv;
+            bool isHit = _rc.hit(valueA, iter->value);
+            rv |= isHit;
+            iter->hit |= isHit;
         }
-        return false;
+        return rv;
     }
 
     void execute() {

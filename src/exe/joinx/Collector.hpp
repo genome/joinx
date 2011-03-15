@@ -38,14 +38,16 @@ public:
         Variant va(a);
         Variant vb(b);
 
-        // If we are only outputting A or have set 'unique', then skip 
-        // things that we just printed.
+        // If we are only outputting A then skip things that we just printed.
         // The core intersector returns the full join of A and B.
         // If we are only outputing A, this can look confusing as
         // each time A intersects something in B, an identical line
         // will be printed.
-        if (_hitCount > 0 && !_outputBoth && _lastA.positionMatch(va) && _lastA.alleleMatch(va))
+        if (_hitCount > 0 && !_outputBoth && 
+            _lastA.positionMatch(va) && _lastA.alleleMatch(va))
+        {
                 return true; // already hit
+        }
         ++_hitCount;
 
         if ((_exactPos && !va.positionMatch(vb)) || 
@@ -66,7 +68,6 @@ protected:
     bool _outputBoth;
     bool _exactPos;
     bool _exactAllele;
-    bool _unique;
     std::ostream& _s;
     std::ostream* _missA;
     std::ostream* _missB;
