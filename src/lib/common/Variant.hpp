@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Sequence.hpp"
+#include "Iub.hpp"
 #include "common/intconfig.hpp"
 
 #include <cassert>
@@ -76,6 +77,25 @@ public:
         return
             reference() == rhs.reference()
             && variant() == rhs.variant();
+    }
+
+    bool allelePartialMatch(const Variant& rhs) const {
+        if (reference() != rhs.reference())
+            return false;
+
+        const char* iubA = translateIub(variant().data());
+        const char* iubB = translateIub(rhs.variant().data());
+        while (*iubA && *iubB) {
+            if (*iubA < *iubB) {
+                ++iubA;
+                continue;
+            } else if (*iubA > *iubB) {
+                ++iubB;
+            } else {
+                return true; // some degree of overlap
+            }
+        }
+        return false;
     }
 
     std::ostream& toStream(std::ostream& stream) const;

@@ -11,6 +11,7 @@ public:
             bool outputBoth,
             bool exactPos,
             bool exactAllele,
+            bool iubMatch,
             std::ostream& s,
             std::ostream* missA = NULL,
             std::ostream* missB = NULL
@@ -18,6 +19,7 @@ public:
         : _outputBoth(outputBoth)
         , _exactPos(exactPos)
         , _exactAllele(exactAllele)
+        , _iubMatch(iubMatch)
         , _s(s)
         , _missA(missA)
         , _missB(missB)
@@ -50,10 +52,15 @@ public:
         }
         ++_hitCount;
 
-        if ((_exactPos && !va.positionMatch(vb)) || 
-            (_exactAllele && !va.alleleMatch(vb)))
-            return false; // reject!
-
+        if (_exactAllele) {
+            if (!va.positionMatch(vb) || 
+                ((_iubMatch && !va.allelePartialMatch(vb)) || (!_iubMatch && !va.alleleMatch(vb))))
+            {
+                return false;
+            }
+        } else if (_exactPos && !va.positionMatch(vb))
+            return false;
+    
         _lastA = va;
         _s << a;
         if (_outputBoth)
@@ -68,6 +75,7 @@ protected:
     bool _outputBoth;
     bool _exactPos;
     bool _exactAllele;
+    bool _iubMatch;
     std::ostream& _s;
     std::ostream* _missA;
     std::ostream* _missB;

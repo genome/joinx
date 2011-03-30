@@ -59,4 +59,5 @@ protected:
     bool _outputBoth;
     bool _exactPos;
     bool _exactAllele;
+    bool _iubMatch;
 };

@@ -29,6 +29,7 @@ IntersectCommand::IntersectCommand()
     , _outputBoth(false)
     , _exactPos(false)
     , _exactAllele(false)
+    , _iubMatch(false)
 {
 }
 
@@ -44,7 +45,8 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
         ("first-only,f", "notice only the first thing to hit records in b, not the full intersection")
         ("output-both", "concatenate intersecting lines in output (vs writing out only lines from 'a')")
         ("exact-pos", "require exact match of coordinates (default is to count overlaps)")
-        ("exact-allele", "require exact match of coordinates AND allele values");
+        ("exact-allele", "require exact match of coordinates AND allele values")
+        ("iub-match", "when using --exact-allele, this enables expansion and partial matching of IUB codes");
 
     po::positional_options_description posOpts;
     posOpts.add("file-a", 1);
@@ -89,6 +91,10 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
     if (vm.count("exact-allele")) {
         _exactAllele = true;
         _exactPos = true;
+    }
+
+    if (vm.count("iub-match")) {
+        _iubMatch = true;
     }
 }
 
@@ -167,7 +173,7 @@ void IntersectCommand::exec() {
     BedStream fa(_fileA, *s.inA, 1);
     BedStream fb(_fileB, *s.inB, 1);
 
-    Collector c(_outputBoth, _exactPos, _exactAllele, *s.outHit, s.outMissA, s.outMissB);
+    Collector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, *s.outHit, s.outMissA, s.outMissB);
     Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c);
     intersector.execute();
 }
