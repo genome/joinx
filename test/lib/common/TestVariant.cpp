@@ -69,7 +69,8 @@ TEST(Variant, partialAlleleMatch) {
             stringstream strB;
             strB << iter->first << "/" << iter->second[i];
             Variant b(mkBed(strB.str(), "0", "0"));
-            ASSERT_FALSE(a.allelePartialMatch(b));
+            ASSERT_FALSE(a.allelePartialMatch(b)) 
+                << strA.str() << " vs " << strB.str() << " expected no match";
             ASSERT_FALSE(b.allelePartialMatch(a));
         }
     }

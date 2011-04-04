@@ -7,6 +7,7 @@
 #include <cassert>
 #include <iostream>
 #include <string>
+#include <vector>
 
 class Bed;
 
@@ -26,7 +27,7 @@ public:
     explicit Variant(const Bed& bed);
 
     void setVariantSequence(const Sequence& v) {
-        _variant = v;
+        _allSequences[1] = v;
     }
 
     const std::string& chrom() const {
@@ -56,11 +57,10 @@ public:
     }
 
     void reverseComplement();
-    void revCompReference();
-    void revCompVariant();
 
     const Sequence& reference() const;
     const Sequence& variant() const;
+    const std::vector<Sequence>& allSequences() const;
 
     bool isIndel() const {
         return type() == INS || type() == DEL;
@@ -73,30 +73,14 @@ public:
             stop() == rhs.stop();
     }
 
-    bool alleleMatch(const Variant& rhs) const {
+    virtual bool alleleMatch(const Variant& rhs) const {
         return
             reference() == rhs.reference()
             && variant() == rhs.variant();
     }
 
-    bool allelePartialMatch(const Variant& rhs) const {
-        if (reference() != rhs.reference())
-            return false;
-
-        const char* iubA = translateIub(variant().data());
-        const char* iubB = translateIub(rhs.variant().data());
-        while (*iubA && *iubB) {
-            if (*iubA < *iubB) {
-                ++iubA;
-                continue;
-            } else if (*iubA > *iubB) {
-                ++iubB;
-            } else {
-                return true; // some degree of overlap
-            }
-        }
-        return false;
-    }
+    virtual bool allelePartialMatch(const Variant& rhs) const;
+    virtual bool alleleDbSnpMatch(const Variant& rhs) const;
 
     std::ostream& toStream(std::ostream& stream) const;
 
@@ -109,19 +93,15 @@ protected:
     int64_t _stop;
     int32_t _quality;
     int32_t _depth;
-    Sequence _reference;
-    Sequence _variant;
+    std::vector<Sequence> _allSequences;
     Type _type;
 };
 
 inline void Variant::reverseComplement() {
-    if (type() != DEL) 
-        _variant = Sequence(_variant.reverseComplementData());
-    if (type() != Variant::INS)
-        _reference = Sequence(_reference.reverseComplementData());
-}
-
-inline void Variant::revCompVariant() {
+    for (unsigned i = 0; i < _allSequences.size(); ++i) {
+        if (_allSequences[i].data() != "-")
+            _allSequences[i] = Sequence(_allSequences[i].reverseComplementData());
+    }
 }
 
 inline Variant::Type Variant::type() const {
@@ -129,18 +109,22 @@ inline Variant::Type Variant::type() const {
 }
 
 inline const Sequence& Variant::reference() const {
-    return _reference;
+    return _allSequences[0];
 }
 
 inline const Sequence& Variant::variant() const {
-    return _variant;
+    return _allSequences[1];
+}
+
+inline const std::vector<Sequence>& Variant::allSequences() const {
+    return _allSequences;
 }
 
 inline bool Variant::valid() const {
-    if (_chrom.empty() || _reference.empty() || _variant.empty())
+    if (_chrom.empty() || _allSequences.size() < 2)
         return false;
 
-    if ((type() == DEL && _variant.data() != "-") || (type() == INS && _reference.data() != "-"))
+    if ((type() == DEL && variant().data() != "-") || (type() == INS && reference().data() != "-"))
         return false;
 
     return true;

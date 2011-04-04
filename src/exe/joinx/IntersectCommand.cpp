@@ -30,6 +30,7 @@ IntersectCommand::IntersectCommand()
     , _exactPos(false)
     , _exactAllele(false)
     , _iubMatch(false)
+    , _dbsnpMatch(false)
 {
 }
 
@@ -46,7 +47,8 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
         ("output-both", "concatenate intersecting lines in output (vs writing out only lines from 'a')")
         ("exact-pos", "require exact match of coordinates (default is to count overlaps)")
         ("exact-allele", "require exact match of coordinates AND allele values")
-        ("iub-match", "when using --exact-allele, this enables expansion and partial matching of IUB codes");
+        ("iub-match", "when using --exact-allele, this enables expansion and partial matching of IUB codes")
+        ("dbsnp-match", "like using --iub-match, but will try to reverse the reference and variant in file b, as well as reverse complement to get a match");
 
     po::positional_options_description posOpts;
     posOpts.add("file-a", 1);
@@ -85,6 +87,7 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
     if (vm.count("output-both"))
         _outputBoth = true;
 
+    // TODO: flatten output modes
     if (vm.count("exact-pos"))
         _exactPos = true;
 
@@ -95,6 +98,13 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
 
     if (vm.count("iub-match")) {
         _iubMatch = true;
+    }
+
+    if (vm.count("dbsnp-match")) {
+        _exactAllele = true;
+        _exactPos = true;
+        _iubMatch = true;
+        _dbsnpMatch = true;
     }
 }
 
@@ -173,7 +183,7 @@ void IntersectCommand::exec() {
     BedStream fa(_fileA, *s.inA, 1);
     BedStream fb(_fileB, *s.inB, 1);
 
-    Collector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, *s.outHit, s.outMissA, s.outMissB);
+    Collector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, _dbsnpMatch, *s.outHit, s.outMissA, s.outMissB);
     Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c);
     intersector.execute();
 }

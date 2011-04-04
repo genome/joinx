@@ -12,6 +12,7 @@ public:
             bool exactPos,
             bool exactAllele,
             bool iubMatch,
+            bool dbsnpMatch,
             std::ostream& s,
             std::ostream* missA = NULL,
             std::ostream* missB = NULL
@@ -20,6 +21,7 @@ public:
         , _exactPos(exactPos)
         , _exactAllele(exactAllele)
         , _iubMatch(iubMatch)
+        , _dbsnpMatch(dbsnpMatch)
         , _s(s)
         , _missA(missA)
         , _missB(missB)
@@ -52,12 +54,22 @@ public:
         }
         ++_hitCount;
 
+        // TODO: clean this up! stop using bools and pass in a mode or functor
+        // i.e., flatten this
         if (_exactAllele) {
-            if (!va.positionMatch(vb) || 
-                ((_iubMatch && !va.allelePartialMatch(vb)) || (!_iubMatch && !va.alleleMatch(vb))))
-            {
+            if (!va.positionMatch(vb))
+                return false;
+
+            if (_dbsnpMatch) {
+                if (!va.alleleDbSnpMatch(vb))
+                    return false;
+            } else if (_iubMatch) {
+                if (!va.allelePartialMatch(vb))
+                    return false;
+            } else if (!va.alleleMatch(vb)) {
                 return false;
             }
+
         } else if (_exactPos && !va.positionMatch(vb))
             return false;
     
@@ -76,6 +88,7 @@ protected:
     bool _exactPos;
     bool _exactAllele;
     bool _iubMatch;
+    bool _dbsnpMatch;
     std::ostream& _s;
     std::ostream* _missA;
     std::ostream* _missB;

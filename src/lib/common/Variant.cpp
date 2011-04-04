@@ -46,7 +46,10 @@ Variant::Type Variant::inferType() const {
     }
 }
 
-Variant::Variant() : _type(INVALID) {}
+Variant::Variant() : _type(INVALID) {
+    _allSequences.push_back(Sequence("-"));
+    _allSequences.push_back(Sequence("-"));
+}
 
 Variant::Variant(const Bed& bed)
     : _chrom(bed.chrom())
@@ -58,16 +61,10 @@ Variant::Variant(const Bed& bed)
     typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
     boost::char_separator<char> sep("/", "", boost::keep_empty_tokens);
     tokenizer tokens(bed.extraFields()[0], sep);
-    tokenizer::iterator iter = tokens.begin();
-    if (iter != tokens.end())
-        _reference = *iter++;
-    else
-        _reference = "-";
-
-    if (iter != tokens.end())
-        _variant = *iter++;
-    else
-        _variant= "-";
+    for (tokenizer::iterator iter = tokens.begin(); iter != tokens.end(); ++iter)
+        _allSequences.push_back(*iter);
+    while (_allSequences.size() < 2)
+        _allSequences.push_back(Sequence("-"));
 
     if (bed.extraFields().size() >= 2) {
         stringstream ss(bed.extraFields()[1]);
@@ -97,3 +94,46 @@ ostream& Variant::toStream(ostream& s) const {
     return s;
 }
 
+bool Variant::allelePartialMatch(const Variant& rhs) const {
+    if (reference() != rhs.reference())
+        return false;
+
+    return iubOverlap(variant().data(), rhs.variant().data());
+}
+
+namespace {
+    bool doDbSnpMatchHack(const Variant& a, const Variant& dbSnp) {
+
+        // this is nuts
+        // we can't trust dbsnp data, so we have to try each allele as the
+        // reference, and the combination of all the // rest as the variant.
+        // if that doesn't work, we reverse complement and do it again.
+        for (unsigned i = 0; i < dbSnp.allSequences().size(); ++i) {
+
+            const Sequence& ref(dbSnp.allSequences()[i]);
+            if (ref != a.reference())
+                continue;
+
+            unsigned allelesBin = 0;
+            for (unsigned j = 0; j < dbSnp.allSequences().size(); ++j) {
+                if (j == i) continue; // skip the one we picked as reference
+                allelesBin |= alleles2bin(dbSnp.allSequences()[j].data().c_str());
+            }
+            string iub(1, alleles2iub(allelesBin));
+            if (iubOverlap(a.variant().data(), iub))
+                return true;
+        }
+        return false;
+    }
+}
+
+bool Variant::alleleDbSnpMatch(const Variant& dbSnp) const {
+
+    if (doDbSnpMatchHack(*this, dbSnp))
+        return true;
+
+    // didn't match? reverse complement dbsnp and try again;
+    Variant revDbSnp(dbSnp);
+    revDbSnp.reverseComplement();
+    return doDbSnpMatchHack(*this, revDbSnp);
+}

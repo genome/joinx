@@ -60,4 +60,5 @@ protected:
     bool _exactPos;
     bool _exactAllele;
     bool _iubMatch;
+    bool _dbsnpMatch;
 };
