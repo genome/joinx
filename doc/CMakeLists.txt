@@ -1,19 +1,29 @@
 cmake_minimum_required(VERSION 2.8)
 
+set(MAN_PAGE_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/joinx.pod)
+set(MAN_PAGE_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/joinx${EXE_VERSION_SUFFIX}.1.gz)
+set(COPYRIGHT_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/copyright)
+set(COPYRIGHT_DIR share/doc/joinx${EXE_VERSION_SUFFIX})
+
 add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/joinx.1.gz
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/joinx.pod
+    OUTPUT ${MAN_PAGE_OUTPUT}
+    DEPENDS ${MAN_PAGE_INPUT}
     COMMAND pod2man ARGS 
         --section=1
         --release='Joinx ${FULL_VERSION}' 
         --center='Joinx Manual'
-        ${CMAKE_CURRENT_SOURCE_DIR}/joinx.pod
-        | gzip -9 > ${CMAKE_BINARY_DIR}/joinx.1.gz
+        ${MAN_PAGE_INPUT}
+        | gzip -9 > ${MAN_PAGE_OUTPUT}
 )
 
-add_custom_target(doc ALL DEPENDS ${CMAKE_BINARY_DIR}/joinx.1.gz)
+add_custom_target(doc ALL DEPENDS ${MAN_PAGE_OUTPUT} ${COPYRIGHT_INPUT})
 
-install(FILES ${CMAKE_BINARY_DIR}/joinx.1.gz
+install(FILES ${MAN_PAGE_OUTPUT}
     DESTINATION share/man/man1
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+)
+
+install(FILES ${COPYRIGHT_INPUT}
+    DESTINATION ${COPYRIGHT_DIR}
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
 )
