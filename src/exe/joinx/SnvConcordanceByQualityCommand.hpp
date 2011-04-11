@@ -1,20 +1,28 @@
 #pragma once
 
-#include "common/intconfig.hpp"
+#include "CommandBase.hpp"
 
 #include <fstream>
-#include <memory>
 #include <string>
+#include <vector>
+#include <memory>
 
 class ResultStreamWriter;
 
-class ConcordanceApp {
+class SnvConcordanceByQualityCommand : public CommandBase {
 public:
-    ConcordanceApp(int argc, char** argv);
+    using CommandBase::ptr;
 
-    void usage();
+    SnvConcordanceByQualityCommand();
+    ptr create(int argc, char** argv);
+
+    std::string name() const { return "snv-concordance-by-quality"; }
+    std::string description() const {
+        return "produce snv concordance report by quality for 2 variant files";
+    }
+
     void exec();
-
+    
     std::auto_ptr<ResultStreamWriter> setupStreamWriter();
 
 protected:

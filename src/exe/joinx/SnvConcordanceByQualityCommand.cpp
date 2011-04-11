@@ -1,4 +1,4 @@
-#include "ConcordanceApp.hpp"
+#include "SnvConcordanceByQualityCommand.hpp"
 
 #include "fileformats/BedStream.hpp"
 #include "bedutil/ConcordanceQuality.hpp"
@@ -19,12 +19,16 @@
 using namespace std;
 namespace po = boost::program_options;
 
-ConcordanceApp::ConcordanceApp(int argc, char** argv)
-{
-    parseArguments(argc, argv);
+SnvConcordanceByQualityCommand::SnvConcordanceByQualityCommand() {
 }
 
-void ConcordanceApp::parseArguments(int argc, char** argv) {
+CommandBase::ptr SnvConcordanceByQualityCommand::create(int argc, char** argv) {
+    boost::shared_ptr<SnvConcordanceByQualityCommand> app(new SnvConcordanceByQualityCommand);
+    app->parseArguments(argc, argv);
+    return app;
+}
+
+void SnvConcordanceByQualityCommand::parseArguments(int argc, char** argv) {
     po::options_description opts("Available Options");
     opts.add_options()
         ("help,h", "this message")
@@ -71,7 +75,7 @@ void ConcordanceApp::parseArguments(int argc, char** argv) {
     }
 }
 
-auto_ptr<ResultStreamWriter> ConcordanceApp::setupStreamWriter() {
+auto_ptr<ResultStreamWriter> SnvConcordanceByQualityCommand::setupStreamWriter() {
     auto_ptr<ResultStreamWriter> resultStreamWriter;
 
     ofstream* hitA(NULL);
@@ -111,7 +115,7 @@ auto_ptr<ResultStreamWriter> ConcordanceApp::setupStreamWriter() {
     return resultStreamWriter;
 }
 
-void ConcordanceApp::exec() {
+void SnvConcordanceByQualityCommand::exec() {
 
     ifstream inA(_fileA.c_str());
     if (!inA)

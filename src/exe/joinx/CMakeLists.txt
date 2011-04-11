@@ -10,6 +10,8 @@ set(SOURCES
     IntersectCommand.hpp
     JoinX.cpp
     JoinX.hpp
+    SnvConcordanceByQualityCommand.cpp
+    SnvConcordanceByQualityCommand.hpp
     SnvConcordanceCommand.cpp
     SnvConcordanceCommand.hpp
     SortCommand.cpp
