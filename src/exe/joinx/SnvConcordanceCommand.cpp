@@ -155,13 +155,13 @@ namespace {
 
     void missA(const Bed& a) {
         if (_s.outMissA)
-            *_s.outMissA << a;
+            *_s.outMissA << a << "\n";;
         _concordance.missA(a);
     }
 
     void missB(const Bed& b) {
         if (_s.outMissB)
-            *_s.outMissB << b;
+            *_s.outMissB << b << "\n";
         _concordance.missB(b);
     }
 
