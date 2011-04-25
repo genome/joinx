@@ -34,7 +34,7 @@ if(GTEST_FOUND)
 else()
     message("Google Test framework not found, no tests will be built")
     message("GTest is available at http://code.google.com/p/googletest/")
-    message("Ubuntu users can likely sudo apt-get install gtest")
+    message("Ubuntu users can likely sudo apt-get install libgtest-dev")
 endif()
 
 # main project
