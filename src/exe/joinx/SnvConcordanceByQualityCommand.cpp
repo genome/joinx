@@ -7,7 +7,6 @@
 #include "bedutil/ResultStreamWriter.hpp"
 #include "bedutil/SnvComparator.hpp"
 #include "bedutil/TypeFilter.hpp"
-#include "common/ProgramVersion.hpp"
 
 #include <boost/program_options.hpp>
 #include <fstream>
@@ -32,7 +31,6 @@ void SnvConcordanceByQualityCommand::parseArguments(int argc, char** argv) {
     po::options_description opts("Available Options");
     opts.add_options()
         ("help,h", "this message")
-        ("version,v", "display program version")
         ("file-a,a", po::value<string>(&_fileA), "input file a (required)")
         ("file-b,b", po::value<string>(&_fileB), "input file b (required)")
         ("hits-a",   po::value<string>(&_hitFileA), "output hits in 'a' to this file")
@@ -52,9 +50,6 @@ void SnvConcordanceByQualityCommand::parseArguments(int argc, char** argv) {
         vm
     );
     po::notify(vm);
-
-    if (vm.count("version"))
-        throw runtime_error(makeProgramVersionInfo("snvcmp"));
 
     if (vm.count("help")) {
         stringstream ss;
