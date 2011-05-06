@@ -1,0 +1,34 @@
+<p>To install the base system, run this in a terminal:</p>
+
+<p class="terminal"><code>wget -q -O - http://apt.genome.wustl.edu/ubuntu/files/install.sh | sudo bash</code></p>
+<p>For a list of components available, run &#8220;genome install&#8221; with no parameters.</p>
+<p class="terminal"><code>genome install</code></p>
+<p>Add components with the &#8220;genome install&#8221; command, i.e.:</p>
+<p class="terminal"><code>genome install joinx1.1</code></p>
+<h3>Behind the Scenes:</h3>
+
+<h4><span style="font-weight:normal;">Debian (including Ubuntu) GNU/Linux systems</span></h4>
+<p>Genome Modeling System uses the native apt package manager, and links to an apt repository served from apt.genome.wustl.edu for systematic updates.</p>
+<p>repository linkage:</p>
+<p class="terminal"><code><br />
+sudo apt-add-respository "deb http://apt.genome.wustl.edu lucid-genome main"<br />
+wget  http://apt.genome.wustl.edu/ubuntu/files/genome-center.asc | sudo apt-key add<br />
+sudo apt-get update<br />
+</code></p>
+<p>install joinx:</p>
+<p class="terminal"><code><br />
+sudo apt-get install joinx1.1<br />
+</code></p>
+<h4>Other Platforms/source code:</h4>
+<p>The full source code and build instructions are available from the <a href="http://github.com/genome/joinx">github project page</a>.</p>
+<h3>Help:</h3>
+<p>To get help on joinx or a particular subcommand, use the -h option, e.g.:</p>
+<p class="terminal"><code><br />
+joinx -h<br />
+joinx intersect -h<br />
+</code></p>
+<h3>Manuals:</h3>
+<p>To see the manual page:</p>
+<p class="terminal"><code><br />
+man joinx1.1<br /> 
+</code></p> 

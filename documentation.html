@@ -1,0 +1,173 @@
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#intersect_subcommand">INTERSECT SUBCOMMAND</a></li>
+	<ul>
+
+		<li><a href="#synopsis">SYNOPSIS</a></li>
+		<li><a href="#options">OPTIONS</a></li>
+		<li><a href="#synopsis">SYNOPSIS</a></li>
+		<li><a href="#options">OPTIONS</a></li>
+	</ul>
+
+	<li><a href="#sort_subcommand">SORT SUBCOMMAND</a></li>
+	<ul>
+
+		<li><a href="#synopsis">SYNOPSIS</a></li>
+		<li><a href="#options">OPTIONS</a></li>
+	</ul>
+
+	<li><a href="#author">AUTHOR</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+</ul>
+<!-- INDEX END -->
+
+<hr />
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>joinx - a tool for performing set operations on .bed files</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p>joinx [--version|-v] SUBCOMMAND [SUBCOMMAND-ARGS]</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>Joinx is a lightweight tool for performing set operations (e.g., intersection,
+difference, ...) on genomic data contained in .bed files. It also
+provides some limited analysis functions (concordance reports). An
+important assumption that joinx makes is that the input data is always
+sorted. This allows it to compute its results in an efficient manner.</p>
+<p>
+</p>
+<hr />
+<h1><a name="intersect_subcommand">INTERSECT SUBCOMMAND</a></h1>
+<p>joinx intersect
+    Perform set intersection and difference operations.</p>
+<p>
+</p>
+<h2><a name="synopsis">SYNOPSIS</a></h2>
+<p>joinx intersect [OPTIONS] a.bed b.bed</p>
+<p>
+</p>
+<h2><a name="options">OPTIONS</a></h2>
+<p>-h, --help
+    Display usage information</p>
+<p>-a, --file-a &lt;path&gt; (or first positional argument)
+    Path to sorted input .bed file ``A'' (- for stdin)
+</p>
+<pre>
+
+-b, --file-b &lt;path&gt; (or second positional argument)
+    Path to sorted input .bed file &quot;B&quot; (- for stdin, note: not both &quot;A&quot;
+    and &quot;B&quot; can be stdin)</pre>
+<p>-o, --output-file &lt;path&gt;
+    Output bed file for intersection results</p>
+<p>--miss-a &lt;path&gt;
+    Write entries in A that are not in B (set difference, A\B) to &lt;path&gt;.
+</p>
+<pre>
+
+--miss-b &lt;path&gt;
+    Write entries in B that are not in A (set difference, B\A) to &lt;path&gt;.</pre>
+<p>-f, --first-only
+    Notice only the first thing in A to hit records in B, not the full
+    intersection</p>
+<p>--output-both
+    Concatenate the columns of A and B in the intersection output</p>
+<p>--exact-pos
+    For indels, define intersection to mean an exact position match. The
+    default considers any overlap a match.</p>
+<p>--exact-allele
+    Require exact allele matching for intersection.</p>
+<p>--iub-match
+    When using exact-allele, treat any overlap between an allele and an
+    IUB code as a match (e.g., G &amp; K match).</p>
+<p>--dbsnp-match
+    Undocumented. Should not be used.
+</p>
+<pre>
+
+=head1 SNV-CONCORDANCE SUBCOMMAND</pre>
+<p>joinx snv-concordance
+    Generate basic concordance reports given 2 .bed files.</p>
+<p>
+</p>
+<h2><a name="synopsis">SYNOPSIS</a></h2>
+<p>joinx snv-concordance [OPTIONS] a.bed b.bed</p>
+<p>
+</p>
+<h2><a name="options_h__help_display_usage_information">OPTIONS
+-h, --help
+    Display usage information</a></h2>
+<p>-a, --file-a &lt;path&gt; (or first positional argument)
+    Path to sorted input .bed file ``A'' (- for stdin)
+</p>
+<pre>
+
+-b, --file-b &lt;path&gt; (or second positional argument)
+    Path to sorted input .bed file &quot;B&quot; (- for stdin, note: not both &quot;A&quot;
+    and &quot;B&quot; can be stdin)</pre>
+<p>-d, --depth
+    Use read depth (bed column 5) instead of quality (column 4) in report</p>
+<p>--hits &lt;path&gt;
+    Output the resulting intersection of ``A'' and ``B'' to ``path'' (discarded by default)</p>
+<p>--miss-a &lt;path&gt;
+    Write entries in A that are not in B (set difference, A\B) to &lt;path&gt;.
+</p>
+<pre>
+
+--miss-b &lt;path&gt;
+    Write entries in B that are not in A (set difference, B\A) to &lt;path&gt;.</pre>
+<p>
+</p>
+<hr />
+<h1><a name="sort_subcommand">SORT SUBCOMMAND</a></h1>
+<p>joinx sort
+    Sort .bed files by chromosome/sequence, start, end position.</p>
+<p>
+</p>
+<h2><a name="synopsis">SYNOPSIS</a></h2>
+<p>joinx sort [OPTIONS] a.bed b.bed c.bed ...</p>
+<p>
+</p>
+<h2><a name="options">OPTIONS</a></h2>
+<p>-h, --help
+    Display usage information</p>
+<p>-i, --input-file &lt;path&gt;
+    Input file to be sorted (can be specified multiple times, positional arguments work too)</p>
+<p>-m, --merge-only
+    Assume all input files are pre-sorted, merge only</p>
+<p>-o, --output-file
+    The path of the sorted output file to write</p>
+<p>-M, --max-mem-lines (default=1000000)
+    The maximum number of lines to hold in memory while sorting (before writing to tmp files)</p>
+<p>-s, --stable
+    Perform a ``stable'' sort (equivalent records maintain their original order)
+
+</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>Joinx was written by Travis Abbott &lt;<a href="mailto:tabbott@genome.wustl.edu">tabbott@genome.wustl.edu</a>&gt;, and is maintained on
+Github at: <a href="https://github.com/genome/joinx/">https://github.com/genome/joinx/</a>.
+
+</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Joinx is free software, distributed under the terms of the GNU GPL v3 or later: <a href="http://gnu.org/licenses/gpl.html">http://gnu.org/licenses/gpl.html</a>.
+
+</p>
+
+
