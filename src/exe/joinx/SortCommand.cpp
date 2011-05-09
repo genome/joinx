@@ -82,7 +82,7 @@ void SortCommand::exec() {
         if (*iter != "-") {
             FilePtr in(new ifstream(iter->c_str()));
             if (!in || !in->is_open())
-                throw runtime_error(str(format("Failed to open input file %1%") %*iter));
+                throw runtime_error(str(format("Failed to open input file '%1%'") %*iter));
             files.push_back(in);
             _inputs.push_back(new BedStream(*iter, *in)); 
         } else if (!haveCin) {
