@@ -6,5 +6,5 @@ macro(def_integration_test testName script)
     set_tests_properties(${testName} PROPERTIES LABELS integration)
 endmacro(def_integration_test testName script)
 
-add_subdirectory(intersect)
-add_subdirectory(sort)
+def_integration_test(Intersect intersect.t)
+def_integration_test(Sort sort.t)
