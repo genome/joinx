@@ -48,8 +48,8 @@ void SnvComparator::exec() {
                 _b >> snvB;
                 _rc.hitB(snvB);
             }
-            _a >> snvA;
-            _b >> snvB;
+            if (!_a.eof()) _a >> snvA;
+            if (!_b.eof()) _b >> snvB;
         }
     }
 

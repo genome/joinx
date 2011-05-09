@@ -44,6 +44,7 @@ protected:
     std::vector<BedFilterBase*> _filters;
 
     bool _cached;
+    bool _cachedRv;
     Bed _cachedBed;
 };
 

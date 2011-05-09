@@ -128,7 +128,7 @@ TEST(BedStream, peek) {
     ASSERT_EQ("44", bed.extraFields()[1]);
     ASSERT_EQ(Bed::SNV, bed.type());
 
-    ASSERT_TRUE(ss >> bed);
+    ASSERT_TRUE(ss.next(bed));
     ASSERT_EQ("44", bed.extraFields()[1]);
 
     ASSERT_FALSE(ss.eof());
@@ -136,10 +136,10 @@ TEST(BedStream, peek) {
     // before getting an exception
     ASSERT_FALSE(ss.peek(&peek));
     ASSERT_FALSE(ss.peek(&peek));
-    ASSERT_FALSE(ss >> bed);
+    ASSERT_FALSE(ss.next(bed));
     ASSERT_TRUE(ss.eof());
 
-    // only now, after attempting to read (>>) a bed and getting EOF should
+    // only now, after attempting to read a bed and getting EOF should
     // an exception be thrown
     ASSERT_THROW(ss.peek(&peek), runtime_error);
     ASSERT_THROW(ss >> bed, runtime_error);

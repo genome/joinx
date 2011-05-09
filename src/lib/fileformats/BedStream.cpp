@@ -13,6 +13,7 @@ BedStream::BedStream(const string& name, istream& in, int maxExtraFields /* = -1
     , _lineNum(0)
     , _bedCount(0)
     , _cached(false)
+    , _cachedRv(false)
 {
 }
 
@@ -41,21 +42,24 @@ bool BedStream::peek(Bed** bed) {
     // need to peek ahead
     // note: next() may return false (because of EOF). we want to take care
     // when using _cachedBed to make sure that EOF is false.
-    bool rv = next(_cachedBed);
+    _cachedRv = next(_cachedBed);
     *bed = &_cachedBed;
     _cached = true;
-    return rv;
+    return _cachedRv;
 }
 
 bool BedStream::eof() const {
-    return !_cached && _in.eof();
+    if (_cached)
+        return !_cachedRv;
+    else
+        return _in.eof();
 }
 
 bool BedStream::next(Bed& bed) {
     if (_cached) {
         bed.swap(_cachedBed);
         _cached = false;
-        return !eof(); // to handle the case where we peeked at EOF
+        return _cachedRv;
     }
 
     do {
