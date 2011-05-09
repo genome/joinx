@@ -2,6 +2,8 @@
 
 #include <cstring>
 #include <deque>
+#include <stdexcept>
+#include <boost/format.hpp>
 
 template<typename StreamTypeA, typename StreamTypeB, typename CollectorType>
 class Intersect {
@@ -61,10 +63,20 @@ public:
         return rv;
     }
 
+    template<typename T, typename S>
+    bool advanceSorted(S& stream, T& value) {
+        using std::runtime_error;
+        using boost::format;
+        T* peek = NULL;
+        if (stream.peek(&peek) && compare(*peek, value) == BEFORE)
+            throw runtime_error(str(format("Unsorted data found in stream %1%\n'%2%' follows '%3%'") %stream.name() %peek->toString() %value.toString()));
+        return stream.next(value);
+    }
+
     void execute() {
         TypeA valueA;
         TypeB valueB;
-        while (!_a.eof() && _a.next(valueA)) {
+        while (!_a.eof() && advanceSorted(_a, valueA)) {
             // burn entries from the cache
             while (!_cache.empty() && compare(valueA, _cache.front().value) == AFTER)
                 popCache();
@@ -73,13 +85,13 @@ public:
             TypeB* peek = NULL;
             if (_cache.empty()) {
                 while (!_b.eof() && _b.peek(&peek) && compare(valueA, *peek) == AFTER) {
-                    _b.next(valueB);
+                    advanceSorted(_b, valueB);
                     _rc.missB(valueB);
                 }
             }
 
             bool hitA = checkCache(valueA);
-            while (!_b.eof() && _b.next(valueB)) {
+            while (!_b.eof() && advanceSorted(_b, valueB)) {
                 Compare cmp = compare(valueA, valueB);
                 if (cmp == BEFORE) {
                     cache(valueB, false);
@@ -100,7 +112,7 @@ public:
         }
         while (!_cache.empty())
             popCache();
-        while (!_b.eof() && _b.next(valueB))
+        while (!_b.eof() && advanceSorted(_b, valueB))
             _rc.missB(valueB);
     }
 
