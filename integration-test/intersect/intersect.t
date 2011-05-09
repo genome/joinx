@@ -7,9 +7,11 @@ use File::Basename qw/dirname/;
 use File::Temp;
 use Test::More tests => 12;
 
+my $joinx_path = shift @ARGV;
+
 my $dir = dirname($0);
 # TODO: get rid of hard coded version # here
-my $exe = "$dir/../../bin/joinx intersect";
+my $exe = "$joinx_path intersect";
 my $data_dir = "$dir/data"; 
 my $input = "$data_dir/a.bed $data_dir/b.bed";
 my %data = (

@@ -7,9 +7,11 @@ use File::Basename qw/dirname/;
 use File::Temp;
 use Test::More tests => 4;
 
+my $joinx_path = shift @ARGV;
+
 my $dir = dirname($0);
 # TODO: get rid of hard coded version # here
-my $exe = "$dir/../../bin/joinx sort";
+my $exe = "$joinx_path sort";
 my $data_dir = "$dir/data"; 
 my $input = join(" ", glob("$data_dir/input*.bed"));
 my $expected = "$data_dir/expected.bed";

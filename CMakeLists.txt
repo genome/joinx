@@ -43,7 +43,11 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 add_projects(src/lib)
 add_projects(src/exe)
 
+# integration testing
+add_subdirectory(integration-test)
+
 # generate documentation
 add_subdirectory(doc)
 
 include(PackageInfo.cmake)
+

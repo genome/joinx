@@ -7,8 +7,6 @@ set(SOURCES
     ConcordanceQuality.hpp
     IResultCollector.hpp
     Intersect.hpp
-    IntersectBed.cpp
-    IntersectBed.hpp
     NoReferenceFilter.hpp
     ResultStreamWriter.cpp
     ResultStreamWriter.hpp
