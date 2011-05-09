@@ -70,4 +70,14 @@ subtest 'unsorted data' => sub {
     like($err, qr/Unsorted data.*unsorted0.bed/, 'got unsorted data error message');
 };
 
+subtest 'position only' => sub {
+    my $fh = new File::Temp;
+    my $tmpfile = $fh->filename;
+    my ($rv, $out, $err) = $jx->exec("intersect $data_dir/a.bed $data_dir/posonly.bed -o $tmpfile");
+    is($rv, 0, "executed command");
+    my $diff = `diff $tmpfile $data_dir/a.bed`;
+    is($diff, '', "results are as expected for position only intersection");
+    $fh->close();
+};
+
 done_testing();

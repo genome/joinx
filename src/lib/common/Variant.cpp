@@ -1,9 +1,9 @@
 #include "Variant.hpp"
 
+#include "Tokenizer.hpp"
 #include "fileformats/Bed.hpp"
 
 #include <boost/format.hpp>
-#include <boost/tokenizer.hpp>
 #include <sstream>
 #include <sstream>
 #include <stdexcept>
@@ -38,12 +38,8 @@ Variant::Type Variant::inferType() const {
         return INS;
     else if (_stop != _start && variant().null())
         return DEL;
-    else {
-        stringstream ss;
-        ss << "Could not determine type of variant: ";
-        toStream(ss);
-        throw runtime_error(ss.str());
-    }
+    else
+        return INVALID;
 }
 
 Variant::Variant() : _type(INVALID) {
@@ -58,11 +54,15 @@ Variant::Variant(const Bed& bed)
     , _quality(0)
     , _depth(0)
 {
-    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-    boost::char_separator<char> sep("/", "", boost::keep_empty_tokens);
-    tokenizer tokens(bed.extraFields()[0], sep);
-    for (tokenizer::iterator iter = tokens.begin(); iter != tokens.end(); ++iter)
-        _allSequences.push_back(*iter);
+    if (!bed.extraFields().empty()) {
+        Tokenizer tokenizer(bed.extraFields()[0], '/');
+        while (!tokenizer.eof()) {
+            string tok;
+            tokenizer.extract(tok);
+            _allSequences.push_back(tok);
+        }
+    }
+            
     while (_allSequences.size() < 2)
         _allSequences.push_back(Sequence("-"));
 
