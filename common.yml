@@ -8,8 +8,6 @@ menu:
     - text: Install
       href: install.html
 
-
-module_details: {
-  name: JoinX
-  icon: gmt_joinx_48.png
-}
+module_details:
+    name: JoinX
+    icon: gmt_joinx_48.png
