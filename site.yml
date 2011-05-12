@@ -1,0 +1,9 @@
+---
+style: joinx
+menu: 
+    - text: Introduction
+      href: intro.html
+    - text: Documentation
+      href: documentation.html
+    - text: Install
+      href: install.html

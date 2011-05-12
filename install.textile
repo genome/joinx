@@ -1,13 +1,5 @@
 ---
 layout: sub
-version_suffix: 1.1
-menu: 
-    - text: Introduction
-      href: intro.html
-    - text: Documentation
-      href: documentation.html
-    - text: Install
-      href: install.html
 ---
 h2. Download (Ubuntu 8.04+)
 ==<hr />==
