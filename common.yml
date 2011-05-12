@@ -1,8 +1,8 @@
 ---
 style: joinx
 menu: 
-    - text: Introduction
-      href: intro.html
+    - text: Home
+      href: index.html
     - text: Documentation
       href: documentation.html
     - text: Install
