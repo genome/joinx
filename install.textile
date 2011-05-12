@@ -1,4 +1,16 @@
+---
+layout: sub
+version_suffix: 1.1
+menu: 
+    - text: Introduction
+      href: intro.html
+    - text: Documentation
+      href: documentation.html
+    - text: Install
+      href: install.html
+---
 h2. Download (Ubuntu 8.04+)
+==<hr />==
 
 p. To install the the base system, run this in a terminal:
 
@@ -22,18 +34,21 @@ p. install joinx:
 
 p(terminal). ==sudo apt-get install joinx{{ page.version_suffix }}==
 
-h4. Other Platforms/source code:
+h2. Other Platforms/source code:
+==<hr />==
 
 p. The full source code and build instructions are available from the "github project page":http://github.com/genome/joinx.
 
-h3. Help:
+h2. Help:
+==<hr />==
 
 p. To get help on joinx or a particular subcommand, use the -h option, e.g.:
 
 p(terminal). ==joinx -h==
 ==joinx intersect -h==
 
-h3. Manuals:
+h2. Manuals:
+==<hr />==
 
 p. To see the manual page:
 
