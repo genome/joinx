@@ -1,5 +1,6 @@
 ---
 style: joinx
+layout: sub
 menu: 
     - text: Home
       href: index.html

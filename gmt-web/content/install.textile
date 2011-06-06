@@ -1,6 +1,3 @@
----
-layout: sub
----
 h2. Download (Ubuntu 8.04+)
 ==<hr />==
 
