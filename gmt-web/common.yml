@@ -1,0 +1,13 @@
+---
+style: joinx
+menu: 
+    - text: Home
+      href: index.html
+    - text: Documentation
+      href: documentation.html
+    - text: Install
+      href: install.html
+
+module_details:
+    name: JoinX
+    icon: res/images/icon_48.png
