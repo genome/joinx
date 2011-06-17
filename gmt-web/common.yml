@@ -2,7 +2,7 @@
 style: joinx
 layout: sub
 menu: 
-    - text: Home
+    - text: Overview
       href: index.html
     - text: Documentation
       href: documentation.html
