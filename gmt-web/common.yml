@@ -14,3 +14,4 @@ module_details:
     icon: res/images/icon_48.png
 
 download_link: install.html
+github_url: https://github.com/genome/joinx
