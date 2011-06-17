@@ -12,3 +12,5 @@ menu:
 module_details:
     name: JoinX
     icon: res/images/icon_48.png
+
+download_link: install.html
