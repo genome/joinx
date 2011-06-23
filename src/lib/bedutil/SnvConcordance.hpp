@@ -29,7 +29,7 @@ enum MatchType {
 
 struct Zygosity {
     ZygosityType type;
-    unsigned alleleCount;
+    size_t alleleCount;
 };
 
 struct SnvDescription {

@@ -8,3 +8,4 @@ endmacro(def_integration_test testName script)
 
 def_integration_test(Intersect intersect.t)
 def_integration_test(Sort sort.t)
+def_integration_test(CreateContigs create-contigs.t)

@@ -7,14 +7,18 @@ set(SOURCES
     ConcordanceQuality.hpp
     IResultCollector.hpp
     Intersect.hpp
+    MergeSorted.hpp
     NoReferenceFilter.hpp
+    ResultMultiplexer.hpp
     ResultStreamWriter.cpp
     ResultStreamWriter.hpp
     SnvComparator.cpp
     SnvComparator.hpp
     SnvConcordance.cpp
     SnvConcordance.hpp
+    Sort.hpp
     TypeFilter.hpp
+    VariantsToContigs.hpp
 )
 
 add_library(bedutil ${SOURCES})

@@ -10,6 +10,8 @@ set(SOURCES
     BedFilterBase.hpp
     BedStream.cpp
     BedStream.hpp
+    FastaReader.cpp
+    FastaReader.hpp
     IGenomicPosition.hpp
     ISequenceReader.hpp
     ReferenceSequence.cpp
@@ -21,4 +23,4 @@ set(SOURCES
 )
 
 add_library(fileformats ${SOURCES})
-target_link_libraries(fileformats common)
+target_link_libraries(fileformats common ${Samtools_LIBRARIES})
