@@ -1,3 +1,4 @@
+*.fai
 *.deb
 CMakeCache.txt
 CMakeFiles/

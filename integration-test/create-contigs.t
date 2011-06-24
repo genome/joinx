@@ -25,3 +25,5 @@ subtest 'create contigs' => sub {
     is($diff, '', "results are as expected");
     $fh->close();
 };
+
+done_testing()

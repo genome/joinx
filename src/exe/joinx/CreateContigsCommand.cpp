@@ -1,6 +1,6 @@
 #include "CreateContigsCommand.hpp"
 
-#include "bedutil/VariantsToContigs.hpp"
+#include "bedutil/RemappedContig.hpp"
 #include "fileformats/FastaReader.hpp"
 #include "fileformats/BedStream.hpp"
 
@@ -13,6 +13,23 @@
 using boost::format;
 using namespace std;
 namespace po = boost::program_options;
+
+namespace {
+    class RemappedContigFastaWriter {
+    public:
+        RemappedContigFastaWriter(ostream& out)
+            : _out(out)
+        {
+        }
+
+        void operator()(const RemappedContig& ctg) {
+            _out << ">" << ctg.name() << "\n" << ctg.sequence() << "\n";
+        }
+
+    protected:
+        ostream& _out;
+    };
+}
 
 CreateContigsCommand::CreateContigsCommand()
     : _flankSize(99)
@@ -73,13 +90,18 @@ void CreateContigsCommand::exec() {
     FastaReader ref(_referenceFasta);
     std::istream* input = &cin; 
     std::ostream* output = &cout;
+    bool closeOutput = false;
+    bool closeInput = false;
+
     if (!_variantsFile.empty() && _variantsFile != "-") {
+        closeInput = true;
         input = new ifstream(_variantsFile);
         if (!*input)
             throw runtime_error(str(format("Failed to open variants file %1%") %_variantsFile));
     }
 
     if (!_outputFile.empty() && _outputFile != "-") {
+        closeOutput = true;
         output = new ofstream(_outputFile);
         if (!*output)
             throw runtime_error(str(format("Failed to open output file %1%") %_outputFile));
@@ -87,12 +109,15 @@ void CreateContigsCommand::exec() {
 
     // this stream will read 2 extra fields, ref/call and quality
     BedStream bedStream(_variantsFile, *input, 2);
+    RemappedContigFastaWriter writer(*output);
+    RemappedContigGenerator<FastaReader, RemappedContigFastaWriter> generator(ref, _flankSize, writer);
+    Bed b;
+    while (bedStream.next(b)) {
+        Variant v(b);
+        if (v.quality() >= _minQuality)
+            generator.generate(v);
+    }
 
-    VariantsToContigs<FastaReader,BedStream> v2c(
-        ref, bedStream, *output, _flankSize, _minQuality
-    );
-    v2c.execute();
-
-    if (input != &cin) delete input;
-    if (output != &cout) delete output;
+    if (closeInput) delete input;
+    if (closeOutput) delete output;
 }

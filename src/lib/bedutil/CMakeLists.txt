@@ -9,6 +9,7 @@ set(SOURCES
     Intersect.hpp
     MergeSorted.hpp
     NoReferenceFilter.hpp
+    RemappedContig.hpp
     ResultMultiplexer.hpp
     ResultStreamWriter.cpp
     ResultStreamWriter.hpp
@@ -18,7 +19,6 @@ set(SOURCES
     SnvConcordance.hpp
     Sort.hpp
     TypeFilter.hpp
-    VariantsToContigs.hpp
 )
 
 add_library(bedutil ${SOURCES})
