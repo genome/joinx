@@ -77,7 +77,11 @@ public:
         string preFlank;
         string postFlank;
         _refSeq.sequence(v.chrom(), start, v.start(), preFlank);
-        stop = _refSeq.sequence(v.chrom(), v.stop(), stop, postFlank);
+        try {
+            stop = _refSeq.sequence(v.chrom(), v.stop(), stop, postFlank);
+        } catch (std::length_error&) {
+            stop = v.stop();
+        }
 
         const string& ref = v.reference().data();
         const string& var = v.variant().data();
