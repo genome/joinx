@@ -48,6 +48,11 @@ public:
             %stop
             %cigar
             );
+
+        if (varLen) {
+            _name += '-';
+            _name.append(var, varLen);
+        }
     }
 
     const std::string& name() const     { return _name; }
