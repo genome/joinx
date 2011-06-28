@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <sstream>
 
 class RemappedContig {
 public:
@@ -29,24 +30,18 @@ public:
         _sequence.append(var, varLen);
         _sequence += post;
 
-        string cigar;
-        if (insertedBases == 0) {
-            cigar = str(format("%1%M") %_sequence.size());
-        } else {
-            char insOrDel = insertedBases > 0 ? 'I' : 'D';
-            cigar = str(format("%1%M%2%%3%%4%M")
-                %pre.size()
-                %std::abs(insertedBases)
-                %insOrDel
-                %post.size()
-            );
-        }
+        std::stringstream cigar;
+        if (!pre.empty()) cigar << pre.size() << '=';
+        if (insertedBases == 0)     cigar << "1X"; // snv
+        else if (insertedBases > 0) cigar << insertedBases << 'I'; // ins
+        else                        cigar << (-insertedBases) << 'D'; // del
+        if (!post.empty()) cigar << post.size() << '=';
 
         _name = str(format("REMAP-%1%,%2%,%3%-%4%")
             %chrom
             %start
             %stop
-            %cigar
+            %cigar.str()
             );
 
         if (varLen) {
