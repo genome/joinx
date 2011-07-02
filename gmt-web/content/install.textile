@@ -7,7 +7,7 @@ p(terminal). ==wget -q -O - http://apt.genome.wustl.edu/ubuntu/files/install.sh 
 
 p. To install joinx, run:
 
-p(terminal). ==genome install joinx{{ page.version_suffix }}==
+p(terminal). ==gmt install joinx{{ page.version_suffix }}==
 
 h3. Behind the Scenes:
 
