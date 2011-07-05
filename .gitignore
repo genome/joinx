@@ -1,3 +1,4 @@
+*.pyc
 *.fai
 *.deb
 CMakeCache.txt

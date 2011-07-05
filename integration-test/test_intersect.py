@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+
+from joinxtest import JoinxTest, main
+import unittest
+
+class TestIntersect(JoinxTest, unittest.TestCase):
+
+    def test_intersect(self):
+        data = {
+            "--exact-allele --output-both": "expected-exact-allele-both.bed",
+            "--exact-allele": "expected-exact-allele.bed",
+            "--exact-pos --output-both": "expected-exact-pos-both.bed",
+            "--exact-pos": "expected-exact-pos.bed",
+            "--output-both": "expected-noargs-both.bed",
+            "": "expected-noargs.bed",
+        }
+
+        for args, expected in data.items():
+            output_file = self.tempFile("output.bed")
+
+            params = [ "intersect", args, "-o", output_file ]
+            params.extend(self.inputFiles("a.bed", "b.bed"))
+
+            rv, err = self.joinx(params)
+            self.assertEqual(0, rv)
+            self.assertEqual('', err)
+            expected_file = self.inputFiles(expected)[0]
+            self.assertFilesEqual(expected_file, output_file)
+
+    def test_partial_match(self):
+        output_file = self.tempFile("output.bed")
+        params = [
+            "intersect",
+            "--exact-allele --iub-match --output-both",
+            "-o", output_file
+        ]
+        params.extend(self.inputFiles("iub-a.bed", "iub-b.bed"))
+        rv, err = self.joinx(params)
+        self.assertEqual(0, rv)
+        self.assertEqual('', err)
+        expected_file = self.inputFiles("expected-iub-both.bed")[0]
+        self.assertFilesEqual(expected_file, output_file)
+
+    def test_position_only(self):
+        output_file = self.tempFile("output.bed")
+        params = [ "intersect", "-o", output_file ]
+        params.extend(self.inputFiles("a.bed", "posonly.bed"))
+        rv, err = self.joinx(params)
+        self.assertEqual(0, rv)
+        self.assertEqual('', err)
+        expected_file = self.inputFiles("a.bed")[0]
+        self.assertFilesEqual(expected_file, output_file)
+
+    def test_file_not_found(self):
+        rv, err = self.joinx(["intersect", "qwert", "djfsoidjfdj"])
+        self.assertEqual(1, rv)
+        self.assertEqual("Failed to open input file 'qwert'\n", err)
+
+    def test_invalid_arguments(self):
+        rv, err = self.joinx(["the bear went over the mountain"])
+        self.assertEqual(1, rv)
+        self.assertTrue(err.startswith("Invalid subcommand 'the'"))
+
+    def test_unsorted_data(self):
+        params = ["intersect"]
+        params.extend(self.inputFiles("a.bed", "unsorted0.bed"))
+        rv, err = self.joinx(params)
+        self.assertEqual(1, rv)
+        self.assertTrue(err.startswith("Unsorted data found in stream"))
+
+if __name__ == "__main__":
+    main()
