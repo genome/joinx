@@ -13,7 +13,6 @@ class TestCreateContigs(JoinxTest, unittest.TestCase):
         params.extend(input_files)
         rv, err = self.joinx(params)
         self.assertEqual(0, rv)
-        self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file)
 
 if __name__ == "__main__":
