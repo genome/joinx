@@ -6,6 +6,44 @@
 
 using namespace std;
 
+TEST(TestTokenizer, stringDelim) {
+    string input("1,2-5,7");
+    Tokenizer<string> t(input, "-,");
+
+    string s;
+
+    ASSERT_TRUE(t.extract(s));
+    ASSERT_EQ("1", s);
+    ASSERT_EQ(',', t.lastDelim());
+
+    ASSERT_TRUE(t.extract(s));
+    ASSERT_EQ("2", s);
+    ASSERT_EQ('-', t.lastDelim());
+
+    ASSERT_TRUE(t.extract(s));
+    ASSERT_EQ("5", s);
+    ASSERT_EQ(',', t.lastDelim());
+
+    ASSERT_TRUE(t.extract(s));
+    ASSERT_EQ("7", s);
+    ASSERT_EQ('\0', t.lastDelim());
+
+    ASSERT_TRUE(t.eof());
+    ASSERT_FALSE(t.extract(s));
+}
+
+TEST(TestTokenizer, extractSingleToken) {
+    string input("hi");
+    string hi;
+
+    Tokenizer<char> t(input);
+    ASSERT_FALSE(t.eof());
+
+    ASSERT_TRUE(t.extract(hi));
+    ASSERT_EQ("hi", hi);
+
+    ASSERT_FALSE(t.extract(hi));
+}
 
 TEST(TestTokenizer, extract) {
     string input("123\tnot\t-456");
@@ -13,7 +51,7 @@ TEST(TestTokenizer, extract) {
     int32_t signedValue;
     string stringValue;
 
-    Tokenizer t(input);
+    Tokenizer<char> t(input);
     ASSERT_FALSE(t.eof());
 
     ASSERT_TRUE(t.extract(unsignedValue));
@@ -33,7 +71,7 @@ TEST(TestTokenizer, rewind) {
     string input("1\t2\t3");
     int n;
 
-    Tokenizer t(input);
+    Tokenizer<char> t(input);
     ASSERT_FALSE(t.eof());
 
     for (int i = 1; i <=3; ++i) {
@@ -54,7 +92,7 @@ TEST(TestTokenizer, advance) {
     int n;
     string s;
 
-    Tokenizer t(input);
+    Tokenizer<char> t(input);
     ASSERT_FALSE(t.eof());
 
     ASSERT_TRUE(t.advance());
@@ -71,7 +109,7 @@ TEST(TestTokenizer, nullFields) {
     string input(",1,,3,");
     string s;
 
-    Tokenizer t(input, ',');
+    Tokenizer<char> t(input, ',');
     ASSERT_FALSE(t.eof());
 
     string expected[5] = { "", "1", "", "3", "" };
@@ -88,7 +126,7 @@ TEST(TestTokenizer, nullFields) {
 TEST(TestTokenizer, eof) {
     string input("1,2,3");
     int n;
-    Tokenizer t(input, ',');
+    Tokenizer<char> t(input, ',');
 
     for (int i = 0; i < 3; ++i) {
         ASSERT_FALSE(t.eof());
@@ -102,7 +140,7 @@ TEST(TestTokenizer, eof) {
 
 TEST(TestTokenizer, remaining) {
     string input("1,2,3");
-    Tokenizer t(input, ',');
+    Tokenizer<char> t(input, ',');
     string s;
 
     t.remaining(s); 

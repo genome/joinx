@@ -55,7 +55,7 @@ Variant::Variant(const Bed& bed)
     , _depth(0)
 {
     if (!bed.extraFields().empty()) {
-        Tokenizer tokenizer(bed.extraFields()[0], '/');
+        Tokenizer<char> tokenizer(bed.extraFields()[0], '/');
         while (!tokenizer.eof()) {
             string tok;
             tokenizer.extract(tok);

@@ -2,6 +2,7 @@
 
 from joinxtest import JoinxTest, main
 import unittest
+import sys
 
 class TestIntersect(JoinxTest, unittest.TestCase):
 
@@ -25,6 +26,7 @@ class TestIntersect(JoinxTest, unittest.TestCase):
             self.assertEqual(0, rv)
             self.assertEqual('', err)
             expected_file = self.inputFiles(expected)[0]
+            sys.stderr.write("TRYING %s, %s\n" %(args, expected))
             self.assertFilesEqual(expected_file, output_file)
 
     def test_partial_match(self):

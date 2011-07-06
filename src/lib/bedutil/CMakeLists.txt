@@ -7,6 +7,8 @@ set(SOURCES
     ConcordanceQuality.hpp
     IResultCollector.hpp
     Intersect.hpp
+    IntersectionOutputFormatter.cpp
+    IntersectionOutputFormatter.hpp
     MergeSorted.hpp
     NoReferenceFilter.hpp
     RemappedContig.hpp

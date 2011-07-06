@@ -3,7 +3,6 @@
 
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
 #include <cstring>
 #include <iostream>
 
@@ -32,7 +31,7 @@ Bed::Bed(const std::string& chrom, int64_t start, int64_t stop, const ExtraField
 
 
 void Bed::parseLine(std::string& line, Bed& bed, int maxExtraFields) {
-    Tokenizer tokenizer(line);
+    Tokenizer<char> tokenizer(line);
     if (!tokenizer.extract(bed._chrom))
         throw runtime_error(str(format("Failed to extract chromosome from bed line '%1%'") %line));
 

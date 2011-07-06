@@ -8,17 +8,18 @@
 
 using namespace std;
 
-// Tokenize based on single character delimiter.
 // Implemented because C++ iostreams, boost::tokenizer, and boost::split were
 // too general purpose (i.e., slow).
+template<typename DelimType>
 class Tokenizer {
 public:
-    Tokenizer(const std::string& s, char delim = '\t')
+    Tokenizer(const std::string& s, DelimType delim = '\t')
         : _s(s)
         , _delim(delim)
         , _pos(0)
         , _end(0)
         , _eofCalls(0) // to support the last field being empty, see eof()
+        , _lastDelim(0)
     {
         rewind();
     }
@@ -32,6 +33,7 @@ public:
     uint32_t advance(uint32_t count);
     void rewind();
     bool eof();
+    const char& lastDelim() { return _lastDelim; }
 
 protected:
     bool _extract(std::string& value);
@@ -51,24 +53,28 @@ protected:
 
 protected:
     const std::string& _s;
-    char _delim;
+    DelimType _delim;
     std::string::size_type _pos;
     std::string::size_type _end;
     uint32_t _eofCalls;
+    char _lastDelim;
 };
 
+template<typename DelimType>
 template<typename T>
-bool Tokenizer::extract(T& value) {
+inline bool Tokenizer<DelimType>::extract(T& value) {
     if (eof())
         return false;
     return _extract(value);
 }
 
-inline void Tokenizer::remaining(std::string& s) {
+template<typename DelimType>
+inline void Tokenizer<DelimType>::remaining(std::string& s) {
     s = _s.substr(_pos);
 }
  
-inline bool Tokenizer::_extract(std::string& value) {
+template<typename DelimType>
+inline bool Tokenizer<DelimType>::_extract(std::string& value) {
 
     std::string::size_type len = _end-_pos;
     value = _s.substr(_pos, len);
@@ -76,15 +82,19 @@ inline bool Tokenizer::_extract(std::string& value) {
     return true;
 }
 
-inline uint32_t Tokenizer::advance(uint32_t count) {
+template<typename DelimType>
+inline uint32_t Tokenizer<DelimType>::advance(uint32_t count) {
     uint32_t i = 0;
     while (i++ < count && advance());
     return i-1;
 }
 
-inline bool Tokenizer::advance() {
+template<typename DelimType>
+inline bool Tokenizer<DelimType>::advance() {
     if (eof())
         return false;
+
+    _lastDelim = _s[_end];
 
     if (_pos == _s.size())
         ++_eofCalls;
@@ -94,13 +104,15 @@ inline bool Tokenizer::advance() {
     return true;
 }
 
-inline void Tokenizer::rewind() {
+template<typename DelimType>
+inline void Tokenizer<DelimType>::rewind() {
     _pos = 0;
-    _end = _s.find_first_of(_delim);
+    _end = std::min(_s.size(), _s.find_first_of(_delim, _pos));
     _eofCalls = 0;
 }
 
-inline bool Tokenizer::eof() {
+template<>
+inline bool Tokenizer<char>::eof() {
     // in order to handle the last field being empty, we don't want to
     // just look at _pos == _s.size(). instead, we need to check if the
     // last char in the string is the delim, and if so, return an empty
@@ -119,8 +131,30 @@ inline bool Tokenizer::eof() {
     return false;
 }
 
+template<>
+inline bool Tokenizer<std::string>::eof() {
+    // in order to handle the last field being empty, we don't want to
+    // just look at _pos == _s.size(). instead, we need to check if the
+    // last char in the string is the delim, and if so, return an empty
+    // result, but only once!
+
+    if (_s.empty())
+        return true;
+
+    if (_pos == _s.size()) {
+        if (_delim.find_first_of(_s[_s.size()-1]) != std::string::npos && 
+            _eofCalls == 0)
+            return false;
+        else
+            return true;
+    }
+
+    return false;
+}
+
+template<typename DelimType>
 template<typename T>
-bool Tokenizer::_extractSigned(T& value) {
+inline bool Tokenizer<DelimType>::_extractSigned(T& value) {
     char* realEnd = NULL;
     string::size_type expectedLen =_end-_pos;
     value = strtoll(&_s[_pos], &realEnd, 10);
@@ -131,8 +165,9 @@ bool Tokenizer::_extractSigned(T& value) {
     return rv;
 }
 
+template<typename DelimType>
 template<typename T>
-bool Tokenizer::_extractUnsigned(T& value) {
+inline bool Tokenizer<DelimType>::_extractUnsigned(T& value) {
     char* realEnd = NULL;
     string::size_type expectedLen =_end-_pos;
     value = strtoull(&_s[_pos], &realEnd, 10);

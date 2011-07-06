@@ -1,6 +1,7 @@
 #include "IntersectCommand.hpp"
 #include "Collector.hpp"
 
+#include "bedutil/IntersectionOutputFormatter.hpp"
 #include "bedutil/Intersect.hpp"
 #include "common/intconfig.hpp"
 #include "fileformats/BedStream.hpp"
@@ -25,6 +26,7 @@ CommandBase::ptr IntersectCommand::create(int argc, char** argv) {
 
 IntersectCommand::IntersectCommand()
     : _outputFile("-")
+    , _formatString("A")
     , _firstOnly(false)
     , _outputBoth(false)
     , _exactPos(false)
@@ -43,6 +45,7 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
         ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
         ("miss-a", po::value<string>(&_missFileA), "output misses in A to file")
         ("miss-b", po::value<string>(&_missFileB), "output misses in B to file")
+        ("format-string,F", po::value<string>(&_formatString), "specify the output format explicity (see man page).")
         ("first-only,f", "notice only the first thing to hit records in b, not the full intersection")
         ("output-both", "concatenate intersecting lines in output (vs writing out only lines from 'a')")
         ("exact-pos", "require exact match of coordinates (default is to count overlaps)")
@@ -84,8 +87,12 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
     if (vm.count("first-only"))
         _firstOnly = true;
     
-    if (vm.count("output-both"))
+    if (vm.count("output-both")) {
+        if (vm.count("format-string"))
+            throw runtime_error("Specify either --output-both or --format string, not both");
+        _formatString = "A B";
         _outputBoth = true;
+    }
 
     // TODO: flatten output modes
     if (vm.count("exact-pos"))
@@ -179,11 +186,13 @@ void IntersectCommand::exec() {
     Streams s;
     setupStreams(s);
 
+    IntersectionOutput::Formatter outputFormatter(_formatString, *s.outHit);
+
     // these bedstreams will read 1 extra field, which is ref/call
     BedStream fa(_fileA, *s.inA, 1);
     BedStream fb(_fileB, *s.inB, 1);
 
-    Collector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, _dbsnpMatch, *s.outHit, s.outMissA, s.outMissB);
+    Collector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, _dbsnpMatch, outputFormatter, s.outMissA, s.outMissB);
     Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c);
     intersector.execute();
 }

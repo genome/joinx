@@ -55,6 +55,7 @@ protected:
     std::string _missFileA;
     std::string _missFileB;
     std::string _outputFile;
+    std::string _formatString;
     bool _firstOnly;
     bool _outputBoth;
     bool _exactPos;

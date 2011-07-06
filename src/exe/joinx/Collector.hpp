@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bedutil/IntersectionOutputFormatter.hpp"
 #include "common/Variant.hpp"
 #include "fileformats/Bed.hpp"
 
@@ -13,7 +14,7 @@ public:
             bool exactAllele,
             bool iubMatch,
             bool dbsnpMatch,
-            std::ostream& s,
+            IntersectionOutput::Formatter& outputFormatter,
             std::ostream* missA = NULL,
             std::ostream* missB = NULL
             )
@@ -22,7 +23,7 @@ public:
         , _exactAllele(exactAllele)
         , _iubMatch(iubMatch)
         , _dbsnpMatch(dbsnpMatch)
-        , _s(s)
+        , _outputFormatter(outputFormatter)
         , _missA(missA)
         , _missB(missB)
         , _hitCount(0)
@@ -74,10 +75,7 @@ public:
             return false;
     
         _lastA = va;
-        _s << a;
-        if (_outputBoth)
-            _s << "\t" << b;
-        _s << "\n";
+        _outputFormatter.output(a, b);
 
         return true;
     }
@@ -89,7 +87,7 @@ protected:
     bool _exactAllele;
     bool _iubMatch;
     bool _dbsnpMatch;
-    std::ostream& _s;
+    IntersectionOutput::Formatter& _outputFormatter;
     std::ostream* _missA;
     std::ostream* _missB;
     uint32_t _hitCount;

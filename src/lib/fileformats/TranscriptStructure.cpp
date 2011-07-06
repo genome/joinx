@@ -17,7 +17,7 @@ namespace {
 
 void TranscriptStructure::parseLine(const string& line, TranscriptStructure& ts) {
     
-    Tokenizer tokenizer(line, ',');
+    Tokenizer<char> tokenizer(line, ',');
     unsigned idx = 0;
     while (idx < NUM_FIELDS && tokenizer.extract(ts._fields[idx++]));
     assert(idx <= NUM_FIELDS);
