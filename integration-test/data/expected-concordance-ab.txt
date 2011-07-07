@@ -1,0 +1,6 @@
+homozygous reference	25
+	match
+		homozygous reference	12	102.50
+homozygous snv	75
+	match
+		homozygous snv	38	148.05

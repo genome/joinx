@@ -26,6 +26,7 @@ public:
         Streams()
             : inA(NULL)
             , inB(NULL)
+            , out(NULL)
             , outHit(NULL)
             , outMissA(NULL)
             , outMissB(NULL)
@@ -38,6 +39,7 @@ public:
 
         std::istream* inA;
         std::istream* inB;
+        std::ostream* out;
         std::ostream* outHit;
         std::ostream* outMissA;
         std::ostream* outMissB;
@@ -56,5 +58,6 @@ protected:
     std::string _missFileA;
     std::string _missFileB;
     std::string _outputFile;
+    std::string _hitsFile;
     bool _useDepth;
 };

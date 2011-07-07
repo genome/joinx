@@ -34,8 +34,9 @@ void SnvConcordanceCommand::parseArguments(int argc, char** argv) {
         ("help,h", "this message")
         ("file-a,a", po::value<string>(&_fileA), "input .bed file a (required, - for stdin)")
         ("file-b,b", po::value<string>(&_fileB), "input .bed file b (required, - for stdin)")
+        ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
         ("depth,d", "use read depth metric in place of quality")
-        ("hits", po::value<string>(&_outputFile), "output intersection to file, discarded by default")
+        ("hits", po::value<string>(&_hitsFile), "output intersection to file, discarded by default")
         ("miss-a", po::value<string>(&_missFileA), "output misses in A to file")
         ("miss-b", po::value<string>(&_missFileB), "output misses in B to file");
 
@@ -103,13 +104,23 @@ void SnvConcordanceCommand::setupStreams(Streams& s) const {
     if (cinReferences > 1)
         throw runtime_error("Multiple input streams from stdin specified. Abort.");
 
-    if (!_outputFile.empty() && _outputFile != "-") {
-        s.outHit = fs = new fstream(_outputFile.c_str(), ios::out);
+    if (!_hitsFile.empty() && _hitsFile != "-") {
+        s.outHit = fs = new fstream(_hitsFile.c_str(), ios::out);
         if (!*s.outHit)
+            throw runtime_error("Failed to open output file '" + _hitsFile + "'");
+        s.cleanup.push_back(fs);
+    } else if (_hitsFile == "-") {
+        s.outHit = &cout;
+        ++coutReferences; 
+    }
+
+    if (!_outputFile.empty() && _outputFile != "-") {
+        s.out = fs = new fstream(_outputFile.c_str(), ios::out);
+        if (!*s.out)
             throw runtime_error("Failed to open output file '" + _outputFile + "'");
         s.cleanup.push_back(fs);
     } else if (_outputFile == "-") {
-        s.outHit = &cout;
+        s.out = &cout;
         ++coutReferences; 
     }
 
@@ -188,5 +199,5 @@ void SnvConcordanceCommand::exec() {
     Collector c(concordance, s);
     Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c);
     intersector.execute();
-    concordance.reportText(cout);
+    concordance.reportText(*s.out);
 }
