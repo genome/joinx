@@ -26,7 +26,6 @@ class TestIntersect(JoinxTest, unittest.TestCase):
             self.assertEqual(0, rv)
             self.assertEqual('', err)
             expected_file = self.inputFiles(expected)[0]
-            sys.stderr.write("TRYING %s, %s\n" %(args, expected))
             self.assertFilesEqual(expected_file, output_file)
 
     def test_partial_match(self):
@@ -56,7 +55,7 @@ class TestIntersect(JoinxTest, unittest.TestCase):
     def test_file_not_found(self):
         rv, err = self.joinx(["intersect", "qwert", "djfsoidjfdj"])
         self.assertEqual(1, rv)
-        self.assertEqual("Failed to open input file 'qwert'\n", err)
+        self.assertEqual("Failed to open file qwert\n", err)
 
     def test_invalid_arguments(self):
         rv, err = self.joinx(["the bear went over the mountain"])

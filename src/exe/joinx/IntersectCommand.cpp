@@ -91,6 +91,7 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
         if (vm.count("format-string"))
             throw runtime_error("Specify either --output-both or --format string, not both");
         _formatString = "A B";
+        _outputBoth = true;
     }
 
     // TODO: flatten output modes
