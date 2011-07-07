@@ -3,17 +3,15 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <memory>
 
 class StreamHandler {
 public:
-    StreamHandler();
-    virtual ~StreamHandler();
-
     std::iostream* get(const std::string& path, std::ios_base::openmode mode);
 
 protected:
     struct Stream {
-        std::iostream* stream;
+        std::shared_ptr<std::iostream> stream;
         std::ios_base::openmode mode;
     };
 

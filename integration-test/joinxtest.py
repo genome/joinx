@@ -2,6 +2,7 @@
 
 from glob import glob
 from subprocess import Popen, PIPE
+from valgrind import Valgrind
 import difflib
 import os
 import shlex
@@ -34,10 +35,8 @@ class JoinxTest():
 
     def joinx(self, args):
         cmdline = "%s %s" %(self.exe_path, " ".join(args))
-        # Popen wants split args
-        p = Popen(shlex.split(cmdline), stderr=PIPE, close_fds=True)
-        out, err = p.communicate(None)
-        return p.returncode, err
+        vglog_file = self.tempFile("valgrind.log")
+        return Valgrind(shlex.split(cmdline), vglog_file).run()
 
     def tempFile(self, name):
         return os.path.join(self.tmp_dir, name)
