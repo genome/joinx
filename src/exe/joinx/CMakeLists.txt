@@ -18,6 +18,8 @@ set(SOURCES
     SnvConcordanceCommand.hpp
     SortCommand.cpp
     SortCommand.hpp
+    StreamHandler.cpp
+    StreamHandler.hpp
     main.cpp
 )
 

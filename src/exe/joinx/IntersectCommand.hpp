@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CommandBase.hpp"
+#include "StreamHandler.hpp"
 
 #include <fstream>
 #include <string>
@@ -47,7 +48,7 @@ protected:
         std::vector<std::fstream*> cleanup;
     };
 
-    void setupStreams(Streams& s) const;
+    void setupStreams(Streams& s);
 
 protected:
     std::string _fileA;
@@ -62,4 +63,5 @@ protected:
     bool _exactAllele;
     bool _iubMatch;
     bool _dbsnpMatch;
+    StreamHandler _streams;
 };

@@ -91,7 +91,6 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
         if (vm.count("format-string"))
             throw runtime_error("Specify either --output-both or --format string, not both");
         _formatString = "A B";
-        _outputBoth = true;
     }
 
     // TODO: flatten output modes
@@ -115,27 +114,18 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
     }
 }
 
-void IntersectCommand::setupStreams(Streams& s) const {
+void IntersectCommand::setupStreams(Streams& s) {
     unsigned cinReferences = 0;
-    unsigned coutReferences = 0;
-
-    fstream* fs;
 
     if (_fileA != "-") {
-        s.inA = fs = new fstream(_fileA.c_str(), ios::in);
-        if (!*s.inA)
-            throw runtime_error("Failed to open input file '" + _fileA + "'");
-        s.cleanup.push_back(fs);
+        s.inA = _streams.get(_fileA, ios::in);
     } else {
         s.inA = &cin;
         ++cinReferences;
     }
 
     if (_fileB != "-") {
-        s.inB = fs = new fstream(_fileB.c_str(), ios::in);
-        if (!*s.inB)
-            throw runtime_error("Failed to open input file '" + _fileB + "'");
-        s.cleanup.push_back(fs);
+        s.inB = _streams.get(_fileB, ios::in);
     } else {
         s.inB = &cin;
         ++cinReferences;
@@ -145,37 +135,22 @@ void IntersectCommand::setupStreams(Streams& s) const {
         throw runtime_error("Multiple input streams from stdin specified. Abort.");
 
     if (!_outputFile.empty() && _outputFile != "-") {
-        s.outHit = fs = new fstream(_outputFile.c_str(), ios::out);
-        if (!*s.outHit)
-            throw runtime_error("Failed to open output file '" + _outputFile + "'");
-        s.cleanup.push_back(fs);
+        s.outHit = _streams.get(_outputFile, ios::out);
     } else {
         s.outHit = &cout;
-        ++coutReferences; 
     }
 
     if (!_missFileA.empty() && _missFileA != "-") {
-        s.outMissA = fs = new fstream(_missFileA.c_str(), ios::out);
-        if (!*s.outMissA)
-            throw runtime_error("failed to open output file '" + _missFileA + "'");
-        s.cleanup.push_back(fs);
+        s.outMissA = _streams.get(_missFileA, ios::out);
     } else if (!_missFileA.empty()) {
         s.outMissA = &cout;
-        ++coutReferences;
     }
 
     if (!_missFileB.empty() && _missFileB != "-") {
-        s.outMissB = fs = new fstream(_missFileB.c_str(), ios::out);
-        if (!*s.outMissB)
-            throw runtime_error("failed to open output file '" + _missFileB + "'");
-        s.cleanup.push_back(fs);
+        s.outMissB = _streams.get(_missFileB, ios::out);
     } else if (!_missFileB.empty()) {
         s.outMissB = &cout;
-        ++coutReferences;
     }
-
-    if (coutReferences > 1)
-        throw runtime_error("Multiple output streams to stdout specified. Abort.");
 }
 
 void IntersectCommand::exec() {
