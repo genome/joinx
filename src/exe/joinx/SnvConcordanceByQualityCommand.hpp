@@ -23,7 +23,7 @@ public:
 
     void exec();
     
-    std::auto_ptr<ResultStreamWriter> setupStreamWriter();
+    std::unique_ptr<ResultStreamWriter> setupStreamWriter();
 
 protected:
     void parseArguments(int argc, char** argv);

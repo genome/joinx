@@ -70,8 +70,8 @@ void SnvConcordanceByQualityCommand::parseArguments(int argc, char** argv) {
     }
 }
 
-auto_ptr<ResultStreamWriter> SnvConcordanceByQualityCommand::setupStreamWriter() {
-    auto_ptr<ResultStreamWriter> resultStreamWriter;
+unique_ptr<ResultStreamWriter> SnvConcordanceByQualityCommand::setupStreamWriter() {
+    unique_ptr<ResultStreamWriter> resultStreamWriter;
 
     ofstream* hitA(NULL);
     ofstream* hitB(NULL);
@@ -134,7 +134,7 @@ void SnvConcordanceByQualityCommand::exec() {
     ResultMultiplexer rmux;
     rmux.add(&qc);
 
-    auto_ptr<ResultStreamWriter> resultStreamWriter = setupStreamWriter();
+    unique_ptr<ResultStreamWriter> resultStreamWriter = setupStreamWriter();
     if (resultStreamWriter.get())
         rmux.add(resultStreamWriter.get());
     SnvComparator snvi(fa, fb, rmux);
