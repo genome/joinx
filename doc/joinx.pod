@@ -10,9 +10,10 @@ joinx [--version|-v] SUBCOMMAND [SUBCOMMAND-ARGS]
 
 Joinx is a lightweight tool for performing set operations (e.g., intersection,
 difference, ...) on genomic data contained in .bed files. It also
-provides some limited analysis functions (concordance reports). An
-important assumption that joinx makes is that the input data is always
-sorted. This allows it to compute its results in an efficient manner.
+provides some limited analysis functions (concordance reports), and can be used
+to generate contigs from variant files and a reference sequence. An important
+assumption that joinx makes is that the input data is always sorted. This
+allows it to compute its results in an efficient manner.
 
 =head1 INTERSECT SUBCOMMAND
 
@@ -44,6 +45,24 @@ joinx intersect [OPTIONS] a.bed b.bed
 --miss-b <path>
     Write entries in B that are not in A (set difference, B\A) to <path>.
 
+-F, --format
+    Specify a format string for intersection output. The string consists
+    of a space separated list of column specifiers:
+
+    I - the actual intersection of the two bed entries (3 columns)
+    A - the complete entry from file 'A'
+    B - the complete entry from file 'B'
+
+    Additionally, you can select individual columns from A or B like so:
+
+    A3     - column 3 from A
+    A1,3   - columns 1 and 3 from A
+    A2-4,6 - columns 2 to 4, and 6 from A
+
+    A complete example is: --format "I A B4" which outputs the range of
+    the intersection, followed by the complete entry from A, and the 4th
+    column from B.
+
 -f, --first-only
     Notice only the first thing in A to hit records in B, not the full
     intersection
@@ -64,7 +83,7 @@ joinx intersect [OPTIONS] a.bed b.bed
 
 --dbsnp-match
     Undocumented. Should not be used.
-    
+
 =head1 SNV-CONCORDANCE SUBCOMMAND
 
 joinx snv-concordance
@@ -87,6 +106,9 @@ joinx snv-concordance [OPTIONS] a.bed b.bed
 
 -d, --depth
     Use read depth (bed column 5) instead of quality (column 4) in report
+
+--output-file <path>
+    Output the report to the given path (stdout by default)
 
 --hits <path>
     Output the resulting intersection of "A" and "B" to "path" (discarded by default)
@@ -134,4 +156,3 @@ Github at: L<https://github.com/genome/joinx/>.
 =head1 COPYRIGHT
 
 Joinx is free software, distributed under the terms of the GNU GPL v3 or later: L<http://gnu.org/licenses/gpl.html>.
-
