@@ -16,6 +16,7 @@
 
 
 EXECUTABLES="joinx"
+MANPAGES="joinx"
 
 set -e
 
@@ -25,6 +26,12 @@ case "$1" in
         do
             VERSIONED_EXE="/usr/bin/${e}@EXE_VERSION_SUFFIX@"
             update-alternatives --remove $e $VERSIONED_EXE
+        done
+
+        for m in $MANPAGES
+        do
+            VERSIONED_MAN="/usr/share/man/man1/${m}@EXE_VERSION_SUFFIX@.1.gz"
+            update-alternatives --remove $m.1.gz $VERSIONED_MAN
         done
     ;;
 

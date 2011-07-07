@@ -17,6 +17,7 @@
 
 
 EXECUTABLES="joinx"
+MANPAGES="joinx"
 PRIORITY=@DEFAULT_ETC_ALTERNATIVES_PRIORITY@
 
 set -e
@@ -28,6 +29,13 @@ case "$1" in
             BARE_EXE=/usr/bin/$e
             VERSIONED_EXE="/usr/bin/${e}@EXE_VERSION_SUFFIX@"
             update-alternatives --install $BARE_EXE $e $VERSIONED_EXE $PRIORITY
+        done
+
+        for m in $MANPAGES
+        do
+            BARE_MAN=/usr/share/man/man1/$m.1.gz
+            VERSIONED_MAN=/usr/share/man/man1/${m}@EXE_VERSION_SUFFIX@.1.gz
+            update-alternatives --install $BARE_MAN $m.1.gz $VERSIONED_MAN $PRIORITY
         done
     ;;
 
