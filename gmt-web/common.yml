@@ -16,5 +16,6 @@ module_details:
     gmt_pkg_name: joinx
     debian_pkg_name: joinx
 
+include_suffix: true
 download_link: install.html
 github_url: https://github.com/genome/joinx
