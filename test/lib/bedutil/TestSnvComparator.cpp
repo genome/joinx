@@ -17,7 +17,7 @@ const string BEDA =
     "19\t3\t4\tA/T\t44\n"
     "19\t3\t4\tA/T\t44\n"
     "X\t2\t3\tA/T\t44\n"
-    "Y\t2\t3\tA/T\t44\n";
+    "Y\t1\t2\tA/T\t44\n";
 
 const string BEDB = 
     "1\t2\t3\tA/T\t43\n"
@@ -57,8 +57,8 @@ TEST(SnvComparator, intersectSome) {
     SnvComparator ss(sA, sB, rc);
     ss.exec();
 
-    ASSERT_EQ(4u, rc._hitA.size());
-    ASSERT_EQ(6u, rc._hitB.size());
-    ASSERT_EQ(2u, rc._missA.size());
-    ASSERT_EQ(4u, rc._missB.size());
+    ASSERT_EQ(3u, rc._hitA.size());
+    ASSERT_EQ(4u, rc._hitB.size());
+    ASSERT_EQ(3u, rc._missA.size());
+    ASSERT_EQ(6u, rc._missB.size());
 }
