@@ -1,7 +1,10 @@
 {% include install/download.html %}
 {% include install/github.html %}
 
-{% assign help_command = "joinx -h<br/>joinx intersect -h" %}
-{% include install/help.html %}
+{% capture help_command %}
+  {{ page.module_details.exe_name }}{{ page.version_suffix }} -h<br />
+  {{ page.module_details.exe_name }}{{ page.version_suffix }} intersect -h
+{% endcapture %}
 
+{% include install/help.html %}
 {% include install/manuals.html %}
