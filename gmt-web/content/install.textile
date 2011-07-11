@@ -1,13 +1,7 @@
 {% include install/download.html %}
-{% include install/download.html %}
 {% include install/github.html %}
 
-h2. Help:
-==<hr />==
-
-p. To get help on joinx or a particular subcommand, use the -h option, e.g.:
-
-p(terminal). ==joinx -h==
-==joinx intersect -h==
+{% assign help_command = "joinx -h<br/>joinx intersect -h" %}
+{% include install/help.html %}
 
 {% include install/manuals.html %}
