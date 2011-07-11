@@ -22,7 +22,7 @@ void BedStream::addFilter(BedFilterBase* filter) {
 }
 
 void BedStream::checkEof() const {
-    if (eof())
+    if (!_cached && eof())
         throw runtime_error("Attempted to read past eof of stream " + name());
 }
 
