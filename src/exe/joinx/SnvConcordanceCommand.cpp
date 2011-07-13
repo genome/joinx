@@ -119,7 +119,7 @@ void SnvConcordanceCommand::setupStreams(Streams& s) const {
         if (!*s.out)
             throw runtime_error("Failed to open output file '" + _outputFile + "'");
         s.cleanup.push_back(fs);
-    } else if (_outputFile == "-") {
+    } else {
         s.out = &cout;
         ++coutReferences; 
     }
