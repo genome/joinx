@@ -15,22 +15,28 @@ namespace IntersectionOutput {
 
 class ColumnBase {
 public:
-    ColumnBase(std::ostream& s)
-        : _s(s)
+    ColumnBase(std::ostream& s, unsigned which)
+        : _which(which)
+        , _extraFields(0)
+        , _s(s)
     {}
 
     virtual ~ColumnBase() {}
 
     virtual void output(const Bed& a, const Bed& b) = 0;
+    virtual unsigned which() const { return _which; }
+    virtual unsigned extraFields() const { return _extraFields; }
 
 protected:
+    unsigned _which;
+    unsigned _extraFields;
     std::ostream& _s;
 };
 
 class IntersectionColumns : public ColumnBase {
 public:
     IntersectionColumns(std::ostream& s)
-        : ColumnBase(s)
+        : ColumnBase(s, 0)
     {}
 
     void output(const Bed& a, const Bed& b) {
@@ -42,8 +48,7 @@ public:
 class Column : public ColumnBase {
 public:
     Column(std::ostream& s, unsigned which, unsigned field)
-        : ColumnBase(s)
-        , _which(which)
+        : ColumnBase(s, which)
         , _field(field)
     {
         switch (_field) {
@@ -58,6 +63,7 @@ public:
                 break;
             default:
                 _field -= 3;
+                _extraFields = _field + 1;
                 _output = std::bind(&Column::outputExtraField, this, _1, _2);
                 break;
         }
@@ -132,7 +138,6 @@ public:
     }
 
 protected:
-    unsigned _which;
     unsigned _field;
     std::function<void(const Bed&, const Bed&)> _output;
 };
@@ -140,16 +145,12 @@ protected:
 class CompleteColumn : public ColumnBase {
 public:
     CompleteColumn(std::ostream& s, unsigned which)
-        : ColumnBase(s)
-        , _which(which)
+        : ColumnBase(s, which)
     {}
 
     void output(const Bed& a, const Bed& b) {
-        _s << (_which ? b : a);        
+        _s << (_which ? b : a);
     }
-
-protected:
-    unsigned _which;
 };
 
 Formatter::Formatter(const std::string& formatString, std::ostream& s)
@@ -186,6 +187,14 @@ void Formatter::output(const Bed& a, const Bed& b) {
         if (i < _columns.size() - 1) _s << "\t";
     }
     _s << "\n";
+}
+
+unsigned Formatter::extraFields(unsigned which) const {
+    unsigned n = 0;
+    for (auto i = _columns.begin(); i != _columns.end(); ++i)
+        if ((*i)->which() == 0)
+            n = max(n, (*i)->extraFields());
+    return n;
 }
 
 }

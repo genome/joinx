@@ -16,6 +16,7 @@ public:
     virtual ~Formatter();
 
     void output(const Bed& a, const Bed& b);
+    unsigned extraFields(unsigned which) const;
 
 protected:
     std::string _formatString;

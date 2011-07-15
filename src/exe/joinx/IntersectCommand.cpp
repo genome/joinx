@@ -6,15 +6,18 @@
 #include "common/intconfig.hpp"
 #include "fileformats/BedStream.hpp"
 
+#include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <algorithm>
 #include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
 
+using boost::format;
 using namespace std;
 namespace po = boost::program_options;
 
@@ -46,6 +49,7 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
         ("miss-a", po::value<string>(&_missFileA), "output misses in A to file")
         ("miss-b", po::value<string>(&_missFileB), "output misses in B to file")
         ("format-string,F", po::value<string>(&_formatString), "specify the output format explicity (see man page).")
+        ("full", "'full' output format, equivalent to -F 'I A B'")
         ("first-only,f", "notice only the first thing to hit records in b, not the full intersection")
         ("output-both", "concatenate intersecting lines in output (vs writing out only lines from 'a')")
         ("exact-pos", "require exact match of coordinates (default is to count overlaps)")
@@ -65,6 +69,26 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
         vm
     );
     po::notify(vm);
+
+    // check for mutually exclusive formatting options
+    vector<string> exclusiveFormattingOpts = {
+        "output-both",
+        "format-string",
+        "full",
+    };
+    vector<string> formattingOpts;
+    for (auto i = exclusiveFormattingOpts.begin(); i != exclusiveFormattingOpts.end(); ++i) {
+        if (vm.count(*i))
+            formattingOpts.push_back(*i);
+    }
+    if (formattingOpts.size() > 1) {
+        stringstream opts;
+        copy(formattingOpts.begin(), formattingOpts.end(), ostream_iterator<string>(opts, " "));
+
+        throw runtime_error(
+            str(format("Mutually exclusive formatting options detected, please specify only one of: %s") %opts.str())
+        );
+    }
 
     if (vm.count("help")) {
         stringstream ss;
@@ -86,15 +110,17 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
 
     if (vm.count("first-only"))
         _firstOnly = true;
-    
+
     if (vm.count("output-both")) {
-        if (vm.count("format-string"))
-            throw runtime_error("Specify either --output-both or --format string, not both");
         _formatString = "A B";
         _outputBoth = true;
     }
 
-    // TODO: flatten output modes
+    if (vm.count("full")) {
+        _formatString = "I A B";
+        _outputBoth = true;
+    }
+
     if (vm.count("exact-pos"))
         _exactPos = true;
 
@@ -164,9 +190,11 @@ void IntersectCommand::exec() {
 
     IntersectionOutput::Formatter outputFormatter(_formatString, *s.outHit);
 
-    // these bedstreams will read 1 extra field, which is ref/call
-    BedStream fa(_fileA, *s.inA, 1);
-    BedStream fb(_fileB, *s.inB, 1);
+    unsigned extraFieldsA = max(1u, outputFormatter.extraFields(0));
+    unsigned extraFieldsB = max(1u, outputFormatter.extraFields(1));
+    //
+    BedStream fa(_fileA, *s.inA, extraFieldsA);
+    BedStream fb(_fileB, *s.inB, extraFieldsB);
 
     Collector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, _dbsnpMatch, outputFormatter, s.outMissA, s.outMissB);
     Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c);

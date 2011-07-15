@@ -69,5 +69,19 @@ class TestIntersect(JoinxTest, unittest.TestCase):
         self.assertEqual(1, rv)
         self.assertTrue(err.startswith("Unsorted data found in stream"))
 
+    def test_output_format_extra_fields(self):
+        output_file = self.tempFile("output.bed")
+        params = [
+            "intersect",
+            "--format 'I A3-4'",
+            "-o", output_file
+        ]
+        params.extend(self.inputFiles("a.bed", "b.bed"))
+        rv, err = self.joinx(params)
+        self.assertEqual(0, rv)
+        self.assertEqual('', err)
+        expected_file = self.inputFiles("expected-format-I,A3-4.bed")[0]
+        self.assertFilesEqual(expected_file, output_file)
+
 if __name__ == "__main__":
     main()

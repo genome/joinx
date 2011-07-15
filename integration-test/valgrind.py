@@ -5,22 +5,26 @@ import os
 import re
 
 class Valgrind:
-    valgrind_path = None
+    vg_path = None
+    disable_var = "JXTEST_NO_VALGRIND"
 
     def __init__(self, command, vglog_file):
         self.command = command
         self.vglog_file = vglog_file
-        if self.valgrind_path == None:
+        if self.vg_path == None:
             for d in os.environ["PATH"].split(os.pathsep):
                 path = os.path.join(d, "valgrind")
                 if os.path.exists(path) and os.access(path, os.X_OK):
-                    self.valgrind_path = path
+                    self.vg_path = path
                     break
+
+    def have_valgrind(self):
+        return self.vg_path != None and os.getenv(self.disable_var) == None
 
     def run(self):
         cmd = self.command
 
-        if self.valgrind_path != None:
+        if self.have_valgrind():
             cmd[:0] = [
                 "valgrind",
                 "--leak-check=full",
@@ -36,7 +40,7 @@ class Valgrind:
         return p.returncode, err
 
     def leak_free(self):
-        if self.valgrind_path == None:
+        if self.have_valgrind() == False:
             return True
 
         log_contents = open(self.vglog_file).read()
