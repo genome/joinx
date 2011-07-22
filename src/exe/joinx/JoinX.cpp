@@ -1,4 +1,5 @@
 #include "JoinX.hpp"
+#include "CheckRefCommand.hpp"
 #include "CreateContigsCommand.hpp"
 #include "IntersectCommand.hpp"
 #include "SnvConcordanceByQualityCommand.hpp"
@@ -20,6 +21,7 @@ JoinX::JoinX(int argc, char** argv)
     registerSubCommand(SnvConcordanceByQualityCommand::ptr(new SnvConcordanceByQualityCommand));
     registerSubCommand(SnvConcordanceCommand::ptr(new SnvConcordanceCommand));
     registerSubCommand(CreateContigsCommand::ptr(new CreateContigsCommand));
+    registerSubCommand(CheckRefCommand::ptr(new CheckRefCommand));
     registerSubCommand(SortCommand::ptr(new SortCommand));
 
     stringstream cmdHelp;
