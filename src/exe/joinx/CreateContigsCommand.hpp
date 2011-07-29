@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CommandBase.hpp"
+#include "StreamHandler.hpp"
 
 #include <string>
 
@@ -27,4 +28,5 @@ protected:
     std::string _outputFile;
     int _flankSize;
     int _minQuality;
+    StreamHandler _streams;
 };

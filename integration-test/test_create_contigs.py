@@ -15,5 +15,27 @@ class TestCreateContigs(JoinxTest, unittest.TestCase):
         self.assertEqual(0, rv)
         self.assertFilesEqual(expected_file, output_file)
 
+    def test_fasta_not_found(self):
+        input_files = self.inputFiles("variants-contig.bed")
+        output_file = self.tempFile("output.bed")
+        params = ["create-contigs", "--flank=10", "-o", output_file ]
+        params.append("boof.fa")
+        params.extend(input_files)
+        rv, err = self.joinx(params)
+        self.assertEqual(1, rv)
+        self.assertTrue(err.startswith("Failed to load fasta file: boof.fa"))
+
+    def test_bed_not_found(self):
+        input_files = self.inputFiles("small.fa")
+        output_file = self.tempFile("output.bed")
+        params = ["create-contigs", "--flank=10", "-o", output_file ]
+        params.extend(input_files)
+        params.append("boof.bed")
+        rv, err = self.joinx(params)
+        self.assertEqual(1, rv)
+        self.assertTrue(err.startswith("Failed to open file boof.bed"))
+
+
+
 if __name__ == "__main__":
     main()

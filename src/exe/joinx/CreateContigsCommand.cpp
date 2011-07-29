@@ -88,21 +88,17 @@ void CreateContigsCommand::parseArguments(int argc, char** argv) {
 
 void CreateContigsCommand::exec() {
     FastaReader ref(_referenceFasta);
-    std::istream* input = &cin; 
-    std::ostream* output = &cout;
-    bool closeOutput = false;
-    bool closeInput = false;
+    istream* input = &cin; 
+    ostream* output = &cout;
 
     if (!_variantsFile.empty() && _variantsFile != "-") {
-        closeInput = true;
-        input = new ifstream(_variantsFile);
+        input = _streams.get(_variantsFile, ios::in);
         if (!*input)
             throw runtime_error(str(format("Failed to open variants file %1%") %_variantsFile));
     }
 
     if (!_outputFile.empty() && _outputFile != "-") {
-        closeOutput = true;
-        output = new ofstream(_outputFile);
+        output = _streams.get(_outputFile, ios::out);
         if (!*output)
             throw runtime_error(str(format("Failed to open output file %1%") %_outputFile));
     }
@@ -118,6 +114,4 @@ void CreateContigsCommand::exec() {
             generator.generate(v);
     }
 
-    if (closeInput) delete input;
-    if (closeOutput) delete output;
 }

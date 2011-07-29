@@ -3,6 +3,7 @@
 #include <boost/format.hpp>
 #include <algorithm>
 #include <cassert>
+#include <fstream>
 #include <stdexcept>
 
 using boost::format;
@@ -13,9 +14,11 @@ FastaReader::FastaReader(const string& path)
     , _len(0)
     , _buf(NULL)
 {
-    _fai = fai_load(path.c_str());
-    if (_fai == NULL)
-        throw runtime_error(str(format("Failed to load fasta file: %1%") %path));
+    string failmsg = str(format("Failed to load fasta file: %1%") %path);
+    // samtools 0.1.17 segfaults if you fai_load a non-existing file
+    ifstream tmp(path.c_str());
+    if (!tmp.is_open() || (_fai = fai_load(path.c_str())) == NULL)
+        throw runtime_error(failmsg);
 }
 
 FastaReader::~FastaReader() {

@@ -37,7 +37,7 @@ public:
         else                        cigar << (-insertedBases) << 'D'; // del
         if (!post.empty()) cigar << post.size() << '=';
 
-        _name = str(format("REMAP-%1%,%2%,%3%-%4%")
+        _name = str(format("REMAP-%1%|%2%|%3%-%4%")
             %chrom
             %start
             %stop
