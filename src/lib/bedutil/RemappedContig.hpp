@@ -27,7 +27,8 @@ public:
         using std::string;
 
         _sequence = pre;
-        _sequence.append(var, varLen);
+        if (insertedBases >= 0)
+            _sequence.append(var, varLen);
         _sequence += post;
 
         std::stringstream cigar;
@@ -105,13 +106,14 @@ public:
             }
         } else {
             int isize = v.type() == Variant::DEL ? -ref.size() : var.size();
-            int strLen = v.type() == Variant::DEL ? 0 : var.size();
+            int strLen = v.type() == Variant::DEL ? ref.size() : var.size();
             RemappedContig ctg(
                 v.chrom(),
                 start,
                 stop,
                 preFlank,
-                &var[0], strLen,
+                v.type() == Variant::DEL ? &ref[0] : &var[0],
+                strLen,
                 postFlank,
                 isize
                 );
