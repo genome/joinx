@@ -36,6 +36,7 @@ IntersectCommand::IntersectCommand()
     , _exactAllele(false)
     , _iubMatch(false)
     , _dbsnpMatch(false)
+    , _adjacentInsertions(false)
 {
 }
 
@@ -55,7 +56,9 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
         ("exact-pos", "require exact match of coordinates (default is to count overlaps)")
         ("exact-allele", "require exact match of coordinates AND allele values")
         ("iub-match", "when using --exact-allele, this enables expansion and partial matching of IUB codes")
-        ("dbsnp-match", "like using --iub-match, but will try to reverse the reference and variant in file b, as well as reverse complement to get a match");
+        ("dbsnp-match", "like using --iub-match, but will try to reverse the reference and variant in file b, as well as reverse complement to get a match")
+        ("adjacent-insertions", "count insertions adjacent to other regions as intersecting")
+        ;
 
     po::positional_options_description posOpts;
     posOpts.add("file-a", 1);
@@ -108,8 +111,7 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
         throw runtime_error(ss.str());
     }
 
-    if (vm.count("first-only"))
-        _firstOnly = true;
+    _firstOnly = vm.count("first-only") > 0;
 
     if (vm.count("output-both")) {
         _formatString = "A B";
@@ -121,17 +123,14 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
         _outputBoth = true;
     }
 
-    if (vm.count("exact-pos"))
-        _exactPos = true;
+    _exactPos = vm.count("exact-pos") > 0;
 
     if (vm.count("exact-allele")) {
         _exactAllele = true;
         _exactPos = true;
     }
 
-    if (vm.count("iub-match")) {
-        _iubMatch = true;
-    }
+    _iubMatch = vm.count("iub-match") > 0;
 
     if (vm.count("dbsnp-match")) {
         _exactAllele = true;
@@ -139,6 +138,8 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
         _iubMatch = true;
         _dbsnpMatch = true;
     }
+
+    _adjacentInsertions = vm.count("adjacent-insertions") > 0;
 }
 
 void IntersectCommand::setupStreams(Streams& s) {
@@ -197,6 +198,6 @@ void IntersectCommand::exec() {
     BedStream fb(_fileB, *s.inB, extraFieldsB);
 
     Collector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, _dbsnpMatch, outputFormatter, s.outMissA, s.outMissB);
-    Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c);
+    Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c, _adjacentInsertions);
     intersector.execute();
 }

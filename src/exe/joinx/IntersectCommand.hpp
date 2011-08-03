@@ -63,5 +63,6 @@ protected:
     bool _exactAllele;
     bool _iubMatch;
     bool _dbsnpMatch;
+    bool _adjacentInsertions;
     StreamHandler _streams;
 };
