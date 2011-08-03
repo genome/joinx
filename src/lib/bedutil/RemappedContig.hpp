@@ -27,6 +27,8 @@ public:
         using std::string;
 
         _sequence = pre;
+        // insertedBases will be negative for deletions. for everything else,
+        // we want to append the variant bases to the sequence.
         if (insertedBases >= 0)
             _sequence.append(var, varLen);
         _sequence += post;
@@ -88,9 +90,11 @@ public:
         const string& var = v.variant().data();
 
         if (v.type() == Variant::SNP) {
+            // In the case of extended iub codes, we create one contig per
+            // hypothesized base
             const char* bases = translateIub(var);
             while (*bases) {
-                if (*bases != ref[0]) {
+                if (*bases != ref[0]) { // non-reference base, that is
                     RemappedContig ctg(
                         v.chrom(),
                         start,
