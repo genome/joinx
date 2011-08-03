@@ -3,7 +3,10 @@ cmake_minimum_required(VERSION 2.8)
 project(common)
 
 set(SOURCES
+    CigarString.cpp
+    CigarString.hpp
     Iub.hpp
+    ProgramVersion.hpp
     Region.cpp
     Region.hpp
     Sequence.cpp
