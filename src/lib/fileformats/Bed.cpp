@@ -18,6 +18,7 @@ Bed::Bed(const std::string& chrom, int64_t start, int64_t stop)
     : _chrom(chrom)
     , _start(start)
     , _stop(stop)
+    , _length(stop-start)
 {
 }
 
@@ -25,6 +26,7 @@ Bed::Bed(const std::string& chrom, int64_t start, int64_t stop, const ExtraField
     : _chrom(chrom)
     , _start(start)
     , _stop(stop)
+    , _length(stop-start)
     , _extraFields(extraFields)
 {
 }
@@ -41,6 +43,8 @@ void Bed::parseLine(std::string& line, Bed& bed, int maxExtraFields) {
     if (!tokenizer.extract(bed._stop))
         throw runtime_error(str(format("Failed to extract stop position from bed line '%1%'") %line));
 
+    bed._length = bed._stop - bed._start;
+
     bed._extraFields.clear();
     int fields = 0;
     while ((maxExtraFields == -1 || fields++ < maxExtraFields) && !tokenizer.eof()) {
@@ -56,6 +60,7 @@ void Bed::swap(Bed& rhs) {
     _chrom.swap(rhs._chrom);
     std::swap(_start, rhs._start);
     std::swap(_stop, rhs._stop);
+    std::swap(_length, rhs._length);
     _line.swap(rhs._line);
     _extraFields.swap(rhs._extraFields);
 }

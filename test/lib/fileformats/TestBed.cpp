@@ -22,11 +22,22 @@ TEST(Bed, parse) {
     ASSERT_EQ(3u, snv.stop());
     ASSERT_EQ("A/T", snv.extraFields()[0]);
     ASSERT_EQ("44", snv.extraFields()[1]);
+    ASSERT_EQ(1, snv.length());
 
     ASSERT_EQ(Bed::SNV, snv.type());
 
     snv._stop += 1;
     ASSERT_EQ(Bed::INDEL, snv.type());
+}
+
+TEST(Bed, length) {
+    Bed snv("1", 2, 3);
+    Bed del2bp("1", 2, 4);
+    Bed ins("1", 2, 2);
+
+    ASSERT_EQ(1, snv.length());
+    ASSERT_EQ(2, del2bp.length());
+    ASSERT_EQ(0, ins.length());
 }
 
 TEST(Bed, swap) {

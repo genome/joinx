@@ -28,6 +28,7 @@ public:
     const std::string& chrom() const;
     int64_t start() const;
     int64_t stop() const;
+    int64_t length() const;
     const std::string& toString() const;
 
     int cmp(const Bed& rhs) const;
@@ -44,6 +45,7 @@ protected:
     std::string _chrom;
     int64_t _start;
     int64_t _stop;
+    int64_t _length;
     ExtraFieldsType _extraFields;
 
     mutable std::string _line;
@@ -59,6 +61,10 @@ inline int64_t Bed::start() const {
 
 inline int64_t Bed::stop() const {
     return _stop;
+}
+
+inline int64_t Bed::length() const {
+    return _length;
 }
 
 inline bool Bed::operator<(const Bed& rhs) const {
