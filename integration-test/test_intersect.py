@@ -28,6 +28,23 @@ class TestIntersect(JoinxTest, unittest.TestCase):
             expected_file = self.inputFiles(expected)[0]
             self.assertFilesEqual(expected_file, output_file)
 
+    def test_adjacent_insertions(self):
+        output_file = self.tempFile("output.bed")
+        params = [
+            "intersect", "--full",
+            "-o", output_file
+        ]
+        params.extend(self.inputFiles(
+            "adjacent-insertions-a.bed",
+            "adjacent-insertions-b.bed"
+        ))
+        print params
+        rv, err = self.joinx(params)
+        self.assertEqual(0, rv)
+        self.assertEqual('', err)
+        expected_file = self.inputFiles("expected-adjacent-insertions.bed")[0]
+        self.assertFilesEqual(expected_file, output_file)
+
     def test_partial_match(self):
         output_file = self.tempFile("output.bed")
         params = [

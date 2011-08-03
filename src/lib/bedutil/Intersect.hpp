@@ -29,9 +29,12 @@ public:
         if (rv > 0)
             return AFTER;
 
-        // to handle insertions!
-        if (a.start() == a.stop() && b.start() == b.stop() && a.start() == b.start())
+        // to handle adjacent/exact match insertions!
+        if ((a.length() == 0 && (a.start() == b.start() || a.start() == b.stop())) ||
+            (b.length() == 0 && (b.start() == a.start() || b.start() == a.stop())) )
+        {
             return INTERSECT;
+        }
 
         if (a.stop() <= b.start())
             return BEFORE;
