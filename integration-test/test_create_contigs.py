@@ -23,7 +23,7 @@ class TestCreateContigs(JoinxTest, unittest.TestCase):
         params.extend(input_files)
         rv, err = self.joinx(params)
         self.assertEqual(1, rv)
-        self.assertTrue(err.startswith("Failed to load fasta file: boof.fa"))
+        self.assertTrue("Failed to load fasta file: boof.fa" in err, "value was %s" %err)
 
     def test_bed_not_found(self):
         input_files = self.inputFiles("small.fa")
@@ -33,7 +33,7 @@ class TestCreateContigs(JoinxTest, unittest.TestCase):
         params.append("boof.bed")
         rv, err = self.joinx(params)
         self.assertEqual(1, rv)
-        self.assertTrue(err.startswith("Failed to open file boof.bed"))
+        self.assertTrue("Failed to open file boof.bed" in err, "value was %s" %err)
 
 
 
