@@ -35,4 +35,5 @@ protected:
     uint64_t _maxInMem;
     bool _mergeOnly;
     bool _stable;
+    std::string _compressionString;
 };

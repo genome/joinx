@@ -19,6 +19,9 @@ namespace {
 
 class TestSort : public ::testing::Test {
 protected:
+    typedef boost::shared_ptr<BedStream> BedStreamPtr;
+
+    TestSort() : _rawStreams(NULL) {}
 
     string chromName(int chrom) {
         stringstream chromStr;
@@ -43,51 +46,64 @@ protected:
         }
         _shuffledBeds = _expectedBeds;
         random_shuffle(_shuffledBeds.begin(), _shuffledBeds.end());
+
+        const int nStreams = 10;
+        _rawStreams = new stringstream[nStreams];
+        auto iter = _shuffledBeds.begin();
+        while (iter != _shuffledBeds.end()) {
+            for (int i = 0; i < nStreams && iter != _shuffledBeds.end(); ++i) {
+                _rawStreams[i] << *iter++ << "\n";
+            }
+        }
+
+        for (int i = 0; i < nStreams; ++i)
+            _bedStreams.push_back(BedStreamPtr(new BedStream("test", _rawStreams[i], -1)));
+    }
+
+    void TearDown() {
+        delete[] _rawStreams;
+        _rawStreams = NULL;
     }
 
     vector<Bed> _expectedBeds;
     vector<Bed> _shuffledBeds;
     stringstream _expectedStr;
+
+    stringstream* _rawStreams;
+    vector<BedStreamPtr> _bedStreams;
 };
 
 TEST_F(TestSort, unstable) {
-    const int nStreams = 10;
-    stringstream streams[nStreams];
-    vector<Bed>::const_iterator iter = _shuffledBeds.begin();
-    while (iter != _shuffledBeds.end()) {
-        for (int i = 0; i < nStreams && iter != _shuffledBeds.end(); ++i) {
-            streams[i] << *iter++ << "\n";
-        }
-    }
-
-    typedef boost::shared_ptr<BedStream> BedStreamPtr;
-    vector<BedStreamPtr> bedStreams;
-    for (int i = 0; i < nStreams; ++i)
-        bedStreams.push_back(BedStreamPtr(new BedStream("test", streams[i], -1)));
-
     stringstream out;
-    Sort<BedStream, BedStreamPtr> sorter(bedStreams, out, _expectedBeds.size()/10, false);
+    Sort<BedStream, BedStreamPtr> sorter(_bedStreams, out, _expectedBeds.size()/10, false);
+    sorter.execute();
+    ASSERT_EQ(_expectedStr.str(), out.str());
+}
+
+TEST_F(TestSort, zlib) {
+    stringstream out;
+    Sort<BedStream, BedStreamPtr> sorter(_bedStreams, out, _expectedBeds.size()/10, false, ZLIB);
+    sorter.execute();
+    ASSERT_EQ(_expectedStr.str(), out.str());
+}
+
+TEST_F(TestSort, bzip2) {
+    stringstream out;
+    Sort<BedStream, BedStreamPtr> sorter(_bedStreams, out, _expectedBeds.size()/10, false, BZIP2);
+    sorter.execute();
+    ASSERT_EQ(_expectedStr.str(), out.str());
+}
+
+TEST_F(TestSort, gzip) {
+    stringstream out;
+    Sort<BedStream, BedStreamPtr> sorter(_bedStreams, out, _expectedBeds.size()/10, false, GZIP);
     sorter.execute();
     ASSERT_EQ(_expectedStr.str(), out.str());
 }
 
 TEST_F(TestSort, stable) {
-    const int nStreams = 10;
-    stringstream streams[nStreams];
-    vector<Bed>::const_iterator iter = _shuffledBeds.begin();
-    while (iter != _shuffledBeds.end()) {
-        for (int i = 0; i < nStreams && iter != _shuffledBeds.end(); ++i) {
-            streams[i] << *iter++ << "\n";
-        }
-    }
-
-    typedef boost::shared_ptr<BedStream> BedStreamPtr;
-    vector<BedStreamPtr> bedStreams;
-    for (int i = 0; i < nStreams; ++i)
-        bedStreams.push_back(BedStreamPtr(new BedStream("test", streams[i], -1)));
-
     stringstream out;
-    Sort<BedStream, BedStreamPtr> sorter(bedStreams, out, _expectedBeds.size()/10, false);
+    Sort<BedStream, BedStreamPtr> sorter(_bedStreams, out, _expectedBeds.size()/10, false);
     sorter.execute();
     ASSERT_EQ(_expectedStr.str(), out.str());
 }

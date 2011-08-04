@@ -2,6 +2,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
+#include <cstring>
 #include <cstdio> // P_tmpdir in glibc
 #include <cstdlib>
 #include <stdexcept>
@@ -10,17 +11,17 @@ using namespace std;
 using boost::format;
 namespace bfs = boost::filesystem;
 
+#ifdef P_tmpdir
+# define DEFAULT_TMPDIR P_tmpdir
+#else
+# define DEFAULT_TMPDIR "/tmp"
+#endif
+
 // TempFile ///////////////////////////// 
 
 const char* TempFile::sys_tmpdir() {
-#ifdef P_tmpdir
-    const char* def = P_tmpdir;
-#else
-    const char* def = "/tmp";
-#endif
-
     const char* envtmp = getenv("TMPDIR");
-    return envtmp == NULL ? def : envtmp;
+    return envtmp == NULL ? DEFAULT_TMPDIR : envtmp;
 }
 
 TempFile::ptr TempFile::create(Mode mode) {
@@ -33,11 +34,15 @@ TempFile::ptr TempFile::create(const std::string& tmpl, Mode mode) {
 
 TempFile::TempFile(Mode mode)
     : _path(sys_tmpdir())
+    , _mode(mode)
 {
+    _path += "/tmp.XXXXXX";
+    _mkstemp();
 }
 
 TempFile::TempFile(const std::string& tmpl, Mode mode)
     : _path(tmpl)
+    , _mode(mode)
 {
     _mkstemp();
 }
@@ -55,7 +60,7 @@ void TempFile::_mkstemp() {
     }
 
     if (!_stream.is_open())
-        throw runtime_error(str(format("Failed to create temp file with template %1%") %_path));
+        throw runtime_error(str(format("Failed to create temp file with template %1%: %s") %_path %strerror(errno)));
 
     if (_mode == ANON) {
         bfs::remove(_path);

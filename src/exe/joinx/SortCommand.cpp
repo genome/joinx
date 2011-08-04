@@ -43,8 +43,9 @@ void SortCommand::parseArguments(int argc, char** argv) {
         ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
         ("max-mem-lines,M", po::value<uint64_t>(&_maxInMem),
             str(format("maximum number of lines to hold in memory at once (default=%1%)") %_maxInMem).c_str())
-        ("stable,s", "perform a 'stable' sort (default=false)");
-
+        ("stable,s", "perform a 'stable' sort (default=false)")
+        ("compression,C", po::value<string>(&_compressionString), "type of compression to use for tmpfiles, n=none, g=gzip, z=zlib, b=bzip2. default=n")
+        ;
     po::positional_options_description posOpts;
     posOpts.add("input-file", -1);
 
@@ -76,6 +77,21 @@ void SortCommand::parseArguments(int argc, char** argv) {
 
 void SortCommand::exec() {
     typedef boost::shared_ptr<ifstream> FilePtr;
+
+    CompressionType compression(NONE);
+    if (!_compressionString.empty()) {
+        if (_compressionString == "n")
+            compression = NONE;
+        else if (_compressionString == "g")
+            compression = GZIP;
+        else if (_compressionString == "z")
+            compression = ZLIB;
+        else if (_compressionString == "b")
+            compression = BZIP2;
+        else
+            throw runtime_error(str(format("Invalid compression option '%1%'") %_compressionString));
+    }
+
     vector<FilePtr> files;
     bool haveCin = false;
     for (vector<string>::const_iterator iter = _filenames.begin(); iter != _filenames.end(); ++iter) {
@@ -103,6 +119,6 @@ void SortCommand::exec() {
         out = &cout;
     }
 
-    Sort<BedStream, BedStream*> sorter(_inputs, *out, _maxInMem, _stable);
+    Sort<BedStream, BedStream*> sorter(_inputs, *out, _maxInMem, _stable, compression);
     sorter.execute();
 }

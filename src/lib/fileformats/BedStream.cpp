@@ -2,8 +2,10 @@
 
 #include "BedFilterBase.hpp"
 
+#include <boost/format.hpp>
 #include <stdexcept>
 
+using boost::format;
 using namespace std;
 
 BedStream::BedStream(const string& name, istream& in, int maxExtraFields /* = -1 */)
@@ -15,6 +17,8 @@ BedStream::BedStream(const string& name, istream& in, int maxExtraFields /* = -1
     , _cached(false)
     , _cachedRv(false)
 {
+    if (!_in.good())
+        throw runtime_error(str(format("Input stream '%1%' is invalid") %name));
 }
 
 void BedStream::addFilter(BedFilterBase* filter) {
