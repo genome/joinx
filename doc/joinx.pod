@@ -84,6 +84,12 @@ joinx intersect [OPTIONS] a.bed b.bed
 --dbsnp-match
     Undocumented. Should not be used.
 
+--adjacent-insertions
+    When specified, insertions (specifically, features with 0 length) will
+    be counted as intersecting adjacent features, e.g.:
+    position 1 1 2 (snv or 1bp deletion at 1) will intersect position 1 2 2
+    (insertion at 2).
+
 =head1 SNV-CONCORDANCE SUBCOMMAND
 
 joinx snv-concordance
