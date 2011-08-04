@@ -19,7 +19,10 @@ if (CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "-Wall -ansi -pedantic -std=c++0x")
 endif ()
 
-find_package(Boost COMPONENTS program_options filesystem system REQUIRED)
+find_package(ZLIB REQUIRED)
+include_directories(${ZLIB_INCLUDE_DIRS})
+
+find_package(Boost COMPONENTS program_options filesystem system iostreams REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(Samtools 0.1.6 REQUIRED)

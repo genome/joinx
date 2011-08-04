@@ -1,8 +1,10 @@
 #pragma once
 
 #include "MergeSorted.hpp"
+#include "common/TempFile.hpp"
 
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 #include <boost/shared_ptr.hpp>
 #include <algorithm>
 #include <cstring>
@@ -16,17 +18,15 @@ template<typename StreamType, typename StreamPtr = StreamType*>
 class Sort {
 public:
     typedef typename StreamType::ValueType ValueType;
-    typedef std::vector<ValueType> BufferType;
-    typedef boost::shared_ptr<std::fstream> TmpStreamPtr;
+    typedef std::vector<ValueType*> BufferType;
 
     Sort(std::vector<StreamPtr> inputs, std::ostream& output, unsigned maxInMem, bool stable)
         : _inputs(inputs)
         , _output(output)
         , _maxInMem(maxInMem)
         , _stable(stable)
-    {}
-
-    virtual ~Sort() {}
+    {
+    }
 
     void execute() {
         using namespace std;
@@ -34,10 +34,15 @@ public:
         BufferType buf;
         buf.reserve(_maxInMem);
 
-        ValueType val;
         for (unsigned idx = 0; idx < _inputs.size(); ++idx) {
-            while (!_inputs[idx]->eof() && _inputs[idx]->next(val)) {
-                buf.push_back(val);
+            
+            while (!_inputs[idx]->eof()) {
+                ValueType* vptr = new ValueType;
+                if (!_inputs[idx]->next(*vptr)) {
+                    delete vptr;
+                    break;
+                }
+                buf.push_back(vptr);
                 if (buf.size() >= _maxInMem)
                     dumpTempFile(buf);
             }
@@ -45,50 +50,53 @@ public:
 
         if (_tmpFiles.empty()) {
             sortBuffer(buf);
-            copy(buf.begin(), buf.end(), ostream_iterator<ValueType>(_output, "\n"));
+            for (auto iter = buf.begin(); iter != buf.end(); ++iter)
+                _output << **iter << "\n";
         } else {
             dumpTempFile(buf);
             vector<boost::shared_ptr<StreamType> > streams;
-            for (vector<TmpStreamPtr>::iterator iter = _tmpFiles.begin(); iter != _tmpFiles.end(); ++iter) {
-                boost::shared_ptr<StreamType> s(new StreamType("anon", **iter));
+            for (vector<TempFile::ptr>::iterator iter = _tmpFiles.begin(); iter != _tmpFiles.end(); ++iter) {
+                boost::shared_ptr<StreamType> s(new StreamType("anon", (*iter)->stream()));
                 streams.push_back(s);
             }
             MergeSorted<ValueType, boost::shared_ptr<StreamType> > merger(streams, _output);
             merger.execute();
         }
+
+        for (auto iter = buf.begin(); iter != buf.end(); ++iter)
+            delete *iter;
     }
 
     void dumpTempFile(BufferType& buf) {
-        using namespace std;
+        if (buf.empty())
+            return;
 
-        // TODO: refactor tmp file creation
-        string tmpdir = "/tmp";
-        const char* tmpenv = getenv("TMPDIR");
-        if (tmpenv != NULL)
-            tmpdir = tmpenv;
+        if (_tmpdir.get() == NULL)
+            _tmpdir = TempDir::create(TempDir::CLEANUP);
 
-        string path = tmpdir + "/SortTmp.XXXXXX";
-        int fd = mkstemp(&path[0]);
-        close(fd); // we just want the name
-        TmpStreamPtr stream(new fstream(path.c_str(), ios::in|ios::out|ios::binary));
-        boost::filesystem::remove(path); // unlink so file goes away on close
-        if (!stream || !stream->is_open())
-            throw runtime_error("Failed to open temporary file '" + string(path) + "' while sorting");
+        TempFile::ptr tmp(_tmpdir->tempFile(TempFile::ANON));
 
         sortBuffer(buf);
-        copy(buf.begin(), buf.end(), ostream_iterator<ValueType>(*stream, "\n"));
-        _tmpFiles.push_back(stream);
-
-        stream->seekg(0);
+        for (auto iter = buf.begin(); iter != buf.end(); ++iter) {
+            tmp->stream() << **iter << "\n";
+            delete *iter;
+        }
+        tmp->stream().seekg(0);
+        _tmpFiles.push_back(tmp);
         buf.clear();
     }
 
 protected:
+
+    static int _cmp(const ValueType* a, const ValueType* b) {
+        return *a < *b;
+    }
+
     void sortBuffer(BufferType& b) {
         if (_stable)
-            stable_sort(b.begin(), b.end());
+            stable_sort(b.begin(), b.end(), _cmp);
         else
-            sort(b.begin(), b.end());
+            sort(b.begin(), b.end(), _cmp);
     }
 
 protected:
@@ -96,5 +104,6 @@ protected:
     std::ostream& _output;
     unsigned _maxInMem;
     bool _stable;
-    std::vector<TmpStreamPtr> _tmpFiles;
+    std::vector<TempFile::ptr> _tmpFiles;
+    TempDir::ptr _tmpdir;
 };
