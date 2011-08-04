@@ -84,9 +84,9 @@ void SortCommand::exec() {
             if (!in || !in->is_open())
                 throw runtime_error(str(format("Failed to open input file '%1%'") %*iter));
             files.push_back(in);
-            _inputs.push_back(new BedStream(*iter, *in)); 
+            _inputs.push_back(new BedStream(*iter, *in, 0)); 
         } else if (!haveCin) {
-            _inputs.push_back(new BedStream(*iter, cin));
+            _inputs.push_back(new BedStream(*iter, cin, 0));
         } else {
             throw runtime_error("- specified as input file multiple times! Abort.");
         }
