@@ -2,11 +2,11 @@
 
 #include "bedutil/MergeSorted.hpp"
 #include "bedutil/Sort.hpp"
-#include "common/intconfig.hpp"
 #include "fileformats/BedStream.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
+#include <cstdint>
 #include <stdexcept>
 
 namespace po = boost::program_options;

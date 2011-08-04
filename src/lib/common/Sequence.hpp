@@ -1,7 +1,6 @@
 #pragma once
 
-#include "common/intconfig.hpp"
-
+#include <cstdint>
 #include <string>
 #include <iostream>
 

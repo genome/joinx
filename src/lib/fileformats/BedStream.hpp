@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Bed.hpp"
-#include "common/intconfig.hpp"
 
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>

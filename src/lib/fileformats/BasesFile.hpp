@@ -1,8 +1,8 @@
 #pragma once
 
 #include "common/Sequence.hpp"
-#include "common/intconfig.hpp"
 
+#include <cstdint>
 #include <string>
 #include <map>
 #include <fstream>

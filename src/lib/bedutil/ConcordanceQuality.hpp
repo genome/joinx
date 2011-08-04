@@ -2,8 +2,8 @@
 
 #include "IResultCollector.hpp"
 #include "fileformats/Bed.hpp"
-#include "common/intconfig.hpp"
 
+#include <cstdint>
 #include <cstdlib>
 #include <map>
 #include <ostream>

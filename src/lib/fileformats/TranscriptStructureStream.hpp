@@ -1,8 +1,8 @@
 #pragma once
 
 #include "TranscriptStructure.hpp"
-#include "common/intconfig.hpp"
 
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>

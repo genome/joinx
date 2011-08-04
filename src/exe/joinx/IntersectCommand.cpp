@@ -3,12 +3,12 @@
 
 #include "bedutil/IntersectionOutputFormatter.hpp"
 #include "bedutil/Intersect.hpp"
-#include "common/intconfig.hpp"
 #include "fileformats/BedStream.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <algorithm>
+#include <cstdint>
 #include <cstdio>
 #include <fstream>
 #include <iostream>

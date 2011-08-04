@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ISequenceReader.hpp"
-#include "common/intconfig.hpp"
 
+#include <cstdint>
 #include <string>
 #include <map>
 

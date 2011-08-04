@@ -24,7 +24,7 @@ class TestSort(JoinxTest, unittest.TestCase):
         expected_file = self.inputFiles("expected-sort.bed")[0]
         output_file = self.tempFile("output.bed")
 
-        # test normal and stable sort
+        # test none, gzip, bzip2, and zlib compression
         for arg in ["", "-C g", "-C b", "-C z"]:
             params = [ "sort", "-o", output_file, arg ]
             params.extend(input_files)

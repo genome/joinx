@@ -1,8 +1,8 @@
 #pragma once
 
 #include "IGenomicPosition.hpp"
-#include "common/intconfig.hpp"
 
+#include <cstdint>
 #include <algorithm>
 #include <string>
 #include <sstream>

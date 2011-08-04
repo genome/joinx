@@ -2,9 +2,9 @@
 
 #include "Sequence.hpp"
 #include "Iub.hpp"
-#include "common/intconfig.hpp"
 
 #include <cassert>
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>

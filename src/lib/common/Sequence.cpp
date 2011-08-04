@@ -1,9 +1,9 @@
 #include "Sequence.hpp"
 
-#include "common/intconfig.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <cassert>
+#include <cstdint>
 
 using namespace std;
 

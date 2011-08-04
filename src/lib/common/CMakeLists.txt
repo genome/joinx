@@ -16,7 +16,6 @@ set(SOURCES
     Tokenizer.hpp
     Variant.cpp
     Variant.hpp
-    intconfig.hpp
 )
 
 add_library(common ${SOURCES})

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "common/intconfig.hpp"
-
 #include <boost/shared_ptr.hpp>
+#include <cstdint>
 #include <iostream>
 #include <map>
 #include <string>

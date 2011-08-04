@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CommandBase.hpp"
-#include "common/intconfig.hpp"
 
+#include <cstdint>
 #include <string>
 
 class JoinX : public CommandBase {
