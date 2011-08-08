@@ -157,3 +157,20 @@ TEST(TestTokenizer, remaining) {
     t.remaining(s); 
     ASSERT_EQ("", s);
 }
+
+TEST(TestTokenizer, floats) {
+    string input("0.66 1e-8 44 1.2e6");
+    double d;
+    Tokenizer<char> t(input, ' ');
+    ASSERT_TRUE(t.extract(d));
+    ASSERT_NEAR(0.66, d, 1e-7);
+    ASSERT_TRUE(t.extract(d)); 
+    ASSERT_NEAR(1e-8, d, 1e-7);
+    ASSERT_TRUE(t.extract(d)); 
+    ASSERT_NEAR(44, d, 1e-7);
+    ASSERT_TRUE(t.extract(d)); 
+    ASSERT_NEAR(1.2e6, d, 1e-7);
+
+    ASSERT_TRUE(t.eof());
+    ASSERT_FALSE(t.extract(d));
+}

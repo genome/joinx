@@ -4,6 +4,7 @@
 #include "fileformats/Bed.hpp"
 
 #include <boost/format.hpp>
+#include <cstdlib>
 #include <sstream>
 #include <sstream>
 #include <stdexcept>
@@ -51,7 +52,7 @@ Variant::Variant(const Bed& bed)
     : _chrom(bed.chrom())
     , _start(bed.start())
     , _stop (bed.stop())
-    , _quality(0)
+    , _quality(0.0)
     , _depth(0)
 {
     if (!bed.extraFields().empty()) {
@@ -67,17 +68,26 @@ Variant::Variant(const Bed& bed)
         _allSequences.push_back(Sequence("-"));
 
     if (bed.extraFields().size() >= 2) {
-        stringstream ss(bed.extraFields()[1]);
-        ss >> _quality;
-        if (ss.fail())
-            throw runtime_error(str(format("Failed converting quality value '%1%' to number for record '%2%'") %bed.extraFields()[1] %bed.toString()));
+        if (bed.extraFields()[1] == "-") {
+            _quality = 0.0;
+        } else {
+            const std::string& s = bed.extraFields()[1];
+            char* end = NULL;
+            _quality = strtod(s.data(), &end);
+            if (end - s.data() != ptrdiff_t(s.size()))
+                throw runtime_error(str(format("Failed converting quality value '%1%' to number for record '%2%'") %bed.extraFields()[1] %bed.toString()));
+        }
     }
 
     if (bed.extraFields().size() >= 3) {
         stringstream ss(bed.extraFields()[2]);
-        ss >> _depth;
-        if (ss.fail())
-            throw runtime_error(str(format("Failed converting read depth value '%1%' to number for record '%2%'") %bed.extraFields()[2] %bed.toString()));
+        if (bed.extraFields()[1] == "-") {
+            _depth = 0;
+        } else {
+            ss >> _depth;
+            if (ss.fail())
+                throw runtime_error(str(format("Failed converting read depth value '%1%' to number for record '%2%'") %bed.extraFields()[2] %bed.toString()));
+        }
     }
 
     _type = inferType();

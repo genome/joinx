@@ -23,6 +23,14 @@ public:
         rewind();
     }
 
+    void reset(const std::string& s) {
+        _s = s;
+        _pos = 0;
+        _end = 0;
+        _eofCalls = 0;
+        _lastDelim = 0;
+    }
+
     template<typename T>
     bool extract(T& value);
     void remaining(std::string& s);
@@ -44,10 +52,16 @@ protected:
     bool _extract(uint16_t& value) { return _extractUnsigned(value); }
     bool _extract(uint32_t& value) { return _extractUnsigned(value); }
     bool _extract(uint64_t& value) { return _extractUnsigned(value); }
+    bool _extract(float& value) { return _extractFloat(strtof, value); }
+    bool _extract(double& value) { return _extractFloat(strtod, value); }
     template<typename T>
     bool _extractSigned(T& value);
     template<typename T>
     bool _extractUnsigned(T& value);
+    template<typename T>
+    bool _extractFloat(T& value);
+    template<typename T>
+    bool _extractFloat(T (*func)(const char*, char**), T& value);
 
 
 protected:
@@ -170,6 +184,19 @@ inline bool Tokenizer<DelimType>::_extractUnsigned(T& value) {
     char* realEnd = NULL;
     string::size_type expectedLen =_end-_pos;
     value = strtoull(&_s[_pos], &realEnd, 10);
+    ptrdiff_t len = realEnd - &_s[_pos];
+    bool rv = len == ptrdiff_t(expectedLen);
+    if (rv)
+        advance();
+    return rv;
+}
+
+template<typename DelimType>
+template<typename T>
+inline bool Tokenizer<DelimType>::_extractFloat(T (*func)(const char*, char**), T& value) {
+    char* realEnd = NULL;
+    string::size_type expectedLen =_end-_pos;
+    value = func(&_s[_pos], &realEnd);
     ptrdiff_t len = realEnd - &_s[_pos];
     bool rv = len == ptrdiff_t(expectedLen);
     if (rv)

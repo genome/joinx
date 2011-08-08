@@ -75,3 +75,16 @@ TEST(Variant, partialAlleleMatch) {
         }
     }
 }
+
+TEST(Variant, floatScore) {
+    Variant v(mkBed("1", "3.456", "7"));
+    ASSERT_EQ("1", v.chrom());
+    ASSERT_NEAR(double(3.456), v.quality(), 1e-7);
+    ASSERT_EQ(7, v.depth());
+}
+
+TEST(Variant, dashQualDepth) {
+    Variant v(mkBed("1", "-", "-"));
+    ASSERT_EQ(0.0, v.depth());
+    ASSERT_EQ(0.0, v.quality());
+}

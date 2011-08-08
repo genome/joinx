@@ -42,7 +42,7 @@ public:
         return _stop;
     }
 
-    int32_t quality() const {
+    float quality() const {
         return _quality;
     }
 
@@ -91,7 +91,7 @@ protected:
     std::string _chrom;
     int64_t _start;
     int64_t _stop;
-    int32_t _quality;
+    float _quality;
     int32_t _depth;
     std::vector<Sequence> _allSequences;
     Type _type;
