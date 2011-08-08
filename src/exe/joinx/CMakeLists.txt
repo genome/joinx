@@ -14,6 +14,8 @@ set(SOURCES
     IntersectCommand.hpp
     JoinX.cpp
     JoinX.hpp
+    RemapCigarCommand.cpp
+    RemapCigarCommand.hpp
     SnvConcordanceByQualityCommand.cpp
     SnvConcordanceByQualityCommand.hpp
     SnvConcordanceCommand.cpp

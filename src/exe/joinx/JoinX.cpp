@@ -2,6 +2,7 @@
 #include "CheckRefCommand.hpp"
 #include "CreateContigsCommand.hpp"
 #include "IntersectCommand.hpp"
+#include "RemapCigarCommand.hpp"
 #include "SnvConcordanceByQualityCommand.hpp"
 #include "SnvConcordanceCommand.hpp"
 #include "SortCommand.hpp"
@@ -17,11 +18,12 @@ using namespace std;
 
 JoinX::JoinX(int argc, char** argv)
 {
+    registerSubCommand(CheckRefCommand::ptr(new CheckRefCommand));
+    registerSubCommand(CreateContigsCommand::ptr(new CreateContigsCommand));
     registerSubCommand(IntersectCommand::ptr(new IntersectCommand));
+    registerSubCommand(RemapCigarCommand::ptr(new RemapCigarCommand));
     registerSubCommand(SnvConcordanceByQualityCommand::ptr(new SnvConcordanceByQualityCommand));
     registerSubCommand(SnvConcordanceCommand::ptr(new SnvConcordanceCommand));
-    registerSubCommand(CreateContigsCommand::ptr(new CreateContigsCommand));
-    registerSubCommand(CheckRefCommand::ptr(new CheckRefCommand));
     registerSubCommand(SortCommand::ptr(new SortCommand));
 
     stringstream cmdHelp;

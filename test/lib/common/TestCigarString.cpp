@@ -119,3 +119,17 @@ TEST(CigarString, merge) {
     b = "99M3I99M";
     ASSERT_EQ("99M3I10D99M", string(CigarString::merge(a,b,0)));
 }
+
+TEST(CigarString, structural) {
+    CigarString c("99=1X99=");
+    ASSERT_EQ("199M", string(c.structural()));
+
+    c = "99=3I99=";
+    ASSERT_EQ("99M3I99M", string(c.structural()));
+
+    c = "99=3D99=";
+    ASSERT_EQ("99M3D99M", string(c.structural()));
+
+    c = "99S3D99=";
+    ASSERT_EQ("99S3D99M", string(c.structural()));
+}

@@ -262,6 +262,34 @@ CigarString CigarString::subset(uint32_t offset, uint32_t len) const {
     return rv;
 }
 
+CigarString CigarString::structural() const {
+    CigarString rv;
+    for (auto iter = _ops.begin(); iter != _ops.end(); ++iter) {
+        Op op;
+        switch (iter->type) {
+            case SEQ_MATCH:
+            case SEQ_MISMATCH:
+                op.type = MATCH;
+                op.length = iter->length;
+                rv.push_back(op);
+                break;
+
+            case MATCH:
+            case INS:
+            case DEL:
+            case SOFT_CLIP:
+                rv.push_back(*iter);
+                break;
+
+            default:
+                throwInvalidOp(iter->type);
+                break;
+        }
+    }
+
+    return rv;
+}
+
 ostream& operator<<(ostream& s, const CigarString::Op& op) {
     s << op.length << CigarString::translate(op.type);
     return s;

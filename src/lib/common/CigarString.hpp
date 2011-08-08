@@ -53,6 +53,8 @@ public:
     // returns a subset of the cigar string
     // note: deletions do not count towards the total length
     CigarString subset(uint32_t offset, uint32_t length) const;
+    // This limits the operations to M,I,D,S. This is what bwa outputs
+    CigarString structural() const;
 
     const Op& operator[](const uint32_t idx) const;
 
