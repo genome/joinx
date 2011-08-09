@@ -1,6 +1,6 @@
 #include "CheckRefCommand.hpp"
 
-#include "common/Variant.hpp"
+#include "fileformats/Variant.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/BedStream.hpp"
 #include "fileformats/FastaReader.hpp"

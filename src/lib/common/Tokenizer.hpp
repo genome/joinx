@@ -43,6 +43,15 @@ public:
     const char& lastDelim() { return _lastDelim; }
 
 protected:
+    template<typename T>
+    bool _extract(T& value) {
+        std::string s;
+        if (!extract(s))
+            return false;
+        value = T(s);
+        return true;
+    }
+
     bool _extract(std::string& value);
     bool _extract(int8_t&  value) { return _extractSigned(value); }
     bool _extract(int16_t& value) { return _extractSigned(value); }

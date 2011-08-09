@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/Variant.hpp"
+#include "fileformats/Variant.hpp"
 
 #include <boost/format.hpp>
 #include <cmath>

@@ -14,8 +14,6 @@ set(SOURCES
     TempFile.cpp
     TempFile.hpp
     Tokenizer.hpp
-    Variant.cpp
-    Variant.hpp
 )
 
 add_library(common ${SOURCES})

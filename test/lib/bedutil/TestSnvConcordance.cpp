@@ -1,6 +1,6 @@
 #include "bedutil/SnvConcordance.hpp"
 #include "common/Sequence.hpp"
-#include "common/Variant.hpp"
+#include "fileformats/Variant.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/ISequenceReader.hpp"
 

@@ -1,6 +1,6 @@
 #include "Variant.hpp"
 
-#include "Tokenizer.hpp"
+#include "common/Tokenizer.hpp"
 #include "fileformats/Bed.hpp"
 
 #include <boost/format.hpp>
@@ -46,6 +46,26 @@ Variant::Type Variant::inferType() const {
 Variant::Variant() : _type(INVALID) {
     _allSequences.push_back(Sequence("-"));
     _allSequences.push_back(Sequence("-"));
+}
+
+Variant::Variant(
+    const std::string& chrom,
+    int64_t start,
+    int64_t stop,
+    float quality,
+    int32_t depth,
+    const std::string& ref,
+    const std::string& alt
+)   : _chrom(chrom)
+    , _start(start)
+    , _stop(stop)
+    , _quality(quality)
+    , _depth(depth)
+{
+    if (!ref.empty() || ref != "-")
+        _allSequences.push_back(ref);
+    if (!alt.empty() || alt != "-")
+        _allSequences.push_back(alt);
 }
 
 Variant::Variant(const Bed& bed)

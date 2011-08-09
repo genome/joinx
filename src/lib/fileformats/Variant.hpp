@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Sequence.hpp"
-#include "Iub.hpp"
+#include "common/Sequence.hpp"
+#include "common/Iub.hpp"
 
 #include <cassert>
 #include <cstdint>
@@ -24,6 +24,17 @@ public:
     static std::string typeToString(Type t);
 
     Variant();
+
+    Variant(
+        const std::string& chrom,
+        int64_t start,
+        int64_t stop,
+        float quality,
+        int32_t depth,
+        const std::string& ref,
+        const std::string& alt
+    );
+
     explicit Variant(const Bed& bed);
 
     void setVariantSequence(const Sequence& v) {

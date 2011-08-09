@@ -12,6 +12,8 @@ set(SOURCES
     CreateContigsCommand.hpp
     IntersectCommand.cpp
     IntersectCommand.hpp
+    IntersectVcfCommand.cpp
+    IntersectVcfCommand.hpp
     JoinX.cpp
     JoinX.hpp
     RemapCigarCommand.cpp

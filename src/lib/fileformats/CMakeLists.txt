@@ -20,6 +20,12 @@ set(SOURCES
     TranscriptStructure.hpp
     TranscriptStructureStream.cpp
     TranscriptStructureStream.hpp
+    Variant.cpp
+    Variant.hpp
+    Vcf.cpp
+    Vcf.hpp
+    VcfReader.cpp
+    VcfReader.hpp
 )
 
 add_library(fileformats ${SOURCES})

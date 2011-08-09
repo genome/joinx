@@ -1,7 +1,7 @@
 #include "SnvConcordance.hpp"
 
 #include "common/Iub.hpp"
-#include "common/Variant.hpp"
+#include "fileformats/Variant.hpp"
 #include "fileformats/Bed.hpp"
 
 #include <boost/lexical_cast.hpp>
