@@ -40,15 +40,22 @@ public:
         else                        cigar << (-insertedBases) << 'D'; // del
         if (!post.empty()) cigar << post.size() << '=';
 
-        _name = str(format("REMAP-%1%|%2%|%3%-%4%")
+        uint32_t varStart = pre.size();
+        uint32_t varStop = varStart + varLen;
+        if (insertedBases < 0)
+            varStop = varStart;
+
+        _name = str(format("REMAP-%1%|%2%|%3%|%4%|%5%|%6%")
             %chrom
             %start
             %stop
             %cigar.str()
+            %varStart
+            %varStop
             );
 
         if (varLen) {
-            _name += '-';
+            _name += '|';
             _name.append(var, varLen);
         }
     }

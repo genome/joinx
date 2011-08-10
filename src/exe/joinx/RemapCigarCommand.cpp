@@ -93,7 +93,7 @@ void RemapCigarCommand::exec() {
         tokCigar.advance(2);
         tokCigar.extract(contigCigar);
 
-        uint32_t readPos;
+        uint32_t readPos(0);
         Tokenizer<char> tokPos(contig, ',');
         tokPos.advance(1);
         tokPos.extract(readPos);
