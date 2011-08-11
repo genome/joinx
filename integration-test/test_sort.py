@@ -34,7 +34,18 @@ class TestSort(JoinxTest, unittest.TestCase):
             self.assertFilesEqual(expected_file, output_file)
 
     def test_sort_vcf(self):
-        input_files = self.inputFiles("unsorted0.vcf")
+        # currently only 1 vcf file at a time can be sorted, as it is trickier
+        # to merge vcf than bed.
+        input_file = self.inputFiles("unsorted0.vcf")[0]
+        expected_file = self.inputFiles("expected-sort.vcf")[0]
+        output_file = self.tempFile("output.bed")
+        params = [ "sort", "-o", output_file, input_file ]
+        rv, err = self.joinx(params)
+        self.assertEqual(0, rv)
+        self.assertEqual('', err)
+        self.assertFilesEqual(expected_file, output_file)
+
+        
 
 
 

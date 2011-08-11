@@ -12,11 +12,14 @@ Reader::Reader(InputStream& in)
     , _cachedRv(false)
 {
     while (_in.getline(_buf) && !_buf.empty() && _buf[0] == '#') {
-        if (_buf[1] == '#')
-            _header.add(_buf);
+        _header.add(_buf);
     }
-    if (_header.lines().empty())
-        throw runtime_error(str(format("Error reading vcf file %1%: invalid or missing header") %name()));
+
+    try {
+        _header.assertValid();
+    } catch (const exception& e) {
+        throw runtime_error(str(format("While reading vcf file %1%: %2%") %name() %e.what()));
+    }
 }
 
 const Header& Reader::header() const {

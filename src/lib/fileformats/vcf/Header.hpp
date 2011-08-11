@@ -21,19 +21,28 @@ public:
 
     void add(const std::string& line);
 
-    const std::vector<RawLine>& lines() const;
+    const std::vector<RawLine>& metaInfoLines() const;
+    const std::vector<std::string>& headerLines() const;
     const std::set<std::string>& categories() const;
     const Category& category(const std::string& name) const;
 
+    // will throw if the header is invalid
+    void assertValid() const;
+
 protected:
-    std::vector<RawLine> _lines;
+    std::vector<RawLine> _metaInfoLines;
+    std::vector<std::string> _headerLines;
     std::set<std::string> _categoryNames;
     std::map<std::string, Category> _categories;
     Category _empty; // so we can return an empty result by constref
 };
 
-inline const std::vector<Header::RawLine>& Header::lines() const {
-    return _lines;
+inline const std::vector<Header::RawLine>& Header::metaInfoLines() const {
+    return _metaInfoLines;
+}
+
+inline const std::vector<std::string>& Header::headerLines() const {
+    return _headerLines;
 }
 
 inline const std::set<std::string>& Header::categories() const {
