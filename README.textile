@@ -17,6 +17,10 @@ Building requires:
 * gtest (google unit testing framework, optional for unit tests)
 * samtools
 
+Integration tests require:
+* Python
+* Valgrind (optional, but recommended)
+
 To install these on Ubuntu, try:
 
 p.  @sudo apt-get install cmake libboost-all-dev libgtest-dev libbam-dev@
@@ -25,8 +29,12 @@ h3. Build and test
 * Joinx does not support in source builds. Create a new build directory, enter it, and run:
 @cmake /path/to/joinx/repo@
 @make@
-@ctest@
+@ctest@ 
 * Binaries can be found in the bin/ subdirectory of your build directory
+
+Running ctest with run both unit and integration tests. you can run one or the other with
+@ctest -L <unit|integration>@
+By default, all integration tests run through valgrind. This can be disabled by setting the environment variable JXTEST_NO_VALGRIND.
 
 h2. LICENSE
 
