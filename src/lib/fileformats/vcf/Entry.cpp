@@ -4,14 +4,14 @@
 #include <functional>
 #include <stdexcept>
 
-using namespace std::placeholders;
+using namespace placeholders;
 using namespace std;
 
 VCF_NAMESPACE_BEGIN
 
 InfoField::InfoField() {}
 
-InfoField::InfoField(const std::string& raw) {
+InfoField::InfoField(const string& raw) {
     Tokenizer<char> t(raw, '=');
     t.extract(_id);
     t.extract(_value);
@@ -34,6 +34,44 @@ const string& InfoField::value() const {
 Entry::Entry() {}
 Entry::Entry(const string& s) {
     parse(s);
+}
+
+Entry::Entry(
+    // non variable length fields
+    const string& chrom,
+    uint64_t pos,
+    const string& ref,
+    double qual
+    )
+    : _chrom(chrom)
+    , _pos(pos)
+    , _ref(ref)
+    , _qual(qual)
+{
+}
+
+void Entry::addIdentifier(const string& id) {
+    _identifiers.push_back(id);
+}
+
+void Entry::addAlt(const string& alt) {
+    _alt.push_back(alt);
+}
+
+void Entry::addFailedFilter(const string& filter) {
+    _failedFilters.push_back(filter);
+}
+
+void Entry::addInfoField(const string& key, const string& value) {
+    _info.push_back(InfoField(key, value));
+}
+
+void Entry::addFormatDescription(const string& desc) {
+    _formatDescription.push_back(desc);
+}
+
+void Entry::addPerSampleData(const string& key, const string& value) {
+    throw runtime_error("adding per sample data is not yet implemented");
 }
 
 void Entry::parse(const string& s) {
@@ -110,11 +148,9 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
     e.printList(s, e.info());
     s << '\t';
     e.printList(s, e.formatDescription());
-    s << '\t';
     const vector< vector<string> >& psd = e.perSampleData();
     for (auto i = psd.begin(); i != psd.end(); ++i) {
-        if (i != psd.begin())
-            s << '\t';
+        s << '\t';
         e.printList(s, *i);
     }
     return s;

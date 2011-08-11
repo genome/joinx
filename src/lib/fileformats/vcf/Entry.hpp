@@ -36,6 +36,20 @@ class Entry {
 public:
     Entry();
     explicit Entry(const std::string& s);
+    Entry(
+        // non variable length fields
+        const std::string& chrom,
+        uint64_t pos,
+        const std::string& ref,
+        double qual
+        );
+
+    void addIdentifier(const std::string& id);
+    void addAlt(const std::string& alt);
+    void addFailedFilter(const std::string& filter);
+    void addInfoField(const std::string& key, const std::string& value);
+    void addFormatDescription(const std::string& desc);
+    void addPerSampleData(const std::string& key, const std::string& value);
 
     void parse(const std::string& s);
 
@@ -45,7 +59,7 @@ public:
     const std::vector<std::string>& identifiers() const { return _identifiers; }
     const std::string& ref() const { return _ref; }
     const std::vector<std::string>& alt() const { return _alt; }
-    float qual() const { return _qual; }
+    double qual() const { return _qual; }
     const std::vector<std::string>& failedFilters() const { return _failedFilters; }
     const std::vector<InfoField>& info() const { return _info; }
     const std::vector<std::string>& formatDescription() const { return _formatDescription; }
@@ -85,7 +99,7 @@ protected:
     std::vector<std::string> _identifiers;
     std::string _ref;
     std::vector<std::string> _alt;
-    float _qual;
+    double _qual;
     std::vector<std::string> _failedFilters;
     std::vector<InfoField> _info;
     std::vector<std::string> _formatDescription;

@@ -52,6 +52,20 @@ TEST(VcfEntry, parse) {
     ASSERT_EQ("T", v[2].alt()[1]);
 }
 
+
+TEST(VcfEntry, construct) {
+    Entry e("1", 2, "TC", 36.2);
+    e.addIdentifier("rs123");
+    e.addIdentifier("rs456");
+    e.addAlt("T");
+    e.addAlt("TA");
+    e.addFailedFilter("q5");
+    e.addFailedFilter("s10");
+    e.addInfoField("NS", "1");
+    e.addInfoField("DP", "20");
+    ASSERT_EQ("1\t2\trs123;rs456\tTC\tT,TA\t36.2\tq5;s10\tNS=1;DP=20\t.", e.toString());
+}
+
 TEST(VcfEntry, variantAdaptor) {
     stringstream ss(vcfLines);
     string line;
