@@ -64,6 +64,7 @@ TEST(VcfEntry, variantAdaptor) {
         v.push_back(VariantAdaptor(e));
     }
 
+    // 20 14370 rs6054257 G A 29 PASS NS=3;DP=14;AF=0.5;DB;H2 GT:GQ:DP:HQ 0|0:48:1:51,51 1|0:48:8:51,51 1/1:43:5:.,.
     ASSERT_EQ("20", v[0].chrom());
     ASSERT_EQ(14369, v[0].start());
     ASSERT_EQ(14370, v[0].stop());
@@ -71,6 +72,7 @@ TEST(VcfEntry, variantAdaptor) {
     ASSERT_EQ("A", v[0].variant());
     ASSERT_FALSE(v[0].advance());
 
+    // 20 17330 . T A 3 q10 NS=3;DP=11;AF=0.017 GT:GQ:DP:HQ 0|0:49:3:58,50 0|1:3:5:65,3 0/0:41:3
     ASSERT_EQ("20", v[1].chrom());
     ASSERT_EQ(17329, v[1].start());
     ASSERT_EQ(17330, v[1].stop());
@@ -78,6 +80,7 @@ TEST(VcfEntry, variantAdaptor) {
     ASSERT_EQ("A", v[1].variant());
     ASSERT_FALSE(v[1].advance());
 
+    // 20 1110696 rs6040355 A G,T 67 PASS NS=2;DP=10;AF=0.333,0.667;AA=T;DB GT:GQ:DP:HQ 1|2:21:6:23,27 2|1:2:0:18,2 2/2:35:4
     ASSERT_EQ("20", v[2].chrom());
     ASSERT_EQ(1110695, v[2].start());
     ASSERT_EQ(1110696, v[2].stop());
@@ -91,7 +94,15 @@ TEST(VcfEntry, variantAdaptor) {
     ASSERT_EQ("T", v[2].variant());
     ASSERT_FALSE(v[2].advance());
 
+    // 20 1230237 . T . 47 PASS NS=3;DP=13;AA=T GT:GQ:DP:HQ 0|0:54:7:56,60 0|0:48:4:51,51 0/0:61:2"
+    ASSERT_EQ("20", v[3].chrom());
+    ASSERT_EQ(1230236, v[3].start());
+    ASSERT_EQ(1230237, v[3].stop());
+    ASSERT_EQ("T", v[3].reference());
+    ASSERT_EQ(".", v[3].variant());
+    ASSERT_FALSE(v[3].advance());
 
+    // 20 1234567 microsat1 GTC G,GTCT 50 PASS NS=3;DP=9;AA=G GT:GQ:DP 0/1:35:4 0/2:17:2 1/1:40:3
     ASSERT_EQ("20", v[4].chrom());
     ASSERT_EQ(1234567, v[4].start());
     ASSERT_EQ(1234569, v[4].stop());

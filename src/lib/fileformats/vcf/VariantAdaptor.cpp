@@ -38,8 +38,10 @@ void VariantAdaptor::setIndex(uint32_t idx) {
     // test if snp or dnp, etc
     const vector<string>& alt = _entry.alt();
     if (idx >= alt.size()) {
-        _start = _stop = 0;
-        _alt = _ref = "";
+        _start = _entry.pos()-1;
+        _stop = _entry.pos();
+        _ref = _entry.ref();
+        _alt = ".";
         return;
     }
 
