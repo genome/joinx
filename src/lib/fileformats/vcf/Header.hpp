@@ -23,12 +23,13 @@ public:
 
     const std::vector<RawLine>& lines() const;
     const std::set<std::string>& categories() const;
-    const Category* category(const std::string& name) const;
+    const Category& category(const std::string& name) const;
 
 protected:
     std::vector<RawLine> _lines;
     std::set<std::string> _categoryNames;
     std::map<std::string, Category> _categories;
+    Category _empty; // so we can return an empty result by constref
 };
 
 inline const std::vector<Header::RawLine>& Header::lines() const {
@@ -39,11 +40,11 @@ inline const std::set<std::string>& Header::categories() const {
     return _categoryNames;
 }
 
-inline const Header::Category* Header::category(const std::string& name) const {
+inline const Header::Category& Header::category(const std::string& name) const {
     auto iter = _categories.find(name);
     if (iter == _categories.end())
-        return NULL;
-    return &iter->second;
+        return _empty;
+    return iter->second;
 }
 
 VCF_NAMESPACE_END

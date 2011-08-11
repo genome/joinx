@@ -1,4 +1,6 @@
+#include "fileformats/vcf/Validator.hpp"
 #include "fileformats/vcf/Header.hpp"
+#include "fileformats/vcf/Entry.hpp"
 
 #include <sstream>
 #include <stdexcept>
@@ -30,42 +32,39 @@ namespace {
         "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">\n"
         "##FORMAT=<ID=HQ,Number=2,Type=Integer,Description=\"Haplotype Quality\">\n"
         ;
+
+    Header makeHeader() {
+        stringstream ss(headerText);
+        Header h;
+        string line;
+        while (getline(ss, line))
+            h.add(line);
+
+        return h;
+    }
 }
 
-TEST(VcfHeader, parse) {
-    stringstream ss(headerText);
-    Header h;
-    string line;
-    while (getline(ss, line))
-        h.add(line);
+TEST(VcfValidator, valid) {
+    Header h = makeHeader();
+    Validator v(h);
 
-    const set<string>& categories = h.categories();
-    ASSERT_TRUE(categories.find("contig") != categories.end());
-    ASSERT_EQ(4, categories.size());
-    ASSERT_TRUE(categories.find("INFO") != categories.end());
-    ASSERT_TRUE(categories.find("FILTER") != categories.end());
-    ASSERT_TRUE(categories.find("FORMAT") != categories.end());
-
-    const Header::Category& info = h.category("INFO");
-    ASSERT_EQ(6, info.size());
-
-    ASSERT_EQ("NS", info[0]["ID"]);
-    ASSERT_EQ("1", info[0]["Number"]);
-    ASSERT_EQ("Integer", info[0]["Type"]);
-    ASSERT_EQ("\"Number of Samples With Data\"", info[0]["Description"]);
-
-    ASSERT_EQ("H2", info[5]["ID"]);
-    ASSERT_EQ("0", info[5]["Number"]);
-    ASSERT_EQ("Flag", info[5]["Type"]);
-    ASSERT_EQ("\"HapMap2 membership\"", info[5]["Description"]);
+    Entry e("1\t1\t.\tG\tA\t50\tPASS\tNS=3;DP=9;AA=G\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:40:3");
+    vector<string> problems;
+    ASSERT_TRUE(v(e, &problems));
+    ASSERT_TRUE(problems.empty());
 }
 
-TEST(VcfHeader, toStream) {
-    stringstream ss(headerText);
-    Header h;
-    string line;
-    while (getline(ss, line))
-        h.add(line);
-    ss << h;
-    ASSERT_EQ(headerText, ss.str());
+TEST(VcfValidator, missingInfo) {
+    Header h = makeHeader();
+    Validator v(h);
+
+    Entry e("1\t1\t.\tG\tA\t50\tPASS\tNO=BAD;NS=3;DP=9;AA=G\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:40:3");
+    vector<string> problems;
+    ASSERT_FALSE(v(e, &problems));
+    ASSERT_EQ(1, problems.size());
+    // or some other appropriate msg...
+    ASSERT_EQ("Unknown field in info section: 'NO'", problems[0]);
+    problems.clear();
+
+    // ... same for info/filters sections
 }

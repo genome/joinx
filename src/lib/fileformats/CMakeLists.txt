@@ -31,6 +31,8 @@ set(SOURCES
     vcf/namespace.hpp
     vcf/VariantAdaptor.cpp
     vcf/VariantAdaptor.hpp
+    vcf/Validator.cpp
+    vcf/Validator.hpp
 )
 
 add_library(fileformats ${SOURCES})
