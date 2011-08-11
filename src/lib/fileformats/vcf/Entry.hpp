@@ -39,8 +39,6 @@ public:
 
     void parse(const std::string& s);
 
-    void setIdentifiers(const std::string& s);
-
     const std::string& line() const { return _line; }
     const std::string& chrom() const { return _chrom; }
     uint64_t pos() const { return _pos; }
