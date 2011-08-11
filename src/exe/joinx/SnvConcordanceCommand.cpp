@@ -3,6 +3,7 @@
 
 #include "bedutil/Intersect.hpp"
 #include "fileformats/BedStream.hpp"
+#include "fileformats/InputStream.hpp"
 
 #include <boost/program_options.hpp>
 #include <algorithm>
@@ -190,9 +191,10 @@ void SnvConcordanceCommand::exec() {
     Streams s;
     setupStreams(s);
 
-    // these bedstreams will read 1 extra field, which is ref/call
-    BedStream fa(_fileA, *s.inA);
-    BedStream fb(_fileB, *s.inB);
+    InputStream inA(_fileA, *s.inA);
+    InputStream inB(_fileB, *s.inB);
+    BedStream fa(inA);
+    BedStream fb(inB);
 
     SnvConcordance::DepthOrQual depthOrQual = _useDepth ? SnvConcordance::DEPTH : SnvConcordance::QUAL;
     SnvConcordance concordance(depthOrQual);

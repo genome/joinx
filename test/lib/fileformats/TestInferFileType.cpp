@@ -1,6 +1,7 @@
 #include "fileformats/InferFileType.hpp"
-#include "common/TempFile.hpp"
+#include "fileformats/InputStream.hpp"
 
+#include <sstream>
 #include <string>
 #include <gtest/gtest.h>
 
@@ -8,7 +9,7 @@ using namespace std;
 
 namespace {
     string vcfLines =
-        "##fileformat=VCFv4.1"
+        "##fileformat=VCFv4.1\n"
         "##fileDate=20090805\n"
         "##source=myImputationProgramV3.1\n"
         "##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta\n"
@@ -39,27 +40,15 @@ namespace {
 }
 
 TEST(InferFileType, infer) {
-    TempDir::ptr tmpdir(TempDir::create(TempDir::CLEANUP));
-    TempFile::ptr bed(tmpdir->tempFile(TempFile::CLEANUP));
-    TempFile::ptr vcf(tmpdir->tempFile(TempFile::CLEANUP));
-    TempFile::ptr bad(tmpdir->tempFile(TempFile::CLEANUP));
+    stringstream vcf(vcfLines);
+    stringstream bed(bedLines);
+    stringstream bad(badLines);
 
-    ofstream bedStream(bed->path());
-    ASSERT_TRUE(bedStream.is_open());
-    ofstream vcfStream(vcf->path());
-    ASSERT_TRUE(vcfStream.is_open());
-    ofstream badStream(bad->path());
-    ASSERT_TRUE(badStream.is_open());
+    InputStream vcfStream("test_vcf", vcf);
+    InputStream bedStream("test_bed", bed);
+    InputStream badStream("test_bad", bad);
 
-    bedStream << bedLines;
-    vcfStream << vcfLines;
-    badStream << badLines;
-
-    bedStream.close();
-    vcfStream.close();
-    badStream.close();
-
-    ASSERT_EQ(BED, inferFileType(bed->path()));
-    ASSERT_EQ(VCF, inferFileType(vcf->path()));
-    ASSERT_EQ(UNKNOWN, inferFileType(bad->path()));
+    ASSERT_EQ(BED, inferFileType(bedStream));
+    ASSERT_EQ(VCF, inferFileType(vcfStream));
+    ASSERT_EQ(UNKNOWN, inferFileType(badStream));
 }

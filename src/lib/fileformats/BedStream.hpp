@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Bed.hpp"
+#include "InputStream.hpp"
 
 #include <cstdint>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -14,7 +14,7 @@ public:
     typedef Bed ValueType;
 
     // maxExtraFields == -1 => no limit
-    BedStream(const std::string& name, std::istream& in, int maxExtraFields = -1);
+    BedStream(InputStream& in, int maxExtraFields = -1);
 
     void addFilter(BedFilterBase* filter);
 
@@ -37,7 +37,7 @@ protected:
 
 protected:
     std::string _name;
-    std::istream& _in;
+    InputStream& _in;
     int _maxExtraFields;
     uint64_t _lineNum;
     uint64_t _bedCount;
@@ -51,7 +51,7 @@ protected:
 BedStream& operator>>(BedStream& s, Bed& bed);
 
 inline const std::string& BedStream::name() const {
-    return _name;
+    return _in.name();
 }
 
 inline uint64_t BedStream::lineNum() const {

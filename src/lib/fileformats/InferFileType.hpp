@@ -2,10 +2,12 @@
 
 #include <string>
 
+class InputStream;
+
 enum FileType {
     BED,
     VCF,
     UNKNOWN
 };
 
-FileType inferFileType(const std::string& path);
+FileType inferFileType(InputStream& in);

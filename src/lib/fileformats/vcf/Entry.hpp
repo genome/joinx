@@ -92,6 +92,9 @@ public:
         }
     }
 
+    int cmp(const Entry& rhs) const;
+    bool operator<(const Entry& rhs) const;
+
 protected:
     std::string _line;
     std::string _chrom;
@@ -105,6 +108,10 @@ protected:
     std::vector<std::string> _formatDescription;
     std::vector< std::vector<std::string> > _perSampleData;
 };
+
+inline bool Entry::operator<(const Entry& rhs) const {
+    return cmp(rhs) < 0;
+}
 
 VCF_NAMESPACE_END
 

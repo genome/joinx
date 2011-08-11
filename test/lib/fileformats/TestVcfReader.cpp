@@ -1,5 +1,6 @@
 #include "fileformats/vcf/Reader.hpp"
 #include "fileformats/vcf/Entry.hpp"
+#include "fileformats/InputStream.hpp"
 
 #include <sstream>
 #include <stdexcept>
@@ -40,8 +41,9 @@ namespace {
 
 TEST(VcfReader, read) {
     stringstream ss(testData);
+    InputStream in("test", ss);
 
-    Reader r("test", ss);
+    Reader r(in);
     Entry e;
 
     ASSERT_EQ(6, r.header().category("INFO").size());

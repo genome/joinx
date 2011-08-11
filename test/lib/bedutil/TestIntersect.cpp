@@ -1,6 +1,7 @@
 #include "bedutil/Intersect.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/BedStream.hpp"
+#include "fileformats/InputStream.hpp"
 
 #include <gtest/gtest.h>
 #include <memory>
@@ -43,8 +44,10 @@ TEST(TestIntersect, intersectSelf) {
     MockCollector rc;
     stringstream ssA(BEDA);
     stringstream ssB(BEDA);
-    BedStream s1("a", ssA, 2);
-    BedStream s2("b", ssB, 2);
+    InputStream streamA("A", ssA);
+    InputStream streamB("B", ssB);
+    BedStream s1(streamA, 2);
+    BedStream s2(streamB, 2);
     Intersect<BedStream,BedStream,MockCollector> intersector(s1, s2, rc);
     intersector.execute();
 
@@ -59,8 +62,10 @@ TEST(TestIntersect, misses) {
     MockCollector rc;
     stringstream ssA(BEDA);
     stringstream ssB(BEDB);
-    BedStream s1("a", ssA, 2);
-    BedStream s2("b", ssB, 2);
+    InputStream streamA("A", ssA);
+    InputStream streamB("B", ssB);
+    BedStream s1(streamA, 2);
+    BedStream s2(streamB, 2);
     Intersect<BedStream,BedStream,MockCollector> intersector(s1, s2, rc);
     intersector.execute();
 

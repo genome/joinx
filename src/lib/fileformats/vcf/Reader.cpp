@@ -6,13 +6,12 @@ using boost::format;
 
 VCF_NAMESPACE_BEGIN
 
-Reader::Reader(const std::string& streamName, std::istream& in)
-    : _streamName(streamName)
-    , _in(in)
+Reader::Reader(InputStream& in)
+    : _in(in)
     , _cached(false)
     , _cachedRv(false)
 {
-    while (getline(_in, _buf) && !_buf.empty() && _buf[0] == '#') {
+    while (_in.getline(_buf) && !_buf.empty() && _buf[0] == '#') {
         if (_buf[1] == '#')
             _header.add(_buf);
     }
@@ -33,10 +32,10 @@ bool Reader::next(Entry& e) {
         return false;
 
     if (_buf.empty())
-        getline(_in, _buf);
+        _in.getline(_buf);
 
     e = Entry(_buf);
-    getline(_in, _buf);
+    _in.getline(_buf);
 
     return true;
 }

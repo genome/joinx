@@ -1,6 +1,7 @@
 #include "fileformats/BedStream.hpp"
 #include "bedutil/TypeFilter.hpp"
 #include "fileformats/Bed.hpp"
+#include "fileformats/InputStream.hpp"
 
 #include <sstream>
 #include <stdexcept>
@@ -20,7 +21,8 @@ const string BEDZ =
 
 TEST(BedStream, next) {
     stringstream data(BEDZ);
-    BedStream ss("test", data, 2);
+    InputStream in("test", data);
+    BedStream ss(in, 2);
     ASSERT_FALSE(ss.eof());
     
     Bed bed;
@@ -48,8 +50,9 @@ TEST(BedStream, next) {
 
 TEST(BedStream, TypeFilterSnv) {
     stringstream data(BEDZ);
+    InputStream in("test", data);
         
-    BedStream ss("test", data, 2);
+    BedStream ss(in, 2);
     TypeFilter f(Bed::SNV);
     ss.addFilter(&f);
     ASSERT_FALSE(ss.eof());
@@ -70,8 +73,9 @@ TEST(BedStream, TypeFilterSnv) {
 
 TEST(BedStream, TypeFilterIndel) {
     stringstream data(BEDZ);
+    InputStream in("test", data);
         
-    BedStream ss("test", data, 2);
+    BedStream ss(in, 2);
     TypeFilter f(Bed::INDEL);
     ss.addFilter(&f);
     ASSERT_FALSE(ss.eof());
@@ -92,8 +96,9 @@ TEST(BedStream, TypeFilterIndel) {
 
 TEST(BedStream, peek) {
     stringstream data(BEDZ);
+    InputStream in("test", data);
 
-    BedStream ss("test", data, 2); 
+    BedStream ss(in, 2); 
     ASSERT_FALSE(ss.eof());
     
     Bed* peek;

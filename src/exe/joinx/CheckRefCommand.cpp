@@ -4,6 +4,7 @@
 #include "fileformats/Bed.hpp"
 #include "fileformats/BedStream.hpp"
 #include "fileformats/FastaReader.hpp"
+#include "fileformats/InputStream.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
@@ -88,7 +89,8 @@ void CheckRefCommand::exec() {
             miss = _streams.get(_missFile, ios::out);
     }
 
-    BedStream bedStream(_bedFile, *bed, 1);
+    InputStream inStream(_bedFile, *bed);
+    BedStream bedStream(inStream, 1);
     FastaReader refSeq(_fastaFile);
 
     Bed entry;

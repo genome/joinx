@@ -1,6 +1,7 @@
 #include "InferFileType.hpp"
 
 #include "BedStream.hpp"
+#include "InputStream.hpp"
 #include "vcf/Reader.hpp"
 
 #include <boost/format.hpp>
@@ -10,27 +11,29 @@ using boost::format;
 
 namespace {
     template<typename ReaderType>
-    bool testReader(const std::string& path) {
-        ifstream f(path.c_str());
-        if (!f.is_open())
-            throw runtime_error(str(format("Failed to open input file %1%") %path));
-
+    bool testReader(InputStream& in) {
+        bool rv(false);
         try {
-            ReaderType reader(path, f);
+            in.caching(true);
+            ReaderType reader(in);
             typename ReaderType::ValueType value;
-            return reader.next(value);
+            rv = reader.next(value);
         } catch (...) {
-            return false;
+            rv = false;
         }
+        in.caching(false);
+        in.rewind();
+        return rv;
     }
 }
 
-FileType inferFileType(const std::string& path) {
-    if (testReader<BedStream>(path))
-        return BED;
+FileType inferFileType(InputStream& in) {
+    FileType rv(UNKNOWN);
 
-    if (testReader<Vcf::Reader>(path))
-        return VCF;
+    if (testReader<BedStream>(in))
+        rv = BED;
+    else if (testReader<Vcf::Reader>(in))
+        rv = VCF;
 
-    return UNKNOWN;
+    return rv;
 }

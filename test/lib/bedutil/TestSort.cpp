@@ -1,9 +1,11 @@
 #include "bedutil/Sort.hpp"
 #include "fileformats/BedStream.hpp"
 #include "fileformats/Bed.hpp"
+#include "fileformats/InputStream.hpp"
 
 #include <gtest/gtest.h>
 #include <algorithm>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -19,7 +21,8 @@ namespace {
 
 class TestSort : public ::testing::Test {
 protected:
-    typedef boost::shared_ptr<BedStream> BedStreamPtr;
+    typedef shared_ptr<BedStream> BedStreamPtr;
+    typedef shared_ptr<InputStream> InputStreamPtr;
 
     TestSort() : _rawStreams(NULL) {}
 
@@ -56,8 +59,10 @@ protected:
             }
         }
 
-        for (int i = 0; i < nStreams; ++i)
-            _bedStreams.push_back(BedStreamPtr(new BedStream("test", _rawStreams[i], -1)));
+        for (int i = 0; i < nStreams; ++i) {
+            _inputStreams.push_back(InputStreamPtr(new InputStream("test", _rawStreams[i])));
+            _bedStreams.push_back(BedStreamPtr(new BedStream(*_inputStreams[i], -1)));
+        }
     }
 
     void TearDown() {
@@ -71,6 +76,7 @@ protected:
 
     stringstream* _rawStreams;
     vector<BedStreamPtr> _bedStreams;
+    vector<InputStreamPtr> _inputStreams;
 };
 
 TEST_F(TestSort, unstable) {

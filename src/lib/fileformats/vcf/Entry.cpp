@@ -1,6 +1,7 @@
 #include "Entry.hpp"
 
 #include <cassert>
+#include <cstring>
 #include <functional>
 #include <stdexcept>
 
@@ -123,6 +124,20 @@ string Entry::toString() const {
     ss << *this;
     return ss.str();
 }
+
+int Entry::cmp(const Entry& rhs) const {
+    int rv = strverscmp(_chrom.c_str(), rhs._chrom.c_str());
+    if (rv != 0)
+        return rv;
+
+    if (_pos < rhs._pos)
+        return -1;
+    if (rhs._pos < _pos)
+        return 1;
+
+    return 0;
+}
+
 
 VCF_NAMESPACE_END
 

@@ -193,9 +193,10 @@ void IntersectCommand::exec() {
 
     unsigned extraFieldsA = max(1u, outputFormatter.extraFields(0));
     unsigned extraFieldsB = max(1u, outputFormatter.extraFields(1));
-    //
-    BedStream fa(_fileA, *s.inA, extraFieldsA);
-    BedStream fb(_fileB, *s.inB, extraFieldsB);
+    InputStream inStreamA(_fileA, *s.inA);
+    InputStream inStreamB(_fileB, *s.inB);
+    BedStream fa(inStreamA, extraFieldsA);
+    BedStream fb(inStreamB, extraFieldsB);
 
     Collector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, _dbsnpMatch, outputFormatter, s.outMissA, s.outMissB);
     Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c, _adjacentInsertions);

@@ -1,12 +1,13 @@
 #include "SnvConcordanceByQualityCommand.hpp"
 
-#include "fileformats/BedStream.hpp"
 #include "bedutil/ConcordanceQuality.hpp"
 #include "bedutil/NoReferenceFilter.hpp"
 #include "bedutil/ResultMultiplexer.hpp"
 #include "bedutil/ResultStreamWriter.hpp"
 #include "bedutil/SnvComparator.hpp"
 #include "bedutil/TypeFilter.hpp"
+#include "fileformats/BedStream.hpp"
+#include "fileformats/InputStream.hpp"
 
 #include <boost/program_options.hpp>
 #include <fstream>
@@ -123,11 +124,13 @@ void SnvConcordanceByQualityCommand::exec() {
     NoReferenceFilter nref;
     TypeFilter snvOnly(Bed::SNV);
 
-    BedStream fa(_fileA, inA, 2);
+    InputStream sa(_fileA, inA);
+    BedStream fa(sa, 2);
     fa.addFilter(&snvOnly);
     fa.addFilter(&nref);
 
-    BedStream fb(_fileB, inB, 0);
+    InputStream sb(_fileB, inB);
+    BedStream fb(sb, 0);
     fb.addFilter(&snvOnly);
 
     ConcordanceQuality qc;

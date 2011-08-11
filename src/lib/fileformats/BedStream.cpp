@@ -8,9 +8,8 @@
 using boost::format;
 using namespace std;
 
-BedStream::BedStream(const string& name, istream& in, int maxExtraFields /* = -1 */)
-    : _name(name)
-    , _in(in)
+BedStream::BedStream(InputStream& in, int maxExtraFields /* = -1 */)
+    : _in(in)
     , _maxExtraFields(maxExtraFields)
     , _lineNum(0)
     , _bedCount(0)
@@ -18,7 +17,7 @@ BedStream::BedStream(const string& name, istream& in, int maxExtraFields /* = -1
     , _cachedRv(false)
 {
     if (!_in.good())
-        throw runtime_error(str(format("Input stream '%1%' is invalid") %name));
+        throw runtime_error(str(format("Input stream '%1%' is invalid") %name()));
 }
 
 void BedStream::addFilter(BedFilterBase* filter) {
@@ -80,7 +79,7 @@ bool BedStream::next(Bed& bed) {
 string BedStream::nextLine() {
     string line;
     do {
-        getline(_in, line);
+        _in.getline(line);
         ++_lineNum;
     } while (!eof() && (line.empty() || line[0] == '#'));
     return line;

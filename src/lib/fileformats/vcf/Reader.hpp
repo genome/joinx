@@ -3,8 +3,8 @@
 #include "Entry.hpp"
 #include "Header.hpp"
 #include "namespace.hpp"
+#include "fileformats/InputStream.hpp"
 
-#include <iostream>
 #include <string>
 
 VCF_NAMESPACE_BEGIN
@@ -13,7 +13,7 @@ class Reader {
 public:
     typedef Entry ValueType;
 
-    Reader(const std::string& streamName, std::istream& in);
+    Reader(InputStream& in);
 
     const std::string& name() const;
     const Header& header() const;
@@ -26,9 +26,8 @@ protected:
     void parseHeader();
 
 protected:
-    std::string _streamName;
     Header _header;
-    std::istream& _in;
+    InputStream& _in;
     std::string _buf;
     bool _cached;
     bool _cachedRv;
@@ -36,7 +35,7 @@ protected:
 };
 
 inline const std::string& Reader::name() const {
-    return _streamName;
+    return _in.name();
 }
 
 VCF_NAMESPACE_END

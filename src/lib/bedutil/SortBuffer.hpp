@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/TempFile.hpp"
+#include "fileformats/InputStream.hpp"
 
 #include <boost/iostreams/filter/zlib.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
@@ -30,6 +31,7 @@ public:
     SortBuffer(bool stable, CompressionType compression)
         : _stable(stable)
         , _compression(compression)
+        , _inputStream("anon", _in)
     {}
 
     ~SortBuffer() {
@@ -106,7 +108,7 @@ public:
 
         _in.push(_tmpfile->stream());
 
-        _stream.reset(new StreamType("anon", _in));
+        _stream.reset(new StreamType(_inputStream));
     }
 
     bool peek(ValueType** v) {
@@ -156,4 +158,5 @@ protected:
     boost::iostreams::zlib_decompressor _zlibDecompressor;
     boost::iostreams::gzip_decompressor _gzipDecompressor;
     boost::iostreams::bzip2_decompressor _bzip2Decompressor;
+    InputStream _inputStream;
 };

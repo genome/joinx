@@ -20,7 +20,20 @@ TEST(InputStream, caching) {
     ASSERT_FALSE(stream.getline(line));
     ASSERT_TRUE(stream.eof());
 
+    stream.rewind();
+    ASSERT_FALSE(stream.eof());
+    ASSERT_TRUE(stream.getline(line));
+    ASSERT_EQ("1", line);
+    ASSERT_TRUE(stream.getline(line));
+    ASSERT_EQ("2", line);
+    ASSERT_TRUE(stream.getline(line));
+    ASSERT_EQ("3", line);
+    ASSERT_FALSE(stream.getline(line));
+    ASSERT_TRUE(stream.eof());
+
     stream.caching(false);
+    stream.rewind();
+
     ASSERT_FALSE(stream.eof());
     ASSERT_TRUE(stream.getline(line));
     ASSERT_EQ("1", line);

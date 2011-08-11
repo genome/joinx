@@ -1,8 +1,9 @@
 #include "CreateContigsCommand.hpp"
 
 #include "bedutil/RemappedContig.hpp"
-#include "fileformats/FastaReader.hpp"
 #include "fileformats/BedStream.hpp"
+#include "fileformats/FastaReader.hpp"
+#include "fileformats/InputStream.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
@@ -104,7 +105,8 @@ void CreateContigsCommand::exec() {
     }
 
     // this stream will read 2 extra fields, ref/call and quality
-    BedStream bedStream(_variantsFile, *input, 2);
+    InputStream inStream(_variantsFile, *input);
+    BedStream bedStream(inStream, 2);
     RemappedContigFastaWriter writer(*output);
     RemappedContigGenerator<FastaReader, RemappedContigFastaWriter> generator(ref, _flankSize, writer);
     Bed b;

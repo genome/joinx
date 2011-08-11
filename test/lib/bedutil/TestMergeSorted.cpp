@@ -3,7 +3,7 @@
 #include "fileformats/Bed.hpp"
 
 #include <gtest/gtest.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -57,10 +57,14 @@ TEST_F(TestMergeSorted, execute) {
         }
     }
 
-    typedef boost::shared_ptr<BedStream> BedStreamPtr;
+    typedef shared_ptr<BedStream> BedStreamPtr;
+    typedef shared_ptr<InputStream> InputStreamPtr;
+    vector<InputStreamPtr> inputStreams;
     vector<BedStreamPtr> bedStreams;
-    for (int i = 0; i < nStreams; ++i)
-        bedStreams.push_back(BedStreamPtr(new BedStream("test", streams[i], -1)));
+    for (int i = 0; i < nStreams; ++i) {
+        inputStreams.push_back(InputStreamPtr(new InputStream("test", streams[i])));
+        bedStreams.push_back(BedStreamPtr(new BedStream(**inputStreams.rbegin(), -1)));
+    }
 
     stringstream out;
     MergeSorted<Bed, BedStreamPtr> merger(bedStreams, out);

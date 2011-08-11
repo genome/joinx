@@ -3,6 +3,9 @@
 #include "bedutil/MergeSorted.hpp"
 #include "bedutil/Sort.hpp"
 #include "fileformats/BedStream.hpp"
+#include "fileformats/InferFileType.hpp"
+#include "fileformats/InputStream.hpp"
+#include "fileformats/vcf/Reader.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
@@ -28,10 +31,6 @@ SortCommand::SortCommand()
 }
 
 SortCommand::~SortCommand() {
-    for (std::vector<InputPtr>::iterator iter = _inputs.begin(); iter != _inputs.end(); ++iter) {
-        delete *iter;
-        *iter = NULL;
-    }
 }
 
 void SortCommand::parseArguments(int argc, char** argv) {
@@ -75,9 +74,18 @@ void SortCommand::parseArguments(int argc, char** argv) {
     
 }
 
-void SortCommand::exec() {
-    typedef boost::shared_ptr<ifstream> FilePtr;
+namespace {
+    template<typename T>
+    vector< shared_ptr<T> > setupStreams(const vector< shared_ptr<InputStream> >& v) {
+        vector< shared_ptr<T> > rv;
+        for (auto i = v.begin(); i != v.end(); ++i) {
+            rv.push_back(shared_ptr<T>(new T(**i))); 
+        }
+        return rv;
+    }
+}
 
+void SortCommand::exec() {
     CompressionType compression(NONE);
     if (!_compressionString.empty()) {
         if (_compressionString == "n")
@@ -92,20 +100,37 @@ void SortCommand::exec() {
             throw runtime_error(str(format("Invalid compression option '%1%'") %_compressionString));
     }
 
+    typedef boost::shared_ptr<ifstream> FilePtr;
+    typedef shared_ptr<InputStream> InputStreamPtr;
     vector<FilePtr> files;
+    vector<InputStreamPtr> inputStreams;
+
     bool haveCin = false;
-    for (vector<string>::const_iterator iter = _filenames.begin(); iter != _filenames.end(); ++iter) {
+    for (auto iter = _filenames.begin(); iter != _filenames.end(); ++iter) {
         if (*iter != "-") {
             FilePtr in(new ifstream(iter->c_str()));
             if (!in || !in->is_open())
                 throw runtime_error(str(format("Failed to open input file '%1%'") %*iter));
             files.push_back(in);
-            _inputs.push_back(new BedStream(*iter, *in, 0)); 
+            inputStreams.push_back(InputStreamPtr(new InputStream(*iter, **files.rbegin())));
         } else if (!haveCin) {
-            _inputs.push_back(new BedStream(*iter, cin, 0));
+            haveCin = true;
+            inputStreams.push_back(InputStreamPtr(new InputStream("stdin", cin)));
         } else {
             throw runtime_error("- specified as input file multiple times! Abort.");
         }
+    }
+
+    FileType type = inferFileType(**inputStreams.begin());
+    if (type == UNKNOWN)
+        throw runtime_error(str(format("Unable to infer file type for %1%") %(*inputStreams.begin())->name()));
+    for (auto iter = inputStreams.begin()+1; iter != inputStreams.end(); ++iter) {
+        if (inferFileType(**iter) != type)
+            throw runtime_error(str(format("Multiple file formats detected (%1%), abort.") %(*iter)->name()));
+    }
+
+    if (type == VCF && inputStreams.size() > 1) {
+        throw runtime_error("VCF only supports sorting one file at a time for now, sorry.");
     }
 
     ostream* out;
@@ -119,6 +144,16 @@ void SortCommand::exec() {
         out = &cout;
     }
 
-    Sort<BedStream, BedStream*> sorter(_inputs, *out, _maxInMem, _stable, compression);
-    sorter.execute();
+    if (type == BED) {
+        vector< shared_ptr<BedStream> > inputs(setupStreams<BedStream>(inputStreams));
+        Sort<BedStream, shared_ptr<BedStream> > sorter(inputs, *out, _maxInMem, _stable, compression);
+        sorter.execute();
+    } else if (type == VCF) {
+        vector< shared_ptr<Vcf::Reader> > inputs(setupStreams<Vcf::Reader>(inputStreams));
+        *out << inputs[0]->header();
+        Sort<Vcf::Reader, shared_ptr<Vcf::Reader> > sorter(inputs, *out, _maxInMem, _stable, compression);
+        sorter.execute();
+    } else {
+        throw runtime_error("Unknown file type!");
+    }
 }
