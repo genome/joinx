@@ -28,11 +28,13 @@ set(SOURCES
     vcf/Header.hpp
     vcf/Map.cpp
     vcf/Map.hpp
-    vcf/namespace.hpp
-    vcf/VariantAdaptor.cpp
-    vcf/VariantAdaptor.hpp
+    vcf/Reader.cpp
+    vcf/Reader.hpp
     vcf/Validator.cpp
     vcf/Validator.hpp
+    vcf/VariantAdaptor.cpp
+    vcf/VariantAdaptor.hpp
+    vcf/namespace.hpp
 )
 
 add_library(fileformats ${SOURCES})

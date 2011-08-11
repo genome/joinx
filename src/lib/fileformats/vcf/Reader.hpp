@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Vcf.hpp"
+#include "Entry.hpp"
+#include "Header.hpp"
+#include "namespace.hpp"
 
 #include <iostream>
 #include <string>

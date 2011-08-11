@@ -1,4 +1,4 @@
-#include "VcfReader.hpp"
+#include "Reader.hpp"
 
 VCF_NAMESPACE_BEGIN
 
@@ -10,7 +10,7 @@ Reader::Reader(const std::string& streamName, std::istream& in)
 {
     while (getline(_in, _buf) && !_buf.empty() && _buf[0] == '#') {
         if (_buf[1] == '#')
-            _header.add(_buf.substr(2));
+            _header.add(_buf);
     }
 }
 
