@@ -66,6 +66,8 @@ Variant::Variant(
         _allSequences.push_back(ref);
     if (!alt.empty() || alt != "-")
         _allSequences.push_back(alt);
+
+    _type = inferType();
 }
 
 Variant::Variant(const Bed& bed)

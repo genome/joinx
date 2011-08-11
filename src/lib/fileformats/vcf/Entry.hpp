@@ -1,33 +1,36 @@
 #pragma once
 
-#include <common/Tokenizer.hpp>
-#include <fileformats/Variant.hpp>
+#include "common/Tokenizer.hpp"
+#include "namespace.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <cstdint>
 #include <ostream>
 #include <string>
-#include <utility>
 #include <vector>
-#include <map>
-#include <utility>
-
-#define VCF_NAMESPACE_BEGIN namespace Vcf {
-#define VCF_NAMESPACE_END   }
 
 VCF_NAMESPACE_BEGIN
 
-enum DataType {
-    INT,
-    FLOAT,
-    CHAR,
-    STRING,
-    FLAG
+class InfoField {
+public:
+    InfoField();
+    InfoField(const std::string& raw);
+    InfoField(const std::string& id, const std::string& val);
+
+    const std::string& id() const;
+    const std::string& value() const;
+
+    template<typename T>
+    T as() const { return boost::lexical_cast<T>(_value); }
+
+    bool operator==(const InfoField& rhs) const {
+        return _id == rhs._id && _value == rhs._value;
+    }
+
+protected:
+    std::string _id;
+    std::string _value;
 };
-
-DataType strToType(const std::string& s);
-std::string parseString(const std::string& s);
-
 
 class Entry {
 public:
@@ -50,19 +53,14 @@ public:
     const std::vector<std::string>& formatDescription() const { return _formatDescription; }
     const std::vector< std::vector<std::string> >& perSampleData() const { return _perSampleData; }
 
-    int64_t start() const;
-    int64_t stop() const;
-    int64_t length() const { return stop() - start(); }
     std::string toString() const;
 
-    std::vector<Variant> variants() const;
-
     template<typename T>
-    void extractList(T& v, const std::string& s) {
+    void extractList(T& v, const std::string& s, char delim = ';') {
         if (s == ".")
             return;
 
-        Tokenizer<char> t(s, ';');
+        Tokenizer<char> t(s, delim);
         typename T::value_type tmp;
         while (t.extract(tmp)) {
             v.push_back(tmp);
@@ -70,11 +68,11 @@ public:
     }
 
     template<typename T>
-    void printList(std::ostream& s, const T& v) const {
+    void printList(std::ostream& s, const T& v, char delim = ';') const {
         if (!v.empty()) {
             for (auto i = v.begin(); i != v.end(); ++i) {
                 if (i != v.begin())
-                    s << ';';
+                    s << delim;
                 s << *i;
             }
         } else {
@@ -98,4 +96,5 @@ protected:
 
 VCF_NAMESPACE_END
 
+std::ostream& operator<<(std::ostream& s, const Vcf::InfoField& i);
 std::ostream& operator<<(std::ostream& s, const Vcf::Entry& e);
