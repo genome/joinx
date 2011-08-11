@@ -16,6 +16,8 @@ set(SOURCES
     ISequenceReader.hpp
     InferFileType.cpp
     InferFileType.hpp
+    InputStream.cpp
+    InputStream.hpp
     ReferenceSequence.cpp
     ReferenceSequence.hpp
     TranscriptStructure.cpp
