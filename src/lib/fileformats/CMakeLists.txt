@@ -14,6 +14,8 @@ set(SOURCES
     FastaReader.hpp
     IGenomicPosition.hpp
     ISequenceReader.hpp
+    InferFileType.cpp
+    InferFileType.hpp
     ReferenceSequence.cpp
     ReferenceSequence.hpp
     TranscriptStructure.cpp

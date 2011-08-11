@@ -5,6 +5,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 def_test(Bed)
 def_test(BedStream)
+def_test(InferFileType)
 def_test(ReferenceSequence)
 def_test(TranscriptStructure)
 def_test(Variant)

@@ -1,5 +1,9 @@
 #include "Reader.hpp"
 
+#include <boost/format.hpp>
+
+using boost::format;
+
 VCF_NAMESPACE_BEGIN
 
 Reader::Reader(const std::string& streamName, std::istream& in)
@@ -12,6 +16,8 @@ Reader::Reader(const std::string& streamName, std::istream& in)
         if (_buf[1] == '#')
             _header.add(_buf);
     }
+    if (_header.lines().empty())
+        throw runtime_error(str(format("Error reading vcf file %1%: invalid or missing header") %name()));
 }
 
 const Header& Reader::header() const {
