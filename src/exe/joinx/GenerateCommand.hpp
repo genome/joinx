@@ -5,30 +5,29 @@
 
 #include <string>
 
-class RemapCigarCommand : public CommandBase {
+class GenerateCommand : public CommandBase {
 public:
     using CommandBase::ptr;
 
-    RemapCigarCommand();
+    GenerateCommand();
     ptr create(int argc, char** argv);
 
-    std::string name() const { return "remap-cigar"; }
+    std::string name() const { return "generate"; }
     std::string description() const {
-        return "update cigar strings from remapped sam files";
+        return "generate random bed or vcf files";
     }
 
     void exec();
-
-    // our little secret... (this cmd won't show in the help)
-    bool hidden() const {
-        return true;
-    }
+    // hide from usage
+    bool hidden() const { return true; }
     
 protected:
     void parseArguments(int argc, char** argv);
 
 protected:
-    std::string _inputFile;
+    uint32_t _lines;
+    uint32_t _seed;
+    std::string _format;
     std::string _outputFile;
     StreamHandler _streams;
 };

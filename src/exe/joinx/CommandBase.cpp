@@ -20,6 +20,8 @@ void CommandBase::registerSubCommand(const ptr& app) {
 
 void CommandBase::describeSubCommands(std::ostream& s, const std::string& indent) {
     for (SubCommandMap::const_iterator iter = _subCmds.begin(); iter != _subCmds.end(); ++iter) {
+        if (iter->second->hidden())
+            continue;
         s << indent << iter->second->name() << " - " << iter->second->description() << endl;
     }
 }

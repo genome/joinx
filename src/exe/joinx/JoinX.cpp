@@ -1,6 +1,7 @@
 #include "JoinX.hpp"
 #include "CheckRefCommand.hpp"
 #include "CreateContigsCommand.hpp"
+#include "GenerateCommand.hpp"
 #include "IntersectCommand.hpp"
 #include "RemapCigarCommand.hpp"
 #include "SnvConcordanceByQualityCommand.hpp"
@@ -20,6 +21,7 @@ JoinX::JoinX(int argc, char** argv)
 {
     registerSubCommand(CheckRefCommand::ptr(new CheckRefCommand));
     registerSubCommand(CreateContigsCommand::ptr(new CreateContigsCommand));
+    registerSubCommand(GenerateCommand::ptr(new GenerateCommand));
     registerSubCommand(IntersectCommand::ptr(new IntersectCommand));
     registerSubCommand(RemapCigarCommand::ptr(new RemapCigarCommand));
     registerSubCommand(SnvConcordanceByQualityCommand::ptr(new SnvConcordanceByQualityCommand));

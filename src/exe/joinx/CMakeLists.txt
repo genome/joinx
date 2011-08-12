@@ -10,6 +10,8 @@ set(SOURCES
     CommandBase.hpp
     CreateContigsCommand.cpp
     CreateContigsCommand.hpp
+    GenerateCommand.cpp
+    GenerateCommand.hpp
     IntersectCommand.cpp
     IntersectCommand.hpp
     JoinX.cpp

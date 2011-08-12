@@ -3,9 +3,7 @@
 #include "CommandBase.hpp"
 #include "StreamHandler.hpp"
 
-#include <fstream>
 #include <string>
-#include <vector>
 
 class IntersectCommand : public CommandBase {
 public:

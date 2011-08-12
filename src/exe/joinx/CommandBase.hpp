@@ -16,6 +16,9 @@ public:
     virtual void exec() = 0;
     virtual std::string name() const = 0;
     virtual std::string description() const = 0;
+    virtual bool hidden() const {
+        return false;
+    }
 
     ptr subCommand(const std::string& name, int argc, char** argv) const;
     void registerSubCommand(const ptr& app);
