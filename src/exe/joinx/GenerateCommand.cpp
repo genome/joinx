@@ -67,7 +67,7 @@ namespace {
         int64_t start = u() * 100000000;
         int64_t stop;
         if (indel) {
-            uint32_t len = u()*maxIndelLength;
+            uint32_t len = u()*maxIndelLength+1;
             stop = start+len;
             for (uint32_t i = 0; i < len; ++i)
                 ref += alleles[int(u()*4)];
