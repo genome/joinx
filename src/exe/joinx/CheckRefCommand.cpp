@@ -67,31 +67,14 @@ void CheckRefCommand::parseArguments(int argc, char** argv) {
 }
 
 void CheckRefCommand::exec() {
-    istream* bed(NULL);
-    ostream* report(NULL);
-    ostream* miss(NULL);
-
-    if (_bedFile == "-")
-        bed = &cin;
-    else
-        bed = _streams.get(_bedFile, ios::in);
-
-
-    if (_reportFile == "-")
-        report = &cout;
-    else
-        report = _streams.get(_reportFile, ios::out);
-
-    if (!_missFile.empty()) {
-        if (_missFile == "-")
-            miss = &cout;
-        else
-            miss = _streams.get(_missFile, ios::out);
-    }
-
-    InputStream inStream(_bedFile, *bed);
-    BedStream bedStream(inStream, 1);
+    InputStream::ptr inStream = _streams.wrap<istream, InputStream>(_bedFile);
+    BedStream bedStream(*inStream, 1);
     FastaReader refSeq(_fastaFile);
+
+    ostream* report = _streams.get<ostream>(_reportFile);
+    ostream* miss(NULL);
+    if (!_missFile.empty())
+        miss = _streams.get<ostream>(_missFile);
 
     Bed entry;
     string referenceBases;

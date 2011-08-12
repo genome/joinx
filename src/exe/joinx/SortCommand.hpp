@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CommandBase.hpp"
+#include "StreamHandler.hpp"
 
 #include <fstream>
 #include <string>
@@ -34,4 +35,5 @@ protected:
     bool _mergeOnly;
     bool _stable;
     std::string _compressionString;
+    StreamHandler _streamHandler;
 };

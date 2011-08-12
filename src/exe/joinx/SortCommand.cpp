@@ -83,66 +83,32 @@ namespace {
         }
         return rv;
     }
+
+    FileType detectFormat(const vector< shared_ptr<InputStream> >& inputStreams) {
+        FileType type = inferFileType(**inputStreams.begin());
+        if (type == UNKNOWN)
+            throw runtime_error(str(format("Unable to infer file type for %1%") %(*inputStreams.begin())->name()));
+        for (auto iter = inputStreams.begin()+1; iter != inputStreams.end(); ++iter) {
+            if (inferFileType(**iter) != type)
+                throw runtime_error(str(format("Multiple file formats detected (%1%), abort.") %(*iter)->name()));
+        }
+
+        if (type == VCF && inputStreams.size() > 1) {
+            throw runtime_error("VCF only supports sorting one file at a time for now, sorry.");
+        }
+
+        return type;
+    }
 }
 
 void SortCommand::exec() {
-    CompressionType compression(NONE);
-    if (!_compressionString.empty()) {
-        if (_compressionString == "n")
-            compression = NONE;
-        else if (_compressionString == "g")
-            compression = GZIP;
-        else if (_compressionString == "z")
-            compression = ZLIB;
-        else if (_compressionString == "b")
-            compression = BZIP2;
-        else
-            throw runtime_error(str(format("Invalid compression option '%1%'") %_compressionString));
-    }
+    CompressionType compression = compressionTypeFromString(_compressionString);
 
-    typedef boost::shared_ptr<ifstream> FilePtr;
-    typedef shared_ptr<InputStream> InputStreamPtr;
-    vector<FilePtr> files;
-    vector<InputStreamPtr> inputStreams;
-
-    bool haveCin = false;
-    for (auto iter = _filenames.begin(); iter != _filenames.end(); ++iter) {
-        if (*iter != "-") {
-            FilePtr in(new ifstream(iter->c_str()));
-            if (!in || !in->is_open())
-                throw runtime_error(str(format("Failed to open input file '%1%'") %*iter));
-            files.push_back(in);
-            inputStreams.push_back(InputStreamPtr(new InputStream(*iter, **files.rbegin())));
-        } else if (!haveCin) {
-            haveCin = true;
-            inputStreams.push_back(InputStreamPtr(new InputStream("stdin", cin)));
-        } else {
-            throw runtime_error("- specified as input file multiple times! Abort.");
-        }
-    }
-
-    FileType type = inferFileType(**inputStreams.begin());
-    if (type == UNKNOWN)
-        throw runtime_error(str(format("Unable to infer file type for %1%") %(*inputStreams.begin())->name()));
-    for (auto iter = inputStreams.begin()+1; iter != inputStreams.end(); ++iter) {
-        if (inferFileType(**iter) != type)
-            throw runtime_error(str(format("Multiple file formats detected (%1%), abort.") %(*iter)->name()));
-    }
-
-    if (type == VCF && inputStreams.size() > 1) {
-        throw runtime_error("VCF only supports sorting one file at a time for now, sorry.");
-    }
-
-    ostream* out;
-    ofstream outFile;
-    if (!_outputFile.empty() && _outputFile != "-") {
-        outFile.open(_outputFile.c_str());
-        if (!outFile)
-            throw runtime_error(str(format("Failed to open output file %1%") %_outputFile));
-        out = &outFile;
-    } else {
-        out = &cout;
-    }
+    vector<InputStream::ptr> inputStreams = _streamHandler.wrap<istream, InputStream>(_filenames);
+    FileType type = detectFormat(inputStreams);
+    ostream* out = _streamHandler.get<ostream>(_outputFile);
+    if (_streamHandler.cinReferences() > 1)
+        throw runtime_error("stdin listed more than once!");
 
     if (type == BED) {
         vector< shared_ptr<BedStream> > inputs(setupStreams<BedStream>(inputStreams));

@@ -3,6 +3,7 @@
 #include "common/TempFile.hpp"
 #include "fileformats/InputStream.hpp"
 
+#include <boost/format.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
@@ -21,6 +22,21 @@ enum CompressionType {
     BZIP2,
     N_COMPRESSION_TYPES
 };
+
+inline CompressionType compressionTypeFromString(const std::string& s) {
+    using boost::format;
+
+    if (s.empty() || s == "n")
+        return NONE;
+    else if (s == "g")
+        return GZIP;
+    else if (s == "z")
+        return ZLIB;
+    else if (s == "b")
+        return BZIP2;
+    else
+        throw std::runtime_error(str(format("Invalid compression string '%1%'. Expected one of: n,g,z,b") %s));
+}
 
 template<typename StreamType>
 class SortBuffer {

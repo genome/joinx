@@ -25,32 +25,6 @@ protected:
     void parseArguments(int argc, char** argv);
 
 protected:
-    struct Streams {
-        Streams()
-            : inA(NULL)
-            , inB(NULL)
-            , outHit(NULL)
-            , outMissA(NULL)
-            , outMissB(NULL)
-        {}
-
-        ~Streams() {
-            for (unsigned i = 0; i < cleanup.size(); ++i)
-                delete cleanup[i];
-        }
-
-        std::istream* inA;
-        std::istream* inB;
-        std::ostream* outHit;
-        std::ostream* outMissA;
-        std::ostream* outMissB;
-
-        std::vector<std::fstream*> cleanup;
-    };
-
-    void setupStreams(Streams& s);
-
-protected:
     std::string _fileA;
     std::string _fileB;
     std::string _missFileA;

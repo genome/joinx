@@ -89,24 +89,11 @@ void CreateContigsCommand::parseArguments(int argc, char** argv) {
 
 void CreateContigsCommand::exec() {
     FastaReader ref(_referenceFasta);
-    istream* input = &cin; 
-    ostream* output = &cout;
+    ostream *output = _streams.get<ostream>(_outputFile);
 
-    if (!_variantsFile.empty() && _variantsFile != "-") {
-        input = _streams.get(_variantsFile, ios::in);
-        if (!*input)
-            throw runtime_error(str(format("Failed to open variants file %1%") %_variantsFile));
-    }
-
-    if (!_outputFile.empty() && _outputFile != "-") {
-        output = _streams.get(_outputFile, ios::out);
-        if (!*output)
-            throw runtime_error(str(format("Failed to open output file %1%") %_outputFile));
-    }
-
+    InputStream::ptr inStream(_streams.wrap<istream, InputStream>(_variantsFile));
     // this stream will read 2 extra fields, ref/call and quality
-    InputStream inStream(_variantsFile, *input);
-    BedStream bedStream(inStream, 2);
+    BedStream bedStream(*inStream, 2);
     RemappedContigFastaWriter writer(*output);
     RemappedContigGenerator<FastaReader, RemappedContigFastaWriter> generator(ref, _flankSize, writer);
     Bed b;

@@ -1,15 +1,18 @@
 #include "StreamHandler.hpp"
 
 #include <boost/format.hpp>
-#include <fstream>
-#include <iostream>
 
-using boost::format;
 using namespace std;
+using boost::format;
 
-iostream* StreamHandler::get(const string& path, ios_base::openmode mode) {
+StreamHandler::StreamHandler()
+    : _cinReferences(0)
+    , _coutReferences(0)
+{
+}
+
+iostream* StreamHandler::getFile(const std::string& path, openmode mode) {
     auto i = _streams.find(path);
-
     if (i != _streams.end()) {
         if (mode != i->second.mode || mode == ios::in)
             throw runtime_error(str(format("Attempted to open file %1% multiple times in an unsupported way. Abort.") %i->first));

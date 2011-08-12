@@ -2,10 +2,17 @@
 
 #include <deque>
 #include <istream>
+#include <memory>
 #include <string>
 
 class InputStream {
 public:
+    typedef std::shared_ptr<InputStream> ptr;
+
+    static ptr create(const std::string& name, std::istream& s) {
+        return ptr(new InputStream(name, s));
+    }
+
     InputStream(const std::string& name, std::istream& s);
 
     void caching(bool value);

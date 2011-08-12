@@ -51,18 +51,8 @@ void RemapCigarCommand::parseArguments(int argc, char** argv) {
 }
 
 void RemapCigarCommand::exec() {
-    istream* in(NULL);
-    ostream* out(NULL);
-
-    if (_inputFile.empty() || _inputFile == "-")
-        in = &cin;
-    else
-        in = _streams.get(_inputFile, ios::in);
-
-    if (_outputFile.empty() || _outputFile == "-")
-        out = &cout;
-    else
-        out = _streams.get(_outputFile, ios::out);
+    istream* in = _streams.get<istream>(_inputFile);
+    ostream* out = _streams.get<ostream>(_outputFile);
 
     string line;
     while (getline(*in, line)) {

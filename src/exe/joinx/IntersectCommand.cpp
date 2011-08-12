@@ -142,63 +142,33 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
     _adjacentInsertions = vm.count("adjacent-insertions") > 0;
 }
 
-void IntersectCommand::setupStreams(Streams& s) {
-    unsigned cinReferences = 0;
-
-    if (_fileA != "-") {
-        s.inA = _streams.get(_fileA, ios::in);
-    } else {
-        s.inA = &cin;
-        ++cinReferences;
-    }
-
-    if (_fileB != "-") {
-        s.inB = _streams.get(_fileB, ios::in);
-    } else {
-        s.inB = &cin;
-        ++cinReferences;
-    }
-
-    if (cinReferences > 1)
-        throw runtime_error("Multiple input streams from stdin specified. Abort.");
-
-    if (!_outputFile.empty() && _outputFile != "-") {
-        s.outHit = _streams.get(_outputFile, ios::out);
-    } else {
-        s.outHit = &cout;
-    }
-
-    if (!_missFileA.empty() && _missFileA != "-") {
-        s.outMissA = _streams.get(_missFileA, ios::out);
-    } else if (!_missFileA.empty()) {
-        s.outMissA = &cout;
-    }
-
-    if (!_missFileB.empty() && _missFileB != "-") {
-        s.outMissB = _streams.get(_missFileB, ios::out);
-    } else if (!_missFileB.empty()) {
-        s.outMissB = &cout;
-    }
-}
-
 void IntersectCommand::exec() {
-    if (_fileA == _fileB) {
+    if (_fileA == _fileB)
         throw runtime_error("Input files have the same name, '" + _fileA + "', not good.");
-    }
 
-    Streams s;
-    setupStreams(s);
+    ostream* outHit = _streams.get<ostream>(_outputFile);
+    IntersectionOutput::Formatter outputFormatter(_formatString, *outHit);
 
-    IntersectionOutput::Formatter outputFormatter(_formatString, *s.outHit);
-
+    // determine how many extra (beyond the 3 mandatory) fields we need to 
+    // parse. this depends on how many we are expected to print, let's ask 
+    // the outputFormatter!
     unsigned extraFieldsA = max(1u, outputFormatter.extraFields(0));
     unsigned extraFieldsB = max(1u, outputFormatter.extraFields(1));
-    InputStream inStreamA(_fileA, *s.inA);
-    InputStream inStreamB(_fileB, *s.inB);
-    BedStream fa(inStreamA, extraFieldsA);
-    BedStream fb(inStreamB, extraFieldsB);
+    InputStream::ptr inStreamA(_streams.wrap<istream, InputStream>(_fileA));
+    InputStream::ptr inStreamB(_streams.wrap<istream, InputStream>(_fileB));
+    // don't try to read cin more than once or you will have a bad day
+    if (_streams.cinReferences() > 1)
+        throw runtime_error("Multiple input streams from stdin specified. Abort.");
+    BedStream fa(*inStreamA, extraFieldsA);
+    BedStream fb(*inStreamB, extraFieldsB);
 
-    Collector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, _dbsnpMatch, outputFormatter, s.outMissA, s.outMissB);
+    // optional "miss" output streams
+    ostream* outMissA(NULL);
+    ostream* outMissB(NULL);
+    if (!_missFileA.empty()) outMissA = _streams.get<ostream>(_missFileA);
+    if (!_missFileB.empty()) outMissB = _streams.get<ostream>(_missFileB);
+
+    Collector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, _dbsnpMatch, outputFormatter, outMissA, outMissB);
     Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c, _adjacentInsertions);
     intersector.execute();
 }
