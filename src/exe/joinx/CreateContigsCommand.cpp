@@ -39,7 +39,7 @@ CreateContigsCommand::CreateContigsCommand()
 }
 
 CommandBase::ptr CreateContigsCommand::create(int argc, char** argv) {
-    boost::shared_ptr<CreateContigsCommand> app(new CreateContigsCommand);
+    std::shared_ptr<CreateContigsCommand> app(new CreateContigsCommand);
     app->parseArguments(argc, argv);
     return app;
 }

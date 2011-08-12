@@ -19,7 +19,7 @@ using namespace std;
 namespace po = boost::program_options;
 
 CommandBase::ptr SnvConcordanceCommand::create(int argc, char** argv) {
-    boost::shared_ptr<SnvConcordanceCommand> app(new SnvConcordanceCommand);
+    std::shared_ptr<SnvConcordanceCommand> app(new SnvConcordanceCommand);
     app->parseArguments(argc, argv);
     return app;
 }

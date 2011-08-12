@@ -22,7 +22,7 @@ using namespace std;
 namespace po = boost::program_options;
 
 CommandBase::ptr IntersectCommand::create(int argc, char** argv) {
-    boost::shared_ptr<IntersectCommand> app(new IntersectCommand);
+    std::shared_ptr<IntersectCommand> app(new IntersectCommand);
     app->parseArguments(argc, argv);
     return app;
 }

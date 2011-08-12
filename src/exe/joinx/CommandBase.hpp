@@ -1,14 +1,14 @@
 #pragma once
 
-#include <boost/shared_ptr.hpp>
 #include <cstdint>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 
 class CommandBase {
 public:
-    typedef boost::shared_ptr<CommandBase> ptr;
+    typedef std::shared_ptr<CommandBase> ptr;
 
     virtual ~CommandBase() {}
 

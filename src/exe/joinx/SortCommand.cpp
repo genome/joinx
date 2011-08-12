@@ -17,7 +17,7 @@ using boost::format;
 using namespace std;
 
 CommandBase::ptr SortCommand::create(int argc, char** argv) {
-    boost::shared_ptr<SortCommand> app(new SortCommand);
+    std::shared_ptr<SortCommand> app(new SortCommand);
     app->parseArguments(argc, argv);
     return app;
 }

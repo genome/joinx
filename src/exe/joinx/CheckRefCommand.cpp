@@ -14,7 +14,7 @@ using namespace std;
 namespace po = boost::program_options;
 
 CommandBase::ptr CheckRefCommand::create(int argc, char** argv) {
-    boost::shared_ptr<CheckRefCommand> app(new CheckRefCommand);
+    std::shared_ptr<CheckRefCommand> app(new CheckRefCommand);
     app->parseArguments(argc, argv);
     return app;
 }

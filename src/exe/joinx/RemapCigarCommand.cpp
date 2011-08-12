@@ -17,7 +17,7 @@ using namespace std;
 namespace po = boost::program_options;
 
 CommandBase::ptr RemapCigarCommand::create(int argc, char** argv) {
-    boost::shared_ptr<RemapCigarCommand> app(new RemapCigarCommand);
+    std::shared_ptr<RemapCigarCommand> app(new RemapCigarCommand);
     app->parseArguments(argc, argv);
     return app;
 }
