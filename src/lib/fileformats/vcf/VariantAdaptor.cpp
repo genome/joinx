@@ -1,6 +1,7 @@
 #include "VariantAdaptor.hpp"
 
 #include <boost/format.hpp>
+#include <algorithm>
 #include <cassert>
 #include <vector>
 #include <stdexcept>
@@ -12,10 +13,28 @@ VCF_NAMESPACE_BEGIN
 
 VariantAdaptor::VariantAdaptor(const Entry& entry)
     : _entry(entry)
-    , _idx(0)
-    , _ref(entry.ref())
 {
-    setIndex(_idx);
+    const vector<string>& alts = _entry.alt();
+    _start = _stop = _entry.pos();
+    for (uint32_t idx = 0; idx < _entry.alt().size(); ++idx) {
+        string::size_type prefix = commonPrefix(_entry.ref(), alts[idx]);
+        int64_t start = _entry.pos() - 1 + prefix;
+        int64_t stop;
+        if (alts[idx].size() == _entry.ref().size()) {
+            stop = start + alts[idx].size() - prefix;
+        } else {
+            // VCF prepends 1 base to indels
+            if (alts[idx].size() < _entry.ref().size()) { // deletion
+                stop = start + _entry.ref().size();
+            } else if (alts[idx].size() > _entry.ref().size()) { // insertion
+                ++start;
+                stop = start;
+            } else // let's see if this ever happens!
+                throw runtime_error(str(format("Unknown variant type, allele %1%: %2%") %idx %_entry.toString()));
+        }
+        _start = min(_start, start);
+        _stop = max(_stop, stop);
+    }
 }
 
 string::size_type VariantAdaptor::commonPrefix(const string& a, const string& b) {
@@ -23,47 +42,6 @@ string::size_type VariantAdaptor::commonPrefix(const string& a, const string& b)
     while (p < a.size() && p < b.size() && a[p] == b[p])
         ++p;
     return p;
-}
-
-
-bool VariantAdaptor::advance() {
-    if (++_idx < _entry.alt().size()) {
-        setIndex(_idx);
-        return true;
-    }
-    return false;
-}
-
-void VariantAdaptor::setIndex(uint32_t idx) {
-    // test if snp or dnp, etc
-    const vector<string>& alt = _entry.alt();
-    if (idx >= alt.size()) {
-        _start = _entry.pos()-1;
-        _stop = _entry.pos();
-        _ref = _entry.ref();
-        _alt = ".";
-        return;
-    }
-
-    string::size_type prefix = commonPrefix(_entry.ref(), alt[_idx]);
-    _start = _entry.pos() - 1 + prefix;
-    if (alt[_idx].size() == _entry.ref().size()) {
-        _stop = _start + alt[_idx].size() - prefix;
-        _ref = _entry.ref().substr(prefix, alt[_idx].size() - prefix);
-        _alt = alt[_idx].substr(prefix);
-        assert(_ref.size() == _alt.size());
-    } else {
-        _ref = _entry.ref().substr(prefix);
-        _alt = alt[_idx].substr(prefix);
-        // VCF prepends 1 base to indels
-        if (_alt.size() < _ref.size()) { // deletion
-            _stop = _start + _ref.size();
-        } else if (_alt.size() > _ref.size()) { // insertion
-            ++_start;
-            _stop = _start;
-        } else // let's see if this ever happens!
-            throw runtime_error(str(format("Unknown variant type, allele %1%: %2%") %_idx %_entry.toString()));
-    }
 }
 
 VCF_NAMESPACE_END
