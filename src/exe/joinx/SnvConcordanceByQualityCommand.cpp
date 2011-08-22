@@ -6,17 +6,20 @@
 #include "bedutil/ResultStreamWriter.hpp"
 #include "bedutil/SnvComparator.hpp"
 #include "bedutil/TypeFilter.hpp"
-#include "fileformats/BedStream.hpp"
+#include "fileformats/Bed.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "fileformats/InputStream.hpp"
 
 #include <boost/program_options.hpp>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
 
 using namespace std;
+using namespace std::placeholders;
 namespace po = boost::program_options;
 
 SnvConcordanceByQualityCommand::SnvConcordanceByQualityCommand() {
@@ -112,25 +115,22 @@ unique_ptr<ResultStreamWriter> SnvConcordanceByQualityCommand::setupStreamWriter
 }
 
 void SnvConcordanceByQualityCommand::exec() {
+    typedef TypedStream<Bed, function<void(string&, Bed&)> > BedReader;
 
-    ifstream inA(_fileA.c_str());
-    if (!inA)
-        throw runtime_error("Failed to open input file '" + _fileA + "'");
-    ifstream inB(_fileB.c_str());
-    if (!inB)
-        throw runtime_error("Failed to open input file '" + _fileB + "'");
+    InputStream::ptr inStreamA(_streamHandler.wrap<istream, InputStream>(_fileA));
+    InputStream::ptr inStreamB(_streamHandler.wrap<istream, InputStream>(_fileB));
 
     // set up input filters, keep SNV only, and reject entries with N ref value
     NoReferenceFilter nref;
     TypeFilter snvOnly(Bed::SNV);
 
-    InputStream sa(_fileA, inA);
-    BedStream fa(sa, 2);
+    function<void(string&, Bed&)> extractorA = bind(&Bed::parseLine, _1, _2, 2);
+    BedReader fa(extractorA, *inStreamA);
     fa.addFilter(&snvOnly);
     fa.addFilter(&nref);
 
-    InputStream sb(_fileB, inB);
-    BedStream fb(sb, 0);
+    function<void(string&, Bed&)> extractorB = bind(&Bed::parseLine, _1, _2, 0);
+    BedReader fb(extractorB, *inStreamB);
     fb.addFilter(&snvOnly);
 
     ConcordanceQuality qc;
@@ -144,7 +144,7 @@ void SnvConcordanceByQualityCommand::exec() {
     snvi.exec();
     qc.report(cout); 
 
-    cout << "Total Snvs: " << fa.bedCount() << endl;
+    cout << "Total Snvs: " << fa.valueCount() << endl;
     cout << "      Hits: " << qc.hits() << endl;
     cout << "    Misses: " << qc.misses() << endl;
 }

@@ -2,6 +2,7 @@
 
 #include "common/TempFile.hpp"
 #include "fileformats/InputStream.hpp"
+#include "fileformats/StreamFactory.hpp"
 
 #include <boost/format.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
@@ -38,14 +39,16 @@ inline CompressionType compressionTypeFromString(const std::string& s) {
         throw std::runtime_error(str(format("Invalid compression string '%1%'. Expected one of: n,g,z,b") %s));
 }
 
-template<typename StreamType>
+template<typename StreamFactoryType>
 class SortBuffer {
 public:
-    typedef typename StreamType::ValueType ValueType;
+    typedef typename StreamFactoryType::StreamPtr StreamPtr;
+    typedef typename StreamFactoryType::ValueType ValueType;
     typedef typename std::deque<ValueType*>::size_type size_type;
 
-    SortBuffer(bool stable, CompressionType compression)
-        : _stable(stable)
+    SortBuffer(StreamFactoryType& streamFactory, bool stable, CompressionType compression)
+        : _streamFactory(streamFactory)
+        , _stable(stable)
         , _compression(compression)
         , _inputStream("anon", _in)
     {}
@@ -124,7 +127,7 @@ public:
 
         _in.push(_tmpfile->stream());
 
-        _stream.reset(new StreamType(_inputStream));
+        _stream = _streamFactory.open(_inputStream);
     }
 
     bool peek(ValueType** v) {
@@ -163,11 +166,12 @@ protected:
     }
 
 protected:
+    StreamFactoryType& _streamFactory;
     bool _stable;
     CompressionType _compression;
     std::deque<ValueType*> _buf;
     TempFile::ptr _tmpfile;
-    std::shared_ptr<StreamType> _stream;
+    StreamPtr _stream;
 
     // for reading compressed tmp file
     boost::iostreams::filtering_stream<boost::iostreams::input> _in;

@@ -3,7 +3,7 @@
 
 #include "bedutil/IntersectionOutputFormatter.hpp"
 #include "bedutil/Intersect.hpp"
-#include "fileformats/BedStream.hpp"
+#include "fileformats/TypedStream.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
@@ -11,15 +11,17 @@
 #include <cstdint>
 #include <cstdio>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <iterator>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
 
-using boost::format;
-using namespace std;
 namespace po = boost::program_options;
+using boost::format;
+using namespace std::placeholders;
+using namespace std;
 
 CommandBase::ptr IntersectCommand::create(int argc, char** argv) {
     std::shared_ptr<IntersectCommand> app(new IntersectCommand);
@@ -159,8 +161,16 @@ void IntersectCommand::exec() {
     // don't try to read cin more than once or you will have a bad day
     if (_streams.cinReferences() > 1)
         throw runtime_error("Multiple input streams from stdin specified. Abort.");
-    BedStream fa(*inStreamA, extraFieldsA);
-    BedStream fb(*inStreamB, extraFieldsB);
+
+    typedef TypedStream<Bed, function<void (std::string&, Bed&)> >BedReaderType;
+    function<void (std::string&, Bed&)>
+        parserA = bind(&Bed::parseLine, _1, _2, extraFieldsA);
+    function<void (std::string&, Bed&)>
+        parserB = bind(&Bed::parseLine, _1, _2, extraFieldsB);
+
+    BedReaderType fa(parserA, *inStreamA);
+    BedReaderType fb(parserB, *inStreamB);
+    
 
     // optional "miss" output streams
     ostream* outMissA(NULL);
@@ -169,6 +179,6 @@ void IntersectCommand::exec() {
     if (!_missFileB.empty()) outMissB = _streams.get<ostream>(_missFileB);
 
     Collector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, _dbsnpMatch, outputFormatter, outMissA, outMissB);
-    Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c, _adjacentInsertions);
+    Intersect<BedReaderType,BedReaderType,Collector> intersector(fa, fb, c, _adjacentInsertions);
     intersector.execute();
 }

@@ -1,19 +1,21 @@
 #pragma once
 
+#include "fileformats/TypedStream.hpp"
+
 #include <cstdint>
 
 class Bed;
-class BedStream;
 class IResultCollector;
 
 class SnvComparator {
 public:
-    SnvComparator(BedStream& a, BedStream& b, IResultCollector& rc);
+    typedef TypedStream<Bed, std::function<void(std::string&, Bed&)> > BedReader;
+    SnvComparator(BedReader& a, BedReader& b, IResultCollector& rc);
 
     void exec();
 
 protected:
-    BedStream& _a;
-    BedStream& _b;
+    BedReader& _a;
+    BedReader& _b;
     IResultCollector& _rc;
 };

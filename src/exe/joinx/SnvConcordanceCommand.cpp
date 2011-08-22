@@ -2,20 +2,23 @@
 #include "bedutil/SnvConcordance.hpp"
 
 #include "bedutil/Intersect.hpp"
-#include "fileformats/BedStream.hpp"
+#include "fileformats/Bed.hpp"
 #include "fileformats/InputStream.hpp"
+#include "fileformats/TypedStream.hpp"
 
 #include <boost/program_options.hpp>
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
 
 using namespace std;
+using namespace std::placeholders;
 namespace po = boost::program_options;
 
 CommandBase::ptr SnvConcordanceCommand::create(int argc, char** argv) {
@@ -193,13 +196,15 @@ void SnvConcordanceCommand::exec() {
 
     InputStream inA(_fileA, *s.inA);
     InputStream inB(_fileB, *s.inB);
-    BedStream fa(inA);
-    BedStream fb(inB);
+    function<void(string&, Bed&)> extractor = bind(&Bed::parseLine, _1, _2, -1);
+    typedef TypedStream<Bed, function<void(string&, Bed&)> > BedReader;
+    BedReader fa(extractor, inA);
+    BedReader fb(extractor, inB);
 
     SnvConcordance::DepthOrQual depthOrQual = _useDepth ? SnvConcordance::DEPTH : SnvConcordance::QUAL;
     SnvConcordance concordance(depthOrQual);
     Collector c(concordance, s);
-    Intersect<BedStream,BedStream,Collector> intersector(fa, fb, c);
+    Intersect<BedReader,BedReader,Collector> intersector(fa, fb, c);
     intersector.execute();
     concordance.reportText(*s.out);
 }

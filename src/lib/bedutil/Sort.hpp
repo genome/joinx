@@ -14,27 +14,36 @@
 #include <memory>
 #include <vector>
 
-template<typename StreamType, typename StreamPtr = StreamType*>
+template<typename StreamFactoryType>
 class Sort {
 public:
-    typedef std::shared_ptr<StreamType> StreamSPtr;
-    typedef typename StreamType::ValueType ValueType;
-    typedef SortBuffer<StreamType> BufferType;
+    typedef typename StreamFactoryType::StreamPtr StreamPtr;
+    typedef typename StreamFactoryType::ValueType ValueType;
+    typedef SortBuffer<StreamFactoryType> BufferType;
     typedef std::shared_ptr<BufferType> BufferPtr;
 
-    Sort(std::vector<StreamPtr> inputs, std::ostream& output, unsigned maxInMem, bool stable, CompressionType compression = NONE)
-        : _inputs(inputs)
+    Sort(
+            StreamFactoryType& streamFactory,
+            std::vector<InputStream::ptr> inputs,
+            std::ostream& output,
+            unsigned maxInMem,
+            bool stable,
+            CompressionType compression = NONE
+        )
+        : _streamFactory(streamFactory)
         , _output(output)
         , _maxInMem(maxInMem)
         , _stable(stable)
         , _compression(compression)
     {
+        for (auto iter = inputs.begin(); iter != inputs.end(); ++iter)
+            _inputs.push_back(streamFactory.open(**iter));
     }
 
     void execute() {
         using namespace std;
 
-        BufferPtr buf(new BufferType(_stable, _compression));
+        BufferPtr buf(new BufferType(_streamFactory, _stable, _compression));
 
         for (unsigned idx = 0; idx < _inputs.size(); ++idx) {
             
@@ -49,7 +58,7 @@ public:
                     buf->sort();
                     buf->writeTmp();
                     _buffers.push_back(buf);
-                    buf.reset(new BufferType(_stable, _compression));
+                    buf.reset(new BufferType(_streamFactory, _stable, _compression));
                 }
             }
         }
@@ -68,6 +77,7 @@ public:
     }
 
 protected:
+    StreamFactoryType& _streamFactory;
     std::vector<BufferPtr> _buffers;
     std::vector<StreamPtr> _inputs;
     std::ostream& _output;

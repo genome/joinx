@@ -20,6 +20,7 @@ public:
     bool getline(std::string& line);
     bool eof() const;
     bool good() const;
+    int peek() const;
 
     const std::string& name() const;
 

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "fileformats/BedFilterBase.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "fileformats/Bed.hpp"
 
 // filter entries with no data for the reference sequence allele
-class NoReferenceFilter : public BedFilterBase {
+class NoReferenceFilter : public TypedStreamFilterBase<Bed> {
 public:
     bool _exclude(const Bed& snv) {
         const std::string& refCall = snv.extraFields()[0];

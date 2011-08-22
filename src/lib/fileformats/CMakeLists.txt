@@ -8,8 +8,6 @@ set(SOURCES
     Bed.cpp
     Bed.hpp
     BedFilterBase.hpp
-    BedStream.cpp
-    BedStream.hpp
     FastaReader.cpp
     FastaReader.hpp
     IGenomicPosition.hpp

@@ -19,6 +19,22 @@ class TestSort(JoinxTest, unittest.TestCase):
             self.assertEqual('', err)
             self.assertFilesEqual(expected_file, output_file)
 
+    def test_sort_tmp(self):
+        input_files = self.inputFiles("unsorted*.bed")
+        expected_file = self.inputFiles("expected-sort.bed")[0]
+        output_file = self.tempFile("output.bed")
+
+        lines = sum([len(open(x).readlines()) for x in input_files])
+        max_lines = lines / 10
+
+        # test normal and stable sort
+        params = [ "sort", "-M", str(max_lines), "-o", output_file ]
+        params.extend(input_files)
+        rv, err = self.joinx(params)
+        self.assertEqual(0, rv)
+        self.assertEqual('', err)
+        self.assertFilesEqual(expected_file, output_file)
+
     def test_compression(self):
         input_files = self.inputFiles("unsorted*.bed")
         expected_file = self.inputFiles("expected-sort.bed")[0]

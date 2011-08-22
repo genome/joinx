@@ -1,10 +1,10 @@
 #pragma once
 
-#include "fileformats/BedFilterBase.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "fileformats/Bed.hpp"
 
 // filter entries with no data for the reference sequence allele
-class TypeFilter : public BedFilterBase {
+class TypeFilter : public TypedStreamFilterBase<Bed> {
 public:
     TypeFilter(Bed::Type t) : _type(t) {}
 

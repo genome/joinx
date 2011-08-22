@@ -34,6 +34,10 @@ protected:
 
 class Entry {
 public:
+    static void parseLine(const std::string& s, Entry& e) {
+        return e.parse(s);
+    }
+
     Entry();
     explicit Entry(const std::string& s);
     Entry(
@@ -69,6 +73,7 @@ public:
 
     template<typename T>
     void extractList(T& v, const std::string& s, char delim = ';') {
+        v.clear();
         if (s == ".")
             return;
 
@@ -94,6 +99,8 @@ public:
 
     int cmp(const Entry& rhs) const;
     bool operator<(const Entry& rhs) const;
+
+    void swap(Entry& other);
 
 protected:
     std::string _line;

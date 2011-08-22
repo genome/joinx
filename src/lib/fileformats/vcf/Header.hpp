@@ -17,6 +17,15 @@ public:
     typedef std::vector<Map> Category;
     typedef std::pair<std::string, std::string> RawLine;
 
+    template<typename T>
+    static Header fromStream(T& stream) {
+        Header rv;
+        std::string line;
+        while (stream.peek() == '#' && stream.getline(line))
+            rv.add(line);
+        return rv;
+    }
+
     Header();
 
     void add(const std::string& line);

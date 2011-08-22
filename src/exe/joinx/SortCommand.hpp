@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-class BedStream;
-
 class SortCommand : public CommandBase {
 public:
     using CommandBase::ptr;

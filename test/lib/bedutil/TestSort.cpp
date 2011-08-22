@@ -1,7 +1,7 @@
 #include "bedutil/Sort.hpp"
-#include "fileformats/BedStream.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/InputStream.hpp"
+#include "fileformats/StreamFactory.hpp"
 
 #include <gtest/gtest.h>
 #include <algorithm>
@@ -10,8 +10,10 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <functional>
 
 using namespace std;
+using namespace std::placeholders;
 
 namespace {
     const int CHROM_MAX = 22;
@@ -21,10 +23,14 @@ namespace {
 
 class TestSort : public ::testing::Test {
 protected:
-    typedef shared_ptr<BedStream> BedStreamPtr;
-    typedef shared_ptr<InputStream> InputStreamPtr;
+    typedef std::function<void(string&, Bed&)> BedExtractor;
+    typedef StreamFactory<Bed, BedExtractor> BedReaderFactory;
 
-    TestSort() : _rawStreams(NULL) {}
+    TestSort()
+        : _rawStreams(NULL)
+        , _bedExtractor(bind(&Bed::parseLine, _1, _2, 0))
+        , _streamFactory(_bedExtractor)
+    {}
 
     string chromName(int chrom) {
         stringstream chromStr;
@@ -59,10 +65,8 @@ protected:
             }
         }
 
-        for (int i = 0; i < nStreams; ++i) {
-            _inputStreams.push_back(InputStreamPtr(new InputStream("test", _rawStreams[i])));
-            _bedStreams.push_back(BedStreamPtr(new BedStream(*_inputStreams[i], -1)));
-        }
+        for (int i = 0; i < nStreams; ++i)
+            _inputStreams.push_back(InputStream::ptr(new InputStream("test", _rawStreams[i])));
     }
 
     void TearDown() {
@@ -75,41 +79,42 @@ protected:
     stringstream _expectedStr;
 
     stringstream* _rawStreams;
-    vector<BedStreamPtr> _bedStreams;
-    vector<InputStreamPtr> _inputStreams;
+    vector<InputStream::ptr> _inputStreams;
+    BedExtractor _bedExtractor;
+    BedReaderFactory _streamFactory;
 };
 
 TEST_F(TestSort, unstable) {
     stringstream out;
-    Sort<BedStream, BedStreamPtr> sorter(_bedStreams, out, _expectedBeds.size()/10, false);
+    Sort<BedReaderFactory> sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false);
     sorter.execute();
     ASSERT_EQ(_expectedStr.str(), out.str());
 }
 
 TEST_F(TestSort, zlib) {
     stringstream out;
-    Sort<BedStream, BedStreamPtr> sorter(_bedStreams, out, _expectedBeds.size()/10, false, ZLIB);
+    Sort<BedReaderFactory> sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false, ZLIB);
     sorter.execute();
     ASSERT_EQ(_expectedStr.str(), out.str());
 }
 
 TEST_F(TestSort, bzip2) {
     stringstream out;
-    Sort<BedStream, BedStreamPtr> sorter(_bedStreams, out, _expectedBeds.size()/10, false, BZIP2);
+    Sort<BedReaderFactory> sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false, BZIP2);
     sorter.execute();
     ASSERT_EQ(_expectedStr.str(), out.str());
 }
 
 TEST_F(TestSort, gzip) {
     stringstream out;
-    Sort<BedStream, BedStreamPtr> sorter(_bedStreams, out, _expectedBeds.size()/10, false, GZIP);
+    Sort<BedReaderFactory> sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false, GZIP);
     sorter.execute();
     ASSERT_EQ(_expectedStr.str(), out.str());
 }
 
 TEST_F(TestSort, stable) {
     stringstream out;
-    Sort<BedStream, BedStreamPtr> sorter(_bedStreams, out, _expectedBeds.size()/10, false);
+    Sort<BedReaderFactory> sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, true);
     sorter.execute();
     ASSERT_EQ(_expectedStr.str(), out.str());
 }

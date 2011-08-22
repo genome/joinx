@@ -24,7 +24,9 @@ bool InputStream::getline(string& line) {
         return true;
     } 
 
-    std::getline(_s, line);
+    // read until we get a line that isn't blank.
+    while (std::getline(_s, line) && line.empty());
+
     if (_caching && _s) {
         _cache.push_back(line);
         _cacheIter = _cache.end();
@@ -32,6 +34,15 @@ bool InputStream::getline(string& line) {
 
     return _s;
 }
+
+
+int InputStream::peek() const {
+    if (_cacheIter != _cache.end())
+        return (*_cacheIter)[0];
+    
+    return _s.peek();
+}
+
 
 bool InputStream::eof() const {
     return _cacheIter == _cache.end() && _s.eof();

@@ -1,16 +1,17 @@
 #include "bedutil/SnvComparator.hpp"
-#include "fileformats/BedStream.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/InputStream.hpp"
 
 #include "MockResultCollector.hpp"
 
+#include <gtest/gtest.h>
+#include <functional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <gtest/gtest.h>
 
 using namespace std;
+using namespace std::placeholders;
 
 const string BEDA = 
     "1\t2\t3\tA/T\t43\n"
@@ -32,13 +33,20 @@ const string BEDB =
     "Y\t2\t3\tA/T\t44\n"
     "Y\t2\t3\tA/T\t44\n";
 
+namespace {
+    typedef function<void(string&, Bed&)> Extractor;
+    Extractor exA = bind(&Bed::parseLine, _1, _2, 2);
+    Extractor exB = bind(&Bed::parseLine, _1, _2, 0);
+    typedef SnvComparator::BedReader BedReader;
+}
+
 TEST(SnvComparator, intersectAll) {
     stringstream A(BEDA);
     stringstream B(BEDA);
     InputStream streamA("A", A);
     InputStream streamB("B", B);
-    BedStream sA(streamA, 2);
-    BedStream sB(streamB, 0);
+    BedReader sA(exA, streamA);
+    BedReader sB(exB, streamB);
     MockResultCollector rc;
 
     SnvComparator ss(sA, sB, rc);
@@ -55,8 +63,8 @@ TEST(SnvComparator, intersectSome) {
     stringstream B(BEDB);
     InputStream streamA("A", A);
     InputStream streamB("B", B);
-    BedStream sA(streamA, 2);
-    BedStream sB(streamB, 0);
+    BedReader sA(exA, streamA);
+    BedReader sB(exB, streamB);
 
     MockResultCollector rc;
 

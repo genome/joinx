@@ -1,8 +1,9 @@
 #include "bedutil/MergeSorted.hpp"
-#include "fileformats/BedStream.hpp"
 #include "fileformats/Bed.hpp"
+#include "fileformats/TypedStream.hpp"
 
 #include <gtest/gtest.h>
+#include <functional>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -10,11 +11,15 @@
 #include <vector>
 
 using namespace std;
+using namespace std::placeholders;
 
 namespace {
     const int CHROM_MAX = 22;
     const int START_MAX = 5;
     const int END_MAX   = 5;
+    typedef function<void(string&, Bed&)> Extractor;
+    typedef TypedStream<Bed, Extractor> BedReader;
+    Extractor extractor = bind(&Bed::parseLine, _1, _2, -1);
 }
 
 class TestMergeSorted : public ::testing::Test {
@@ -57,17 +62,15 @@ TEST_F(TestMergeSorted, execute) {
         }
     }
 
-    typedef shared_ptr<BedStream> BedStreamPtr;
-    typedef shared_ptr<InputStream> InputStreamPtr;
-    vector<InputStreamPtr> inputStreams;
-    vector<BedStreamPtr> bedStreams;
+    vector<InputStream::ptr> inputStreams;
+    vector<BedReader::ptr> bedStreams;
     for (int i = 0; i < nStreams; ++i) {
-        inputStreams.push_back(InputStreamPtr(new InputStream("test", streams[i])));
-        bedStreams.push_back(BedStreamPtr(new BedStream(**inputStreams.rbegin(), -1)));
+        inputStreams.push_back(InputStream::ptr(new InputStream("test", streams[i])));
+        bedStreams.push_back(BedReader::ptr(new BedReader(extractor, **inputStreams.rbegin())));
     }
 
     stringstream out;
-    MergeSorted<Bed, BedStreamPtr> merger(bedStreams, out);
+    MergeSorted<Bed, BedReader::ptr> merger(bedStreams, out);
     merger.execute();
     ASSERT_EQ(_expectedStr.str(), out.str());
 }

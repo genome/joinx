@@ -2,15 +2,17 @@
 
 #include "fileformats/Variant.hpp"
 #include "fileformats/Bed.hpp"
-#include "fileformats/BedStream.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "fileformats/FastaReader.hpp"
 #include "fileformats/InputStream.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
+#include <functional>
 
 using boost::format;
 using namespace std;
+using namespace std::placeholders;
 namespace po = boost::program_options;
 
 CommandBase::ptr CheckRefCommand::create(int argc, char** argv) {
@@ -68,7 +70,9 @@ void CheckRefCommand::parseArguments(int argc, char** argv) {
 
 void CheckRefCommand::exec() {
     InputStream::ptr inStream = _streams.wrap<istream, InputStream>(_bedFile);
-    BedStream bedStream(*inStream, 1);
+    function<void(string&, Bed)> extractor = bind(&Bed::parseLine, _1, _2, 1);
+    typedef TypedStream<Bed, function<void(string&, Bed)> > BedReader;
+    BedReader bedReader(extractor, *inStream);
     FastaReader refSeq(_fastaFile);
 
     ostream* report = _streams.get<ostream>(_reportFile);
@@ -79,7 +83,7 @@ void CheckRefCommand::exec() {
     Bed entry;
     string referenceBases;
     uint64_t misses = 0;
-    while (bedStream.next(entry)) {
+    while (bedReader.next(entry)) {
         Variant v(entry);
         // bed is 0-based, so we add 1 to the start position
         refSeq.sequence(v.chrom(), v.start(), v.stop(), referenceBases);

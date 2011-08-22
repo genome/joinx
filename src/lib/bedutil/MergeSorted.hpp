@@ -17,7 +17,7 @@ public:
         using namespace std;
         typedef typename vector<StreamPtr>::const_iterator IterType;
 
-        ValueType* peek;
+        ValueType* peek(NULL);
         IterType minIter = _sortedInputs.end();
         for (IterType iter = _sortedInputs.begin(); iter != _sortedInputs.end(); ++iter) {
             if (!(*iter)->eof() && (*iter)->peek(&peek)) {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CommandBase.hpp"
+#include "StreamHandler.hpp"
 
 #include <fstream>
 #include <string>
@@ -36,6 +37,8 @@ protected:
     std::string _hitFileB;
     std::string _missFileA;
     std::string _missFileB;
+
+    StreamHandler _streamHandler;
 
     std::ofstream _hitA;
     std::ofstream _hitB;

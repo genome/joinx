@@ -1,18 +1,21 @@
 #include "CreateContigsCommand.hpp"
 
 #include "bedutil/RemappedContig.hpp"
-#include "fileformats/BedStream.hpp"
+#include "fileformats/Bed.hpp"
 #include "fileformats/FastaReader.hpp"
 #include "fileformats/InputStream.hpp"
+#include "fileformats/TypedStream.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <fstream>
+#include <functional>
 #include <memory>
 #include <stdexcept>
 
 using boost::format;
 using namespace std;
+using namespace std::placeholders;
 namespace po = boost::program_options;
 
 namespace {
@@ -93,11 +96,13 @@ void CreateContigsCommand::exec() {
 
     InputStream::ptr inStream(_streams.wrap<istream, InputStream>(_variantsFile));
     // this stream will read 2 extra fields, ref/call and quality
-    BedStream bedStream(*inStream, 2);
+    function<void(string&, Bed&)> extractor = bind(&Bed::parseLine, _1, _2, 2);
+    typedef TypedStream<Bed, function<void(string&, Bed&)> > BedReader;
+    BedReader reader(extractor, *inStream);
     RemappedContigFastaWriter writer(*output);
     RemappedContigGenerator<FastaReader, RemappedContigFastaWriter> generator(ref, _flankSize, writer);
     Bed b;
-    while (bedStream.next(b)) {
+    while (reader.next(b)) {
         Variant v(b);
         if (v.quality() >= _minQuality)
             generator.generate(v);

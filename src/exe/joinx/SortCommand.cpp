@@ -2,19 +2,23 @@
 
 #include "bedutil/MergeSorted.hpp"
 #include "bedutil/Sort.hpp"
-#include "fileformats/BedStream.hpp"
+#include "fileformats/Bed.hpp"
+#include "fileformats/StreamFactory.hpp"
 #include "fileformats/InferFileType.hpp"
 #include "fileformats/InputStream.hpp"
-#include "fileformats/vcf/Reader.hpp"
+#include "fileformats/vcf/Entry.hpp"
+#include "fileformats/vcf/Header.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <cstdint>
+#include <functional>
 #include <stdexcept>
 
 namespace po = boost::program_options;
 using boost::format;
 using namespace std;
+using namespace std::placeholders;
 
 CommandBase::ptr SortCommand::create(int argc, char** argv) {
     std::shared_ptr<SortCommand> app(new SortCommand);
@@ -75,11 +79,11 @@ void SortCommand::parseArguments(int argc, char** argv) {
 }
 
 namespace {
-    template<typename T>
-    vector< shared_ptr<T> > setupStreams(const vector< shared_ptr<InputStream> >& v) {
+    template<typename T, typename X>
+    vector< shared_ptr<T> > setupStreams(const vector< shared_ptr<InputStream> >& v, X& extractor) {
         vector< shared_ptr<T> > rv;
         for (auto i = v.begin(); i != v.end(); ++i) {
-            rv.push_back(shared_ptr<T>(new T(**i))); 
+            rv.push_back(shared_ptr<T>(new T(extractor, **i))); 
         }
         return rv;
     }
@@ -110,14 +114,25 @@ void SortCommand::exec() {
     if (_streamHandler.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
 
+    typedef function<void(string&, Bed&)> BedExtractor;
+    typedef function<void(const string&, Vcf::Entry&)> VcfExtractor;
+    typedef StreamFactory<Bed, BedExtractor> BedReaderFactory;
+    typedef StreamFactory<Vcf::Entry, VcfExtractor> VcfReaderFactory;
+
+    BedExtractor be = bind(&Bed::parseLine, _1, _2, 0);
+    VcfExtractor ve = bind(&Vcf::Entry::parseLine, _1, _2);
+
     if (type == BED) {
-        vector< shared_ptr<BedStream> > inputs(setupStreams<BedStream>(inputStreams));
-        Sort<BedStream, shared_ptr<BedStream> > sorter(inputs, *out, _maxInMem, _stable, compression);
+//        vector< shared_ptr<BedReader> > inputs(setupStreams<BedReader>(inputStreams, be));
+        BedReaderFactory brf(be);
+        Sort<BedReaderFactory> sorter(brf, inputStreams, *out, _maxInMem, _stable, compression);
         sorter.execute();
     } else if (type == VCF) {
-        vector< shared_ptr<Vcf::Reader> > inputs(setupStreams<Vcf::Reader>(inputStreams));
-        *out << inputs[0]->header();
-        Sort<Vcf::Reader, shared_ptr<Vcf::Reader> > sorter(inputs, *out, _maxInMem, _stable, compression);
+ //       vector< shared_ptr<VcfReader> > inputs(setupStreams<VcfReader>(inputStreams, ve));
+        Vcf::Header hdr = Vcf::Header::fromStream(*inputStreams[0]);
+        *out << hdr;
+        VcfReaderFactory vrf(ve);
+        Sort<VcfReaderFactory> sorter(vrf, inputStreams, *out, _maxInMem, _stable, compression);
         sorter.execute();
     } else {
         throw runtime_error("Unknown file type!");

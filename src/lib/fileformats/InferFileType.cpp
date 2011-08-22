@@ -1,21 +1,27 @@
 #include "InferFileType.hpp"
 
-#include "BedStream.hpp"
+#include "Bed.hpp"
 #include "InputStream.hpp"
-#include "vcf/Reader.hpp"
+#include "TypedStream.hpp"
+#include "vcf/Entry.hpp"
 
 #include <boost/format.hpp>
 #include <fstream>
+#include <functional>
 
 using boost::format;
+using namespace std;
+using namespace std::placeholders;
 
 namespace {
-    template<typename ReaderType>
-    bool testReader(InputStream& in) {
+    template<typename ValueType, typename Extractor>
+    bool testReader(InputStream& in, Extractor& extractor) {
+        typedef TypedStream<ValueType, Extractor> ReaderType;
+
         bool rv(false);
         try {
             in.caching(true);
-            ReaderType reader(in);
+            ReaderType reader(extractor, in);
             typename ReaderType::ValueType value;
             rv = reader.next(value);
         } catch (...) {
@@ -30,9 +36,13 @@ namespace {
 FileType inferFileType(InputStream& in) {
     FileType rv(UNKNOWN);
 
-    if (testReader<BedStream>(in))
+    typedef function<void(string&, Bed&)> BedExtractor;
+    typedef function<void(string&, Vcf::Entry&)> VcfExtractor;
+    BedExtractor bedExtractor = bind(&Bed::parseLine, _1, _2, -1);
+    VcfExtractor vcfExtractor = bind(&Vcf::Entry::parseLine, _1, _2);
+    if (testReader<Bed, BedExtractor>(in, bedExtractor))
         rv = BED;
-    else if (testReader<Vcf::Reader>(in))
+    else if (testReader<Vcf::Entry, VcfExtractor>(in, vcfExtractor))
         rv = VCF;
 
     return rv;

@@ -1,14 +1,16 @@
 #include "bedutil/Intersect.hpp"
 #include "fileformats/Bed.hpp"
-#include "fileformats/BedStream.hpp"
 #include "fileformats/InputStream.hpp"
+#include "fileformats/TypedStream.hpp"
 
 #include <gtest/gtest.h>
+#include <functional>
 #include <memory>
 #include <sstream>
 #include <string>
 
 using namespace std;
+using namespace std::placeholders;
 
 namespace {
     const string BEDA = 
@@ -38,6 +40,10 @@ namespace {
         vector<Bed> missesA;
         vector<Bed> missesB;
     };
+
+    typedef function<void(string&, Bed&)> Extractor;
+    typedef TypedStream<Bed, Extractor> BedReader;
+    Extractor extractor = bind(&Bed::parseLine, _1, _2, 2);
 }
 
 TEST(TestIntersect, intersectSelf) {
@@ -46,9 +52,9 @@ TEST(TestIntersect, intersectSelf) {
     stringstream ssB(BEDA);
     InputStream streamA("A", ssA);
     InputStream streamB("B", ssB);
-    BedStream s1(streamA, 2);
-    BedStream s2(streamB, 2);
-    Intersect<BedStream,BedStream,MockCollector> intersector(s1, s2, rc);
+    BedReader s1(extractor, streamA);
+    BedReader s2(extractor, streamB);
+    Intersect<BedReader,BedReader,MockCollector> intersector(s1, s2, rc);
     intersector.execute();
 
     // each line hits twice each generating 8 total matches
@@ -64,9 +70,9 @@ TEST(TestIntersect, misses) {
     stringstream ssB(BEDB);
     InputStream streamA("A", ssA);
     InputStream streamB("B", ssB);
-    BedStream s1(streamA, 2);
-    BedStream s2(streamB, 2);
-    Intersect<BedStream,BedStream,MockCollector> intersector(s1, s2, rc);
+    BedReader s1(extractor, streamA);
+    BedReader s2(extractor, streamB);
+    Intersect<BedReader,BedReader,MockCollector> intersector(s1, s2, rc);
     intersector.execute();
 
     // first 2 lines hit twice each, last 2 lines once each, total of 6 hits

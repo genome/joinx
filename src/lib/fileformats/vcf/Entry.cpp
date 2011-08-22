@@ -1,5 +1,6 @@
 #include "Entry.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <functional>
@@ -77,45 +78,55 @@ void Entry::addPerSampleData(const string& key, const string& value) {
 
 void Entry::parse(const string& s) {
     Tokenizer<char> tok(s, '\t');    
-    tok.extract(_chrom);
-    tok.extract(_pos);
+    if (!tok.extract(_chrom))
+        throw runtime_error("Failed to extract chromosome from vcf entry" + s);
+    if (!tok.extract(_pos))
+        throw runtime_error("Failed to extract position from vcf entry" + s);
 
     string tmp;
 
     // ids
-    tok.extract(tmp);
+    if (!tok.extract(tmp))
+        throw runtime_error("Failed to extract id from vcf entry" + s);
     extractList(_identifiers, tmp);
 
     // ref alleles
-    tok.extract(_ref);
+    if (!tok.extract(_ref))
+        throw runtime_error("Failed to extract ref alleles from vcf entry" + s);
 
     // alt alleles
-    tok.extract(tmp);
+    if (!tok.extract(tmp))
+        throw runtime_error("Failed to extract alt alleles from vcf entry" + s);
     extractList(_alt, tmp, ',');
 
     // phred quality
-    tok.extract(_qual);
+    if (!tok.extract(_qual))
+        throw runtime_error("Failed to extract quality from vcf entry" + s);
 
     // failed filters
-    tok.extract(tmp);
+    if (!tok.extract(tmp))
+        throw runtime_error("Failed to extract filters from vcf entry" + s);
     extractList(_failedFilters, tmp);
     if (_failedFilters.size() == 1 && _failedFilters[0] == "PASS")
         _failedFilters.clear();
 
     // info entries
-    tok.extract(tmp);
+    if (!tok.extract(tmp))
+        throw runtime_error("Failed to extract info from vcf entry" + s);
     extractList(_info, tmp);
 
     // format description
-    tok.extract(tmp);
-    extractList(_formatDescription, tmp);
+    if (tok.extract(tmp)) {
+        extractList(_formatDescription, tmp);
 
-    // per sample formatted data
-    while (tok.extract(tmp)) {
-        // TODO: less copying
-        vector<string> data;
-        extractList(data, tmp);
-        _perSampleData.push_back(data);
+        _perSampleData.clear();
+        // per sample formatted data
+        while (tok.extract(tmp)) {
+            // TODO: less copying
+            vector<string> data;
+            extractList(data, tmp);
+            _perSampleData.push_back(data);
+        }
     }
 }
 
@@ -138,6 +149,20 @@ int Entry::cmp(const Entry& rhs) const {
     return 0;
 }
 
+void Entry::swap(Entry& other) {
+    _line.swap(other._line);
+    _chrom.swap(other._chrom);
+    std::swap(_pos, other._pos);
+    _identifiers.swap(other._identifiers);
+    _ref.swap(other._ref);
+    _alt.swap(other._alt);
+    std::swap(_qual, other._qual);
+    _failedFilters.swap(other._failedFilters);
+    _info.swap(other._info);
+    _formatDescription.swap(other._formatDescription);
+    _perSampleData.swap(other._perSampleData);
+
+}
 
 VCF_NAMESPACE_END
 
