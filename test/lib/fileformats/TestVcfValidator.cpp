@@ -44,11 +44,21 @@ namespace {
     }
 }
 
-TEST(VcfValidator, valid) {
+TEST(VcfValidator, validInfo) {
     Header h = makeHeader();
     Validator v(h);
 
     Entry e("1\t1\t.\tG\tA\t50\tPASS\tNS=3;DP=9;AA=G\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:40:3");
+    vector<string> problems;
+    ASSERT_TRUE(v(e, &problems));
+    ASSERT_TRUE(problems.empty());
+}
+
+TEST(VcfValidator, validFilters) {
+    Header h = makeHeader();
+    Validator v(h);
+
+    Entry e("1\t1\t.\tG\tA\t50\tq10\tNS=3;DP=9;AA=G\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:40:3");
     vector<string> problems;
     ASSERT_TRUE(v(e, &problems));
     ASSERT_TRUE(problems.empty());
@@ -62,9 +72,32 @@ TEST(VcfValidator, missingInfo) {
     vector<string> problems;
     ASSERT_FALSE(v(e, &problems));
     ASSERT_EQ(1, problems.size());
-    // or some other appropriate msg...
     ASSERT_EQ("Unknown field in info section: 'NO'", problems[0]);
     problems.clear();
-
     // ... same for info/filters sections
 }
+
+TEST(VcfValidator, wrongFilter) {
+    Header h = makeHeader();
+    Validator v(h);
+
+    Entry e("1\t1\t.\tG\tA\t50\tP1_v2\tNS=3;DP=9;AA=G\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:40:3");
+    vector<string> problems;
+    ASSERT_FALSE(v(e, &problems));
+    ASSERT_EQ(1, problems.size());
+    ASSERT_EQ("Unknown field in filter section: 'P1_v2'", problems[0]);
+    problems.clear();
+}
+
+TEST(VcfValidator, wrongFormat) {
+    Header h = makeHeader();
+    Validator v(h);
+
+    Entry e("1\t1\t.\tG\tA\t50\tPASS\tNS=3;DP=9;AA=G\tGT:GQ:DP:R2D2\t0/1:35:4\t0/2:17:2\t1/1:40:3");
+    vector<string> problems;
+    ASSERT_FALSE(v(e, &problems));
+    ASSERT_EQ(1, problems.size());
+    ASSERT_EQ("Unknown field in format section: 'R2D2'", problems[0]);
+    problems.clear();
+}
+
