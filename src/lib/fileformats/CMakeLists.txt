@@ -30,8 +30,6 @@ set(SOURCES
     vcf/Header.hpp
     vcf/Map.cpp
     vcf/Map.hpp
-    vcf/Reader.cpp
-    vcf/Reader.hpp
     vcf/Validator.cpp
     vcf/Validator.hpp
     vcf/VariantAdaptor.cpp

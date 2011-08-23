@@ -123,12 +123,10 @@ void SortCommand::exec() {
     VcfExtractor ve = bind(&Vcf::Entry::parseLine, _1, _2);
 
     if (type == BED) {
-//        vector< shared_ptr<BedReader> > inputs(setupStreams<BedReader>(inputStreams, be));
         BedReaderFactory brf(be);
         Sort<BedReaderFactory> sorter(brf, inputStreams, *out, _maxInMem, _stable, compression);
         sorter.execute();
     } else if (type == VCF) {
- //       vector< shared_ptr<VcfReader> > inputs(setupStreams<VcfReader>(inputStreams, ve));
         Vcf::Header hdr = Vcf::Header::fromStream(*inputStreams[0]);
         *out << hdr;
         VcfReaderFactory vrf(ve);

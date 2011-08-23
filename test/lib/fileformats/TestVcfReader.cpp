@@ -1,14 +1,17 @@
-#include "fileformats/vcf/Reader.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "fileformats/vcf/Entry.hpp"
+#include "fileformats/vcf/Header.hpp"
 #include "fileformats/InputStream.hpp"
 
+#include <gtest/gtest.h>
+#include <functional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <gtest/gtest.h>
 
 using namespace std;
+using namespace std::placeholders;
 using namespace Vcf;
 
 namespace {
@@ -43,12 +46,16 @@ TEST(VcfReader, read) {
     stringstream ss(testData);
     InputStream in("test", ss);
 
-    Reader r(in);
+    typedef function<void(string&, Entry&)> Extractor;
+    typedef TypedStream<Entry, Extractor> VcfReader;
+    Extractor extractor = bind(&Entry::parseLine, _1, _2);
+    VcfReader r(extractor, in);
     Entry e;
 
-    ASSERT_EQ(6, r.header().category("INFO").size());
-    ASSERT_EQ(2, r.header().category("FILTER").size());
-    ASSERT_EQ(4, r.header().category("FORMAT").size());
+    Header h = Header::fromStream(in);
+    ASSERT_EQ(6, h.category("INFO").size());
+    ASSERT_EQ(2, h.category("FILTER").size());
+    ASSERT_EQ(4, h.category("FORMAT").size());
 
     vector<Entry> v;
     while (r.next(e)) {
