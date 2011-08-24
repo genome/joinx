@@ -117,14 +117,14 @@ void Entry::parse(const string& s) {
 
     // format description
     if (tok.extract(tmp)) {
-        extractList(_formatDescription, tmp);
+        extractList(_formatDescription, tmp, ':');
 
         _perSampleData.clear();
         // per sample formatted data
         while (tok.extract(tmp)) {
             // TODO: less copying
             vector<string> data;
-            extractList(data, tmp);
+            extractList(data, tmp, ':');
             _perSampleData.push_back(data);
         }
     }
