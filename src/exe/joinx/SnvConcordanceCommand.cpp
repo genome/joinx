@@ -180,6 +180,15 @@ namespace {
         _concordance.missB(b);
     }
 
+    // snv concordance always needs to count misses to compute percentages
+    bool wantMissA() const {
+        return true;
+    }
+
+    bool wantMissB() const {
+        return true;
+    }
+
     protected:
         SnvConcordance& _concordance;
         SnvConcordanceCommand::Streams& _s;

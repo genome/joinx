@@ -31,7 +31,8 @@ namespace {
             hitsB.push_back(b);
             return true;
         }
-
+        bool wantMissA() const { return true; }
+        bool wantMissB() const { return true; }
         void missA(const Bed& a) { missesA.push_back(a); }
         void missB(const Bed& b) { missesB.push_back(b); }
 

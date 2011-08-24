@@ -110,7 +110,8 @@ public:
             if (_cache.empty()) {
                 while (!_b.eof() && _b.peek(&peek) && _compareFunc(valueA, *peek) == AFTER) {
                     advanceSorted(_b, valueB);
-                    _rc.missB(valueB);
+                    if (_rc.wantMissB())
+                        _rc.missB(valueB);
                 }
             }
 
@@ -121,7 +122,8 @@ public:
                     cache(valueB, false);
                     break;
                 } else if (cmp == AFTER) {
-                    _rc.missB(valueB);
+                    if (_rc.wantMissB())
+                        _rc.missB(valueB);
                     continue;
                 }
 
@@ -130,13 +132,13 @@ public:
                 cache(valueB, rv);
             }
 
-            if (!hitA) {
+            if (!hitA && _rc.wantMissA()) {
                 _rc.missA(valueA);
             }
         }
-        while (!_cache.empty())
+        while (_rc.wantMissB() && !_cache.empty())
             popCache();
-        while (!_b.eof() && advanceSorted(_b, valueB))
+        while (_rc.wantMissB() && !_b.eof() && advanceSorted(_b, valueB))
             _rc.missB(valueB);
     }
 

@@ -39,6 +39,14 @@ public:
             *_missB << b << "\n";
     }
 
+    bool wantMissA() const {
+        return _missA;
+    }
+
+    bool wantMissB() const {
+        return _missB;
+    }
+
     bool hit(const Bed& a, const Bed& b) {
         Variant va(a);
         Variant vb(b);
