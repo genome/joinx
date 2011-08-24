@@ -44,7 +44,7 @@ namespace {
     }
 }
 
-TEST(VcfValidator, validInfo) {
+TEST(VcfValidator, validLine) {
     Header h = makeHeader();
     Validator v(h);
 
@@ -54,7 +54,7 @@ TEST(VcfValidator, validInfo) {
     ASSERT_TRUE(problems.empty());
 }
 
-TEST(VcfValidator, validFilters) {
+TEST(VcfValidator, validFilterID) {
     Header h = makeHeader();
     Validator v(h);
 
@@ -64,7 +64,7 @@ TEST(VcfValidator, validFilters) {
     ASSERT_TRUE(problems.empty());
 }
 
-TEST(VcfValidator, missingInfo) {
+TEST(VcfValidator, invalidInfoID) {
     Header h = makeHeader();
     Validator v(h);
 
@@ -77,7 +77,7 @@ TEST(VcfValidator, missingInfo) {
     // ... same for info/filters sections
 }
 
-TEST(VcfValidator, wrongFilter) {
+TEST(VcfValidator, invalidFilterID) {
     Header h = makeHeader();
     Validator v(h);
 
@@ -89,7 +89,7 @@ TEST(VcfValidator, wrongFilter) {
     problems.clear();
 }
 
-TEST(VcfValidator, wrongFormat) {
+TEST(VcfValidator, invalidFormatID) {
     Header h = makeHeader();
     Validator v(h);
 
@@ -101,3 +101,50 @@ TEST(VcfValidator, wrongFormat) {
     problems.clear();
 }
 
+TEST(VcfValidator, invalidInfoIntegerType) {
+    Header h = makeHeader();
+    Validator v(h);
+
+    Entry e("1\t1\t.\tG\tA\t50\tPASS\tNS=3.0;DP=9;AA=G\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:40:3");
+    vector<string> problems;
+    ASSERT_FALSE(v(e, &problems));
+    ASSERT_EQ(1, problems.size());
+    ASSERT_EQ("Could not cast: '3.0' as Integer", problems[0]);
+    problems.clear();
+}
+
+TEST(VcfValidator, invalidInfoFloatType) {
+    Header h = makeHeader();
+    Validator v(h);
+
+    Entry e("1\t1\t.\tG\tA\t50\tPASS\tNS=3;DP=9;AA=G;AF=95%\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:40:3");
+    vector<string> problems;
+    ASSERT_FALSE(v(e, &problems));
+    ASSERT_EQ(1, problems.size());
+    ASSERT_EQ("Could not cast: '95%' as Float", problems[0]);
+    problems.clear();
+}
+
+TEST(VcfValidator, invalidFormatIntegerType) {
+    Header h = makeHeader();
+    Validator v(h);
+
+    Entry e("1\t1\t.\tG\tA\t50\tPASS\tNS=3;DP=9;AA=G\tGT:GQ:DP\t0/1:35.3:4\t0/2:17:2\t1/1:40:3");
+    vector<string> problems;
+    ASSERT_FALSE(v(e, &problems));
+    ASSERT_EQ(1, problems.size());
+    ASSERT_EQ("Could not cast: '35.3' as Integer", problems[0]);
+    problems.clear();
+}
+
+TEST(VcfValidator, incompletePerSampleGenotypeFields) {
+    Header h = makeHeader();
+    Validator v(h);
+
+    Entry e("1\t1\t.\tG\tA\t50\tPASS\tNS=3;DP=9;AA=G\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:40");
+    vector<string> problems;
+    ASSERT_FALSE(v(e, &problems));
+    ASSERT_EQ(1, problems.size());
+    ASSERT_EQ("Not enough genotype fields.", problems[0]);
+    problems.clear();
+}
