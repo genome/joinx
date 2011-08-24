@@ -18,10 +18,12 @@ set(SOURCES
     InputStream.hpp
     ReferenceSequence.cpp
     ReferenceSequence.hpp
+    StreamFactory.hpp
     TranscriptStructure.cpp
     TranscriptStructure.hpp
     TranscriptStructureStream.cpp
     TranscriptStructureStream.hpp
+    TypedStream.hpp
     Variant.cpp
     Variant.hpp
     vcf/Entry.cpp
