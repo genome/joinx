@@ -33,40 +33,30 @@ Validator::Validator(const Header& header)
     sort(_info.begin(), _info.end(), mapIdLessThan);
     sort(_filters.begin(), _filters.end(), mapIdLessThan);
     sort(_format.begin(), _format.end(), mapIdLessThan);
- 
-    //populate _*_list's with fields defined in the header
-    for(auto it = _info.begin(); it != _info.end(); it++){
-        _info_list.insert((*it)["ID"]);
-    }
-    for(auto it = _filters.begin(); it != _filters.end(); it++){
-        _filters_list.insert((*it)["ID"]);
-    }
-    for(auto it = _format.begin(); it != _format.end(); it++){
-        _format_list.insert( (*it)["ID"] );
-    }
 }
 
 bool Validator::operator()(const Entry& e, std::vector<std::string>* problems) const {
-    // TODO: loop over all the data in the entry that requires definitions in the header
-    // Here is an example of how to check if the field "DP" exists in the _info section:
 
     bool valid = true;
+
 
     //check info fields
     auto info_fields = e.info();
     for(auto it=info_fields.begin();it!=info_fields.end();it++){
-        if(! _info_list.count((*it).id()) ) {
+        std::string value = (*it).id();
+        auto iter = lower_bound(_info.begin(), _info.end(), value, mapIdLessThanString);
+        if ((*iter)["ID"] != value) {
             valid = false;
             if (problems) {
                 problems->push_back( "Unknown field in info section: \'" + (*it).id() + "\'" );
             }
         }
     }
-
-    //check filter fields
     auto filters_fields = e.failedFilters();
     for(auto it=filters_fields.begin();it!=filters_fields.end();it++){
-        if(! _filters_list.count((*it)) ) {
+        std::string value = (*it);
+        auto iter = lower_bound(_filters.begin(), _filters.end(), value, mapIdLessThanString);
+        if ((*iter)["ID"] != value) {
             valid = false;
             if (problems) {
                 problems->push_back( "Unknown field in filter section: \'" + (*it) + "\'" );
@@ -74,16 +64,17 @@ bool Validator::operator()(const Entry& e, std::vector<std::string>* problems) c
         }
     }
 
-    //check format fields
+
     auto format_fields = e.formatDescription();
     for(auto it=format_fields.begin();it!=format_fields.end();it++){
         Tokenizer<char>  t((*it), ':');
-        std::string field;
-        while( t.extract(field)){
-            if(! _format_list.count( field )) {
-                valid = false; 
+        std::string value;
+        while( t.extract(value)){
+            auto iter = lower_bound(_format.begin(), _format.end(), value, mapIdLessThanString);
+            if ((*iter)["ID"] != value) {
+                valid = false;
                 if (problems) {
-                    problems->push_back( "Unknown field in format section: \'" + field + "\'" );
+                    problems->push_back( "Unknown field in format section: \'" + value + "\'" );
                 }
             }
         }

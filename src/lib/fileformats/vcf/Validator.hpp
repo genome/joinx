@@ -30,9 +30,6 @@ protected:
     Header::Category _info;
     Header::Category _filters;
     Header::Category _format;
-    std::set<std::string> _info_list;
-    std::set<std::string> _filters_list;
-    std::set<std::string> _format_list;
 };
 
 VCF_NAMESPACE_END
