@@ -22,6 +22,7 @@ public:
 
 protected:
     const Header& _header;
+    bool typeCheck(const std::string& value, const std::string& type, std::vector<std::string>* problems) const;
 
     // by default, the header entries are not necessarily sorted
     // we will optimize for the info/filter/format tags by copying and sorting
