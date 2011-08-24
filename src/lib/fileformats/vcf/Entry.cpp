@@ -187,11 +187,11 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
 
     e.printList(s, e.info());
     s << '\t';
-    e.printList(s, e.formatDescription());
+    e.printList(s, e.formatDescription(),':');
     const vector< vector<string> >& psd = e.perSampleData();
     for (auto i = psd.begin(); i != psd.end(); ++i) {
         s << '\t';
-        e.printList(s, *i);
+        e.printList(s, *i, ':');
     }
     return s;
 }
