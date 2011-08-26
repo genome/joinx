@@ -14,6 +14,27 @@ using namespace std;
 using namespace std::placeholders;
 
 namespace {
+    bool testEmpty(InputStream& in) {
+        bool rv(true);
+        try {
+            in.caching(true);
+            string line;
+            while (!in.eof() && in.good() && in.getline(line)) {
+                if (!line.empty() && line[0] != '#') {
+                    rv = false;
+                    break;
+                }
+            
+            }
+        } catch (...) {
+            rv = false;
+        }
+
+        in.caching(false);
+        in.rewind();
+        return rv;
+    }
+
     template<typename ValueType, typename Extractor>
     bool testReader(InputStream& in, Extractor& extractor) {
         typedef TypedStream<ValueType, Extractor> ReaderType;
@@ -44,6 +65,8 @@ FileType inferFileType(InputStream& in) {
         rv = BED;
     else if (testReader<Vcf::Entry, VcfExtractor>(in, vcfExtractor))
         rv = VCF;
+    else if (testEmpty(in))
+        rv = EMPTY;
 
     return rv;
 }

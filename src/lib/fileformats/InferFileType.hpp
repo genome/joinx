@@ -7,6 +7,7 @@ class InputStream;
 enum FileType {
     BED,
     VCF,
+    EMPTY,
     UNKNOWN
 };
 

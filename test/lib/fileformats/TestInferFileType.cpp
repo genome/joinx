@@ -36,19 +36,31 @@ namespace {
 
     string bedLines = "1\t2\t3\tA/T\t0\t0\n";
 
+    string bedLinesWithComments =
+        "# hi\n"
+        "# I am a comment, and\n"
+        "# I am here to ruin your day\n"
+        "1\t2\t3\tA/T\t0\t0\n";
+
     string badLines = "the quick brown fox jumped over the lazy dog\n";
 }
 
 TEST(InferFileType, infer) {
     stringstream vcf(vcfLines);
     stringstream bed(bedLines);
+    stringstream bedComments(bedLinesWithComments);
     stringstream bad(badLines);
+    stringstream empty;
 
     InputStream vcfStream("test_vcf", vcf);
     InputStream bedStream("test_bed", bed);
+    InputStream bedCommentStream("test_bed_comments", bedComments);
     InputStream badStream("test_bad", bad);
+    InputStream emptyStream("test_empty", empty);
 
     ASSERT_EQ(BED, inferFileType(bedStream));
+    ASSERT_EQ(BED, inferFileType(bedCommentStream));
     ASSERT_EQ(VCF, inferFileType(vcfStream));
+    ASSERT_EQ(EMPTY, inferFileType(emptyStream));
     ASSERT_EQ(UNKNOWN, inferFileType(badStream));
 }

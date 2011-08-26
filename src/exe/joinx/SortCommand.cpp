@@ -88,12 +88,27 @@ namespace {
         return rv;
     }
 
-    FileType detectFormat(const vector< shared_ptr<InputStream> >& inputStreams) {
-        FileType type = inferFileType(**inputStreams.begin());
+    bool isEmpty(const InputStream::ptr& stream) {
+        return inferFileType(*stream) == EMPTY;
+    }
+
+    FileType detectFormat(vector<InputStream::ptr>& inputStreams) {
+        // remove any empty files
+        auto iter = remove_if(inputStreams.begin(), inputStreams.end(), isEmpty);
+        inputStreams.erase(iter, inputStreams.end());
+
+        if (inputStreams.empty())
+            return EMPTY;
+
+        iter = inputStreams.begin();
+
+        FileType type = inferFileType(**iter++);
         if (type == UNKNOWN)
             throw runtime_error(str(format("Unable to infer file type for %1%") %(*inputStreams.begin())->name()));
-        for (auto iter = inputStreams.begin()+1; iter != inputStreams.end(); ++iter) {
-            if (inferFileType(**iter) != type)
+
+        for (; iter != inputStreams.end(); ++iter) {
+            FileType otherType = inferFileType(**iter);
+            if (otherType != type)
                 throw runtime_error(str(format("Multiple file formats detected (%1%), abort.") %(*iter)->name()));
         }
 
@@ -113,6 +128,10 @@ void SortCommand::exec() {
     ostream* out = _streamHandler.get<ostream>(_outputFile);
     if (_streamHandler.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
+
+    // this happens when all input files are empty
+    if (type == EMPTY)
+        return;
 
     typedef function<void(string&, Bed&)> BedExtractor;
     typedef function<void(const string&, Vcf::Entry&)> VcfExtractor;

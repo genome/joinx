@@ -61,8 +61,31 @@ class TestSort(JoinxTest, unittest.TestCase):
         self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file)
 
-        
+    def test_sort_some_empty(self):
+        expected_file = self.inputFiles("expected-sort.bed")[0]
+        input_files = self.inputFiles("unsorted*.bed")
+        temp_empty = self.tempFile("empty.bed")
+        open(temp_empty, "w").close();
+        input_files.append(temp_empty)
+        output_file = self.tempFile("output.bed")
+        params = [ "sort", "-o", output_file ]
+        params.extend(input_files)
+        rv, err = self.joinx(params)
+        self.assertEqual(0, rv, err)
+        self.assertEqual('', err)
+        self.assertFilesEqual(expected_file, output_file)
 
+    def test_sort_all_empty(self):
+        expected_file = temp_empty = self.tempFile("empty.bed")
+        open(temp_empty, "w").close();
+        input_files = [(temp_empty)]
+        output_file = self.tempFile("output.bed")
+        params = [ "sort", "-o", output_file ]
+        params.extend(input_files)
+        rv, err = self.joinx(params)
+        self.assertEqual(0, rv, err)
+        self.assertEqual('', err)
+        self.assertFilesEqual(expected_file, output_file)
 
 
 if __name__ == "__main__":
