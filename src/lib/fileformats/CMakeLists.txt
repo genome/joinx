@@ -28,6 +28,8 @@ set(SOURCES
     Variant.hpp
     vcf/CustomType.cpp
     vcf/CustomType.hpp
+    vcf/CustomValue.cpp
+    vcf/CustomValue.hpp
     vcf/Entry.cpp
     vcf/Entry.hpp
     vcf/Header.cpp

@@ -2,10 +2,9 @@
 
 #include "namespace.hpp"
 
-#include <boost/any.hpp>
+#include <boost/format.hpp>
 #include <cstdint>
 #include <string>
-#include <vector>
 
 VCF_NAMESPACE_BEGIN
 
@@ -24,6 +23,9 @@ public:
         CHAR,
         STRING
     };
+
+    static std::string numberString(NumberType t, uint32_t n);
+    static std::string typeString(DataType t);
 
     CustomType();
     explicit CustomType(const std::string& raw);
@@ -53,11 +55,11 @@ public:
         return !(*this == rhs);
     }
 
+    template<typename T>
+    void typecheck() const;
 
     void validateIndex(uint32_t idx) const;
 
-    std::string numberString() const;
-    std::string typeString() const;
     std::string toString() const;
 
 protected:
@@ -67,32 +69,6 @@ protected:
     DataType _type;
     std::string _description;
 };
-
-class CustomValue {
-public:
-    typedef boost::any ValueType;
-    typedef std::vector<ValueType>::size_type SizeType;
-
-    CustomValue();
-    explicit CustomValue(const CustomType& type);
-    CustomValue(const CustomType& type, const std::string& value);
-
-    const CustomType& type() const;
-    SizeType size() const;
-    bool empty() const;
-    const ValueType* getAny(SizeType idx) const;
-
-    template<typename T>
-    const T* get(SizeType idx) const;
-
-    template<typename T>
-    void set(SizeType idx, const T& value);
-
-protected:
-    const CustomType& _type;
-    std::vector<ValueType> _values;
-};
-
 
 inline CustomType::NumberType CustomType::numberType() const {
     return _numberType;
@@ -110,39 +86,47 @@ inline const std::string& CustomType::description() const {
     return _description;
 }
 
-inline const CustomValue::ValueType* CustomValue::getAny(SizeType idx) const {
-    _type.validateIndex(idx);
-    if (idx >= _values.size())
-        return 0; 
-    return &_values[idx];
+template<>
+inline void CustomType::typecheck<double>() const {
+    using boost::format;
+    if (_type != FLOAT)
+        throw std::runtime_error(str(format("VCF Custom type error, tried to convert %1% to Float") %typeString(_type)));
 }
 
-template<typename T>
-inline const T* CustomValue::get(SizeType idx) const {
-    _type.validateIndex(idx);
-    if (idx >= _values.size())
-        return 0;
-    return boost::any_cast<T>(&_values[idx]);
+template<>
+inline void CustomType::typecheck<std::string>() const {
+    using boost::format;
+    if (_type != STRING)
+        throw std::runtime_error(str(format("VCF Custom type error, tried to convert %1% to String") %typeString(_type)));
 }
 
-template<typename T>
-inline void CustomValue::set(SizeType idx, const T& value) {
-    _type.validateIndex(idx);
-    if (idx >= _values.size())
-        _values.resize(idx+1);
-    _values[idx] = value;
+template<>
+inline void CustomType::typecheck<char>() const {
+    using boost::format;
+    if (_type != CHAR)
+        throw std::runtime_error(str(format("VCF Custom type error, tried to convert %1% to Character") %typeString(_type)));
 }
 
-inline const CustomType& CustomValue::type() const {
-    return _type;
+template<>
+inline void CustomType::typecheck<int64_t>() const {
+    using boost::format;
+    if (_type != INTEGER)
+        throw std::runtime_error(str(format("VCF Custom type error, tried to convert %1% to Integer") %typeString(_type)));
 }
 
-inline CustomValue::SizeType CustomValue::size() const {
-    return _values.size();
+template<>
+inline void CustomType::typecheck<uint64_t>() const {
+    typecheck<int64_t>();
 }
 
-inline bool CustomValue::empty() const {
-    return _values.empty();
+template<>
+inline void CustomType::typecheck<int32_t>() const {
+    typecheck<int64_t>();
+}
+
+template<>
+inline void CustomType::typecheck<uint32_t>() const {
+    typecheck<int64_t>();
 }
 
 VCF_NAMESPACE_END

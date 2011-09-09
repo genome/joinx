@@ -41,13 +41,12 @@ void CustomType::validateIndex(uint32_t idx) const {
         throw runtime_error(
             str(format("Request for index %1% from type %2% is invalid") %idx %toString()
             ));
-    
 }
 
-string CustomType::numberString() const {
-    switch (_numberType) {
+string CustomType::numberString(NumberType t, uint32_t n) {
+    switch (t) {
         case FIXED_SIZE:
-            return lexical_cast<string>(_number);
+            return lexical_cast<string>(n);
             break;
         case PER_ALLELE:    return "A"; break;
         case PER_GENOME:    return "G"; break;
@@ -58,8 +57,8 @@ string CustomType::numberString() const {
     }
 }
 
-string CustomType::typeString() const {
-    switch (_type) {
+string CustomType::typeString(DataType t) {
+    switch (t) {
         case INTEGER: return "Integer"  ; break;
         case FLOAT:   return "Float"    ; break;
         case CHAR:    return "Character"; break;
@@ -73,22 +72,11 @@ string CustomType::typeString() const {
 
 string CustomType::toString() const {
     stringstream ss;
-    ss << "ID=" << _id 
-        << ",Number=" << numberString() 
-        << ",Type=" << typeString() 
+    ss << "ID=" << _id
+        << ",Number=" << numberString(_numberType, _number)
+        << ",Type=" << typeString(_type)
         << ",Description=" << description();
     return ss.str();
-}
-
-
-CustomValue::CustomValue(const CustomType& type)
-    : _type(type)
-{
-}
-
-CustomValue::CustomValue(const CustomType& type, const string& value)
-    : _type(type)
-{
 }
 
 VCF_NAMESPACE_END

@@ -1,4 +1,4 @@
-#include "fileformats/vcf/CustomType.hpp"
+#include "fileformats/vcf/CustomValue.hpp"
 
 #include <sstream>
 #include <stdexcept>
@@ -10,7 +10,7 @@ using namespace std;
 using namespace Vcf;
 
 
-TEST(VcfCustomType, scalarInt) {
+TEST(VcfCustomValue, scalarInt) {
     CustomType type("DP", CustomType::FIXED_SIZE, 1, CustomType::INTEGER, "depth");
     CustomValue value(type);
 
@@ -23,10 +23,10 @@ TEST(VcfCustomType, scalarInt) {
     ASSERT_TRUE((result = value.get<int>(0)));
     ASSERT_EQ(42, *result);
 
-    // make sure asking for the wrong type returns null
-    ASSERT_FALSE(value.get<double>(0));
-    ASSERT_FALSE(value.get<string>(0));
-    ASSERT_FALSE(value.get<char>(0));
+    // make sure asking for the wrong type is an error
+    ASSERT_THROW(value.get<double>(0), runtime_error);
+    ASSERT_THROW(value.get<string>(0), runtime_error);
+    ASSERT_THROW(value.get<char>(0), runtime_error);
 
     // make sure trying to set past the max # of elts is an error
     ASSERT_THROW(value.set<int>(2, 7), runtime_error);
@@ -34,10 +34,13 @@ TEST(VcfCustomType, scalarInt) {
     // make sure trying to get past the max # of elts returns null
     ASSERT_THROW(value.get<int>(2), runtime_error);
 
-    // TODO: make sure trying to set with the wrong type is an error (NOTIMPL)
+    // make sure trying to set with the wrong type is an error
+    ASSERT_THROW(value.set<double>(0, 1.2), runtime_error);
+    ASSERT_THROW(value.set<string>(0, "hi"), runtime_error);
+    ASSERT_THROW(value.set<char>(0, 'a'), runtime_error);
 }
 
-TEST(VcfCustomType, variableSizedListFloat) {
+TEST(VcfCustomValue, variableSizedListFloat) {
     CustomType type("BQ", CustomType::VARIABLE_SIZE, 0, CustomType::FLOAT, "quality");
     CustomValue value(type);
 
@@ -51,12 +54,10 @@ TEST(VcfCustomType, variableSizedListFloat) {
     ASSERT_TRUE((result = value.get<double>(1)));
     ASSERT_EQ(0.456, *result);
 
-    // make sure asking for the wrong type returns null
-    // this differs from the fixed size case where asking for things that
-    // are known to be out of bounds is an error
-    ASSERT_FALSE(value.get<int>(0));
-    ASSERT_FALSE(value.get<string>(0));
-    ASSERT_FALSE(value.get<char>(0));
+    // make sure asking for the wrong type is an error
+    ASSERT_THROW(value.get<int>(0), runtime_error);
+    ASSERT_THROW(value.get<string>(0), runtime_error);
+    ASSERT_THROW(value.get<char>(0), runtime_error);
 
     // make sure set at an arbitrary index works, and updates size (var length)
     ASSERT_NO_THROW(value.set<double>(999, 0.789));
@@ -70,10 +71,13 @@ TEST(VcfCustomType, variableSizedListFloat) {
     ASSERT_FALSE(value.get<double>(2));
     ASSERT_FALSE(value.get<double>(998));
 
-    // TODO: make sure trying to set with the wrong type is an error (NOTIMPL)
+    // make sure trying to set with the wrong type is an error
+    ASSERT_THROW(value.set<int>(0, 2), runtime_error);
+    ASSERT_THROW(value.set<string>(0, "hi"), runtime_error);
+    ASSERT_THROW(value.set<char>(0, 'a'), runtime_error);
 }
 
-TEST(VcfCustomType, fixedSizedListString) {
+TEST(VcfCustomValue, fixedSizedListString) {
     CustomType type("CF", CustomType::FIXED_SIZE, 2, CustomType::STRING, "cat food");
     CustomValue value(type);
 
@@ -87,14 +91,19 @@ TEST(VcfCustomType, fixedSizedListString) {
     ASSERT_TRUE((result = value.get<string>(1)));
     ASSERT_EQ("burritos", *result);
 
-    // make sure asking for the wrong type returns null
-    ASSERT_FALSE(value.get<int>(0));
-    ASSERT_FALSE(value.get<double>(0));
-    ASSERT_FALSE(value.get<char>(0));
+    // make sure asking for the wrong type is an error
+    ASSERT_THROW(value.get<int>(0), runtime_error);
+    ASSERT_THROW(value.get<double>(0), runtime_error);
+    ASSERT_THROW(value.get<char>(0), runtime_error);
 
     // make sure trying to set past the max # of elts is an error
     ASSERT_THROW(value.set<string>(2, "boom"), runtime_error);
 
     // make sure trying to get past the max # of elts returns null
     ASSERT_THROW(value.get<string>(2), runtime_error);
+
+    // make sure trying to set with the wrong type is an error
+    ASSERT_THROW(value.set<int>(0, 2), runtime_error);
+    ASSERT_THROW(value.set<double>(0, 1.23), runtime_error);
+    ASSERT_THROW(value.set<char>(0, 'a'), runtime_error);
 }
