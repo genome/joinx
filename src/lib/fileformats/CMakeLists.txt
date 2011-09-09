@@ -26,6 +26,8 @@ set(SOURCES
     TypedStream.hpp
     Variant.cpp
     Variant.hpp
+    vcf/CustomType.cpp
+    vcf/CustomType.hpp
     vcf/Entry.cpp
     vcf/Entry.hpp
     vcf/Header.cpp

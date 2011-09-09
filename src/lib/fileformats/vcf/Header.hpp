@@ -29,29 +29,35 @@ public:
     Header();
 
     void add(const std::string& line);
+    void merge(const Header& other);
 
     const std::vector<RawLine>& metaInfoLines() const;
-    const std::vector<std::string>& headerLines() const;
+    std::string headerLine() const;
     const std::set<std::string>& categories() const;
     const Category& category(const std::string& name) const;
+    const Map* categoryItem(const std::string& catName, const std::string& id) const;
+    const std::vector<std::string>& sampleNames() const;
+
+    // throws when sampleName is not found
+    unsigned sampleIndex(const std::string& sampleName);
 
     // will throw if the header is invalid
     void assertValid() const;
 
 protected:
+    void parseHeaderLine(const std::string& line);
+
+protected:
     std::vector<RawLine> _metaInfoLines;
-    std::vector<std::string> _headerLines;
     std::set<std::string> _categoryNames;
     std::map<std::string, Category> _categories;
+    std::vector<std::string> _sampleNames;
     Category _empty; // so we can return an empty result by constref
+    bool _headerSeen;
 };
 
 inline const std::vector<Header::RawLine>& Header::metaInfoLines() const {
     return _metaInfoLines;
-}
-
-inline const std::vector<std::string>& Header::headerLines() const {
-    return _headerLines;
 }
 
 inline const std::set<std::string>& Header::categories() const {
@@ -63,6 +69,10 @@ inline const Header::Category& Header::category(const std::string& name) const {
     if (iter == _categories.end())
         return _empty;
     return iter->second;
+}
+
+inline const std::vector<std::string>& Header::sampleNames() const {
+    return _sampleNames;
 }
 
 VCF_NAMESPACE_END

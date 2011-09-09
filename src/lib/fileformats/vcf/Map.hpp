@@ -39,6 +39,7 @@ public:
     T as(const std::string& key) const;
 
     bool operator==(const Map& rhs) const;
+    bool operator!=(const Map& rhs) const;
 
 protected:
     mutable std::string _str;
@@ -102,7 +103,12 @@ inline T Map::as(const std::string& key) const {
 
 inline bool Map::operator==(const Map& rhs) const {
     // ignoring order of fields
-    return _map == _map;
+    return _map == rhs._map;
+}
+
+inline bool Map::operator!=(const Map& rhs) const {
+    // ignoring order of fields
+    return _map != rhs._map;
 }
 
 VCF_NAMESPACE_END
