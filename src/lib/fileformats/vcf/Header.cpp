@@ -1,9 +1,12 @@
 #include "Header.hpp"
+#include "Map.hpp"
 #include "common/Tokenizer.hpp"
 
 #include <boost/format.hpp>
 #include <functional>
+#include <sstream>
 #include <stdexcept>
+#include <utility>
 
 using boost::format;
 using namespace std;
@@ -18,14 +21,6 @@ namespace {
     };
 
     unsigned nExpectedHeaderFields = sizeof(expectedHeaderFields)/sizeof(expectedHeaderFields[0]);
-
-    bool isCategory(const std::string& line) {
-        return line[0] == '<' && line[line.size()-1] == '>';
-    }
-
-    bool mapIdEquals(const Map& m, const string& id) {
-        return m["ID"] == id;
-    }
 }
 
 Header::Header() : _headerSeen(false) {}
@@ -40,22 +35,24 @@ void Header::add(const string& line) {
             throw runtime_error(str(format("Failed to parse VCF header line: %1%") %line));
         p.first = p.first.substr(2); // strip leading ##
         t.remaining(p.second);
-        _metaInfoLines.push_back(p);
 
-        if (isCategory(p.second)) {
-            string value = p.second.substr(1, p.second.size()-2); // strip wrapping <>
-            _categoryNames.insert(p.first);
-            Category& category = _categories[p.first];
-            Map entry(value);
-            auto existing = find_if(category.begin(), category.end(), bind(&mapIdEquals, _1, entry["ID"]));
-            if (existing != category.end()) {
-                if (*existing != entry)
-                    throw runtime_error(str(format("Error in VCF header: conflicting values for %1%:%2%:\n%3%\nAND\n%4%")
-                        %p.first %entry["ID"] %existing->toString() %entry.toString()));
-            } else {
-                _categories[p.first].push_back(entry);
-            }
+        if (p.first == "INFO") {
+            CustomType t(p.second.substr(1, p.second.size()-2));
+            auto inserted = _infoTypes.insert(make_pair(t.id(), t));
+            if (!inserted.second)
+                throw runtime_error(str(format("Duplicate value for INFO:%1%") %t.id()));
+        } else if (p.first == "FORMAT") {
+            CustomType t(p.second.substr(1, p.second.size()-2));
+            auto inserted = _formatTypes.insert(make_pair(t.id(), t));
+            if (!inserted.second)
+                throw runtime_error(str(format("Duplicate value for FORMAT:%1%") %t.id()));
+        } else if (p.first == "FILTER") {
+            // TODO: care about duplicates?
+            Map m(p.second.substr(1, p.second.size()-2));
+            _filters.insert(make_pair(m["ID"], m["Description"]));
         }
+
+        _metaInfoLines.push_back(p);
     } else {
         parseHeaderLine(line.substr(1));
     }
@@ -76,19 +73,6 @@ void Header::parseHeaderLine(const std::string& line) {
 
     while (t.extract(tok))
         _sampleNames.push_back(tok);
-}
-
-const Map* Header::categoryItem(const std::string& catName, const std::string& id) const {
-    auto catIter = _categories.find(catName);
-    if (catIter == _categories.end())
-        return 0;
-
-    const Category& category = catIter->second;
-
-    auto iter = find_if(category.begin(), category.end(), bind(&mapIdEquals, _1, id));
-    if (iter == category.end())
-        return 0;
-    return &*iter;
 }
 
 inline std::string Header::headerLine() const {

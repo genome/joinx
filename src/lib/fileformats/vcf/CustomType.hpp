@@ -21,11 +21,14 @@ public:
         INTEGER,
         FLOAT,
         CHAR,
-        STRING
+        STRING,
+        FLAG
     };
 
-    static std::string numberString(NumberType t, uint32_t n);
-    static std::string typeString(DataType t);
+    static std::string numberToString(NumberType t, uint32_t n);
+    static std::string typeToString(DataType t);
+    static NumberType stringToNumber(const std::string& s, uint32_t& n);
+    static DataType stringToType(const std::string& s);
 
     CustomType();
     explicit CustomType(const std::string& raw);
@@ -37,6 +40,7 @@ public:
         const std::string& description
         );
 
+    const std::string& id() const;
     NumberType numberType() const;
     uint32_t number() const;
     DataType type() const;
@@ -70,6 +74,10 @@ protected:
     std::string _description;
 };
 
+inline const std::string& CustomType::id() const {
+    return _id;
+}
+
 inline CustomType::NumberType CustomType::numberType() const {
     return _numberType;
 }
@@ -90,28 +98,35 @@ template<>
 inline void CustomType::typecheck<double>() const {
     using boost::format;
     if (_type != FLOAT)
-        throw std::runtime_error(str(format("VCF Custom type error, tried to convert %1% to Float") %typeString(_type)));
+        throw std::runtime_error(str(format("VCF Custom type error, tried to convert %1% to Float") %typeToString(_type)));
 }
 
 template<>
 inline void CustomType::typecheck<std::string>() const {
     using boost::format;
     if (_type != STRING)
-        throw std::runtime_error(str(format("VCF Custom type error, tried to convert %1% to String") %typeString(_type)));
+        throw std::runtime_error(str(format("VCF Custom type error, tried to convert %1% to String") %typeToString(_type)));
 }
 
 template<>
 inline void CustomType::typecheck<char>() const {
     using boost::format;
     if (_type != CHAR)
-        throw std::runtime_error(str(format("VCF Custom type error, tried to convert %1% to Character") %typeString(_type)));
+        throw std::runtime_error(str(format("VCF Custom type error, tried to convert %1% to Character") %typeToString(_type)));
+}
+
+template<>
+inline void CustomType::typecheck<bool>() const {
+    using boost::format;
+    if (_type != FLAG)
+        throw std::runtime_error(str(format("VCF Custom type error, tried to convert %1% to Flag") %typeToString(_type)));
 }
 
 template<>
 inline void CustomType::typecheck<int64_t>() const {
     using boost::format;
     if (_type != INTEGER)
-        throw std::runtime_error(str(format("VCF Custom type error, tried to convert %1% to Integer") %typeString(_type)));
+        throw std::runtime_error(str(format("VCF Custom type error, tried to convert %1% to Integer") %typeToString(_type)));
 }
 
 template<>

@@ -112,25 +112,9 @@ namespace {
 
 TEST(VcfHeader, parse) {
     Header h = parse(headerText);
-    const set<string>& categories = h.categories();
-    ASSERT_TRUE(categories.find("contig") != categories.end());
-    ASSERT_EQ(4, categories.size());
-    ASSERT_TRUE(categories.find("INFO") != categories.end());
-    ASSERT_TRUE(categories.find("FILTER") != categories.end());
-    ASSERT_TRUE(categories.find("FORMAT") != categories.end());
 
-    const Header::Category& info = h.category("INFO");
-    ASSERT_EQ(6, info.size());
-
-    ASSERT_EQ("NS", info[0]["ID"]);
-    ASSERT_EQ("1", info[0]["Number"]);
-    ASSERT_EQ("Integer", info[0]["Type"]);
-    ASSERT_EQ("\"Number of Samples With Data\"", info[0]["Description"]);
-
-    ASSERT_EQ("H2", info[5]["ID"]);
-    ASSERT_EQ("0", info[5]["Number"]);
-    ASSERT_EQ("Flag", info[5]["Type"]);
-    ASSERT_EQ("\"HapMap2 membership\"", info[5]["Description"]);
+    ASSERT_EQ(6, h.infoTypes().size());
+    ASSERT_EQ(4, h.formatTypes().size());
 
     ASSERT_EQ(3, h.sampleNames().size());
     ASSERT_EQ("NA00001", h.sampleNames()[0]);
@@ -150,12 +134,6 @@ TEST(VcfHeader, merge) {
     ASSERT_NO_THROW(h1.merge(different));
     stringstream ss;
     ss << h1;
-    const Map* item = h1.categoryItem("INFO", "NW");
-    ASSERT_TRUE(item);
-    ASSERT_EQ("\"Extra field to test merge\"", (*item)["Description"]);
-    item = h1.categoryItem("INFO", "AA");
-    ASSERT_TRUE(item);
-    ASSERT_EQ("\"Ancestral Allele\"", (*item)["Description"]);
     ASSERT_EQ(6, h1.sampleNames().size());
     ASSERT_EQ("NA00001", h1.sampleNames()[0]);
     ASSERT_EQ("NA00002", h1.sampleNames()[1]);

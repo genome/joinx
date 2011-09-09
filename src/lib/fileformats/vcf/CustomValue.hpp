@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CustomType.hpp"
+#include "common/Tokenizer.hpp"
 #include "namespace.hpp"
 
 #include <boost/any.hpp>
@@ -30,6 +31,28 @@ public:
     void set(SizeType idx, const T& value);
 
 protected:
+    template<typename T>
+    bool set(const std::string& value) {
+        _type.typecheck<T>();
+        SizeType idx = 0;
+        Tokenizer<char> t(value, ',');
+        std::string tok;
+        T tmp;
+        if (!t.extract(tmp))
+            return false;
+
+        do {
+            _type.validateIndex(idx);
+            ensureCapacity(idx+1);
+            _values[idx++] = tmp;
+        } while (t.extract(tmp));
+
+        return t.eof();
+    }
+
+    void ensureCapacity(uint32_t size);
+
+protected:
     const CustomType& _type;
     std::vector<ValueType> _values;
 };
@@ -47,9 +70,13 @@ template<typename T>
 inline void CustomValue::set(SizeType idx, const T& value) {
     _type.typecheck<T>();
     _type.validateIndex(idx);
-    if (idx >= _values.size())
-        _values.resize(idx+1);
+    ensureCapacity(idx+1);
     _values[idx] = value;
+}
+
+inline void CustomValue::ensureCapacity(uint32_t size) {
+    if (size > _values.size())
+        _values.resize(size);
 }
 
 VCF_NAMESPACE_END

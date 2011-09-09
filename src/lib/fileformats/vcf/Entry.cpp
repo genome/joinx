@@ -76,6 +76,60 @@ void Entry::addPerSampleData(const string& key, const string& value) {
     throw runtime_error("adding per sample data is not yet implemented");
 }
 
+void Entry::parse2(const Header& h, const string& s) {
+    Tokenizer<char> tok(s, '\t');    
+    if (!tok.extract(_chrom))
+        throw runtime_error("Failed to extract chromosome from vcf entry" + s);
+    if (!tok.extract(_pos))
+        throw runtime_error("Failed to extract position from vcf entry" + s);
+
+    string tmp;
+
+    // ids
+    if (!tok.extract(tmp))
+        throw runtime_error("Failed to extract id from vcf entry" + s);
+    extractList(_identifiers, tmp);
+
+    // ref alleles
+    if (!tok.extract(_ref))
+        throw runtime_error("Failed to extract ref alleles from vcf entry" + s);
+
+    // alt alleles
+    if (!tok.extract(tmp))
+        throw runtime_error("Failed to extract alt alleles from vcf entry" + s);
+    extractList(_alt, tmp, ',');
+
+    // phred quality
+    if (!tok.extract(_qual))
+        throw runtime_error("Failed to extract quality from vcf entry" + s);
+
+    // failed filters
+    if (!tok.extract(tmp))
+        throw runtime_error("Failed to extract filters from vcf entry" + s);
+    extractList(_failedFilters, tmp);
+    if (_failedFilters.size() == 1 && _failedFilters[0] == "PASS")
+        _failedFilters.clear();
+
+    // info entries
+    if (!tok.extract(tmp))
+        throw runtime_error("Failed to extract info from vcf entry" + s);
+    extractList(_info, tmp);
+
+    // format description
+    if (tok.extract(tmp)) {
+        extractList(_formatDescription, tmp, ':');
+
+        _perSampleData.clear();
+        // per sample formatted data
+        while (tok.extract(tmp)) {
+            // TODO: less copying
+            vector<string> data;
+            extractList(data, tmp, ':');
+            _perSampleData.push_back(data);
+        }
+    }
+}
+
 void Entry::parse(const string& s) {
     Tokenizer<char> tok(s, '\t');    
     if (!tok.extract(_chrom))

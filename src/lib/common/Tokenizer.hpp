@@ -1,8 +1,10 @@
 #pragma once
 
+#include <boost/format.hpp>
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
+#include <stdexcept>
 #include <string>
 
 using namespace std;
@@ -50,6 +52,21 @@ protected:
             return false;
         value = T(s);
         return true;
+    }
+
+    // special case for casting string to char
+    bool _extract(char& value) {
+        string s;
+        if (! extract(s))
+            return false;
+        if (s.size() == 1) {
+            value = s[0];
+            return true;
+        } else {
+            using boost::format;
+            throw std::runtime_error(str(format("Attempted to cast string '%1%' to char") %value));
+        }
+        return false;
     }
 
     bool _extract(std::string& value);

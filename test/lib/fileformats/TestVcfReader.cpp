@@ -53,9 +53,9 @@ TEST(VcfReader, read) {
     Entry e;
 
     Header h = Header::fromStream(in);
-    ASSERT_EQ(6, h.category("INFO").size());
-    ASSERT_EQ(2, h.category("FILTER").size());
-    ASSERT_EQ(4, h.category("FORMAT").size());
+    ASSERT_EQ(6, h.infoTypes().size());
+    ASSERT_EQ(2, h.filters().size());
+    ASSERT_EQ(4, h.formatTypes().size());
 
     vector<Entry> v;
     while (r.next(e)) {

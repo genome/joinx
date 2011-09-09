@@ -7,14 +7,13 @@
 #include <utility>
 #include <vector>
 
-#include "Map.hpp"
+#include "CustomType.hpp"
 #include "namespace.hpp"
 
 VCF_NAMESPACE_BEGIN
 
 class Header {
 public:
-    typedef std::vector<Map> Category;
     typedef std::pair<std::string, std::string> RawLine;
 
     template<typename T>
@@ -33,9 +32,12 @@ public:
 
     const std::vector<RawLine>& metaInfoLines() const;
     std::string headerLine() const;
-    const std::set<std::string>& categories() const;
-    const Category& category(const std::string& name) const;
-    const Map* categoryItem(const std::string& catName, const std::string& id) const;
+    // infoType/formatType return NULL for non-existing ids
+    const CustomType* infoType(const std::string& id) const;
+    const CustomType* formatType(const std::string& id) const;
+    const std::map<std::string, CustomType>& infoTypes() const;
+    const std::map<std::string, CustomType>& formatTypes() const;
+    const std::map<std::string, std::string>& filters() const;
     const std::vector<std::string>& sampleNames() const;
 
     // throws when sampleName is not found
@@ -48,27 +50,43 @@ protected:
     void parseHeaderLine(const std::string& line);
 
 protected:
+    std::map<std::string, CustomType> _infoTypes;
+    std::map<std::string, CustomType> _formatTypes;
+    // filters = name -> description
+    std::map<std::string, std::string> _filters;
     std::vector<RawLine> _metaInfoLines;
-    std::set<std::string> _categoryNames;
-    std::map<std::string, Category> _categories;
     std::vector<std::string> _sampleNames;
-    Category _empty; // so we can return an empty result by constref
     bool _headerSeen;
 };
 
+inline const CustomType* Header::infoType(const std::string& id) const {
+    auto iter = _infoTypes.find(id);
+    if (iter == _infoTypes.end());
+        return 0;
+    return &iter->second;
+}
+
+inline const CustomType* Header::formatType(const std::string& id) const {
+    auto iter = _formatTypes.find(id);
+    if (iter == _formatTypes.end());
+        return 0;
+    return &iter->second;
+}
+
+inline const std::map<std::string, CustomType>& Header::infoTypes() const {
+    return _infoTypes;
+}
+
+inline const std::map<std::string, CustomType>& Header::formatTypes() const {
+    return _formatTypes;
+}
+
+inline const std::map<std::string, std::string>& Header::filters() const {
+    return _filters;
+}
+
 inline const std::vector<Header::RawLine>& Header::metaInfoLines() const {
     return _metaInfoLines;
-}
-
-inline const std::set<std::string>& Header::categories() const {
-    return _categoryNames;
-}
-
-inline const Header::Category& Header::category(const std::string& name) const {
-    auto iter = _categories.find(name);
-    if (iter == _categories.end())
-        return _empty;
-    return iter->second;
 }
 
 inline const std::vector<std::string>& Header::sampleNames() const {

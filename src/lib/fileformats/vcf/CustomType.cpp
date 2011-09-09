@@ -1,7 +1,9 @@
 #include "CustomType.hpp"
+#include "common/Tokenizer.hpp"
 
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+#include <set>
 #include <stdexcept>
 
 using boost::format;
@@ -18,6 +20,43 @@ CustomType::CustomType()
 }
 
 CustomType::CustomType(const string& raw) {
+    Tokenizer<string> t(raw, ",=\"");
+    set<string> required = {"ID", "Number", "Type", "Description"};
+
+    string id;
+    while (t.extract(id)) {
+        // ="  or " at EOS will give us a null token, skip it
+        if (id.empty())
+            continue;
+
+        string value;
+        string tok;
+        if (!t.extract(value))
+            throw runtime_error(str(format("Failed to extract token while parsing custom type %1%") %raw));
+
+        if (t.lastDelim() == '"') {
+            do {
+                string tmp;
+                t.extract(tmp);
+                value += tmp;
+                if (t.lastDelim() != '"')
+                    value += t.lastDelim();
+            } while (t.lastDelim() != '"');
+        }
+
+        if (required.erase(id) != 1)
+            throw runtime_error(str(format("Unexpected field id '%1%' while parsing custom time %2%") %id %raw));
+
+        if (id == "ID") {
+            _id = value;
+        } else if (id == "Number") {
+            _numberType = stringToNumber(value, _number);
+        } else if (id == "Type" ) {
+            _type = stringToType(value);
+        } else if (id == "Description") {
+            _description = value;
+        }
+    }
 }
 
 CustomType::CustomType(
@@ -43,7 +82,7 @@ void CustomType::validateIndex(uint32_t idx) const {
             ));
 }
 
-string CustomType::numberString(NumberType t, uint32_t n) {
+string CustomType::numberToString(NumberType t, uint32_t n) {
     switch (t) {
         case FIXED_SIZE:
             return lexical_cast<string>(n);
@@ -57,12 +96,13 @@ string CustomType::numberString(NumberType t, uint32_t n) {
     }
 }
 
-string CustomType::typeString(DataType t) {
+string CustomType::typeToString(DataType t) {
     switch (t) {
         case INTEGER: return "Integer"  ; break;
         case FLOAT:   return "Float"    ; break;
         case CHAR:    return "Character"; break;
         case STRING:  return "String"   ; break;
+        case FLAG:    return "Flag"     ; break;
         default:
             throw runtime_error("Invalid custom VCF type!");
             break;
@@ -73,10 +113,42 @@ string CustomType::typeString(DataType t) {
 string CustomType::toString() const {
     stringstream ss;
     ss << "ID=" << _id
-        << ",Number=" << numberString(_numberType, _number)
-        << ",Type=" << typeString(_type)
-        << ",Description=" << description();
+        << ",Number=" << numberToString(_numberType, _number)
+        << ",Type=" << typeToString(_type)
+        << ",Description=\"" << description() << "\"";
     return ss.str();
 }
+
+CustomType::NumberType CustomType::stringToNumber(const std::string& s, uint32_t& n) {
+    n = 0;
+    if (s == "A") {
+        return PER_ALLELE;
+    } else if (s == "G") {
+        return PER_GENOME;
+    } else if (s == ".") {
+        return VARIABLE_SIZE;
+    } else {
+        n = lexical_cast<uint32_t>(s);
+        return FIXED_SIZE;
+    }
+}
+
+CustomType::DataType CustomType::stringToType(const std::string& s) {
+    if (s == "Integer") {
+        return INTEGER;
+    } else if (s == "Float") {
+        return FLOAT;
+    } else if (s == "Character") {
+        return CHAR;
+    } else if (s == "String") {
+        return STRING;
+    } else if (s == "Flag") {
+        return FLAG;
+    } else {
+        throw runtime_error(str(format("Unknown data type '%1%'. "
+            "Expected one of: Integer, Float, Character, String, Flag") % s));
+    }
+}
+
 
 VCF_NAMESPACE_END

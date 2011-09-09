@@ -11,6 +11,8 @@
 
 VCF_NAMESPACE_BEGIN
 
+class Header;
+
 class InfoField {
 public:
     InfoField();
@@ -34,6 +36,11 @@ protected:
 
 class Entry {
 public:
+    template<typename T>
+    static void parseLine2(const T& reader, const std::string& s, Entry& e) {
+        e.parse2(reader, s);
+    }
+
     static void parseLine(const std::string& s, Entry& e) {
         return e.parse(s);
     }
@@ -56,6 +63,7 @@ public:
     void addPerSampleData(const std::string& key, const std::string& value);
 
     void parse(const std::string& s);
+    void parse2(const Header& h, const std::string& s);
 
     const std::string& line() const { return _line; }
     const std::string& chrom() const { return _chrom; }
