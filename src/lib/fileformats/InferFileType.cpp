@@ -4,6 +4,7 @@
 #include "InputStream.hpp"
 #include "TypedStream.hpp"
 #include "vcf/Entry.hpp"
+#include "vcf/Header.hpp"
 
 #include <boost/format.hpp>
 #include <fstream>
@@ -52,21 +53,36 @@ namespace {
         in.rewind();
         return rv;
     }
+
+    bool testVcf(InputStream& in) {
+        bool rv(true);
+        try {
+            in.caching(true);
+            Vcf::Header hdr = Vcf::Header::fromStream(in);
+            hdr.assertValid();
+            rv = !hdr.empty();
+        } catch (...) {
+            rv = false;
+        }
+
+        in.caching(false);
+        in.rewind();
+        return rv;
+    }
 }
 
 FileType inferFileType(InputStream& in) {
     FileType rv(UNKNOWN);
 
     typedef function<void(string&, Bed&)> BedExtractor;
-    typedef function<void(string&, Vcf::Entry&)> VcfExtractor;
     BedExtractor bedExtractor = bind(&Bed::parseLine, _1, _2, -1);
-    VcfExtractor vcfExtractor = bind(&Vcf::Entry::parseLine, _1, _2);
-    if (testReader<Bed, BedExtractor>(in, bedExtractor))
+    if (testReader<Bed, BedExtractor>(in, bedExtractor)) {
         rv = BED;
-    else if (testReader<Vcf::Entry, VcfExtractor>(in, vcfExtractor))
+    } else if (testVcf(in)) {
         rv = VCF;
-    else if (testEmpty(in))
+    } else if (testEmpty(in)) {
         rv = EMPTY;
+    }
 
     return rv;
 }

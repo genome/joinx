@@ -26,6 +26,8 @@ set(SOURCES
     SortCommand.hpp
     StreamHandler.cpp
     StreamHandler.hpp
+    VcfMergeCommand.cpp
+    VcfMergeCommand.hpp
     main.cpp
 )
 

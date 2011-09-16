@@ -1,47 +1,64 @@
 #pragma once
 
+#include <set>
 #include <vector>
-#include <iostream>
+#include <functional>
 
-template<typename ValueType, typename StreamPtr>
+namespace {
+    template<typename StreamPtr>
+    bool streamLessThan(const StreamPtr& a, const StreamPtr& b) {
+        typedef typename StreamPtr::element_type::ValueType ValueType;
+        ValueType* pa;
+        ValueType* pb;
+        if (a->eof()) return false;
+        if (b->eof()) return true; 
+        a->peek(&pa);
+        b->peek(&pb);
+        return *pa < *pb;    
+    }
+}
+
+template<typename ValueType, typename StreamPtr, typename OutputFunc>
 class MergeSorted {
 public:
-    MergeSorted(std::vector<StreamPtr> sortedInputs, std::ostream& output)
-        : _sortedInputs(sortedInputs)
+    MergeSorted(const std::vector<StreamPtr>& sortedInputs, OutputFunc& output)
+        : _sortedInputs(&streamLessThan<StreamPtr>)
         , _output(output)
-    {}
+    {
+        for (auto i = sortedInputs.begin(); i != sortedInputs.end(); ++i)
+            if (!(*i)->eof())
+                _sortedInputs.insert(*i);
+    }
 
     virtual ~MergeSorted() {}
 
     bool nextSorted(ValueType& next) {
         using namespace std;
-        typedef typename vector<StreamPtr>::const_iterator IterType;
+        if (_sortedInputs.empty())
+            return false;
 
-        ValueType* peek(NULL);
-        IterType minIter = _sortedInputs.end();
-        for (IterType iter = _sortedInputs.begin(); iter != _sortedInputs.end(); ++iter) {
-            if (!(*iter)->eof() && (*iter)->peek(&peek)) {
-                if (minIter == _sortedInputs.end() || *peek < next) {
-                    minIter = iter;
-                    next = *peek;
-                }
+        bool rv = false;
+        while (rv == false && !_sortedInputs.empty()) {
+            StreamPtr s = *_sortedInputs.begin();
+            _sortedInputs.erase(_sortedInputs.begin());
+            if ((rv = s->next(next))) {
+                ValueType* p;
+                if (s->peek(&p))
+                    _sortedInputs.insert(s);
             }
         }
-        if (minIter != _sortedInputs.end()) {
-            (*minIter)->next(next);
-            return true;
-        }
 
-        return false;
+        return rv;
     }
 
     void execute() {
         ValueType v;
         while (nextSorted(v))
-            _output << v << "\n";
+            _output(v);
     }
 
 protected:
-    std::vector<StreamPtr> _sortedInputs;
-    std::ostream& _output;
+    typedef bool (*Compare)(const StreamPtr&, const StreamPtr&);
+    std::multiset<StreamPtr, Compare> _sortedInputs;
+    OutputFunc& _output;
 };

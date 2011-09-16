@@ -39,7 +39,7 @@ inline CompressionType compressionTypeFromString(const std::string& s) {
         throw std::runtime_error(str(format("Invalid compression string '%1%'. Expected one of: n,g,z,b") %s));
 }
 
-template<typename StreamFactoryType>
+template<typename StreamFactoryType, typename OutputFunc>
 class SortBuffer {
 public:
     typedef typename StreamFactoryType::StreamPtr StreamPtr;
@@ -77,9 +77,9 @@ public:
         return _buf.empty() && _stream.get() == NULL;
     }
 
-    void write(std::ostream& s) const {
+    void write(OutputFunc& out) const {
         for (auto iter = _buf.begin(); iter != _buf.end(); ++iter)
-            s << **iter << "\n";
+            out(**iter);
     }
 
     void writeTmp() {

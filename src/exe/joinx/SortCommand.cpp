@@ -6,6 +6,7 @@
 #include "fileformats/StreamFactory.hpp"
 #include "fileformats/InferFileType.hpp"
 #include "fileformats/InputStream.hpp"
+#include "fileformats/OutputWriter.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 
@@ -134,22 +135,26 @@ void SortCommand::exec() {
         return;
 
     typedef function<void(string&, Bed&)> BedExtractor;
-    typedef function<void(const string&, Vcf::Entry&)> VcfExtractor;
+    typedef function<void(string&, Vcf::Entry&)> VcfExtractor;
     typedef StreamFactory<Bed, BedExtractor> BedReaderFactory;
     typedef StreamFactory<Vcf::Entry, VcfExtractor> VcfReaderFactory;
 
-    BedExtractor be = bind(&Bed::parseLine, _1, _2, 0);
-    VcfExtractor ve = bind(&Vcf::Entry::parseLine, _1, _2);
 
     if (type == BED) {
+        typedef OutputWriter<Bed> WriterType;
+        WriterType writer(*out);
+        BedExtractor be = bind(&Bed::parseLine, _1, _2, 0);
         BedReaderFactory brf(be);
-        Sort<BedReaderFactory> sorter(brf, inputStreams, *out, _maxInMem, _stable, compression);
+        Sort<BedReaderFactory, WriterType> sorter(brf, inputStreams, writer, _maxInMem, _stable, compression);
         sorter.execute();
     } else if (type == VCF) {
+        typedef OutputWriter<Vcf::Entry> WriterType;
+        WriterType writer(*out);
         Vcf::Header hdr = Vcf::Header::fromStream(*inputStreams[0]);
+        VcfExtractor ve = bind(&Vcf::Entry::parseLine, &hdr, _1, _2);
         *out << hdr;
         VcfReaderFactory vrf(ve);
-        Sort<VcfReaderFactory> sorter(vrf, inputStreams, *out, _maxInMem, _stable, compression);
+        Sort<VcfReaderFactory, WriterType> sorter(vrf, inputStreams, writer, _maxInMem, _stable, compression);
         sorter.execute();
     } else {
         throw runtime_error("Unknown file type!");

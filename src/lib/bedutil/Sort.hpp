@@ -6,32 +6,31 @@
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <algorithm>
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
-#include <iostream>
 #include <iterator>
 #include <memory>
 #include <vector>
 
-template<typename StreamFactoryType>
+template<typename StreamFactoryType, typename OutputFunc>
 class Sort {
 public:
     typedef typename StreamFactoryType::StreamPtr StreamPtr;
     typedef typename StreamFactoryType::ValueType ValueType;
-    typedef SortBuffer<StreamFactoryType> BufferType;
+    typedef SortBuffer<StreamFactoryType, OutputFunc> BufferType;
     typedef std::shared_ptr<BufferType> BufferPtr;
 
     Sort(
             StreamFactoryType& streamFactory,
             std::vector<InputStream::ptr> inputs,
-            std::ostream& output,
+            OutputFunc& out,
             unsigned maxInMem,
             bool stable,
             CompressionType compression = NONE
         )
         : _streamFactory(streamFactory)
-        , _output(output)
+        , _out(out)
         , _maxInMem(maxInMem)
         , _stable(stable)
         , _compression(compression)
@@ -65,13 +64,13 @@ public:
 
         if (_buffers.empty()) {
             buf->sort();
-            buf->write(_output);
+            buf->write(_out);
         } else {
             if (!buf->empty()) {
                 buf->sort();
                 _buffers.push_back(buf);
             }
-            MergeSorted<ValueType, BufferPtr> merger(_buffers, _output);
+            MergeSorted<ValueType, BufferPtr, OutputFunc> merger(_buffers, _out);
             merger.execute();
         }
     }
@@ -80,7 +79,7 @@ protected:
     StreamFactoryType& _streamFactory;
     std::vector<BufferPtr> _buffers;
     std::vector<StreamPtr> _inputs;
-    std::ostream& _output;
+    OutputFunc& _out;
     unsigned _maxInMem;
     bool _stable;
     CompressionType _compression;

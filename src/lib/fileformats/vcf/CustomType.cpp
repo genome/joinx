@@ -37,7 +37,8 @@ CustomType::CustomType(const string& raw) {
         if (t.lastDelim() == '"') {
             do {
                 string tmp;
-                t.extract(tmp);
+                if (!t.extract(tmp))
+                    break;
                 value += tmp;
                 if (t.lastDelim() != '"')
                     value += t.lastDelim();

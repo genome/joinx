@@ -20,6 +20,14 @@ namespace {
     typedef function<void(string&, Bed&)> Extractor;
     typedef TypedStream<Bed, Extractor> BedReader;
     Extractor extractor = bind(&Bed::parseLine, _1, _2, -1);
+
+    struct Collector {
+        void operator()(const Bed& value) {
+            beds.push_back(value);
+        }
+
+        vector<Bed> beds;
+    };
 }
 
 class TestMergeSorted : public ::testing::Test {
@@ -69,9 +77,11 @@ TEST_F(TestMergeSorted, execute) {
         bedStreams.push_back(BedReader::ptr(new BedReader(extractor, **inputStreams.rbegin())));
     }
 
-    stringstream out;
-    MergeSorted<Bed, BedReader::ptr> merger(bedStreams, out);
+    Collector c;
+    MergeSorted<Bed, BedReader::ptr, Collector> merger(bedStreams, c);
     merger.execute();
-    ASSERT_EQ(_expectedStr.str(), out.str());
+    ASSERT_EQ(_expectedBeds.size(), c.beds.size());
+    for (unsigned i = 0; i < c.beds.size(); ++i)
+        ASSERT_EQ(_expectedBeds[i], c.beds[i]);
 }
 

@@ -20,15 +20,17 @@ public:
     static Header fromStream(T& stream) {
         Header rv;
         std::string line;
-        while (stream.peek() == '#' && stream.getline(line))
+        while (stream.peek() == '#' && getline(stream, line))
             rv.add(line);
         return rv;
     }
 
     Header();
+    ~Header();
 
     void add(const std::string& line);
     void merge(const Header& other);
+    bool empty() const;
 
     const std::vector<RawLine>& metaInfoLines() const;
     std::string headerLine() const;
@@ -41,7 +43,7 @@ public:
     const std::vector<std::string>& sampleNames() const;
 
     // throws when sampleName is not found
-    unsigned sampleIndex(const std::string& sampleName);
+    uint32_t sampleIndex(const std::string& sampleName) const;
 
     // will throw if the header is invalid
     void assertValid() const;
@@ -58,40 +60,6 @@ protected:
     std::vector<std::string> _sampleNames;
     bool _headerSeen;
 };
-
-inline const CustomType* Header::infoType(const std::string& id) const {
-    auto iter = _infoTypes.find(id);
-    if (iter == _infoTypes.end());
-        return 0;
-    return &iter->second;
-}
-
-inline const CustomType* Header::formatType(const std::string& id) const {
-    auto iter = _formatTypes.find(id);
-    if (iter == _formatTypes.end());
-        return 0;
-    return &iter->second;
-}
-
-inline const std::map<std::string, CustomType>& Header::infoTypes() const {
-    return _infoTypes;
-}
-
-inline const std::map<std::string, CustomType>& Header::formatTypes() const {
-    return _formatTypes;
-}
-
-inline const std::map<std::string, std::string>& Header::filters() const {
-    return _filters;
-}
-
-inline const std::vector<Header::RawLine>& Header::metaInfoLines() const {
-    return _metaInfoLines;
-}
-
-inline const std::vector<std::string>& Header::sampleNames() const {
-    return _sampleNames;
-}
 
 VCF_NAMESPACE_END
 

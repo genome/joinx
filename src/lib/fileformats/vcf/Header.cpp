@@ -4,6 +4,7 @@
 
 #include <boost/format.hpp>
 #include <functional>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
@@ -24,6 +25,8 @@ namespace {
 }
 
 Header::Header() : _headerSeen(false) {}
+Header::~Header() {
+}
 
 void Header::add(const string& line) {
     // determine if this is a meta-information line (##) or header line (#)
@@ -106,12 +109,52 @@ void Header::merge(const Header& other) {
     }
 }
 
-unsigned Header::sampleIndex(const std::string& sampleName) {
+uint32_t Header::sampleIndex(const std::string& sampleName) const {
     auto iter = find(_sampleNames.begin(), _sampleNames.end(), sampleName);
     if (iter == _sampleNames.end())
         throw runtime_error(str(format("Request for sample name '%1%' which does not exist in this VCF header") %sampleName));
     return distance(_sampleNames.begin(), iter);
 }
+
+bool Header::empty() const {
+    return _metaInfoLines.empty();
+}
+
+const CustomType* Header::infoType(const std::string& id) const {
+    using namespace std;
+    auto iter = _infoTypes.find(id);
+    if (iter == _infoTypes.end())
+        return 0;
+    return &iter->second;
+}
+
+const CustomType* Header::formatType(const std::string& id) const {
+    auto iter = _formatTypes.find(id);
+    if (iter == _formatTypes.end())
+        return 0;
+    return &iter->second;
+}
+
+const std::map<std::string, CustomType>& Header::infoTypes() const {
+    return _infoTypes;
+}
+
+const std::map<std::string, CustomType>& Header::formatTypes() const {
+    return _formatTypes;
+}
+
+const std::map<std::string, std::string>& Header::filters() const {
+    return _filters;
+}
+
+const std::vector<Header::RawLine>& Header::metaInfoLines() const {
+    return _metaInfoLines;
+}
+
+const std::vector<std::string>& Header::sampleNames() const {
+    return _sampleNames;
+}
+
 
 VCF_NAMESPACE_END
 

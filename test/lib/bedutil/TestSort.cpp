@@ -19,12 +19,22 @@ namespace {
     const int CHROM_MAX = 22;
     const int START_MAX = 5;
     const int END_MAX   = 5;
+
+    template<typename T>
+    struct Collector {
+        void operator()(const T& value) {
+            out << value << "\n";
+        }
+        stringstream out;
+    };
+
 }
 
 class TestSort : public ::testing::Test {
 protected:
     typedef std::function<void(string&, Bed&)> BedExtractor;
     typedef StreamFactory<Bed, BedExtractor> BedReaderFactory;
+    typedef Sort<BedReaderFactory, Collector<Bed> > SortType;
 
     TestSort()
         : _rawStreams(NULL)
@@ -85,37 +95,37 @@ protected:
 };
 
 TEST_F(TestSort, unstable) {
-    stringstream out;
-    Sort<BedReaderFactory> sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false);
+    Collector<Bed> out;
+    SortType sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false);
     sorter.execute();
-    ASSERT_EQ(_expectedStr.str(), out.str());
+    ASSERT_EQ(_expectedStr.str(), out.out.str());
 }
 
 TEST_F(TestSort, zlib) {
-    stringstream out;
-    Sort<BedReaderFactory> sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false, ZLIB);
+    Collector<Bed> out;
+    SortType sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false, ZLIB);
     sorter.execute();
-    ASSERT_EQ(_expectedStr.str(), out.str());
+    ASSERT_EQ(_expectedStr.str(), out.out.str());
 }
 
 TEST_F(TestSort, bzip2) {
-    stringstream out;
-    Sort<BedReaderFactory> sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false, BZIP2);
+    Collector<Bed> out;
+    SortType sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false, BZIP2);
     sorter.execute();
-    ASSERT_EQ(_expectedStr.str(), out.str());
+    ASSERT_EQ(_expectedStr.str(), out.out.str());
 }
 
 TEST_F(TestSort, gzip) {
-    stringstream out;
-    Sort<BedReaderFactory> sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false, GZIP);
+    Collector<Bed> out;
+    SortType sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false, GZIP);
     sorter.execute();
-    ASSERT_EQ(_expectedStr.str(), out.str());
+    ASSERT_EQ(_expectedStr.str(), out.out.str());
 }
 
 TEST_F(TestSort, stable) {
-    stringstream out;
-    Sort<BedReaderFactory> sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, true);
+    Collector<Bed> out;
+    SortType sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, true);
     sorter.execute();
-    ASSERT_EQ(_expectedStr.str(), out.str());
+    ASSERT_EQ(_expectedStr.str(), out.out.str());
 }
 

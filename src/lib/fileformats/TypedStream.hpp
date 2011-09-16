@@ -2,6 +2,7 @@
 
 #include "InputStream.hpp"
 
+#include <boost/format.hpp>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -65,7 +66,7 @@ protected:
     std::string nextLine();
 
 protected:
-    Extractor& _extractor;
+    Extractor _extractor;
 
     std::string _name;
     InputStream& _in;
@@ -139,7 +140,13 @@ inline bool TypedStream<ValueType, Extractor>::next(ValueType& value) {
         if (line.empty())
             return false;
 
-        _extractor(line, value);
+        try {
+            _extractor(line, value);
+        } catch (const std::exception& e) {
+            using boost::format;
+            throw std::runtime_error(
+                str(format("Error at %1%:%2%: %3%") %name() %_in.lineNum() %e.what()));
+        }
     } while (exclude(value));
     ++_valueCount;
     return true;

@@ -36,7 +36,8 @@ namespace {
 }
 
 CreateContigsCommand::CreateContigsCommand()
-    : _flankSize(99)
+    : _outputFile("-")
+    , _flankSize(99)
     , _minQuality(0)
 {
 }

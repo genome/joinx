@@ -13,7 +13,7 @@ using namespace Vcf;
 
 TEST(VcfCustomValue, scalarInt) {
     CustomType type("DP", CustomType::FIXED_SIZE, 1, CustomType::INTEGER, "depth");
-    CustomValue value(type);
+    CustomValue value(&type);
 
     // set the first element
     value.set<int64_t>(0, 42);
@@ -43,7 +43,7 @@ TEST(VcfCustomValue, scalarInt) {
 
 TEST(VcfCustomValue, variableSizedListFloat) {
     CustomType type("BQ", CustomType::VARIABLE_SIZE, 0, CustomType::FLOAT, "quality");
-    CustomValue value(type);
+    CustomValue value(&type);
 
     // set the first element
     value.set<double>(0, 0.123);
@@ -80,7 +80,7 @@ TEST(VcfCustomValue, variableSizedListFloat) {
 
 TEST(VcfCustomValue, fixedSizedListString) {
     CustomType type("CF", CustomType::FIXED_SIZE, 2, CustomType::STRING, "cat food");
-    CustomValue value(type);
+    CustomValue value(&type);
 
     // set the first element
     value.set<string>(0, "tasty");
@@ -112,64 +112,64 @@ TEST(VcfCustomValue, fixedSizedListString) {
 
 TEST(VcfCustomValue, fixedIntFromString) {
     CustomType fixedInt("DP", CustomType::FIXED_SIZE, 1, CustomType::INTEGER, "depth");
-    ASSERT_NO_THROW(CustomValue(fixedInt, "12"));
-    CustomValue value(fixedInt, "12");
+    ASSERT_NO_THROW(CustomValue(&fixedInt, "12"));
+    CustomValue value(&fixedInt, "12");
     const int64_t* resultInt = 0;
     ASSERT_TRUE((resultInt = value.get<int64_t>(0)));
     ASSERT_EQ(12, *resultInt);
-    ASSERT_THROW(CustomValue(fixedInt, "1,2"), runtime_error);
-    ASSERT_THROW(CustomValue(fixedInt, "1.2"), runtime_error);
-    ASSERT_THROW(CustomValue(fixedInt, "pig"), runtime_error);
-    ASSERT_THROW(CustomValue(fixedInt, "c"), runtime_error);
-    ASSERT_THROW(CustomValue(fixedInt, ""), runtime_error);
-    ASSERT_NO_THROW(CustomValue(fixedInt, "."));
-    CustomValue empty(fixedInt, ".");
+    ASSERT_THROW(CustomValue(&fixedInt, "1,2"), runtime_error);
+    ASSERT_THROW(CustomValue(&fixedInt, "1.2"), runtime_error);
+    ASSERT_THROW(CustomValue(&fixedInt, "pig"), runtime_error);
+    ASSERT_THROW(CustomValue(&fixedInt, "c"), runtime_error);
+    ASSERT_THROW(CustomValue(&fixedInt, ""), runtime_error);
+    ASSERT_NO_THROW(CustomValue(&fixedInt, "."));
+    CustomValue empty(&fixedInt, ".");
     ASSERT_TRUE(empty.empty());
 }
 
 TEST(VcfCustomValue, varFloat) {
     CustomType varFloat("BQ", CustomType::VARIABLE_SIZE, 0, CustomType::FLOAT, "quality");
-    ASSERT_NO_THROW(CustomValue(varFloat, "1.2,3.4,5"));
-    CustomValue value(varFloat, "1.2,3.4,5");
+    ASSERT_NO_THROW(CustomValue(&varFloat, "1.2,3.4,5"));
+    CustomValue value(&varFloat, "1.2,3.4,5");
     const double* resultInt = 0;
     ASSERT_TRUE((resultInt = value.get<double>(0))); ASSERT_EQ(1.2, *resultInt);
     ASSERT_TRUE((resultInt = value.get<double>(1))); ASSERT_EQ(3.4, *resultInt);
     ASSERT_TRUE((resultInt = value.get<double>(2))); ASSERT_EQ(5, *resultInt);
-    ASSERT_THROW(CustomValue(varFloat, "pig"), runtime_error);
-    ASSERT_THROW(CustomValue(varFloat, "c"), runtime_error);
-    ASSERT_THROW(CustomValue(varFloat, ""), runtime_error);
-    ASSERT_NO_THROW(CustomValue(varFloat, "."));
-    CustomValue empty(varFloat, ".");
+    ASSERT_THROW(CustomValue(&varFloat, "pig"), runtime_error);
+    ASSERT_THROW(CustomValue(&varFloat, "c"), runtime_error);
+    ASSERT_THROW(CustomValue(&varFloat, ""), runtime_error);
+    ASSERT_NO_THROW(CustomValue(&varFloat, "."));
+    CustomValue empty(&varFloat, ".");
     ASSERT_TRUE(empty.empty());
 }
 
 TEST(VcfCustomValue, fixedStringFromString) {
     CustomType fixedString("CF", CustomType::FIXED_SIZE, 2, CustomType::STRING, "cat food");
-    ASSERT_NO_THROW(CustomValue(fixedString, "cat,hat"));
-    CustomValue value(fixedString, "cat,hat");
+    ASSERT_NO_THROW(CustomValue(&fixedString, "cat,hat"));
+    CustomValue value(&fixedString, "cat,hat");
     const string* resultStr;
     ASSERT_TRUE((resultStr = value.get<string>(0))); ASSERT_EQ("cat", *resultStr);
     ASSERT_TRUE((resultStr = value.get<string>(1))); ASSERT_EQ("hat", *resultStr);
-    ASSERT_THROW(CustomValue(fixedString, "1,2,3"), runtime_error);
-    ASSERT_NO_THROW(CustomValue(fixedString, "."));
-    CustomValue empty(fixedString, ".");
+    ASSERT_THROW(CustomValue(&fixedString, "1,2,3"), runtime_error);
+    ASSERT_NO_THROW(CustomValue(&fixedString, "."));
+    CustomValue empty(&fixedString, ".");
     ASSERT_TRUE(empty.empty());
 }
 
 TEST(VcfCustomValue, fixedCharFromString) {
     CustomType fixedChar("CH", CustomType::FIXED_SIZE, 3, CustomType::CHAR, "chars?");
-    ASSERT_NO_THROW(CustomValue(fixedChar, "a,b,c"));
-    CustomValue value(fixedChar, "a,b,c");
+    ASSERT_NO_THROW(CustomValue(&fixedChar, "a,b,c"));
+    CustomValue value(&fixedChar, "a,b,c");
     const char* resultChar;
     ASSERT_TRUE((resultChar = value.get<char>(0))); ASSERT_EQ('a', *resultChar);
     ASSERT_TRUE((resultChar = value.get<char>(1))); ASSERT_EQ('b', *resultChar);
     ASSERT_TRUE((resultChar = value.get<char>(2))); ASSERT_EQ('c', *resultChar);
-    ASSERT_THROW(CustomValue(fixedChar, "aa"), runtime_error);
-    ASSERT_THROW(CustomValue(fixedChar, "a,bb"), runtime_error);
-    ASSERT_THROW(CustomValue(fixedChar, "a,b,cc"), runtime_error);
-    ASSERT_THROW(CustomValue(fixedChar, "1,2,3,4"), runtime_error);
-    ASSERT_NO_THROW(CustomValue(fixedChar, "."));
-    CustomValue empty(fixedChar, ".");
+    ASSERT_THROW(CustomValue(&fixedChar, "aa"), runtime_error);
+    ASSERT_THROW(CustomValue(&fixedChar, "a,bb"), runtime_error);
+    ASSERT_THROW(CustomValue(&fixedChar, "a,b,cc"), runtime_error);
+    ASSERT_THROW(CustomValue(&fixedChar, "1,2,3,4"), runtime_error);
+    ASSERT_NO_THROW(CustomValue(&fixedChar, "."));
+    CustomValue empty(&fixedChar, ".");
     ASSERT_TRUE(empty.empty());
 }
 //

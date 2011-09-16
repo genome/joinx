@@ -7,6 +7,7 @@ InputStream::InputStream(const string& name, istream& s)
     , _s(s)
     , _caching(false)
     , _cacheIter(_cache.begin())
+    , _lineNum(0)
 {
 }
 
@@ -25,7 +26,9 @@ bool InputStream::getline(string& line) {
     } 
 
     // read until we get a line that isn't blank.
-    while (std::getline(_s, line) && line.empty());
+    while (std::getline(_s, line) && line.empty())
+        ++_lineNum;
+    ++_lineNum;
 
     if (_caching && _s) {
         _cache.push_back(line);
@@ -46,4 +49,8 @@ int InputStream::peek() const {
 
 bool InputStream::eof() const {
     return _cacheIter == _cache.end() && _s.eof();
+}
+
+uint64_t InputStream::lineNum() const {
+    return _lineNum;
 }

@@ -102,11 +102,7 @@ namespace {
 
     Header parse(const std::string& s) {
         stringstream ss(s);
-        Header h;
-        string line;
-        while (getline(ss, line))
-            h.add(line);
-        return h;
+        return Header::fromStream(ss);
     }
 }
 

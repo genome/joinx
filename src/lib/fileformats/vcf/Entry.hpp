@@ -1,10 +1,12 @@
 #pragma once
 
+#include "CustomValue.hpp"
 #include "common/Tokenizer.hpp"
 #include "namespace.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <cstdint>
+#include <map>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -13,59 +15,24 @@ VCF_NAMESPACE_BEGIN
 
 class Header;
 
-class InfoField {
-public:
-    InfoField();
-    InfoField(const std::string& raw);
-    InfoField(const std::string& id, const std::string& val);
-
-    const std::string& id() const;
-    const std::string& value() const;
-
-    template<typename T>
-    T as() const { return boost::lexical_cast<T>(_value); }
-
-    bool operator==(const InfoField& rhs) const {
-        return _id == rhs._id && _value == rhs._value;
-    }
-
-protected:
-    std::string _id;
-    std::string _value;
-};
-
 class Entry {
 public:
-    template<typename T>
-    static void parseLine2(const T& reader, const std::string& s, Entry& e) {
-        e.parse2(reader, s);
-    }
+    typedef std::map<std::string, CustomValue> CustomValueMap;
+    const static double MISSING_QUALITY;
 
-    static void parseLine(const std::string& s, Entry& e) {
-        return e.parse(s);
+    static void parseLine(const Header* hdr, std::string& s, Entry& e) {
+        e.parse(hdr, s);
     }
 
     Entry();
-    explicit Entry(const std::string& s);
-    Entry(
-        // non variable length fields
-        const std::string& chrom,
-        uint64_t pos,
-        const std::string& ref,
-        double qual
-        );
+    explicit Entry(const Header* h);
+    Entry(const Header* h, const std::string& s);
 
-    void addIdentifier(const std::string& id);
-    void addAlt(const std::string& alt);
-    void addFailedFilter(const std::string& filter);
-    void addInfoField(const std::string& key, const std::string& value);
-    void addFormatDescription(const std::string& desc);
-    void addPerSampleData(const std::string& key, const std::string& value);
+    static Entry merge(const Header* mergedHeader, const Entry* begin, const Entry* end);
 
-    void parse(const std::string& s);
-    void parse2(const Header& h, const std::string& s);
+    const Header& header() const;
+    void parse(const Header* h, const std::string& s);
 
-    const std::string& line() const { return _line; }
     const std::string& chrom() const { return _chrom; }
     uint64_t pos() const { return _pos; }
     const std::vector<std::string>& identifiers() const { return _identifiers; }
@@ -73,9 +40,14 @@ public:
     const std::vector<std::string>& alt() const { return _alt; }
     double qual() const { return _qual; }
     const std::vector<std::string>& failedFilters() const { return _failedFilters; }
-    const std::vector<InfoField>& info() const { return _info; }
+    const CustomValueMap& info() const { return _info; }
     const std::vector<std::string>& formatDescription() const { return _formatDescription; }
-    const std::vector< std::vector<std::string> >& perSampleData() const { return _perSampleData; }
+    const std::vector< std::vector<CustomValue> >& genotypeData() const { return _genotypeData; }
+    const CustomValue* info(const std::string& key) const;
+    const CustomValue* genotypeData(uint32_t sampleIdx, const std::string& key) const;
+
+    // -1 if not found
+    int32_t altIdx(const std::string& alt) const;
 
     std::string toString() const;
 
@@ -111,7 +83,7 @@ public:
     void swap(Entry& other);
 
 protected:
-    std::string _line;
+    const Header* _header;
     std::string _chrom;
     uint64_t _pos;
     std::vector<std::string> _identifiers;
@@ -119,9 +91,9 @@ protected:
     std::vector<std::string> _alt;
     double _qual;
     std::vector<std::string> _failedFilters;
-    std::vector<InfoField> _info;
+    CustomValueMap _info;
     std::vector<std::string> _formatDescription;
-    std::vector< std::vector<std::string> > _perSampleData;
+    std::vector< std::vector<CustomValue> > _genotypeData;
 };
 
 inline bool Entry::operator<(const Entry& rhs) const {
@@ -130,5 +102,4 @@ inline bool Entry::operator<(const Entry& rhs) const {
 
 VCF_NAMESPACE_END
 
-std::ostream& operator<<(std::ostream& s, const Vcf::InfoField& i);
 std::ostream& operator<<(std::ostream& s, const Vcf::Entry& e);

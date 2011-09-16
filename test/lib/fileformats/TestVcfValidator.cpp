@@ -31,6 +31,7 @@ namespace {
         "##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">\n"
         "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">\n"
         "##FORMAT=<ID=HQ,Number=2,Type=Integer,Description=\"Haplotype Quality\">\n"
+        "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNA00001\tNA00002\tNA00003\n"
         ;
 
     Header makeHeader() {
