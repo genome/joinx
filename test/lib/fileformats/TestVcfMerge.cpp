@@ -139,3 +139,13 @@ TEST_F(TestVcfMerge, merge) {
     ASSERT_TRUE(v);
     ASSERT_EQ("Samtools,Varscan", v->toString());
 }
+
+TEST_F(TestVcfMerge, mergeWrongPos) {
+    Entry wrongPos(&_headers[2], "20\t14371\tid1\tG\tA\t29\t.\t.\t");
+    Entry e[] = { _entries[0], wrongPos };
+    ASSERT_THROW(Entry::merge(&_mergedHeader, e, e+2), runtime_error);
+
+    Entry wrongChrom(&_headers[2], "21\t14370\tid1\tG\tA\t29\t.\t.\t");
+    e[1] = wrongChrom;
+    ASSERT_THROW(Entry::merge(&_mergedHeader, e, e+2), runtime_error);
+}

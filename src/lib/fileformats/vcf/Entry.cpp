@@ -221,6 +221,14 @@ Entry Entry::merge(const Header* mergedHeader, const Entry* begin, const Entry* 
     posDesc << out._chrom << ":" << out._pos;
 
     for (auto entry = begin; entry != end; ++entry) {
+        if (entry->_pos != out._pos || entry->_chrom != out._chrom) {
+            throw runtime_error(
+                str(format("Attempted to merge VCF entries with different positions: %1% and %2%")
+                    %begin->toString() %entry->toString()));
+        }
+
+
+
         // Merge identifiers
         const vector<string>& idents = entry->identifiers();
         copy(idents.begin(), idents.end(), inserter(identifiers, identifiers.begin()));

@@ -133,3 +133,21 @@ TEST_F(TestVcfEntry, badCustomTypes) {
     ASSERT_THROW(Entry(&_header, badInfo), runtime_error);
     ASSERT_THROW(Entry(&_header, badFormat), runtime_error);
 }
+
+TEST_F(TestVcfEntry, swap) {
+    stringstream ss(vcfLines);
+    string line;
+    vector<Entry> v;
+    while (getline(ss, line))
+        v.push_back(Entry(&_header, line));
+    Entry e1 = v[0];
+    Entry e2 = v[1];
+    e1.swap(e2);
+
+    // this was a bug
+    ASSERT_EQ(&e1.header(), &v[1].header());
+    ASSERT_EQ(&e2.header(), &v[0].header());
+
+    ASSERT_EQ(e1.toString(), v[1].toString());
+    ASSERT_EQ(e2.toString(), v[0].toString());
+}

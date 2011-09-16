@@ -27,6 +27,7 @@ vector<CustomValue> GenotypeFormatter::process(
     uint32_t idx) const
 {
     vector<CustomValue> rv;
+    rv.reserve(fields.size());
     for (auto i = fields.begin(); i != fields.end(); ++i) {
         const CustomType* type = _header->formatType(*i);
         if (!type)
