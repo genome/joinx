@@ -5,7 +5,6 @@
 #include "CustomValue.hpp"
 
 #include <boost/format.hpp>
-#include <iostream>
 #include <set>
 
 using boost::format;
@@ -37,7 +36,6 @@ CustomValue Concatenate::operator()(
             if (v) {
                 auto inserted = seen.insert(v->toString());
                 if (inserted.second) {
-                    cout << "adding: " << v->toString() << "\n";
                     rv.append(*v);
                 }
             }
