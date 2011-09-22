@@ -20,6 +20,8 @@ set(SOURCES
     ReferenceSequence.cpp
     ReferenceSequence.hpp
     StreamFactory.hpp
+    StreamHandler.cpp
+    StreamHandler.hpp
     TranscriptStructure.cpp
     TranscriptStructure.hpp
     TranscriptStructureStream.cpp
@@ -35,6 +37,8 @@ set(SOURCES
     vcf/CustomValue.hpp
     vcf/Entry.cpp
     vcf/Entry.hpp
+    vcf/EntryMerger.cpp
+    vcf/EntryMerger.hpp
     vcf/GenotypeFormatter.cpp
     vcf/GenotypeFormatter.hpp
     vcf/Header.cpp
@@ -51,4 +55,4 @@ set(SOURCES
 )
 
 add_library(fileformats ${SOURCES})
-target_link_libraries(fileformats common ${Samtools_LIBRARIES})
+target_link_libraries(fileformats common ${Samtools_LIBRARIES} ${Boost_LIBRARIES})

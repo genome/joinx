@@ -5,7 +5,6 @@
 #include "fileformats/StreamFactory.hpp"
 
 #include <boost/format.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
@@ -15,29 +14,6 @@
 #include <iterator>
 #include <memory>
 #include <stdexcept>
-
-enum CompressionType {
-    NONE,
-    ZLIB,
-    GZIP,
-    BZIP2,
-    N_COMPRESSION_TYPES
-};
-
-inline CompressionType compressionTypeFromString(const std::string& s) {
-    using boost::format;
-
-    if (s.empty() || s == "n")
-        return NONE;
-    else if (s == "g")
-        return GZIP;
-    else if (s == "z")
-        return ZLIB;
-    else if (s == "b")
-        return BZIP2;
-    else
-        throw std::runtime_error(str(format("Invalid compression string '%1%'. Expected one of: n,g,z,b") %s));
-}
 
 template<typename StreamFactoryType, typename OutputFunc>
 class SortBuffer {
@@ -93,12 +69,10 @@ public:
         // data won't be flushed until filtering_stream goes out of scope
         {
             io::filtering_stream<io::output> out;
-            io::zlib_compressor zlib;
             io::gzip_compressor gzip;
             io::bzip2_compressor bzip2;
 
             switch (_compression) {
-                case ZLIB: out.push(zlib); break;
                 case GZIP: out.push(gzip); break;
                 case BZIP2: out.push(bzip2); break;
                 case NONE:
@@ -117,7 +91,6 @@ public:
         _tmpfile->stream().seekg(0);
 
         switch (_compression) {
-            case ZLIB: _in.push(_zlibDecompressor); break;
             case GZIP: _in.push(_gzipDecompressor); break;
             case BZIP2: _in.push(_bzip2Decompressor); break;
             case NONE:
@@ -175,7 +148,6 @@ protected:
 
     // for reading compressed tmp file
     boost::iostreams::filtering_stream<boost::iostreams::input> _in;
-    boost::iostreams::zlib_decompressor _zlibDecompressor;
     boost::iostreams::gzip_decompressor _gzipDecompressor;
     boost::iostreams::bzip2_decompressor _bzip2Decompressor;
     InputStream _inputStream;

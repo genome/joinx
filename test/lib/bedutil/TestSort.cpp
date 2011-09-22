@@ -101,13 +101,6 @@ TEST_F(TestSort, unstable) {
     ASSERT_EQ(_expectedStr.str(), out.out.str());
 }
 
-TEST_F(TestSort, zlib) {
-    Collector<Bed> out;
-    SortType sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false, ZLIB);
-    sorter.execute();
-    ASSERT_EQ(_expectedStr.str(), out.out.str());
-}
-
 TEST_F(TestSort, bzip2) {
     Collector<Bed> out;
     SortType sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false, BZIP2);

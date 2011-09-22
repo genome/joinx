@@ -19,7 +19,7 @@ public:
     virtual ~MergeStrategy();
 
     void setHeader(const Header* header);
-    CustomValue mergeInfo(const std::string& which, const Entry* begin, const Entry* end);
+    CustomValue mergeInfo(const std::string& which, const Entry* begin, const Entry* end) const;
 
 protected:
     const Header* _header;

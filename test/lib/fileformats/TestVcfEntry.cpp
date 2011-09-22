@@ -37,10 +37,11 @@ namespace {
 
     string vcfLines =
         "20\t14370\trs6054257\tG\tA\t29\tPASS\tAF=0.5;DB;DP=14;H2;NS=3\tGT:GQ:DP:HQ\t0|0:48:1:51,51\t1|0:48:8:51,51\t1/1:43:5:.,.\n"
-        "20\t17330\t.\tT\tA\t3\tq10\tAF=0.017;DP=11;NS=3\tGT:GQ:DP:HQ\t0|0:49:3:58,50\t0|1:3:5:65,3\t0/0:41:3\n"
+        "20\t17330\t.\tT\tA\t3\tq10\tAF=0.017;DP=11;NS=3\tGT:GQ:DP:HQ\t0|0:49:3:58,50\t0|1:3:5:65,3\t.\n"
         "20\t1110696\trs6040355\tA\tG,T\t67\tPASS\tAA=T;AF=0.333,0.667;DB;DP=10;NS=2\tGT:GQ:DP:HQ\t1|2:21:6:23,27\t2|1:2:0:18,2\t2/2:35:4\n"
         "20\t1230237\t.\tT\t.\t47\tPASS\tAA=T;DP=13;NS=3\tGT:GQ:DP:HQ\t0|0:54:7:56,60\t0|0:48:4:51,51\t0/0:61:2\n"
-        "20\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:40:3\n"
+        "20\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:3:3\n"
+        "20\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\t.\n"
         ;
 }
 
@@ -67,7 +68,7 @@ TEST_F(TestVcfEntry, parse) {
         v.push_back(e);
     }
 
-    ASSERT_EQ(5, v.size());
+    ASSERT_EQ(6, v.size());
     ASSERT_EQ("20", v[0].chrom());
     ASSERT_EQ(14370, v[0].pos());
     ASSERT_EQ("G", v[0].ref());
@@ -150,4 +151,33 @@ TEST_F(TestVcfEntry, swap) {
 
     ASSERT_EQ(e1.toString(), v[1].toString());
     ASSERT_EQ(e2.toString(), v[0].toString());
+}
+
+TEST_F(TestVcfEntry, samplesWithData) {
+    stringstream ss(vcfLines);
+    string line;
+    vector<Entry> v;
+    while (getline(ss, line))
+        v.push_back(Entry(&_header, line));
+
+    ASSERT_EQ(3, v[0].samplesWithData());
+    ASSERT_EQ(2, v[1].samplesWithData());
+    ASSERT_EQ(3, v[2].samplesWithData());
+    ASSERT_EQ(3, v[3].samplesWithData());
+    ASSERT_EQ(3, v[4].samplesWithData());
+    ASSERT_EQ(0, v[5].samplesWithData());
+}
+
+TEST_F(TestVcfEntry, removeLowDepthGenotypes) {
+    stringstream ss(vcfLines);
+    string line;
+    vector<Entry> v;
+    while (getline(ss, line))
+        v.push_back(Entry(&_header, line));
+
+    ASSERT_EQ(3, v[4].samplesWithData());
+    v[4].removeLowDepthGenotypes(2);
+    ASSERT_EQ(3, v[4].samplesWithData());
+    v[4].removeLowDepthGenotypes(4);
+    ASSERT_EQ(1, v[4].samplesWithData());
 }

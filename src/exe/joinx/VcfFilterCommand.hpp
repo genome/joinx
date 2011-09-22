@@ -5,30 +5,26 @@
 
 #include <string>
 
-class RemapCigarCommand : public CommandBase {
+class VcfFilterCommand : public CommandBase {
 public:
     using CommandBase::ptr;
 
-    RemapCigarCommand();
+    VcfFilterCommand();
     ptr create(int argc, char** argv);
 
-    std::string name() const { return "remap-cigar"; }
+    std::string name() const { return "vcf-filter"; }
     std::string description() const {
-        return "update cigar strings from remapped sam files";
+        return "filter vcf files";
     }
 
     void exec();
-
-    // our little secret... (this cmd won't show in the help)
-    bool hidden() const {
-        return true;
-    }
     
 protected:
     void parseArguments(int argc, char** argv);
 
 protected:
-    std::string _inputFile;
+    std::string _infile;
     std::string _outputFile;
+    uint32_t _minDepth;
     StreamHandler _streams;
 };

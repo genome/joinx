@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CommandBase.hpp"
-#include "StreamHandler.hpp"
+#include "fileformats/StreamHandler.hpp"
 
 #include <fstream>
 #include <string>

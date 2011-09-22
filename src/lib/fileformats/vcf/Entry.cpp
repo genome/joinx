@@ -202,6 +202,30 @@ const CustomValue* Entry::genotypeData(uint32_t sampleIdx, const string& key) co
     return &_genotypeData[sampleIdx][offset];
 }
 
+void Entry::removeLowDepthGenotypes(uint32_t lowDepth) {
+    auto i = find(_formatDescription.begin(), _formatDescription.end(), "DP");
+    if (i == _formatDescription.end())
+        return;
+    
+    uint32_t offset = distance(_formatDescription.begin(), i);
+    for (auto i = _genotypeData.begin(); i != _genotypeData.end(); ++i) {
+        if (i->empty())
+            continue;
+        const int64_t *v;
+        if ((*i)[offset].empty() || (v = (*i)[offset].get<int64_t>(0)) == NULL || *v < lowDepth)
+            i->clear();
+    }
+}
+
+uint32_t Entry::samplesWithData() const {
+    uint32_t rv = 0;
+    for (auto i = _genotypeData.begin(); i != _genotypeData.end(); ++i) {
+        if (i->size())
+            ++rv;
+    }
+    return rv;
+}
+
 Entry Entry::merge(const Header* mergedHeader, const Entry* begin, const Entry* end) {
     map<string, uint32_t> alleleMap;
     uint32_t alleleIdx = 0;

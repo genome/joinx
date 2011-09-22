@@ -29,7 +29,7 @@ void MergeStrategy::setHeader(const Header* header) {
     _header = header;
 }
 
-CustomValue MergeStrategy::mergeInfo(const string& which, const Entry* begin, const Entry* end) {
+CustomValue MergeStrategy::mergeInfo(const string& which, const Entry* begin, const Entry* end) const {
     const CustomValue* (Entry::*fetchInfo)(const string&) const = &Entry::info;
     FetchFunc fetch = bind(fetchInfo, _1, which);
     const CustomType* type = _header->infoType(which);
@@ -42,8 +42,10 @@ CustomValue MergeStrategy::mergeInfo(const string& which, const Entry* begin, co
 
     if (type->numberType() == CustomType::VARIABLE_SIZE)
         return MergeActions::Concatenate()(type, fetch, begin, end);
+    else
+        return MergeActions::Equality()(type, fetch, begin, end);
 
-    throw runtime_error(str(format("Unknown merge strategy for info field '%1%'") %which));
+//    throw runtime_error(str(format("Unknown merge strategy for info field '%1%'") %which));
 }
 
 VCF_NAMESPACE_END

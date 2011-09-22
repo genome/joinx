@@ -24,8 +24,8 @@ set(SOURCES
     SnvConcordanceCommand.hpp
     SortCommand.cpp
     SortCommand.hpp
-    StreamHandler.cpp
-    StreamHandler.hpp
+    VcfFilterCommand.cpp
+    VcfFilterCommand.hpp
     VcfMergeCommand.cpp
     VcfMergeCommand.hpp
     main.cpp

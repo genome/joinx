@@ -45,6 +45,8 @@ public:
     const std::vector< std::vector<CustomValue> >& genotypeData() const { return _genotypeData; }
     const CustomValue* info(const std::string& key) const;
     const CustomValue* genotypeData(uint32_t sampleIdx, const std::string& key) const;
+    uint32_t samplesWithData() const;
+    void removeLowDepthGenotypes(uint32_t lowDepth);
 
     // -1 if not found
     int32_t altIdx(const std::string& alt) const;

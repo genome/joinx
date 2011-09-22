@@ -48,7 +48,7 @@ void SortCommand::parseArguments(int argc, char** argv) {
         ("max-mem-lines,M", po::value<uint64_t>(&_maxInMem),
             str(format("maximum number of lines to hold in memory at once (default=%1%)") %_maxInMem).c_str())
         ("stable,s", "perform a 'stable' sort (default=false)")
-        ("compression,C", po::value<string>(&_compressionString), "type of compression to use for tmpfiles, n=none, g=gzip, z=zlib, b=bzip2. default=n")
+        ("compression,C", po::value<string>(&_compressionString), "type of compression to use for tmpfiles, n=none, g=gzip, b=bzip2. default=n")
         ;
     po::positional_options_description posOpts;
     posOpts.add("input-file", -1);
