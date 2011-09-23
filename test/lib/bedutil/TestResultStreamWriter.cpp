@@ -14,7 +14,7 @@ using namespace std;
 // TODO: use a text fixture for this and hold expected Bed objects to test for
 // equality for 1 ASSERT_EQ instead of 6.
 
-const string BEDZ = 
+const string BEDZ =
     "1\t1\t2\tA/T\t43\n"
     "1\t2\t3\tA/T\t44\n"
     "1\t3\t4\tA/T\t44\n"

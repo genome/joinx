@@ -53,7 +53,7 @@ Entry::Entry(const EntryMerger& merger)
 {
     const std::set<std::string>& idents = merger.identifiers();
     copy(idents.begin(), idents.end(), back_inserter(_identifiers));
-    
+
     const EntryMerger::AlleleMap& alleleMap = merger.alleleMap();
 
     _alt.resize(alleleMap.size());
@@ -230,7 +230,7 @@ void Entry::removeLowDepthGenotypes(uint32_t lowDepth) {
     auto i = find(_formatDescription.begin(), _formatDescription.end(), "DP");
     if (i == _formatDescription.end())
         return;
-    
+
     uint32_t offset = distance(_formatDescription.begin(), i);
     for (auto i = _genotypeData.begin(); i != _genotypeData.end(); ++i) {
         if (i->empty())

@@ -16,7 +16,7 @@ namespace {
 }
 
 void TranscriptStructure::parseLine(const string& line, TranscriptStructure& ts) {
-    
+
     Tokenizer<char> tokenizer(line, ',');
     unsigned idx = 0;
     while (idx < NUM_FIELDS && tokenizer.extract(ts._fields[idx++]));
@@ -88,5 +88,5 @@ bool TranscriptStructure::errorContains(const std::string& value) const {
 }
 
 int64_t TranscriptStructure::sequencePosition(int64_t pos, int64_t& borrowed) const {
-    return numPhaseBasesBefore() + abs(region().strandedStart() - pos); 
+    return numPhaseBasesBefore() + abs(region().strandedStart() - pos);
 }

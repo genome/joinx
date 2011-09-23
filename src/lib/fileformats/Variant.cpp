@@ -85,7 +85,7 @@ Variant::Variant(const Bed& bed)
             _allSequences.push_back(tok);
         }
     }
-            
+
     while (_allSequences.size() < 2)
         _allSequences.push_back(Sequence("-"));
 

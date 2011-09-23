@@ -87,7 +87,7 @@ void CustomValue::setString(SizeType idx, const std::string& value) {
         _values.clear();
         return;
     }
-        
+
     switch (type().type()) {
         case CustomType::INTEGER:
              set<int64_t>(value);
@@ -122,7 +122,7 @@ std::string CustomValue::getString(SizeType idx) const {
     stringstream ss;
     if (_values[idx].empty())
         return ".";
-        
+
     switch (type().type()) {
         case CustomType::INTEGER:
              ss << *get<int64_t>(idx);
@@ -162,7 +162,7 @@ void CustomValue::toStream(ostream& s) const {
 }
 
 std::string CustomValue::toString() const {
-    stringstream ss;    
+    stringstream ss;
     toStream(ss);
     return ss.str();
 }

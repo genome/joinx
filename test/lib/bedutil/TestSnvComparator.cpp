@@ -13,7 +13,7 @@
 using namespace std;
 using namespace std::placeholders;
 
-const string BEDA = 
+const string BEDA =
     "1\t2\t3\tA/T\t43\n"
     "1\t3\t4\tA/T\t44\n"
     "19\t3\t4\tA/T\t44\n"
@@ -21,7 +21,7 @@ const string BEDA =
     "X\t2\t3\tA/T\t44\n"
     "Y\t1\t2\tA/T\t44\n";
 
-const string BEDB = 
+const string BEDB =
     "1\t2\t3\tA/T\t43\n"
     "1\t3\t4\tA/T\t44\n"
     "1\t3\t4\tA/T\t44\n"

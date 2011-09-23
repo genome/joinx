@@ -38,7 +38,7 @@ Region::RelativePos Region::distance(int64_t pos) const {
     if (pos >= _start && pos <= _stop) {
         return RelativePos(RelativePos::IN, 0);
     } else if (strandedLess(pos, _strandedStart)) {
-        return RelativePos(RelativePos::BEFORE, abs(pos - _strandedStart)); 
+        return RelativePos(RelativePos::BEFORE, abs(pos - _strandedStart));
     } else if (strandedLess(_strandedStop, pos)) {
         return RelativePos(RelativePos::AFTER, abs(pos - _strandedStop));
     }

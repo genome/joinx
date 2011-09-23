@@ -30,7 +30,7 @@ public:
     void setInfo(CustomValueMap& info) const;
     void setGenotypeData(
         std::vector<std::string>& format,
-        std::vector< std::vector<CustomValue> >& genotypeData) const; 
+        std::vector< std::vector<CustomValue> >& genotypeData) const;
 
     const Header* mergedHeader() const;
 

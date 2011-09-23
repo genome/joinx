@@ -9,7 +9,7 @@ using namespace Vcf;
 
 TEST(VcfMap, parse) {
     string s = "ID=NS,Number=1,Type=Integer,Description=\"foo\"";
-    Map m(s); 
+    Map m(s);
     ASSERT_EQ(4, m.size());
     ASSERT_EQ("NS", m["ID"]);
     ASSERT_EQ("1", m["Number"]);

@@ -72,11 +72,11 @@ void RemapCigarCommand::exec() {
             // we will revisit this if something downstream turns wants it.
             if (fld.find("MD:Z:") == 0)
                 continue;
-            fields.push_back(fld); 
+            fields.push_back(fld);
         }
 
         string cigar = fields[5];
-         
+
         string contig = &line[pos+5];
         string contigCigar;
         Tokenizer<char> tokCigar(contig, '-');

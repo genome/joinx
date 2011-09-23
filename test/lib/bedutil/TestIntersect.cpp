@@ -13,13 +13,13 @@ using namespace std;
 using namespace std::placeholders;
 
 namespace {
-    const string BEDA = 
+    const string BEDA =
         "1\t2\t2\t*/CC\t30\t30\n"
         "1\t2\t2\t*/CCC\t30\t30\n"
         "1\t5\t8\tTTT/*\t30\t30\n"
         "1\t5\t8\tCCC/*\t30\t30";
 
-    const string BEDB = 
+    const string BEDB =
         "1\t2\t2\t*/CC\t30\t30\n"
         "1\t2\t2\t*/CCC\t30\t30\n"
         "1\t5\t8\tTTT/*\t30\t30\n"

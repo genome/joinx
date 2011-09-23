@@ -45,7 +45,7 @@ vector<CustomValue> GenotypeFormatter::process(
 }
 
 string GenotypeFormatter::renumberGT(const Entry* e, uint32_t idx) const {
-    const CustomValue* oldGT = e->genotypeData(idx, "GT"); 
+    const CustomValue* oldGT = e->genotypeData(idx, "GT");
     if (!oldGT)
         return ".";
 
@@ -63,7 +63,7 @@ string GenotypeFormatter::renumberGT(const Entry* e, uint32_t idx) const {
             const string& allele = e->alt()[oldIdx];
             auto iter = _alleles.find(allele);
             if (iter == _alleles.end()) {
-                throw runtime_error(str(format( 
+                throw runtime_error(str(format(
                     "Failed to find allele '%1%' while rewriting GT field") %allele));
             }
 

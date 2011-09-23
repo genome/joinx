@@ -47,7 +47,7 @@ public:
     const std::string& description() const;
 
     bool operator==(const CustomType& rhs) const {
-        return 
+        return
             _id == rhs._id &&
             _numberType == rhs._numberType &&
             _number == rhs._number &&

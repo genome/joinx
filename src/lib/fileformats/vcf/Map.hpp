@@ -26,7 +26,7 @@ public:
 
     size_type size() const;
     bool empty() const;
-    
+
     template<typename T>
     void insert(const std::string& key, const T& value);
     void remove(const std::string& key);
@@ -98,7 +98,7 @@ inline T Map::as(const std::string& key) const {
     std::stringstream ss(operator[](key));
     T rv;
     ss >> rv;
-    return rv; 
+    return rv;
 }
 
 inline bool Map::operator==(const Map& rhs) const {

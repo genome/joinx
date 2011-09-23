@@ -115,7 +115,7 @@ void SnvConcordanceCommand::setupStreams(Streams& s) const {
         s.cleanup.push_back(fs);
     } else if (_hitsFile == "-") {
         s.outHit = &cout;
-        ++coutReferences; 
+        ++coutReferences;
     }
 
     if (!_outputFile.empty() && _outputFile != "-") {
@@ -125,7 +125,7 @@ void SnvConcordanceCommand::setupStreams(Streams& s) const {
         s.cleanup.push_back(fs);
     } else {
         s.out = &cout;
-        ++coutReferences; 
+        ++coutReferences;
     }
 
     if (!_missFileA.empty() && _missFileA != "-") {
@@ -164,7 +164,7 @@ namespace {
     bool hit(const Bed& a, const Bed& b) {
         if (_s.outHit)
             *_s.outHit << a << "\t" << b << endl;
- 
+
         return _concordance.hit(a, b);
     }
 

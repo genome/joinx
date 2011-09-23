@@ -38,7 +38,7 @@ VariantAdaptor::VariantAdaptor(const Entry& entry)
 }
 
 string::size_type VariantAdaptor::commonPrefix(const string& a, const string& b) {
-    string::size_type p = 0; 
+    string::size_type p = 0;
     while (p < a.size() && p < b.size() && a[p] == b[p])
         ++p;
     return p;

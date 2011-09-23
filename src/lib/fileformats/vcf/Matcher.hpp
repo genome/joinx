@@ -27,7 +27,7 @@ namespace Conditions {
 
         bool operator()(const Entry& e) const {
             return !_cond(e);
-        } 
+        }
 
     protected:
         const Base& _cond;
@@ -46,7 +46,7 @@ namespace Conditions {
         bool operator()(const Entry& e) const {
             const T& value = _extractor(e);
             return _cmp(value, _value);
-        } 
+        }
 
     protected:
         const T& _value;
@@ -66,7 +66,7 @@ namespace Conditions {
 
         bool operator()(const Entry& e) const {
             return _op((*_a)(e), (*_b)(e));
-        } 
+        }
 
     protected:
         Op _op;

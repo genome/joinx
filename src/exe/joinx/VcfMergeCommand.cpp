@@ -61,7 +61,7 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
 }
 
 namespace {
-    
+
 }
 
 void VcfMergeCommand::exec() {

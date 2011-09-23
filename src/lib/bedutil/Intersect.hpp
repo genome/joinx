@@ -152,7 +152,7 @@ public:
             _rc.missB(ce.value);
         _cache.pop_front();
     }
-    
+
 protected:
     struct CacheEntry {
         CacheEntry(const TypeB& v) : value(v), hit(false) {}

@@ -17,8 +17,8 @@ TEST(Sequence, reverseComplement) {
 TEST(Sequence, fromStream) {
     stringstream ss("ACGTACGTACGT");
     string expected = "ACGTA";
-    Sequence seq(ss, 5); 
-    ASSERT_EQ(expected, seq.data()); 
+    Sequence seq(ss, 5);
+    ASSERT_EQ(expected, seq.data());
 }
 
 TEST(Sequence, null) {

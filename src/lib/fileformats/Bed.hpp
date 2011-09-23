@@ -32,7 +32,7 @@ public:
     const std::string& toString() const;
 
     int cmp(const Bed& rhs) const;
-    bool operator<(const Bed& rhs) const; 
+    bool operator<(const Bed& rhs) const;
     bool operator==(const Bed& rhs) const;
 
     bool type() const {

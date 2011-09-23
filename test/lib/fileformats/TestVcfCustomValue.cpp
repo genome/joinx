@@ -48,7 +48,7 @@ TEST(VcfCustomValue, variableSizedListFloat) {
     // set the first element
     value.set<double>(0, 0.123);
     value.set<double>(1, 0.456);
-    
+
     const double* result = 0;
     ASSERT_TRUE((result = value.get<double>(0)));
     ASSERT_EQ(0.123, *result);
@@ -67,7 +67,7 @@ TEST(VcfCustomValue, variableSizedListFloat) {
     ASSERT_EQ(0.789, *result);
 
     // we just extended the size of the array to 1000, yet we have only defined
-    // values at indices 0, 1, and 999 
+    // values at indices 0, 1, and 999
     // make sure trying to get an unset value returns null
     ASSERT_FALSE(value.get<double>(2));
     ASSERT_FALSE(value.get<double>(998));
@@ -85,7 +85,7 @@ TEST(VcfCustomValue, fixedSizedListString) {
     // set the first element
     value.set<string>(0, "tasty");
     value.set<string>(1, "burritos");
-    
+
     const string* result = 0;
     ASSERT_TRUE((result = value.get<string>(0)));
     ASSERT_EQ("tasty", *result);

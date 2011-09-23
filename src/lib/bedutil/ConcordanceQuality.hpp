@@ -14,10 +14,10 @@ class ConcordanceQuality : public IResultCollector {
 public:
     ConcordanceQuality() : _hitCount(0), _missCount(0) {}
 
-    unsigned qualityLevel(const Bed& snv); 
+    unsigned qualityLevel(const Bed& snv);
 
     void hitA(const Bed& snv) {
-        using namespace std; 
+        using namespace std;
         unsigned qual = qualityLevel(snv);
         ++_hitCount;
         pair<MapType::iterator,bool> p = _hitMap.insert(make_pair(qual, 1));
@@ -33,7 +33,7 @@ public:
     }
 
     void missA(const Bed& snv) {
-        using namespace std; 
+        using namespace std;
         ++_missCount;
         unsigned qual = qualityLevel(snv);
 

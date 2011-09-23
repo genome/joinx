@@ -91,7 +91,7 @@ namespace {
 
 
 void GenerateCommand::exec() {
-    srand(_seed);    
+    srand(_seed);
     if (_format != "bed") {
         cerr << "No support for format '" << _format << "'\n";
     }

@@ -142,7 +142,7 @@ void SnvConcordanceByQualityCommand::exec() {
         rmux.add(resultStreamWriter.get());
     SnvComparator snvi(fa, fb, rmux);
     snvi.exec();
-    qc.report(cout); 
+    qc.report(cout);
 
     cout << "Total Snvs: " << fa.valueCount() << endl;
     cout << "      Hits: " << qc.hits() << endl;

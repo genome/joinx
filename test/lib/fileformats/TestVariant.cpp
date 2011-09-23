@@ -46,7 +46,7 @@ TEST(Variant, partialAlleleMatch) {
     invalid["C"] = "AGTKRWD";
     invalid["G"] = "ACTMYWH";
     invalid["T"] = "ACGMRSV";
-    
+
     typedef map<string,string>::const_iterator IterType;
     for (IterType iter = valid.begin(); iter != valid.end(); ++iter) {
         stringstream strA;
@@ -69,7 +69,7 @@ TEST(Variant, partialAlleleMatch) {
             stringstream strB;
             strB << iter->first << "/" << iter->second[i];
             Variant b(mkBed(strB.str(), "0", "0"));
-            ASSERT_FALSE(a.allelePartialMatch(b)) 
+            ASSERT_FALSE(a.allelePartialMatch(b))
                 << strA.str() << " vs " << strB.str() << " expected no match";
             ASSERT_FALSE(b.allelePartialMatch(a));
         }

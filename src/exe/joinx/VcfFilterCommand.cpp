@@ -58,7 +58,7 @@ void VcfFilterCommand::parseArguments(int argc, char** argv) {
 }
 
 namespace {
-    
+
 }
 
 void VcfFilterCommand::exec() {

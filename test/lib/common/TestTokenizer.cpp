@@ -132,7 +132,7 @@ TEST(TestTokenizer, eof) {
         ASSERT_FALSE(t.eof());
         ASSERT_TRUE(t.extract(n));
     }
-    
+
     ASSERT_TRUE(t.eof());
     ASSERT_FALSE(t.extract(n));
     ASSERT_TRUE(t.eof());
@@ -143,18 +143,18 @@ TEST(TestTokenizer, remaining) {
     Tokenizer<char> t(input, ',');
     string s;
 
-    t.remaining(s); 
+    t.remaining(s);
     ASSERT_EQ("1,2,3", s);
     ASSERT_TRUE(t.extract(s));
-    t.remaining(s); 
+    t.remaining(s);
     ASSERT_EQ("2,3", s);
     ASSERT_TRUE(t.extract(s));
-    t.remaining(s); 
+    t.remaining(s);
     ASSERT_EQ("3", s);
     ASSERT_TRUE(t.extract(s));
-    t.remaining(s); 
+    t.remaining(s);
     ASSERT_EQ("", s);
-    t.remaining(s); 
+    t.remaining(s);
     ASSERT_EQ("", s);
 }
 
@@ -164,11 +164,11 @@ TEST(TestTokenizer, floats) {
     Tokenizer<char> t(input, ' ');
     ASSERT_TRUE(t.extract(d));
     ASSERT_NEAR(0.66, d, 1e-7);
-    ASSERT_TRUE(t.extract(d)); 
+    ASSERT_TRUE(t.extract(d));
     ASSERT_NEAR(1e-8, d, 1e-7);
-    ASSERT_TRUE(t.extract(d)); 
+    ASSERT_TRUE(t.extract(d));
     ASSERT_NEAR(44, d, 1e-7);
-    ASSERT_TRUE(t.extract(d)); 
+    ASSERT_TRUE(t.extract(d));
     ASSERT_NEAR(1.2e6, d, 1e-7);
 
     ASSERT_TRUE(t.eof());

@@ -27,7 +27,7 @@ TEST(NoReferenceFilter, exclude) {
         Bed snv;
         string line = baseLine + *valid + string("/C");
         Bed::parseLine(line, snv, 1);
-        ASSERT_FALSE(filter.exclude(snv)) << 
+        ASSERT_FALSE(filter.exclude(snv)) <<
             "don't exclude '" << *valid << "' as reference value (" << line << ")";
         ++valid;
     }

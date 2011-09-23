@@ -75,7 +75,7 @@ namespace {
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tMA00001\tMA00002\tMA00003\n"
         ;
 
-    string expectedMerged = 
+    string expectedMerged =
         "##fileformat=VCFv4.1\n"
         "##fileDate=20090805\n"
         "##source=myImputationProgramV3.1\n"
@@ -123,7 +123,7 @@ TEST(VcfHeader, merge) {
     Header h1copy = parse(headerText);
     Header conflict = parse(conflictingHeader);
     Header different = parse(differentData);
-    
+
     // throw due to sample conflict
     ASSERT_THROW(h1.merge(h1copy), runtime_error);
     ASSERT_THROW(h1.merge(conflict), runtime_error);

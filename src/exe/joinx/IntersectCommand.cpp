@@ -151,8 +151,8 @@ void IntersectCommand::exec() {
     ostream* outHit = _streams.get<ostream>(_outputFile);
     IntersectionOutput::Formatter outputFormatter(_formatString, *outHit);
 
-    // determine how many extra (beyond the 3 mandatory) fields we need to 
-    // parse. this depends on how many we are expected to print, let's ask 
+    // determine how many extra (beyond the 3 mandatory) fields we need to
+    // parse. this depends on how many we are expected to print, let's ask
     // the outputFormatter!
     unsigned extraFieldsA = max(1u, outputFormatter.extraFields(0));
     unsigned extraFieldsB = max(1u, outputFormatter.extraFields(1));
@@ -170,7 +170,7 @@ void IntersectCommand::exec() {
 
     BedReaderType fa(parserA, *inStreamA);
     BedReaderType fb(parserB, *inStreamB);
-    
+
 
     // optional "miss" output streams
     ostream* outMissA(NULL);

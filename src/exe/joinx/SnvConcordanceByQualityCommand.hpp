@@ -23,7 +23,7 @@ public:
     }
 
     void exec();
-    
+
     std::unique_ptr<ResultStreamWriter> setupStreamWriter();
 
 protected:

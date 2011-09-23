@@ -99,7 +99,7 @@ TEST_F(TestVcfMerge, merge) {
     ASSERT_EQ(Entry::MISSING_QUALITY, merger.qual());
 
     Entry mergedEntry(merger);
-    
+
     // check the simple fields: chrom, pos, etc.
     ASSERT_EQ("20", mergedEntry.chrom());
     ASSERT_EQ(14370, mergedEntry.pos());

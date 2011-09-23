@@ -116,7 +116,7 @@ public:
 
     bool next(ValueType& v) {
         if (_stream.get() != NULL)
-            return _stream->next(v);        
+            return _stream->next(v);
 
         if (_buf.empty())
             return false;

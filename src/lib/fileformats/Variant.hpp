@@ -59,7 +59,7 @@ public:
 
     int32_t depth() const {
         return _depth;
-    }        
+    }
 
     bool valid() const;
     Type type() const;
@@ -78,7 +78,7 @@ public:
     }
 
     bool positionMatch(const Variant& rhs) const {
-        return 
+        return
             type() == rhs.type() &&
             start() == rhs.start() &&
             stop() == rhs.stop();

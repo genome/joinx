@@ -36,7 +36,7 @@ public:
     template<typename T>
     bool extract(T& value);
     void remaining(std::string& s);
-    
+
     bool advance();
     // returns # of tokens actually skipped
     uint32_t advance(uint32_t count);
@@ -112,7 +112,7 @@ template<typename DelimType>
 inline void Tokenizer<DelimType>::remaining(std::string& s) {
     s = _s.substr(_pos);
 }
- 
+
 template<typename DelimType>
 inline bool Tokenizer<DelimType>::_extract(const char** begin, const char** end) {
     *begin = _s.data() + _pos;
@@ -190,7 +190,7 @@ inline bool Tokenizer<std::string>::eof() {
         return true;
 
     if (_pos == _s.size()) {
-        if (_delim.find_first_of(_s[_s.size()-1]) != std::string::npos && 
+        if (_delim.find_first_of(_s[_s.size()-1]) != std::string::npos &&
             _eofCalls == 0)
             return false;
         else

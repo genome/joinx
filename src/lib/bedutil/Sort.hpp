@@ -45,7 +45,7 @@ public:
         BufferPtr buf(new BufferType(_streamFactory, _stable, _compression));
 
         for (unsigned idx = 0; idx < _inputs.size(); ++idx) {
-            
+
             while (!_inputs[idx]->eof()) {
                 ValueType* vptr = new ValueType;
                 if (!_inputs[idx]->next(*vptr)) {

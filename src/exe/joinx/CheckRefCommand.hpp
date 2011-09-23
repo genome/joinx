@@ -20,7 +20,7 @@ public:
     }
 
     void exec();
-    
+
 protected:
     void parseArguments(int argc, char** argv);
 

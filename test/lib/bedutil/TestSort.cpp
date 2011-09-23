@@ -55,8 +55,8 @@ protected:
 
     void SetUp() {
         for (int chrom = 1; chrom <= CHROM_MAX; ++chrom) {
-            for (int start = 1; start <= START_MAX; ++start) { 
-                for (int end = 1; end <= END_MAX; ++end) { 
+            for (int start = 1; start <= START_MAX; ++start) {
+                for (int end = 1; end <= END_MAX; ++end) {
                     Bed b(chromName(chrom), start, end);
                     _expectedBeds.push_back(b);
                     _expectedStr << b << "\n";

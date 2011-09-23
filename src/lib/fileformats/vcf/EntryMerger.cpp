@@ -109,7 +109,7 @@ void EntryMerger::setGenotypeData(
     for (const Entry* e = _begin; e != _end; ++e) {
         const vector<string>& gtFormat = e->formatDescription();
         for (auto i = gtFormat.begin(); i != gtFormat.end(); ++i) {
-            auto inserted = seen.insert(*i);    
+            auto inserted = seen.insert(*i);
             if (inserted.second)
                 format.push_back(*i);
         }

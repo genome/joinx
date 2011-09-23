@@ -23,7 +23,7 @@ public:
     bool hidden() const {
         return true;
     }
-    
+
 protected:
     void parseArguments(int argc, char** argv);
 

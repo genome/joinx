@@ -9,8 +9,8 @@ public:
     bool _exclude(const Bed& snv) {
         const std::string& refCall = snv.extraFields()[0];
         return refCall.size() != 3 ||
-            refCall[0] == '\0' || 
-            refCall[0] == 'N' || 
+            refCall[0] == '\0' ||
+            refCall[0] == 'N' ||
             refCall[0] == ' ';
     }
 };

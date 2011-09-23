@@ -14,7 +14,7 @@ namespace MergeActions {
 
     struct Base {
         typedef std::function<const CustomValue*(const Entry*)> FetchFunc;
-        virtual ~Base() {}; 
+        virtual ~Base() {};
         virtual CustomValue operator()(
             const CustomType* type,
             FetchFunc fetch,

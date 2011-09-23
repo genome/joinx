@@ -19,7 +19,7 @@ public:
     }
 
     void exec();
-    
+
 
 public:
     struct Streams {

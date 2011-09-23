@@ -73,10 +73,10 @@ void SortCommand::parseArguments(int argc, char** argv) {
 
     if (vm.count("merge-only"))
         _mergeOnly = true;
-    
+
     if (vm.count("stable"))
         _stable = true;
-    
+
 }
 
 namespace {
@@ -84,7 +84,7 @@ namespace {
     vector< shared_ptr<T> > setupStreams(const vector< shared_ptr<InputStream> >& v, X& extractor) {
         vector< shared_ptr<T> > rv;
         for (auto i = v.begin(); i != v.end(); ++i) {
-            rv.push_back(shared_ptr<T>(new T(extractor, **i))); 
+            rv.push_back(shared_ptr<T>(new T(extractor, **i)));
         }
         return rv;
     }

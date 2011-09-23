@@ -56,7 +56,7 @@ public:
         // If we are only outputing A, this can look confusing as
         // each time A intersects something in B, an identical line
         // will be printed.
-        if (_hitCount > 0 && !_outputBoth && 
+        if (_hitCount > 0 && !_outputBoth &&
             _lastA.positionMatch(va) && _lastA.alleleMatch(va))
         {
                 return true; // already hit
@@ -81,7 +81,7 @@ public:
 
         } else if (_exactPos && !va.positionMatch(vb))
             return false;
-    
+
         _lastA = va;
         _outputFormatter.output(a, b);
 

@@ -16,7 +16,7 @@ BasesFile::BasesFile(const string& path)
 Sequence BasesFile::lookup(uint64_t start, uint64_t end) {
     _file.seekg(start-1);
 
-    Sequence rv(_file, end-start+1); 
+    Sequence rv(_file, end-start+1);
     if (!_file.good())
         throw runtime_error(str(format("Failed to seek to position %1% in bases file %2%") %(start-1) %path()));
     return rv;

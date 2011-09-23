@@ -11,10 +11,10 @@ namespace {
         ValueType* pa;
         ValueType* pb;
         if (a->eof()) return false;
-        if (b->eof()) return true; 
+        if (b->eof()) return true;
         a->peek(&pa);
         b->peek(&pb);
-        return *pa < *pb;    
+        return *pa < *pb;
     }
 }
 

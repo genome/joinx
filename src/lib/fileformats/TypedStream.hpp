@@ -123,7 +123,7 @@ inline bool TypedStream<ValueType, Extractor>::exclude(const ValueType& value) c
         if ((*iter)->exclude(value))
             return true;
     }
-        
+
     return false;
 }
 

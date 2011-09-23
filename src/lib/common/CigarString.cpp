@@ -27,7 +27,7 @@ namespace {
     const char _op_to_chr[N_CIGAR_OP_TYPES+1] = "MIDNSHP=X";
     const CigarOpType _chr_to_op[256] = {
         BAD, BAD, BAD, BAD, BAD, BAD, BAD, BAD, // 0
-        BAD, BAD, BAD, BAD, BAD, BAD, BAD, BAD, // 8 
+        BAD, BAD, BAD, BAD, BAD, BAD, BAD, BAD, // 8
         BAD, BAD, BAD, BAD, BAD, BAD, BAD, BAD, // 16
         BAD, BAD, BAD, BAD, BAD, BAD, BAD, BAD, // 24
         BAD, BAD, BAD, BAD, BAD, BAD, BAD, BAD, // 32
@@ -115,7 +115,7 @@ CigarString CigarString::merge(CigarString a, CigarString b, uint32_t pos) {
             break;
         }
     }
-    
+
     return rv;
 }
 
@@ -184,7 +184,7 @@ void CigarString::pop_front(uint32_t len) {
             len -= _ops.begin()->length;
             _ops.pop_front();
         }
-    } 
+    }
 }
 
 const deque<CigarString::Op> CigarString::ops() const {
@@ -240,7 +240,7 @@ CigarString CigarString::subset(uint32_t offset, uint32_t len) const {
             case SEQ_MATCH:
             case SEQ_MISMATCH: {
                 uint32_t amt = min(_ops[i].length, len);
-                Op op = { amt, _ops[i].type }; 
+                Op op = { amt, _ops[i].type };
                 rv.push_back(op);
                 len -= amt;
                 } break;
@@ -250,7 +250,7 @@ CigarString CigarString::subset(uint32_t offset, uint32_t len) const {
             case SOFT_CLIP:
             case HARD_CLIP:
             case PADDING:
-                rv.push_back(_ops[i]); 
+                rv.push_back(_ops[i]);
                 break;
 
             default:

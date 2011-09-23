@@ -25,7 +25,7 @@ namespace {
                     rv = false;
                     break;
                 }
-            
+
             }
         } catch (...) {
             rv = false;

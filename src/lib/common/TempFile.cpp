@@ -17,7 +17,7 @@ namespace bfs = boost::filesystem;
 # define DEFAULT_TMPDIR "/tmp"
 #endif
 
-// TempFile ///////////////////////////// 
+// TempFile /////////////////////////////
 
 const char* TempFile::sys_tmpdir() {
     const char* envtmp = getenv("TMPDIR");
@@ -68,7 +68,7 @@ void TempFile::_mkstemp() {
     }
 }
 
-// TempDir ////////////////////////////// 
+// TempDir //////////////////////////////
 
 TempDir::ptr TempDir::create(Mode mode) {
     return ptr(new TempDir(mode));

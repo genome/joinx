@@ -37,7 +37,7 @@ inline unsigned alleles2bin(const char* alleles) {
             default: break;
         }
     }
-    return rv; 
+    return rv;
 }
 
 inline char alleles2iub(unsigned binAlleles) {

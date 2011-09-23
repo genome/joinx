@@ -35,7 +35,7 @@ public:
     static CigarOpType translate(char c);
     static CigarString merge(CigarString a, CigarString b, uint32_t pos);
 
-    CigarString(); 
+    CigarString();
     CigarString(const std::string& data);
 
     CigarString& operator=(const std::string& data);
