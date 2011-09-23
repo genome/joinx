@@ -9,11 +9,12 @@ VCF_NAMESPACE_BEGIN
 
 class Entry;
 class Header;
+class MergeStrategy;
 
 class Builder {
 public:
     typedef std::function<void(const Entry&)> OutputFunc;
-    Builder(Header* header, OutputFunc out);
+    Builder(const MergeStrategy& mergeStrategy, Header* header, OutputFunc out);
 
     void operator()(const Entry& e);
     void flush();
@@ -21,6 +22,7 @@ public:
     static bool canMerge(const Entry& a, const Entry& b);
 
 protected:
+    const MergeStrategy& _mergeStrategy;
     Header* _header;
     std::vector<Entry> _entries;
     OutputFunc _out;

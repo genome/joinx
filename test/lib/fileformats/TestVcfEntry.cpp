@@ -3,14 +3,16 @@
 #include "fileformats/vcf/VariantAdaptor.hpp"
 #include "fileformats/InputStream.hpp"
 
+#include <functional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 #include <gtest/gtest.h>
 
-using namespace std;
 using namespace Vcf;
+using namespace std::placeholders;
+using namespace std;
 
 namespace {
     string headerText(
@@ -39,33 +41,37 @@ namespace {
         "20\t14370\trs6054257\tG\tA\t29\tPASS\tAF=0.5;DB;DP=14;H2;NS=3\tGT:GQ:DP:HQ\t0|0:48:1:51,51\t1|0:48:8:51,51\t1/1:43:5:.,.\n"
         "20\t17330\t.\tT\tA\t3\tq10\tAF=0.017;DP=11;NS=3\tGT:GQ:DP:HQ\t0|0:49:3:58,50\t0|1:3:5:65,3\t.\n"
         "20\t1110696\trs6040355\tA\tG,T\t67\tPASS\tAA=T;AF=0.333,0.667;DB;DP=10;NS=2\tGT:GQ:DP:HQ\t1|2:21:6:23,27\t2|1:2:0:18,2\t2/2:35:4\n"
-        "20\t1230237\t.\tT\t.\t47\tPASS\tAA=T;DP=13;NS=3\tGT:GQ:DP:HQ\t0|0:54:7:56,60\t0|0:48:4:51,51\t0/0:61:2\n"
+        "20\t1230237\t.\tT\t.\t47\tPASS\tAA=T;DP=13;NS=3\tGT:GQ:DP:HQ\t0|0:54:7:56,60\t0|0:48:4:51,51\t0/0:.:2\n"
         "20\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:3:3\n"
-        "20\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\t.\n"
+        "21\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\t.\n"
         ;
 }
 
 class TestVcfEntry : public ::testing::Test {
 protected:
     void SetUp() {
-        stringstream ss(headerText);
-        InputStream in("test", ss);
+        stringstream hdrss(headerText);
+        InputStream in("test", hdrss);
         _header = Header::fromStream(in);
+
+        stringstream vcfss(vcfLines);
+        string line;
+        while (getline(vcfss, line)) {
+            Entry e(&_header, line);
+            v.push_back(e);
+        }
     }
 
     Header _header;
+    vector<Entry> v;
 };
 
 TEST_F(TestVcfEntry, parse) {
     stringstream ss(vcfLines);
-    string line;
-    vector<Entry> v;
-    while (getline(ss, line)) {
-        Entry e(&_header, line);
-        stringstream ss;
-        ss << e;
-        ASSERT_EQ(line, ss.str());
-        v.push_back(e);
+    for (auto i = v.begin(); i != v.end(); ++i) {
+        string line;
+        getline(ss, line);
+        ASSERT_EQ(line, i->toString());
     }
 
     ASSERT_EQ(6, v.size());
@@ -90,41 +96,34 @@ TEST_F(TestVcfEntry, parse) {
 }
 
 TEST_F(TestVcfEntry, variantAdaptor) {
-    stringstream ss(vcfLines);
-    string line;
-    vector<VariantAdaptor> v;
-    while (getline(ss, line)) {
-        Entry e(&_header, line);
-        stringstream ss;
-        ss << e;
-        ASSERT_EQ(line, ss.str());
-        v.push_back(VariantAdaptor(e));
-    }
+    vector<VariantAdaptor> va;
+    for (auto i = v.begin(); i != v.end(); ++i)
+        va.push_back(VariantAdaptor(*i));
 
     // 20 14370 rs6054257 G A 29 PASS NS=3;DP=14;AF=0.5;DB;H2 GT:GQ:DP:HQ 0|0:48:1:51,51 1|0:48:8:51,51 1/1:43:5:.,.
-    ASSERT_EQ("20", v[0].chrom());
-    ASSERT_EQ(14369, v[0].start());
-    ASSERT_EQ(14370, v[0].stop());
+    ASSERT_EQ("20", va[0].chrom());
+    ASSERT_EQ(14369, va[0].start());
+    ASSERT_EQ(14370, va[0].stop());
 
     // 20 17330 . T A 3 q10 NS=3;DP=11;AF=0.017 GT:GQ:DP:HQ 0|0:49:3:58,50 0|1:3:5:65,3 0/0:41:3
-    ASSERT_EQ("20", v[1].chrom());
-    ASSERT_EQ(17329, v[1].start());
-    ASSERT_EQ(17330, v[1].stop());
+    ASSERT_EQ("20", va[1].chrom());
+    ASSERT_EQ(17329, va[1].start());
+    ASSERT_EQ(17330, va[1].stop());
 
     // 20 1110696 rs6040355 A G,T 67 PASS NS=2;DP=10;AF=0.333,0.667;AA=T;DB GT:GQ:DP:HQ 1|2:21:6:23,27 2|1:2:0:18,2 2/2:35:4
-    ASSERT_EQ("20", v[2].chrom());
-    ASSERT_EQ(1110695, v[2].start());
-    ASSERT_EQ(1110696, v[2].stop());
+    ASSERT_EQ("20", va[2].chrom());
+    ASSERT_EQ(1110695, va[2].start());
+    ASSERT_EQ(1110696, va[2].stop());
 
-    // 20 1230237 . T . 47 PASS NS=3;DP=13;AA=T GT:GQ:DP:HQ 0|0:54:7:56,60 0|0:48:4:51,51 0/0:61:2"
-    ASSERT_EQ("20", v[3].chrom());
-    ASSERT_EQ(1230237, v[3].start());
-    ASSERT_EQ(1230237, v[3].stop());
+    // 20 1230237 . T . 47 PASS NS=3;DP=13;AA=T GT:GQ:DP:HQ 0|0:54:7:56,60 0|0:48:4:51,51 0/0:.:2"
+    ASSERT_EQ("20", va[3].chrom());
+    ASSERT_EQ(1230237, va[3].start());
+    ASSERT_EQ(1230237, va[3].stop());
 
     // 20 1234567 microsat1 GTC G,GTCT 50 PASS NS=3;DP=9;AA=G GT:GQ:DP 0/1:35:4 0/2:17:2 1/1:40:3
-    ASSERT_EQ("20", v[4].chrom());
-    ASSERT_EQ(1234567, v[4].start());
-    ASSERT_EQ(1234570, v[4].stop());
+    ASSERT_EQ("20", va[4].chrom());
+    ASSERT_EQ(1234567, va[4].start());
+    ASSERT_EQ(1234570, va[4].stop());
 }
 
 TEST_F(TestVcfEntry, badCustomTypes) {
@@ -136,11 +135,6 @@ TEST_F(TestVcfEntry, badCustomTypes) {
 }
 
 TEST_F(TestVcfEntry, swap) {
-    stringstream ss(vcfLines);
-    string line;
-    vector<Entry> v;
-    while (getline(ss, line))
-        v.push_back(Entry(&_header, line));
     Entry e1 = v[0];
     Entry e2 = v[1];
     e1.swap(e2);
@@ -154,12 +148,6 @@ TEST_F(TestVcfEntry, swap) {
 }
 
 TEST_F(TestVcfEntry, samplesWithData) {
-    stringstream ss(vcfLines);
-    string line;
-    vector<Entry> v;
-    while (getline(ss, line))
-        v.push_back(Entry(&_header, line));
-
     ASSERT_EQ(3, v[0].samplesWithData());
     ASSERT_EQ(2, v[1].samplesWithData());
     ASSERT_EQ(3, v[2].samplesWithData());
@@ -169,12 +157,6 @@ TEST_F(TestVcfEntry, samplesWithData) {
 }
 
 TEST_F(TestVcfEntry, removeLowDepthGenotypes) {
-    stringstream ss(vcfLines);
-    string line;
-    vector<Entry> v;
-    while (getline(ss, line))
-        v.push_back(Entry(&_header, line));
-
     ASSERT_EQ(3, v[4].samplesWithData());
     v[4].removeLowDepthGenotypes(2);
     ASSERT_EQ(3, v[4].samplesWithData());

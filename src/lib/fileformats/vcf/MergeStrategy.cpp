@@ -13,10 +13,11 @@ using namespace std;
 using namespace std::placeholders;
 
 VCF_NAMESPACE_BEGIN
+
 typedef MergeActions::Base::FetchFunc FetchFunc;
 
-MergeStrategy::MergeStrategy()
-    : _header(0)
+MergeStrategy::MergeStrategy(const Header* header)
+    : _header(header)
 {
 }
 

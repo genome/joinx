@@ -22,15 +22,17 @@ public:
 
     const std::string& chrom() const;
     uint64_t pos() const;
-    const std::set<std::string> identifiers() const;
+    const std::set<std::string>& identifiers() const;
     const std::string& ref() const;
     const AlleleMap& alleleMap() const;
-    const std::set<std::string> failedFilters() const;
+    const std::set<std::string>& failedFilters() const;
     double qual() const;
     void setInfo(CustomValueMap& info) const;
     void setGenotypeData(
         std::vector<std::string>& format,
         std::vector< std::vector<CustomValue> >& genotypeData) const; 
+
+    const Header* mergedHeader() const;
 
 protected:
     const MergeStrategy& _mergeStrategy;

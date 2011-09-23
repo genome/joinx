@@ -15,7 +15,7 @@ class Header;
 
 class MergeStrategy {
 public:
-    MergeStrategy();
+    explicit MergeStrategy(const Header* header);
     virtual ~MergeStrategy();
 
     void setHeader(const Header* header);

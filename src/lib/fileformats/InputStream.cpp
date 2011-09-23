@@ -93,9 +93,9 @@ char InputStream::peek() const {
     if (_cacheIter != _cache.end())
         return (*_cacheIter)[0];
     
-    char c;
-    boost::iostreams::read(_in, &c, 1);
-    boost::iostreams::putback(_in, c);
+    char c(0);
+    if (boost::iostreams::read(_in, &c, 1))
+        boost::iostreams::putback(_in, c);
     return c;
 }
 

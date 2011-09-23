@@ -1,9 +1,11 @@
 #include "fileformats/vcf/EntryMerger.hpp"
+#include "fileformats/vcf/MergeStrategy.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 
 #include <gtest/gtest.h>
 #include <cassert>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -80,15 +82,24 @@ public:
             _entries.push_back(e);
         }
 
-
+        _defaultMs.reset(new MergeStrategy(&_mergedHeader));
     }
     Header _mergedHeader;
     vector<Entry> _entries;
     vector<Header> _headers;
+    unique_ptr<MergeStrategy> _defaultMs;
 };
 
 TEST_F(TestVcfMerge, merge) {
-    Entry mergedEntry = Entry::merge(&_mergedHeader, &_entries[0], &_entries[_entries.size()]);
+    EntryMerger merger(*_defaultMs, &_mergedHeader, &*_entries.begin(), &*_entries.end());
+    ASSERT_EQ("20", merger.chrom());
+    ASSERT_EQ(14370, merger.pos());
+    ASSERT_EQ(3, merger.identifiers().size());
+    ASSERT_EQ("G", merger.ref());
+    ASSERT_EQ(Entry::MISSING_QUALITY, merger.qual());
+
+    Entry mergedEntry(merger);
+    
     // check the simple fields: chrom, pos, etc.
     ASSERT_EQ("20", mergedEntry.chrom());
     ASSERT_EQ(14370, mergedEntry.pos());
@@ -142,11 +153,12 @@ TEST_F(TestVcfMerge, merge) {
 }
 
 TEST_F(TestVcfMerge, mergeWrongPos) {
+    EntryMerger merger(*_defaultMs, &_mergedHeader, &*_entries.begin(), &*_entries.end());
     Entry wrongPos(&_headers[2], "20\t14371\tid1\tG\tA\t29\t.\t.\t");
     Entry e[] = { _entries[0], wrongPos };
-    ASSERT_THROW(Entry::merge(&_mergedHeader, e, e+2), runtime_error);
+    ASSERT_THROW(EntryMerger(*_defaultMs, &_mergedHeader, e, e+2), runtime_error);
 
     Entry wrongChrom(&_headers[2], "21\t14370\tid1\tG\tA\t29\t.\t.\t");
     e[1] = wrongChrom;
-    ASSERT_THROW(Entry::merge(&_mergedHeader, e, e+2), runtime_error);
+    ASSERT_THROW(EntryMerger(*_defaultMs, &_mergedHeader, e, e+2), runtime_error);
 }

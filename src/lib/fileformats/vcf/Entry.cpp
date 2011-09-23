@@ -1,4 +1,5 @@
 #include "Entry.hpp"
+#include "EntryMerger.hpp"
 #include "CustomValue.hpp"
 #include "GenotypeFormatter.hpp"
 #include "Header.hpp"
@@ -41,6 +42,29 @@ Entry::Entry(const Header* h, const string& s)
     : _header(h)
 {
     parse(h, s);
+}
+
+Entry::Entry(const EntryMerger& merger)
+    : _header(merger.mergedHeader())
+    , _chrom(merger.chrom())
+    , _pos(merger.pos())
+    , _ref(merger.ref())
+    , _qual(merger.qual())
+{
+    const std::set<std::string>& idents = merger.identifiers();
+    copy(idents.begin(), idents.end(), back_inserter(_identifiers));
+    
+    const EntryMerger::AlleleMap& alleleMap = merger.alleleMap();
+
+    _alt.resize(alleleMap.size());
+    for (auto i = alleleMap.begin(); i != alleleMap.end(); ++i)
+        _alt[i->second] = i->first;
+
+    const std::set<std::string>& filts = merger.failedFilters();
+    copy(filts.begin(), filts.end(), back_inserter(_failedFilters));
+
+    merger.setInfo(_info);
+    merger.setGenotypeData(_formatDescription, _genotypeData);
 }
 
 const Header& Entry::header() const {
@@ -226,108 +250,6 @@ uint32_t Entry::samplesWithData() const {
     return rv;
 }
 
-Entry Entry::merge(const Header* mergedHeader, const Entry* begin, const Entry* end) {
-    map<string, uint32_t> alleleMap;
-    uint32_t alleleIdx = 0;
-    set<string> identifiers;
-    set<string> infoFields;
-    set<string> failedFilters;
-    vector<string> formatFields; // need to retain order of these
-    set<string> sampleNames;
-    Entry out(mergedHeader);
-    out._chrom = begin->_chrom;
-    out._pos = begin->_pos;
-    out._qual = MISSING_QUALITY; // not sure how to merge qual values yet
-    out._ref = begin->_ref;
-    out._genotypeData.resize(mergedHeader->sampleNames().size());
-
-    stringstream posDesc;
-    posDesc << out._chrom << ":" << out._pos;
-
-    for (auto entry = begin; entry != end; ++entry) {
-        if (entry->_pos != out._pos || entry->_chrom != out._chrom) {
-            throw runtime_error(
-                str(format("Attempted to merge VCF entries with different positions: %1% and %2%")
-                    %begin->toString() %entry->toString()));
-        }
-
-
-
-        // Merge identifiers
-        const vector<string>& idents = entry->identifiers();
-        copy(idents.begin(), idents.end(), inserter(identifiers, identifiers.begin()));
-
-        // Merge alleles
-        const vector<string>& alleles = entry->alt();
-        for (auto alt = alleles.begin(); alt != alleles.end(); ++alt) {
-            auto inserted = alleleMap.insert(make_pair(*alt, alleleIdx));
-            if (inserted.second) {
-                ++alleleIdx;
-                out._alt.push_back(*alt);
-            }
-        }
-
-        // Merge filters
-        const vector<string>& filters = entry->failedFilters();
-        copy(filters.begin(), filters.end(), inserter(failedFilters, failedFilters.begin()));
-
-
-        // Build set of all info fields present, validating as we go
-        const CustomValueMap& info = entry->info();
-        for (auto i = info.begin(); i != info.end(); ++i) {
-            infoFields.insert(i->first);
-            if (!mergedHeader->infoType(i->first)) {
-                throw runtime_error(str(format("Invalid info field '%1%' while merging vcf entries at %2%") %i->first %posDesc.str()));
-            }
-        }
-
-        // Build set of all format fields present, validating as we go
-        const vector<string>& fmt = entry->formatDescription();
-        for (auto i = fmt.begin(); i != fmt.end(); ++i) {
-            if (find(formatFields.begin(), formatFields.end(), *i) == formatFields.end())
-                formatFields.push_back(*i);
-            if (!mergedHeader->formatType(*i)) {
-                throw runtime_error(str(format("Invalid format field '%1%' while merging vcf entries at %2%") %*i %posDesc.str()));
-            }
-        }
-
-        const vector<string>& samples = entry->header().sampleNames();
-        for (auto i = samples.begin(); i != samples.end(); ++i) {
-            auto inserted = sampleNames.insert(*i);
-            if (!inserted.second)
-                throw runtime_error(str(format("Duplicate sample name '%1%' at %2%") %*i %posDesc.str()));
-        }
-    }
-
-    // set identifiers in output
-    copy(identifiers.begin(), identifiers.end(), back_inserter(out._identifiers));
-    out._formatDescription.swap(formatFields);
-
-    GenotypeFormatter genotypeFormatter(mergedHeader, alleleMap);
-    // now that we know all the format fields, output per-sample data
-    const vector<string>& gtFormat = out._formatDescription; // for convenience
-    for (auto entry = begin; entry != end; ++entry) {
-        const vector< vector<CustomValue> >& samples = entry->genotypeData();
-        for (uint32_t sampleIdx = 0; sampleIdx < samples.size(); ++sampleIdx) {
-            if (samples[sampleIdx].empty())
-                continue;
-            const string& sampleName = entry->header().sampleNames()[sampleIdx];
-            uint32_t mergedIdx = mergedHeader->sampleIndex(sampleName);
-            out._genotypeData[mergedIdx] = genotypeFormatter.process(gtFormat, entry, sampleIdx);
-        }
-    }
-
-    // TODO: pass this in, rather than constructing default
-    MergeStrategy ms;
-    ms.setHeader(mergedHeader);
-    for (auto i = infoFields.begin(); i != infoFields.end(); ++i) {
-        CustomValue v = ms.mergeInfo(*i, begin, end);
-        out._info.insert(make_pair(*i, v));
-    }
-
-    return out;
-}
-
 VCF_NAMESPACE_END
 
 ostream& operator<<(ostream& s, const Vcf::Entry& e) {
@@ -366,7 +288,10 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
             for (auto j = i->begin(); j != i->end(); ++j) {
                 if (j != i->begin())
                     s << ':';
-                j->toStream(s);
+                if (j->empty())
+                    s << '.';
+                else
+                    j->toStream(s);
             }
         } else
             s << ".";

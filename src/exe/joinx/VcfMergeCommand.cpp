@@ -7,6 +7,7 @@
 #include "fileformats/vcf/Builder.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
+#include "fileformats/vcf/MergeStrategy.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
@@ -90,7 +91,8 @@ void VcfMergeCommand::exec() {
         mergedHeader.merge(*i);
 
     WriterType writer(*out);
-    Vcf::Builder builder(&mergedHeader, writer);
+    Vcf::MergeStrategy mergeStrategy(&mergedHeader);
+    Vcf::Builder builder(mergeStrategy, &mergedHeader, writer);
     *out << mergedHeader;
     MergeSorted<Vcf::Entry, ReaderPtr, Vcf::Builder> merger(readers, builder);
     merger.execute();

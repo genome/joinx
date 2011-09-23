@@ -13,6 +13,7 @@
 
 VCF_NAMESPACE_BEGIN
 
+class EntryMerger;
 class Header;
 
 class Entry {
@@ -26,15 +27,14 @@ public:
 
     Entry();
     explicit Entry(const Header* h);
+    Entry(const EntryMerger& merger);
     Entry(const Header* h, const std::string& s);
-
-    static Entry merge(const Header* mergedHeader, const Entry* begin, const Entry* end);
 
     const Header& header() const;
     void parse(const Header* h, const std::string& s);
 
     const std::string& chrom() const { return _chrom; }
-    uint64_t pos() const { return _pos; }
+    const uint64_t& pos() const { return _pos; }
     const std::vector<std::string>& identifiers() const { return _identifiers; }
     const std::string& ref() const { return _ref; }
     const std::vector<std::string>& alt() const { return _alt; }

@@ -1,10 +1,12 @@
 #include "Builder.hpp"
 #include "Entry.hpp"
+#include "EntryMerger.hpp"
 
 VCF_NAMESPACE_BEGIN
 
-Builder::Builder(Header* header, OutputFunc out)
-    : _header(header)
+Builder::Builder(const MergeStrategy& mergeStrategy, Header* header, OutputFunc out)
+    : _mergeStrategy(mergeStrategy)
+    , _header(header)
     , _out(out)
 {
 }
@@ -21,8 +23,8 @@ void Builder::operator()(const Entry& e) {
 }
 
 void Builder::flush() {
-    Entry e = Entry::merge(_header, &*_entries.begin(), &*_entries.end());
-    _out(e);
+    EntryMerger merger(_mergeStrategy, _header, &*_entries.begin(), &*_entries.end());
+    _out(Entry(merger));
     _entries.clear();
 }
 

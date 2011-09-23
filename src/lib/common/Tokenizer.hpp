@@ -70,6 +70,7 @@ protected:
     }
 
     bool _extract(std::string& value);
+    bool _extract(const char** begin, const char** end);
     bool _extract(int8_t&  value) { return _extractSigned(value); }
     bool _extract(int16_t& value) { return _extractSigned(value); }
     bool _extract(int32_t& value) { return _extractSigned(value); }
@@ -112,6 +113,14 @@ inline void Tokenizer<DelimType>::remaining(std::string& s) {
     s = _s.substr(_pos);
 }
  
+template<typename DelimType>
+inline bool Tokenizer<DelimType>::_extract(const char** begin, const char** end) {
+    *begin = _s.data() + _pos;
+    *end = _s.data()+_end;
+    advance();
+    return true;
+}
+
 template<typename DelimType>
 inline bool Tokenizer<DelimType>::_extract(std::string& value) {
 

@@ -71,7 +71,7 @@ uint64_t EntryMerger::pos() const {
     return _begin->pos();
 }
 
-const set<string> EntryMerger::identifiers() const {
+const set<string>& EntryMerger::identifiers() const {
     return _identifiers;
 }
 
@@ -83,7 +83,7 @@ const EntryMerger::AlleleMap& EntryMerger::alleleMap() const {
     return _alleleMap;
 }
 
-const set<string> EntryMerger::failedFilters() const {
+const set<string>& EntryMerger::failedFilters() const {
     return _filters;
 }
 
@@ -103,19 +103,32 @@ void EntryMerger::setGenotypeData(
         std::vector<std::string>& format,
         std::vector< std::vector<CustomValue> >& genotypeData) const
 {
+    genotypeData.resize(_mergedHeader->sampleNames().size());
     GenotypeFormatter genotypeFormatter(_mergedHeader, _alleleMap);
     set<string> seen;
     for (const Entry* e = _begin; e != _end; ++e) {
         const vector<string>& gtFormat = e->formatDescription();
+        for (auto i = gtFormat.begin(); i != gtFormat.end(); ++i) {
+            auto inserted = seen.insert(*i);    
+            if (inserted.second)
+                format.push_back(*i);
+        }
+    }
+
+    for (const Entry* e = _begin; e != _end; ++e) {
         const vector< vector<CustomValue> >& samples = e->genotypeData();
         for (uint32_t sampleIdx = 0; sampleIdx < samples.size(); ++sampleIdx) {
             if (samples[sampleIdx].empty())
                 continue;
             const string& sampleName = e->header().sampleNames()[sampleIdx];
             uint32_t mergedIdx = _mergedHeader->sampleIndex(sampleName);
-            genotypeData[mergedIdx] = genotypeFormatter.process(gtFormat, e, sampleIdx);
+            genotypeData[mergedIdx] = genotypeFormatter.process(format, e, sampleIdx);
         }
     }
+}
+
+const Header* EntryMerger::mergedHeader() const {
+    return _mergedHeader;
 }
 
 VCF_NAMESPACE_END

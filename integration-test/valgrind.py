@@ -27,6 +27,7 @@ class Valgrind:
         if self.have_valgrind():
             cmd[:0] = [
                 "valgrind",
+                "--error-exitcode=1",
                 "--leak-check=full",
                 "--log-file=%s" %self.vglog_file,
             ]
