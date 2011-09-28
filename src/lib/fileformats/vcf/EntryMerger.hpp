@@ -39,6 +39,7 @@ protected:
     const Header* _mergedHeader;
     const Entry* _begin;
     const Entry* _end;
+    double _qual;
     std::set<std::string> _identifiers;
     AlleleMap _alleleMap;
     std::set<std::string> _filters;

@@ -21,7 +21,13 @@ EntryMerger::EntryMerger(const MergeStrategy& mergeStrategy, const Header* merge
     , _end(end)
 {
     uint32_t alleleIdx = 0;
+    uint32_t qualCount(0);
     for (const Entry* e = begin; e != end; ++e) {
+        if (e->qual() != Entry::MISSING_QUALITY) {
+            ++qualCount;
+            _qual = e->qual();
+        }
+
         if (e > begin &&
             (e->chrom() != begin->chrom() || e->pos() != begin->pos() || e->ref() != begin->ref())) {
             throw runtime_error(
@@ -61,6 +67,10 @@ EntryMerger::EntryMerger(const MergeStrategy& mergeStrategy, const Header* merge
             }
         }
     }
+
+    // If there was only a single qual value, we will use it. Otherwise, it's not clear how to merge them
+    if (qualCount > 1)
+        _qual = Entry::MISSING_QUALITY;
 }
 
 const string& EntryMerger::chrom() const {
@@ -89,7 +99,7 @@ const set<string>& EntryMerger::failedFilters() const {
 
 double EntryMerger::qual() const {
     // TODO: figure out if we want to do some kind of actual merging here
-    return Entry::MISSING_QUALITY;
+    return _qual;
 }
 
 void EntryMerger::setInfo(CustomValueMap& info) const {

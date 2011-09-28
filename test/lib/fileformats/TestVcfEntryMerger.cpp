@@ -57,12 +57,12 @@ namespace {
 
     string entryText[] = {
         "20\t14370\tid1\tG\tA\t29\tPASS\tVC=Samtools\tGT:GQ:DP:HQ\t0|1:48:1:51,51\t1|0:48:8:51,51",
-        "20\t14370\tid1;id2\tG\tC\t31\tPASS\tVC=Samtools\tGT:GQ:DP:HQ\t0|1:48:1:51,51\t1/1:43:5:.,.",
+        "20\t14370\tid1;id2\tG\tC\t.\tPASS\tVC=Samtools\tGT:GQ:DP:HQ\t0|1:48:1:51,51\t1/1:43:5:.,.",
         "20\t14370\tid3\tG\tC\t31\tPASS\tVC=Varscan,Samtools\tGT:GQ:DP:HQ\t.\t1/0:44:6:50,40"
     };
 }
 
-class TestVcfMerge : public ::testing::Test {
+class TestVcfEntryMerger : public ::testing::Test {
 public:
     void SetUp() {
         unsigned nHeaders = sizeof(headerText)/sizeof(headerText[0]);
@@ -90,7 +90,7 @@ public:
     unique_ptr<MergeStrategy> _defaultMs;
 };
 
-TEST_F(TestVcfMerge, merge) {
+TEST_F(TestVcfEntryMerger, merge) {
     EntryMerger merger(*_defaultMs, &_mergedHeader, &*_entries.begin(), &*_entries.end());
     ASSERT_EQ("20", merger.chrom());
     ASSERT_EQ(14370, merger.pos());
@@ -114,6 +114,7 @@ TEST_F(TestVcfMerge, merge) {
     ASSERT_EQ("G", mergedEntry.ref());
 
     // for now, we are assigning combined quality scores of '.' to merged entries
+    // unless there is only 1 present
     ASSERT_EQ(Entry::MISSING_QUALITY, mergedEntry.qual());
 
     // check that genotype allele references were updated
@@ -152,7 +153,7 @@ TEST_F(TestVcfMerge, merge) {
     ASSERT_EQ("Samtools,Varscan", v->toString());
 }
 
-TEST_F(TestVcfMerge, mergeWrongPos) {
+TEST_F(TestVcfEntryMerger, mergeWrongPos) {
     EntryMerger merger(*_defaultMs, &_mergedHeader, &*_entries.begin(), &*_entries.end());
     Entry wrongPos(&_headers[2], "20\t14371\tid1\tG\tA\t29\t.\t.\t");
     Entry e[] = { _entries[0], wrongPos };
@@ -161,4 +162,11 @@ TEST_F(TestVcfMerge, mergeWrongPos) {
     Entry wrongChrom(&_headers[2], "21\t14370\tid1\tG\tA\t29\t.\t.\t");
     e[1] = wrongChrom;
     ASSERT_THROW(EntryMerger(*_defaultMs, &_mergedHeader, e, e+2), runtime_error);
+}
+
+// Test merging when only 1 entry has a valid quality. The score should be preserved
+TEST_F(TestVcfEntryMerger, singleQual) {
+    EntryMerger merger(*_defaultMs, &_mergedHeader, &*_entries.begin(), &*(_entries.begin()+1));
+    Entry e(merger);
+    ASSERT_EQ(29, e.qual());
 }
