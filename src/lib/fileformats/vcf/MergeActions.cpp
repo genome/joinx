@@ -30,13 +30,17 @@ CustomValue Concatenate::operator()(
 
         rv = *v;
         set<string> seen;
-        seen.insert(v->toString());
+        for (CustomValue::SizeType i = 0; i < v->size(); ++i)
+            seen.insert(v->getString(i));
         for (const Entry* e = begin; e != end; ++e) {
             const CustomValue *v = fetch(e);
             if (v) {
-                auto inserted = seen.insert(v->toString());
-                if (inserted.second) {
-                    rv.append(*v);
+                for (CustomValue::SizeType i = 0; i < v->size(); ++i) {
+                    string s = v->getString(i);
+                    auto inserted = seen.insert(s);
+                    if (inserted.second) {
+                        rv.append(CustomValue(&v->type(), s));
+                    }
                 }
             }
         }

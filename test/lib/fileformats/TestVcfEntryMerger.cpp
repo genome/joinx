@@ -58,7 +58,7 @@ namespace {
     string entryText[] = {
         "20\t14370\tid1\tG\tA\t29\tPASS\tVC=Samtools\tGT:GQ:DP:HQ\t0|1:48:1:51,51\t1|0:48:8:51,51",
         "20\t14370\tid1;id2\tG\tC\t31\tPASS\tVC=Samtools\tGT:GQ:DP:HQ\t0|1:48:1:51,51\t1/1:43:5:.,.",
-        "20\t14370\tid3\tG\tC\t31\tPASS\tVC=Varscan\tGT:GQ:DP:HQ\t.\t1/0:44:6:50,40"
+        "20\t14370\tid3\tG\tC\t31\tPASS\tVC=Varscan,Samtools\tGT:GQ:DP:HQ\t.\t1/0:44:6:50,40"
     };
 }
 

@@ -148,7 +148,7 @@ TEST(VcfHeader, merge) {
         }
     }
     ASSERT_EQ(1, dateCount);
-    char dateStr[32];
+    char dateStr[32] = {0};
     time_t now = time(NULL);
     strftime(dateStr, sizeof(now), "%Y%m%d", localtime(&now));
     ASSERT_EQ(dateStr, date);

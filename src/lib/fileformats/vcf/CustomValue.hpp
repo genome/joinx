@@ -36,6 +36,7 @@ public:
     std::string getString(SizeType idx) const;
     void toStream(std::ostream& s) const;
     std::string toString() const;
+    std::string toString(SizeType idx) const;
 
     void append(const CustomValue& other);
 
