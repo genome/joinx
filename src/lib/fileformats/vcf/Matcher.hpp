@@ -33,6 +33,7 @@ namespace Conditions {
         const Base& _cond;
     };
 
+
     template<typename T, typename Compare>
     class RelOp : public Base {
     public:
@@ -61,8 +62,7 @@ namespace Conditions {
             : _op(op)
             , _a(a)
             , _b(b)
-        {
-        }
+        {}
 
         bool operator()(const Entry& e) const {
             return _op((*_a)(e), (*_b)(e));

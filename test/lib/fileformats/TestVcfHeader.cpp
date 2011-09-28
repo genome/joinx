@@ -56,7 +56,7 @@ namespace {
 
     string differentData =
         "##fileformat=VCFv4.1\n"
-        "##fileDate=20090805\n"
+        "##fileDate=20090806\n"
         "##source=myImputationProgramV3.1\n"
         "##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta\n"
         "##contig=<ID=20,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species=\"Homo sapiens\",taxonomy=x>\n"
@@ -137,6 +137,21 @@ TEST(VcfHeader, merge) {
     ASSERT_EQ("MA00001", h1.sampleNames()[3]);
     ASSERT_EQ("MA00002", h1.sampleNames()[4]);
     ASSERT_EQ("MA00003", h1.sampleNames()[5]);
+
+    unsigned dateCount(0);
+    const vector<Header::RawLine>& metaInfo = h1.metaInfoLines();
+    string date;
+    for (auto i = metaInfo.begin(); i != metaInfo.end(); ++i) {
+        if (i->first == "fileDate") {
+            ++dateCount;
+            date = i->second;
+        }
+    }
+    ASSERT_EQ(1, dateCount);
+    char dateStr[32];
+    time_t now = time(NULL);
+    strftime(dateStr, sizeof(now), "%Y%m%d", localtime(&now));
+    ASSERT_EQ(dateStr, date);
 }
 
 TEST(VcfHeader, sampleIndex) {

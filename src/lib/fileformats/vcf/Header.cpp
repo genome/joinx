@@ -3,6 +3,7 @@
 #include "common/Tokenizer.hpp"
 
 #include <boost/format.hpp>
+#include <ctime>
 #include <functional>
 #include <iostream>
 #include <sstream>
@@ -22,6 +23,23 @@ namespace {
     };
 
     unsigned nExpectedHeaderFields = sizeof(expectedHeaderFields)/sizeof(expectedHeaderFields[0]);
+
+    struct MetaInfoFilter {
+        MetaInfoFilter() {}
+        explicit MetaInfoFilter(const string& s) {
+            targets.push_back(s);
+        }
+
+        void addTarget(const string& s) {
+            targets.push_back(s);
+        }
+
+        bool operator()(const Header::RawLine& value) const {
+            return find(targets.begin(), targets.end(), value.first) != targets.end();
+        }
+
+        vector<string> targets;
+    };
 }
 
 Header::Header() : _headerSeen(false) {}
@@ -107,6 +125,14 @@ void Header::merge(const Header& other) {
             throw runtime_error(str(format("Error merging VCF headers, sample name conflict: %1%") %*iter));
         _sampleNames.push_back(*iter);
     }
+
+    MetaInfoFilter filter("fileDate");
+    auto newEnd = remove_if(_metaInfoLines.begin(), _metaInfoLines.end(), filter);
+    _metaInfoLines.erase(newEnd, _metaInfoLines.end());
+    char dateStr[32];
+    time_t now = time(NULL);
+    strftime(dateStr, sizeof(now), "%Y%m%d", localtime(&now));
+    add(str(format("##fileDate=%1%") %dateStr));
 }
 
 uint32_t Header::sampleIndex(const std::string& sampleName) const {
