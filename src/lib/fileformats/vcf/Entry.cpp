@@ -54,17 +54,11 @@ Entry::Entry(const EntryMerger& merger)
     const std::set<std::string>& idents = merger.identifiers();
     copy(idents.begin(), idents.end(), back_inserter(_identifiers));
 
-    const EntryMerger::AlleleMap& alleleMap = merger.alleleMap();
-
-    _alt.resize(alleleMap.size());
-    for (auto i = alleleMap.begin(); i != alleleMap.end(); ++i)
-        _alt[i->second] = i->first;
-
     const std::set<std::string>& filts = merger.failedFilters();
     copy(filts.begin(), filts.end(), back_inserter(_failedFilters));
 
     merger.setInfo(_info);
-    merger.setGenotypeData(_formatDescription, _genotypeData);
+    merger.setAltAndGenotypeData(_alt, _formatDescription, _genotypeData);
 }
 
 const Header& Entry::header() const {

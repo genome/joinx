@@ -15,20 +15,22 @@ class Header;
 
 class GenotypeFormatter {
 public:
-    typedef std::map<std::string, uint32_t> AlleleMap;
-
-    GenotypeFormatter(const Header* header, const AlleleMap& alleles);
+    GenotypeFormatter(const Header* header, const std::vector<std::string>& alleles);
 
     std::vector<CustomValue> process(
         const std::vector<std::string>& fields,
         const Entry* e,
-        uint32_t idx) const;
+        uint32_t sampleIdx,
+        const std::vector<size_t>& alleleIndices) const;
 
-    std::string renumberGT(const Entry* e, uint32_t idx) const;
+    std::string renumberGT(
+        const Entry* e,
+        uint32_t sampleIdx,
+        const std::vector<size_t>& alleleIndices) const;
 
 protected:
     const Header* _header;
-    const AlleleMap& _alleles;
+    const std::vector<std::string>& _alleles;
 };
 
 VCF_NAMESPACE_END

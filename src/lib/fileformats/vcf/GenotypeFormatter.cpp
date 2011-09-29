@@ -15,7 +15,7 @@ using namespace std;
 
 VCF_NAMESPACE_BEGIN
 
-GenotypeFormatter::GenotypeFormatter(const Header* header, const AlleleMap& alleles)
+GenotypeFormatter::GenotypeFormatter(const Header* header, const vector<string>& alleles)
     : _header(header)
     , _alleles(alleles)
 {
@@ -24,7 +24,8 @@ GenotypeFormatter::GenotypeFormatter(const Header* header, const AlleleMap& alle
 vector<CustomValue> GenotypeFormatter::process(
     const std::vector<std::string>& fields,
     const Entry* e,
-    uint32_t idx) const
+    uint32_t sampleIdx,
+    const std::vector<size_t>& alleleIndices) const
 {
     vector<CustomValue> rv;
     rv.reserve(fields.size());
@@ -34,9 +35,9 @@ vector<CustomValue> GenotypeFormatter::process(
             throw runtime_error(str(format("Unknown genotype field name '%1%'") %*i));
 
         if (*i == "GT") {
-            rv.push_back(CustomValue(type, renumberGT(e, idx)));
+            rv.push_back(CustomValue(type, renumberGT(e, sampleIdx, alleleIndices)));
         } else {
-            const CustomValue* v = e->genotypeData(idx, *i);
+            const CustomValue* v = e->genotypeData(sampleIdx, *i);
             rv.push_back(v ? *v : CustomValue());
         }
     }
@@ -44,8 +45,12 @@ vector<CustomValue> GenotypeFormatter::process(
     return rv;
 }
 
-string GenotypeFormatter::renumberGT(const Entry* e, uint32_t idx) const {
-    const CustomValue* oldGT = e->genotypeData(idx, "GT");
+string GenotypeFormatter::renumberGT(
+        const Entry* e,
+        uint32_t sampleIdx,
+        const std::vector<size_t>& alleleIndices) const
+{
+    const CustomValue* oldGT = e->genotypeData(sampleIdx, "GT");
     if (!oldGT)
         return ".";
 
@@ -59,15 +64,10 @@ string GenotypeFormatter::renumberGT(const Entry* e, uint32_t idx) const {
     while (t.extract(oldIdx)) {
         if (oldIdx > 0) {
             --oldIdx;
-            assert(oldIdx < e->alt().size());
-            const string& allele = e->alt()[oldIdx];
-            auto iter = _alleles.find(allele);
-            if (iter == _alleles.end()) {
-                throw runtime_error(str(format(
-                    "Failed to find allele '%1%' while rewriting GT field") %allele));
-            }
-
-            newGT << iter->second+1;
+            assert(oldIdx < alleleIndices.size());
+            uint32_t newIdx = alleleIndices[oldIdx];
+            assert(newIdx < _alleles.size());
+            newGT << newIdx+1;
         } else {
             newGT << 0;
         }

@@ -28,23 +28,31 @@ public:
     const std::set<std::string>& failedFilters() const;
     double qual() const;
     void setInfo(CustomValueMap& info) const;
-    void setGenotypeData(
+    void setAltAndGenotypeData(
+        std::vector<std::string>& alt,
         std::vector<std::string>& format,
         std::vector< std::vector<CustomValue> >& genotypeData) const;
 
     const Header* mergedHeader() const;
 
 protected:
+    size_t addAllele(const std::string& allele);
+
+protected:
     const MergeStrategy& _mergeStrategy;
     const Header* _mergedHeader;
     const Entry* _begin;
     const Entry* _end;
+    const Entry* _refEntry;
     double _qual;
     std::set<std::string> _identifiers;
     AlleleMap _alleleMap;
+    AlleleMap::size_type _alleleIdx;
     std::set<std::string> _filters;
     std::set<std::string> _sampleNames;
     std::set<std::string> _info;
+
+    std::vector< std::vector< size_t > > _newGTIndices;
 };
 
 VCF_NAMESPACE_END

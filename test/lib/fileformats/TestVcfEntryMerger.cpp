@@ -55,10 +55,15 @@ namespace {
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNA5\tNA6\n"
     };
 
-    string entryText[] = {
+    string snvEntryText[] = {
         "20\t14370\tid1\tG\tA\t29\tPASS\tVC=Samtools\tGT:GQ:DP:HQ\t0|1:48:1:51,51\t1|0:48:8:51,51",
         "20\t14370\tid1;id2\tG\tC\t.\tPASS\tVC=Samtools\tGT:GQ:DP:HQ\t0|1:48:1:51,51\t1/1:43:5:.,.",
         "20\t14370\tid3\tG\tC\t31\tPASS\tVC=Varscan,Samtools\tGT:GQ:DP:HQ\t.\t1/0:44:6:50,40"
+    };
+
+    string indelEntryText[] = {
+        "20\t14370\tid1\tTAC\tT\t29\tPASS\tVC=Samtools\tGT:GQ:DP:HQ\t0|1:48:1:51,51\t1|0:48:8:51,51",
+        "20\t14370\tid1\tTACAG\tT\t.\tPASS\tVC=Samtools"
     };
 }
 
@@ -71,27 +76,38 @@ public:
             _headers.push_back(Header::fromStream(ss));
         }
 
-        unsigned nEntries = sizeof(entryText)/sizeof(entryText[0]);
-        assert(nEntries <= nHeaders);
+        unsigned nSnvs = sizeof(snvEntryText)/sizeof(snvEntryText[0]);
+        assert(nSnvs <= nHeaders);
 
-       for (unsigned i = 0; i < nEntries; ++i) {
+       for (unsigned i = 0; i < nSnvs; ++i) {
             _mergedHeader.merge(_headers[i]);
-            stringstream ss(entryText[i]);
+            stringstream ss(snvEntryText[i]);
             Entry e;
-            Entry::parseLine(&_headers[i], entryText[i], e);
-            _entries.push_back(e);
+            Entry::parseLine(&_headers[i], snvEntryText[i], e);
+            _snvs.push_back(e);
+        }
+
+        unsigned nIndels = sizeof(indelEntryText)/sizeof(indelEntryText[0]);
+        assert(nIndels <= nHeaders);
+
+       for (unsigned i = 0; i < nIndels; ++i) {
+            stringstream ss(indelEntryText[i]);
+            Entry e;
+            Entry::parseLine(&_headers[i], indelEntryText[i], e);
+            _indels.push_back(e);
         }
 
         _defaultMs.reset(new MergeStrategy(&_mergedHeader));
     }
     Header _mergedHeader;
-    vector<Entry> _entries;
+    vector<Entry> _snvs;
+    vector<Entry> _indels;
     vector<Header> _headers;
     unique_ptr<MergeStrategy> _defaultMs;
 };
 
 TEST_F(TestVcfEntryMerger, merge) {
-    EntryMerger merger(*_defaultMs, &_mergedHeader, &*_entries.begin(), &*_entries.end());
+    EntryMerger merger(*_defaultMs, &_mergedHeader, &*_snvs.begin(), &*_snvs.end());
     ASSERT_EQ("20", merger.chrom());
     ASSERT_EQ(14370, merger.pos());
     ASSERT_EQ(3, merger.identifiers().size());
@@ -154,9 +170,9 @@ TEST_F(TestVcfEntryMerger, merge) {
 }
 
 TEST_F(TestVcfEntryMerger, mergeWrongPos) {
-    EntryMerger merger(*_defaultMs, &_mergedHeader, &*_entries.begin(), &*_entries.end());
+    EntryMerger merger(*_defaultMs, &_mergedHeader, &*_snvs.begin(), &*_snvs.end());
     Entry wrongPos(&_headers[2], "20\t14371\tid1\tG\tA\t29\t.\t.\t");
-    Entry e[] = { _entries[0], wrongPos };
+    Entry e[] = { _snvs[0], wrongPos };
     ASSERT_THROW(EntryMerger(*_defaultMs, &_mergedHeader, e, e+2), runtime_error);
 
     Entry wrongChrom(&_headers[2], "21\t14370\tid1\tG\tA\t29\t.\t.\t");
@@ -166,7 +182,15 @@ TEST_F(TestVcfEntryMerger, mergeWrongPos) {
 
 // Test merging when only 1 entry has a valid quality. The score should be preserved
 TEST_F(TestVcfEntryMerger, singleQual) {
-    EntryMerger merger(*_defaultMs, &_mergedHeader, &*_entries.begin(), &*(_entries.begin()+1));
+    EntryMerger merger(*_defaultMs, &_mergedHeader, &*_snvs.begin(), &*(_snvs.begin()+1));
     Entry e(merger);
     ASSERT_EQ(29, e.qual());
+}
+
+TEST_F(TestVcfEntryMerger, mergeAlleles) {
+    EntryMerger merger(*_defaultMs, &_mergedHeader, &*_indels.begin(), &*_indels.end());
+    Entry e(merger);
+    ASSERT_EQ(2, e.alt().size());
+    ASSERT_EQ("TAG", e.alt()[0]);
+    ASSERT_EQ("T", e.alt()[1]);
 }

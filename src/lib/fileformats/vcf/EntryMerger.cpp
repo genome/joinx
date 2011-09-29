@@ -14,25 +14,49 @@ using namespace std;
 
 VCF_NAMESPACE_BEGIN
 
+namespace {
+    bool referenceSizeLessThan(const Entry& a, const Entry& b) {
+        return a.ref().size() < b.ref().size();
+    }
+}
+
+size_t EntryMerger::addAllele(const string& allele) {
+    auto inserted = _alleleMap.insert(make_pair(allele, _alleleIdx));
+    if (inserted.second)
+        ++_alleleIdx;
+    return inserted.first->second;
+}
+
 EntryMerger::EntryMerger(const MergeStrategy& mergeStrategy, const Header* mergedHeader, const Entry* begin, const Entry* end)
     : _mergeStrategy(mergeStrategy)
     , _mergedHeader(mergedHeader)
     , _begin(begin)
     , _end(end)
+    , _refEntry(max_element(begin, end, referenceSizeLessThan))
+    , _alleleIdx(0)
 {
-    uint32_t alleleIdx = 0;
+    _newGTIndices.resize(_end - _begin);
+
     uint32_t qualCount(0);
     for (const Entry* e = begin; e != end; ++e) {
+        size_t idx = e-begin;
+
         if (e->qual() != Entry::MISSING_QUALITY) {
             ++qualCount;
             _qual = e->qual();
         }
 
-        if (e > begin &&
-            (e->chrom() != begin->chrom() || e->pos() != begin->pos() || e->ref() != begin->ref())) {
+        if (e > begin && (e->chrom() != begin->chrom() || e->pos() != begin->pos())) {
             throw runtime_error(
-                str(format("Attempted to merge VCF entries with different position or reference: %1% and %2%")
+                str(format("Attempted to merge VCF entries with different position:\n%1%\nand\n%2%")
                     %begin->toString() %e->toString()));
+        }
+
+        string::size_type refLen = e->ref().size();
+        if (e->ref().compare(0, refLen, ref(), 0, refLen) != 0) {
+            throw runtime_error(str(format(
+                "Attempted to merge VCF entries with incompatible ref entries:\n%1%\nand\n%2%")
+                %_refEntry->toString() %e->toString()));
         }
 
         // merge identifiers
@@ -42,9 +66,14 @@ EntryMerger::EntryMerger(const MergeStrategy& mergeStrategy, const Header* merge
         // Merge alleles
         const vector<string>& alleles = e->alt();
         for (auto alt = alleles.begin(); alt != alleles.end(); ++alt) {
-            auto inserted = _alleleMap.insert(make_pair(*alt, alleleIdx));
-            if (inserted.second)
-                ++alleleIdx;
+            if (refLen != ref().size()) {
+                string allele = *alt;
+                allele += ref().substr(refLen);
+                _newGTIndices[idx].push_back(addAllele(allele));
+            } else {
+                _newGTIndices[idx].push_back(addAllele(*alt));
+            }
+                
         }
 
         // Merge filters
@@ -86,11 +115,7 @@ const set<string>& EntryMerger::identifiers() const {
 }
 
 const string& EntryMerger::ref() const {
-    return _begin->ref();
-}
-
-const EntryMerger::AlleleMap& EntryMerger::alleleMap() const {
-    return _alleleMap;
+    return _refEntry->ref();
 }
 
 const set<string>& EntryMerger::failedFilters() const {
@@ -115,12 +140,17 @@ void EntryMerger::setInfo(CustomValueMap& info) const {
     }
 }
 
-void EntryMerger::setGenotypeData(
+void EntryMerger::setAltAndGenotypeData(
+        std::vector<std::string>& alt,
         std::vector<std::string>& format,
         std::vector< std::vector<CustomValue> >& genotypeData) const
 {
+    alt.resize(_alleleMap.size());
+    for (auto i = _alleleMap.begin(); i != _alleleMap.end(); ++i)
+        alt[i->second] = i->first;
+
     genotypeData.resize(_mergedHeader->sampleNames().size());
-    GenotypeFormatter genotypeFormatter(_mergedHeader, _alleleMap);
+    GenotypeFormatter genotypeFormatter(_mergedHeader, alt);
     set<string> seen;
     for (const Entry* e = _begin; e != _end; ++e) {
         const vector<string>& gtFormat = e->formatDescription();
@@ -133,12 +163,19 @@ void EntryMerger::setGenotypeData(
 
     for (const Entry* e = _begin; e != _end; ++e) {
         const vector< vector<CustomValue> >& samples = e->genotypeData();
-        for (uint32_t sampleIdx = 0; sampleIdx < samples.size(); ++sampleIdx) {
-            if (samples[sampleIdx].empty())
-                continue;
-            const string& sampleName = e->header().sampleNames()[sampleIdx];
-            uint32_t mergedIdx = _mergedHeader->sampleIndex(sampleName);
-            genotypeData[mergedIdx] = genotypeFormatter.process(format, e, sampleIdx);
+        try {
+            for (uint32_t sampleIdx = 0; sampleIdx < samples.size(); ++sampleIdx) {
+                if (samples[sampleIdx].empty())
+                    continue;
+                const string& sampleName = e->header().sampleNames()[sampleIdx];
+                uint32_t mergedIdx = _mergedHeader->sampleIndex(sampleName);
+                size_t idx = e - _begin;
+                genotypeData[mergedIdx] = genotypeFormatter.process(format, e, sampleIdx, _newGTIndices[idx]);
+            }
+        } catch (const exception& ex) {
+            throw runtime_error(str(boost::format(
+                "Failed while merging genotype data for entry:\n%1%\nError: %2%")
+                %e->toString() %ex.what()));
         }
     }
 }
