@@ -179,6 +179,40 @@ void CustomValue::append(const CustomValue& other) {
         _values[idx++] = other._values[i];
 }
 
+CustomValue& CustomValue::operator+=(const CustomValue& rhs) {
+    if (!type().numeric()) {
+        throw runtime_error(str(format(
+            "Attempted to perform addition on non-numeric custom value type %1%"
+            ) %type().id()));
+    }
+
+    if (type().numberType() == CustomType::VARIABLE_SIZE) {
+        throw runtime_error(str(format("Attempted to perform summation on variable length field %1%")
+            %type().id()));
+    }
+
+    if (type() != rhs.type()) {
+        throw runtime_error(str(format("Attempted to add dissimilar types: %1% and %2%")
+            %type().id() %rhs.type().id()));
+    }
+
+    if (type().number() != rhs.type().number()) {
+        throw runtime_error(str(format(
+            "Attempted to perform summation on %1% elements of differeng size: %2% vs %3%"
+            ) %type().id() %type().number() %rhs.type().number()));
+    }
+
+    if (type().type() == CustomType::INTEGER) {
+        add<int64_t>(rhs);
+    } else if (type().type() == CustomType::FLOAT) {
+        add<double>(rhs);
+    } else {
+        throw runtime_error(str(format("Unexpected type for CustomValue addition: %1%")
+            %CustomType::typeToString(type().type())));
+    }
+
+    return *this;
+}
 
 VCF_NAMESPACE_END
 

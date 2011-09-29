@@ -6,6 +6,7 @@
 
 #include <boost/any.hpp>
 #include <boost/lexical_cast.hpp>
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <ostream>
@@ -40,10 +41,24 @@ public:
 
     void append(const CustomValue& other);
 
+    CustomValue& operator+=(const CustomValue& rhs);
     bool operator==(const CustomValue& rhs) const;
     bool operator!=(const CustomValue& rhs) const;
 
 protected:
+    template<typename T>
+    void add(const CustomValue& rhs) {
+        T zero(0); 
+        SizeType sz = std::min(size(), rhs.size());
+        for (SizeType i = 0; i < sz; ++i) {
+            const T* a = get<T>(i);
+            const T* b = rhs.get<T>(i);
+            if (a == NULL) a = &zero;
+            if (b == NULL) b = &zero;
+            _values[i] = *a + *b;
+        }
+    }
+
     template<typename T>
     bool set(const std::string& value) {
         type().typecheck<T>();

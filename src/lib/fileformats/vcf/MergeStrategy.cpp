@@ -21,9 +21,22 @@ MergeStrategy::MergeStrategy(const Header* header)
 {
 }
 
+MergeStrategy::MergeStrategy(const Header* header, std::istream& description)
+    : _header(header)
+{
+}
+
 MergeStrategy::~MergeStrategy() {
     for (auto i = _info.begin(); i != _info.end(); ++i)
         delete i->second;
+}
+
+void MergeStrategy::setAction(const std::string& id, MergeActions::Base* action) {
+    auto inserted = _info.insert(make_pair(id, action));
+    if (!inserted.second) {
+        delete inserted.first->second;
+        inserted.first->second = action;
+    }
 }
 
 void MergeStrategy::setHeader(const Header* header) {
@@ -42,7 +55,7 @@ CustomValue MergeStrategy::mergeInfo(const string& which, const Entry* begin, co
         return (*iter->second)(type, fetch, begin, end);
 
     if (type->numberType() == CustomType::VARIABLE_SIZE)
-        return MergeActions::Concatenate()(type, fetch, begin, end);
+        return MergeActions::UniqueConcat()(type, fetch, begin, end);
     else
         return MergeActions::Equality()(type, fetch, begin, end);
 

@@ -14,7 +14,7 @@ VCF_NAMESPACE_BEGIN
 
 namespace MergeActions {
 
-CustomValue Concatenate::operator()(
+CustomValue UniqueConcat::operator()(
     const CustomType* type,
     FetchFunc fetch,
     const Entry* begin,
@@ -62,9 +62,26 @@ CustomValue Equality::operator()(
         if (rv.empty())
             rv = *v;
         else if (rv != *v) {
-            throw runtime_error(str(format("Equality condition failed! %2% vs %3%")
-                %rv.toString() %v->toString()));
+            throw runtime_error(str(format("Equality condition failed for field %1%: %2% vs %3%")
+                %type->id() %rv.toString() %v->toString()));
         }
+    }
+    return rv;
+}
+
+CustomValue Sum::operator()(
+    const CustomType* type,
+    FetchFunc fetch,
+    const Entry* begin,
+    const Entry* end
+    )
+{
+    CustomValue rv(type);
+    for (const Entry* e = begin; e != end; ++e) {
+        const CustomValue* v = fetch(begin);
+        if (!v || v->empty())
+            continue;
+        rv += *v;
     }
     return rv;
 }

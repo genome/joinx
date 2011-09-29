@@ -23,7 +23,7 @@ namespace MergeActions {
             ) = 0;
     };
 
-    struct Concatenate : public Base {
+    struct UniqueConcat : public Base {
         CustomValue operator()(
             const CustomType* type,
             FetchFunc fetch,
@@ -33,6 +33,15 @@ namespace MergeActions {
     };
 
     struct Equality : public Base {
+        CustomValue operator()(
+            const CustomType* type,
+            FetchFunc fetch,
+            const Entry* begin,
+            const Entry* end
+            );
+    };
+
+    struct Sum : public Base {
         CustomValue operator()(
             const CustomType* type,
             FetchFunc fetch,

@@ -103,9 +103,15 @@ double EntryMerger::qual() const {
 }
 
 void EntryMerger::setInfo(CustomValueMap& info) const {
-    for (auto i = _info.begin(); i != _info.end(); ++i) {
-        CustomValue v = _mergeStrategy.mergeInfo(*i, _begin, _end);
-        info.insert(make_pair(*i, v));
+    try {
+        for (auto i = _info.begin(); i != _info.end(); ++i) {
+            CustomValue v = _mergeStrategy.mergeInfo(*i, _begin, _end);
+            info.insert(make_pair(*i, v));
+        }
+    } catch (const exception& e) {
+        throw runtime_error(str(format(
+            "Error while merging INFO entries at position %1%,%2%: %3%"
+            ) %_begin->chrom() %_begin->pos() %e.what()));
     }
 }
 

@@ -59,6 +59,10 @@ public:
         return !(*this == rhs);
     }
 
+    bool numeric() const {
+        return _type == INTEGER || _type == FLOAT;
+    }
+
     template<typename T>
     void typecheck() const;
 

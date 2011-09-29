@@ -16,10 +16,13 @@ class Header;
 class MergeStrategy {
 public:
     explicit MergeStrategy(const Header* header);
+    MergeStrategy(const Header* header, std::istream& description);
     virtual ~MergeStrategy();
 
     void setHeader(const Header* header);
     CustomValue mergeInfo(const std::string& which, const Entry* begin, const Entry* end) const;
+
+    void setAction(const std::string& id, MergeActions::Base* action);
 
 protected:
     const Header* _header;

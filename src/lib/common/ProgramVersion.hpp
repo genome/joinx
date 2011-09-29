@@ -12,6 +12,9 @@ namespace {
         ss << progname << " version " << __g_prog_version;
         if (!string(__g_commit_hash).empty())
             ss << " (commit " << __g_commit_hash << ")";
+
+        if (!string(__g_build_type).empty())
+            ss << " (" << __g_build_type << ")";
         return ss.str();
     }
 }
