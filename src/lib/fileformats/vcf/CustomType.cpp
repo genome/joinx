@@ -129,6 +129,9 @@ CustomType::NumberType CustomType::stringToNumber(const std::string& s, uint32_t
     } else if (s == ".") {
         return VARIABLE_SIZE;
     } else {
+        if (!s.empty() && s[0] == '-')
+            return VARIABLE_SIZE;
+
         n = lexical_cast<uint32_t>(s);
         return FIXED_SIZE;
     }
