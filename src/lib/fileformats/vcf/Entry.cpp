@@ -89,30 +89,30 @@ void Entry::parse(const Header* h, const string& s) {
 
     Tokenizer<char> tok(s, '\t');
     if (!tok.extract(_chrom))
-        throw runtime_error("Failed to extract chromosome from vcf entry" + s);
+        throw runtime_error("Failed to extract chromosome from vcf entry: " + s);
     if (!tok.extract(_pos))
-        throw runtime_error("Failed to extract position from vcf entry" + s);
+        throw runtime_error("Failed to extract position from vcf entry: " + s);
 
     string tmp;
 
     // ids
     if (!tok.extract(tmp))
-        throw runtime_error("Failed to extract id from vcf entry" + s);
+        throw runtime_error("Failed to extract id from vcf entry: " + s);
     extractList(_identifiers, tmp);
 
     // ref alleles
     if (!tok.extract(_ref))
-        throw runtime_error("Failed to extract ref alleles from vcf entry" + s);
+        throw runtime_error("Failed to extract ref alleles from vcf entry: " + s);
 
     // alt alleles
     if (!tok.extract(tmp))
-        throw runtime_error("Failed to extract alt alleles from vcf entry" + s);
+        throw runtime_error("Failed to extract alt alleles from vcf entry: " + s);
     extractList(_alt, tmp, ',');
 
     // phred quality
     string qualstr;
     if (!tok.extract(qualstr))
-        throw runtime_error("Failed to extract quality from vcf entry" + s);
+        throw runtime_error("Failed to extract quality from vcf entry: " + s);
     if (qualstr == ".")
         _qual = MISSING_QUALITY;
     else
@@ -120,14 +120,14 @@ void Entry::parse(const Header* h, const string& s) {
 
     // failed filters
     if (!tok.extract(tmp))
-        throw runtime_error("Failed to extract filters from vcf entry" + s);
+        throw runtime_error("Failed to extract filters from vcf entry: " + s);
     extractList(_failedFilters, tmp);
     if (_failedFilters.size() == 1 && _failedFilters[0] == "PASS")
         _failedFilters.clear();
 
     // info entries
     if (!tok.extract(tmp))
-        throw runtime_error("Failed to extract info from vcf entry" + s);
+        throw runtime_error("Failed to extract info from vcf entry: " + s);
     vector<string> infoStrings;
     extractList(infoStrings, tmp);
 

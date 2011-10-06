@@ -75,7 +75,7 @@ void Builder::output(const Entry* begin, const Entry* end) const {
         for (auto i = begin; i != end; ++i) {
             auto alts = i->alt();
             for (auto alt = alts.begin(); alt != alts.end(); ++alt) {
-                origAlleles.insert(i->ref() + "," + *alt);
+                origAlleles.insert(i->ref() + ":" + *alt);
             }
         }
         for (auto i = origAlleles.begin(); i != origAlleles.end(); ++i) {
@@ -84,7 +84,7 @@ void Builder::output(const Entry* begin, const Entry* end) const {
             cout << *i;
         }
         
-        cout << " = " << merged.ref() << ",";
+        cout << " = " << merged.ref() << ":";
         auto alts = merged.alt();
         for (auto i = alts.begin(); i != alts.end(); ++i) {
             if (i != alts.begin())
