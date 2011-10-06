@@ -70,15 +70,27 @@ void Builder::output(const Entry* begin, const Entry* end) const {
 
 #ifdef DEBUG_VCF_MERGE
     if (merged.alt().size() > 1) {
-        cout << "ORIG ALLELES (" << _entries[0].chrom() << ", " << _entries[0].pos() << "): ";
+        cout << "MERGED ALLELES (" << _entries[0].chrom() << ", " << _entries[0].pos() << "): ";
         set<string> origAlleles;
         for (auto i = begin; i != end; ++i) {
-            const vector<string>& alts = i->alt();
+            auto alts = i->alt();
             for (auto alt = alts.begin(); alt != alts.end(); ++alt) {
-                origAlleles.insert(i->ref() + ":" + *alt);
+                origAlleles.insert(i->ref() + "," + *alt);
             }
         }
-        copy(origAlleles.begin(), origAlleles.end(), ostream_iterator<string>(cout, ","));
+        for (auto i = origAlleles.begin(); i != origAlleles.end(); ++i) {
+            if (i != origAlleles.begin())
+                cout << " + ";
+            cout << *i;
+        }
+        
+        cout << " = " << merged.ref() << ",";
+        auto alts = merged.alt();
+        for (auto i = alts.begin(); i != alts.end(); ++i) {
+            if (i != alts.begin())
+                cout << ",";
+            cout << *i;
+        }
         cout << "\n";
     }
 #endif // DEBUG_VCF_MERGE
