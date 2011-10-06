@@ -70,7 +70,7 @@ void Builder::output(const Entry* begin, const Entry* end) const {
 
 #ifdef DEBUG_VCF_MERGE
     if (merged.alt().size() > 1) {
-        cout << "MERGED ALLELES (" << _entries[0].chrom() << ", " << _entries[0].pos() << "): ";
+        cerr << "MERGED ALLELES (" << _entries[0].chrom() << ", " << _entries[0].pos() << "): ";
         set<string> origAlleles;
         for (auto i = begin; i != end; ++i) {
             auto alts = i->alt();
@@ -80,18 +80,18 @@ void Builder::output(const Entry* begin, const Entry* end) const {
         }
         for (auto i = origAlleles.begin(); i != origAlleles.end(); ++i) {
             if (i != origAlleles.begin())
-                cout << " + ";
-            cout << *i;
+                cerr << " + ";
+            cerr << *i;
         }
         
-        cout << " = " << merged.ref() << ":";
+        cerr << " = " << merged.ref() << ":";
         auto alts = merged.alt();
         for (auto i = alts.begin(); i != alts.end(); ++i) {
             if (i != alts.begin())
-                cout << ",";
-            cout << *i;
+                cerr << ",";
+            cerr << *i;
         }
-        cout << "\n";
+        cerr << "\n";
     }
 #endif // DEBUG_VCF_MERGE
 }
