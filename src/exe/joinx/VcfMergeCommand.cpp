@@ -37,6 +37,7 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
         ("help,h", "this message")
         ("input-file,i", po::value< vector<string> >(&_filenames), "input file(s) (empty or - means stdin, which is the default)")
         ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
+        ("merge-strategy-file,M", po::value<string>(&_mergeStrategyFile), "merge strategy file for info fields (see man page for format")
         ;
     po::positional_options_description posOpts;
     posOpts.add("input-file", -1);
@@ -92,6 +93,11 @@ void VcfMergeCommand::exec() {
 
     WriterType writer(*out);
     Vcf::MergeStrategy mergeStrategy(&mergedHeader);
+    if (!_mergeStrategyFile.empty()) {
+        InputStream::ptr msFile(_streams.wrap<istream, InputStream>(_mergeStrategyFile));
+        mergeStrategy.parse(*msFile);
+    }
+
     Vcf::Builder builder(mergeStrategy, &mergedHeader, writer);
     *out << mergedHeader;
     MergeSorted<Vcf::Entry, ReaderPtr, Vcf::Builder> merger(readers, builder);

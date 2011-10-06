@@ -45,8 +45,8 @@ set(SOURCES
     vcf/Header.hpp
     vcf/Map.cpp
     vcf/Map.hpp
-    vcf/MergeActions.cpp
-    vcf/MergeActions.hpp
+    vcf/ValueMergers.cpp
+    vcf/ValueMergers.hpp
     vcf/MergeStrategy.cpp
     vcf/MergeStrategy.hpp
     vcf/VariantAdaptor.cpp

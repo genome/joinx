@@ -1,4 +1,4 @@
-#include "fileformats/vcf/MergeActions.hpp"
+#include "fileformats/vcf/ValueMergers.hpp"
 #include "fileformats/vcf/CustomValue.hpp"
 
 #include <cstdint>
@@ -11,6 +11,6 @@
 using namespace std;
 using namespace Vcf;
 
-TEST(TestVcfMergeActions, sum) {
+TEST(TestVcfValueMergers, sum) {
     CustomType type("DP", CustomType::FIXED_SIZE, 1, CustomType::INTEGER, "depth");
 }
