@@ -48,6 +48,11 @@ public:
     uint32_t samplesWithData() const;
     void removeLowDepthGenotypes(uint32_t lowDepth);
 
+    void setPositions();
+    int64_t start() const;
+    int64_t stop() const;
+    int64_t length() const { return stop() - start(); }
+
     // -1 if not found
     int32_t altIdx(const std::string& alt) const;
 
@@ -84,6 +89,7 @@ public:
 
     void swap(Entry& other);
 
+
 protected:
     const Header* _header;
     std::string _chrom;
@@ -96,6 +102,9 @@ protected:
     CustomValueMap _info;
     std::vector<std::string> _formatDescription;
     std::vector< std::vector<CustomValue> > _genotypeData;
+
+    int64_t _start;
+    int64_t _stop;
 };
 
 inline bool Entry::operator<(const Entry& rhs) const {

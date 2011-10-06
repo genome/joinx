@@ -96,4 +96,5 @@ void VcfMergeCommand::exec() {
     *out << mergedHeader;
     MergeSorted<Vcf::Entry, ReaderPtr, Vcf::Builder> merger(readers, builder);
     merger.execute();
+    builder.flush();
 }

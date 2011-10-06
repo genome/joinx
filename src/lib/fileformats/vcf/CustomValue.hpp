@@ -48,14 +48,14 @@ public:
 protected:
     template<typename T>
     void add(const CustomValue& rhs) {
-        T zero(0); 
-        SizeType sz = std::min(size(), rhs.size());
-        for (SizeType i = 0; i < sz; ++i) {
+        ensureCapacity(rhs.size());
+        for (SizeType i = 0; i < type().number(); ++i) {
+            T val(0);
             const T* a = get<T>(i);
             const T* b = rhs.get<T>(i);
-            if (a == NULL) a = &zero;
-            if (b == NULL) b = &zero;
-            _values[i] = *a + *b;
+            if (a != NULL) val += *a;
+            if (b != NULL) val += *b;
+            _values[i] = val;
         }
     }
 

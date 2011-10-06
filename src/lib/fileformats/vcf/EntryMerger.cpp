@@ -131,7 +131,8 @@ void EntryMerger::setInfo(CustomValueMap& info) const {
     try {
         for (auto i = _info.begin(); i != _info.end(); ++i) {
             CustomValue v = _mergeStrategy.mergeInfo(*i, _begin, _end);
-            info.insert(make_pair(*i, v));
+            if (!v.empty())
+                info.insert(make_pair(*i, v));
         }
     } catch (const exception& e) {
         throw runtime_error(str(format(
@@ -145,10 +146,12 @@ void EntryMerger::setAltAndGenotypeData(
         std::vector<std::string>& format,
         std::vector< std::vector<CustomValue> >& genotypeData) const
 {
+    // set alt alleles
     alt.resize(_alleleMap.size());
     for (auto i = _alleleMap.begin(); i != _alleleMap.end(); ++i)
         alt[i->second] = i->first;
 
+    // build list of all format fields
     genotypeData.resize(_mergedHeader->sampleNames().size());
     GenotypeFormatter genotypeFormatter(_mergedHeader, alt);
     set<string> seen;
@@ -156,8 +159,15 @@ void EntryMerger::setAltAndGenotypeData(
         const vector<string>& gtFormat = e->formatDescription();
         for (auto i = gtFormat.begin(); i != gtFormat.end(); ++i) {
             auto inserted = seen.insert(*i);
-            if (inserted.second)
-                format.push_back(*i);
+            if (inserted.second) {
+                // GT field must always come first as per VCF4.1 spec
+                if (*i == "GT" && !format.empty()) {
+                    format.push_back(format[0]);
+                    format[0] = *i;
+                } else {
+                    format.push_back(*i);
+                }
+            }
         }
     }
 

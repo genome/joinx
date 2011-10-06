@@ -49,6 +49,15 @@ namespace MergeActions {
             const Entry* end
             );
     };
+
+    struct Ignore : public Base {
+        CustomValue operator()(
+            const CustomType* type,
+            FetchFunc fetch,
+            const Entry* begin,
+            const Entry* end
+            );
+    };
 }
 
 VCF_NAMESPACE_END

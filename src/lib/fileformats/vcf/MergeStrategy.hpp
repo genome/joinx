@@ -27,6 +27,7 @@ public:
 protected:
     const Header* _header;
     std::map<std::string, MergeActions::Base*> _info;
+    MergeActions::Base* _default;
 };
 
 VCF_NAMESPACE_END

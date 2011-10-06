@@ -113,10 +113,6 @@ namespace {
                 throw runtime_error(str(format("Multiple file formats detected (%1%), abort.") %(*iter)->name()));
         }
 
-        if (type == VCF && inputStreams.size() > 1) {
-            throw runtime_error("VCF only supports sorting one file at a time for now, sorry.");
-        }
-
         return type;
     }
 }
@@ -151,6 +147,9 @@ void SortCommand::exec() {
         typedef OutputWriter<Vcf::Entry> WriterType;
         WriterType writer(*out);
         Vcf::Header hdr = Vcf::Header::fromStream(*inputStreams[0]);
+        for (auto i = inputStreams.begin()+1; i != inputStreams.end(); ++i) {
+            hdr.merge(Vcf::Header::fromStream(**i));
+        }
         VcfExtractor ve = bind(&Vcf::Entry::parseLine, &hdr, _1, _2);
         *out << hdr;
         VcfReaderFactory vrf(ve);

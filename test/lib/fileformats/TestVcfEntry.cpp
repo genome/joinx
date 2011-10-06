@@ -44,6 +44,7 @@ namespace {
         "20\t1230237\t.\tT\t.\t47\tPASS\tAA=T;DP=13;NS=3\tGT:GQ:DP:HQ\t0|0:54:7:56,60\t0|0:48:4:51,51\t0/0:.:2\n"
         "20\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:3:3\n"
         "21\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\t.\n"
+        "22\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\t.\t.\n"
         ;
 }
 
@@ -74,9 +75,11 @@ TEST_F(TestVcfEntry, parse) {
         ASSERT_EQ(line, i->toString());
     }
 
-    ASSERT_EQ(6, v.size());
+    ASSERT_EQ(7, v.size());
     ASSERT_EQ("20", v[0].chrom());
     ASSERT_EQ(14370, v[0].pos());
+    ASSERT_EQ(14369, v[0].start());
+    ASSERT_EQ(14370, v[0].stop());
     ASSERT_EQ("G", v[0].ref());
     ASSERT_EQ(1, v[0].alt().size());
     ASSERT_EQ("A", v[0].alt()[0]);
@@ -87,8 +90,6 @@ TEST_F(TestVcfEntry, parse) {
     ASSERT_EQ("3", info["NS"].getString(0));
     ASSERT_EQ("14", info["DP"].getString(0));
     ASSERT_EQ("0.5", info["AF"].getString(0));
-//    ASSERT_EQ(InfoField("DB"), v[0].info()[3]);
-//    ASSERT_EQ(InfoField("H2"), v[0].info()[4]);
 
     ASSERT_EQ(2, v[2].alt().size());
     ASSERT_EQ("G", v[2].alt()[0]);

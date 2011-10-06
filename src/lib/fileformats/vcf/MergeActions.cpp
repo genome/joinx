@@ -78,12 +78,22 @@ CustomValue Sum::operator()(
 {
     CustomValue rv(type);
     for (const Entry* e = begin; e != end; ++e) {
-        const CustomValue* v = fetch(begin);
+        const CustomValue* v = fetch(e);
         if (!v || v->empty())
             continue;
         rv += *v;
     }
     return rv;
+}
+
+CustomValue Ignore::operator()(
+    const CustomType* type,
+    FetchFunc fetch,
+    const Entry* begin,
+    const Entry* end
+    )
+{
+    return CustomValue();
 }
 
 }

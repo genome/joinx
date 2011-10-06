@@ -65,6 +65,7 @@ namespace {
         "20\t14370\tid1\tTAC\tT\t29\tPASS\tVC=Samtools\tGT:GQ:DP:HQ\t0|1:48:1:51,51\t1|0:48:8:51,51",
         "20\t14370\tid1\tTACAG\tT\t.\tPASS\tVC=Samtools"
     };
+
 }
 
 class TestVcfEntryMerger : public ::testing::Test {
@@ -193,4 +194,16 @@ TEST_F(TestVcfEntryMerger, mergeAlleles) {
     ASSERT_EQ(2, e.alt().size());
     ASSERT_EQ("TAG", e.alt()[0]);
     ASSERT_EQ("T", e.alt()[1]);
+}
+
+TEST_F(TestVcfEntryMerger, GTfieldAlwaysFirst) {
+    string t1="20\t14370\tid1\tT\tG\t.\tPASS\tVC=Samtools\tDP\t1\t3";
+    string t2="20\t14370\tid1\tT\tC\t29\tPASS\tVC=Samtools\tGT:GQ:DP:HQ\t0|1:48:1:51,51\t1|0:48:8:51,51";
+    Entry entries[2];
+    Entry::parseLine(&_headers[0], t1, entries[0]);
+    Entry::parseLine(&_headers[1], t2, entries[1]);
+    EntryMerger merger(*_defaultMs, &_mergedHeader, entries, entries+2);
+    Entry merged(merger);
+    ASSERT_EQ(4, merged.formatDescription().size());
+    ASSERT_EQ("GT", merged.formatDescription()[0]);
 }

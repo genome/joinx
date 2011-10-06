@@ -2,7 +2,17 @@ cmake_minimum_required(VERSION 2.8)
 
 project(joinx)
 
-set(CMAKE_INSTALL_PREFIX "/usr")
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    message("No CMAKE_INSTALL_PREFIX specified, defaulting to /usr")
+    set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "joinx install prefix" FORCE)
+endif()
+message("Install path: ${CMAKE_INSTALL_PREFIX}")
+
+if(DEFINED JOINX_DEBUG_VCF_MERGE)
+    message("Vcf merge debugging output enabled")
+    add_definitions("-DDEBUG_VCF_MERGE")
+endif()
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/build-common/cmake")
 include(TestHelper)
 include(VersionHelper)

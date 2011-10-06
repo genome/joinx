@@ -18,17 +18,23 @@ typedef MergeActions::Base::FetchFunc FetchFunc;
 
 MergeStrategy::MergeStrategy(const Header* header)
     : _header(header)
+    , _default(0)
 {
+    _default = new MergeActions::Ignore;
+    setAction("DP", new MergeActions::Sum);
+    setAction("DP4", new MergeActions::Sum);
 }
 
 MergeStrategy::MergeStrategy(const Header* header, std::istream& description)
     : _header(header)
+    , _default(0)
 {
 }
 
 MergeStrategy::~MergeStrategy() {
     for (auto i = _info.begin(); i != _info.end(); ++i)
         delete i->second;
+    delete _default;
 }
 
 void MergeStrategy::setAction(const std::string& id, MergeActions::Base* action) {
@@ -56,10 +62,12 @@ CustomValue MergeStrategy::mergeInfo(const string& which, const Entry* begin, co
 
     if (type->numberType() == CustomType::VARIABLE_SIZE)
         return MergeActions::UniqueConcat()(type, fetch, begin, end);
+    else if (_default)
+        return (*_default)(type, fetch, begin, end);
     else
         return MergeActions::Equality()(type, fetch, begin, end);
 
-//    throw runtime_error(str(format("Unknown merge strategy for info field '%1%'") %which));
+    throw runtime_error(str(format("Unknown merge strategy for info field '%1%'") %which));
 }
 
 VCF_NAMESPACE_END
