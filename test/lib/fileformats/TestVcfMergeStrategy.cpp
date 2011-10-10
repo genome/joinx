@@ -119,13 +119,12 @@ public:
 };
 
 TEST_F(TestVcfMergeStrategy, parse) {
-    stringstream ss;
-    ss <<
+    stringstream ss(
         "DP=sum\n"
         "FET=ignore\n"
         "FOO=uniq-concat\n"
         "BAR=enforce-equal\n"
-        ;
+        );
 
     InputStream in("test", ss);
     MergeStrategy strategy(&_mergedHeader);
@@ -148,12 +147,11 @@ TEST_F(TestVcfMergeStrategy, parse) {
 }
 
 TEST_F(TestVcfMergeStrategy, parseInvalidInfoField) {
-    stringstream ss;
-    ss <<
+    stringstream ss(
         "DP=sum\n"
         "FET=ignore\n"
         "BADNAME=uniq-concat\n"
-        ;
+        );
 
     InputStream in("test", ss);
     MergeStrategy strategy(&_mergedHeader);
@@ -161,13 +159,12 @@ TEST_F(TestVcfMergeStrategy, parseInvalidInfoField) {
 }
 
 TEST_F(TestVcfMergeStrategy, parseInvalidMerger) {
-    stringstream ss;
-    ss <<
+    stringstream ss(
         "DP=sum\n"
         "FET=ignore\n"
         "FOO=uniq-concat\n"
         "BAR=something-bad\n"
-        ;
+        );
 
     InputStream in("test", ss);
     MergeStrategy strategy(&_mergedHeader);

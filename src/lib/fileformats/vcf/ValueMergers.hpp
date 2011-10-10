@@ -72,6 +72,17 @@ namespace ValueMergers {
         std::map<std::string, const Base*> _mergers;
     };
 
+    /// Value Merger which uses the value from the first entry, ignoring the rest
+    struct UseFirst : public Base {
+        CustomValue operator()(
+            const CustomType* type,
+            FetchFunc fetch,
+            const Entry* begin,
+            const Entry* end
+            ) const;
+        std::string name() const { return "first"; }
+    };
+
     /// Value Merger which will return a new variable length CustomValue
     /// containing all of the unique values found in the input range.
     struct UniqueConcat : public Base {

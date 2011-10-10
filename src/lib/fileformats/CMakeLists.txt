@@ -45,10 +45,10 @@ set(SOURCES
     vcf/Header.hpp
     vcf/Map.cpp
     vcf/Map.hpp
-    vcf/ValueMergers.cpp
-    vcf/ValueMergers.hpp
     vcf/MergeStrategy.cpp
     vcf/MergeStrategy.hpp
+    vcf/ValueMergers.cpp
+    vcf/ValueMergers.hpp
     vcf/VariantAdaptor.cpp
     vcf/VariantAdaptor.hpp
     vcf/namespace.hpp

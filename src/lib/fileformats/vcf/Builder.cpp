@@ -36,33 +36,6 @@ void Builder::operator()(const Entry& e) {
     push(e);
 }
 
-bool Builder::canMergeWithMaxRef(const Entry& e) const {
-    string::size_type maxAltLen(0);
-    auto alts = e.alt();
-    for (auto alt = alts.begin(); alt != alts.end(); ++alt)
-        maxAltLen = max(maxAltLen, alt->size());
-
-
-    if (e.ref().size() >= _maxRefLen ||
-        e.ref().size() > maxAltLen || // entry is all deletions
-        maxAltLen > _maxRefLen   // insertions longer than the newreference
-        )
-    {
-        return true;
-    }
-    return false;
-}
-
-vector<Entry>::iterator Builder::partition() {
-    auto iter = _entries.begin()-1;
-    for (auto i = _entries.begin(); i != _entries.end(); ++i) {
-        if (!canMergeWithMaxRef(*i)) {
-            swap(*++iter, *i);
-        }
-    }
-    return ++iter;
-}
-
 void Builder::output(const Entry* begin, const Entry* end) const {
     EntryMerger merger(_mergeStrategy, _header, begin, end);
     Entry merged(merger);
@@ -98,11 +71,7 @@ void Builder::output(const Entry* begin, const Entry* end) const {
 
 
 void Builder::flush() {
-    if (_entries.size() > 1) {
-        output(&*_entries.begin(), &*_entries.end());
-    } else if (_entries.size() == 1) {
-        _out(_entries[0]);
-    }
+    output(&*_entries.begin(), &*_entries.end());
     _entries.clear();
     _maxRefLen = 0;
 }

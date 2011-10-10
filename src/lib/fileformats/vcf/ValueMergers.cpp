@@ -48,6 +48,19 @@ const Registry* Registry::getInstance() {
     return _instance.get();
 }
 
+CustomValue UseFirst::operator()(
+    const CustomType* type,
+    FetchFunc fetch,
+    const Entry* begin,
+    const Entry* end
+    ) const
+{
+    const CustomValue* v(fetch(begin));
+    if (!v)
+        return CustomValue();
+    return *v;
+}
+
 CustomValue UniqueConcat::operator()(
     const CustomType* type,
     FetchFunc fetch,
