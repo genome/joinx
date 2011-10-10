@@ -1,19 +1,26 @@
 #include "fileformats/vcf/EntryMerger.hpp"
+#include "fileformats/vcf/Builder.hpp"
 #include "fileformats/vcf/MergeStrategy.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 
 #include <gtest/gtest.h>
 #include <cassert>
+#include <functional>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
 using namespace std;
+using namespace std::placeholders;
 using namespace Vcf;
 
 namespace {
+    void push_back(vector<Entry>& v, const Entry& e) {
+        v.push_back(e);
+    }
+
     string headerText[] = {
         "##fileformat=VCFv4.1\n"
         "##fileDate=20090805\n"
@@ -206,4 +213,35 @@ TEST_F(TestVcfEntryMerger, GTfieldAlwaysFirst) {
     Entry merged(merger);
     ASSERT_EQ(4, merged.formatDescription().size());
     ASSERT_EQ("GT", merged.formatDescription()[0]);
+}
+
+// Let's make sure the builder correctly reheaders Entry objects that are not merged.
+// That is, that the samples show up in the right output column.
+TEST_F(TestVcfEntryMerger, Builder) {
+    vector<Entry> v;
+    Builder builder(*_defaultMs, &_mergedHeader, bind(&push_back, ref(v), _1));
+    string t1="20\t14370\tid1\tT\tG\t.\tPASS\tVC=Samtools\tDP\t1";
+    string t2="21\t14370\tid1\tT\tC\t29\tPASS\tVC=Samtools\tDP\t2";
+    Entry entries[2]; 
+    Entry::parseLine(&_headers[0], t1, entries[0]);
+    Entry::parseLine(&_headers[1], t2, entries[1]);
+    builder(*entries);
+    builder(*(entries+1));
+    builder.flush();
+
+    ASSERT_EQ(2, v.size());
+    ASSERT_EQ(&_mergedHeader, &v[0].header());
+    ASSERT_EQ(&_mergedHeader, &v[1].header());
+    ASSERT_EQ(1, v[0].samplesWithData());
+    ASSERT_EQ(1, v[1].samplesWithData());
+    // Our test headers specified 3 samples each, so entry 1 should have
+    // a sample in the first position, entry 2 should have one in the third.
+    ASSERT_EQ(
+        "20\t14370\tid1\tT\tG\t.\tPASS\tVC=Samtools\tDP\t1\t.\t.\t.\t.\t.",
+        v[0].toString()
+        );
+    ASSERT_EQ(
+        "21\t14370\tid1\tT\tC\t29\tPASS\tVC=Samtools\tDP\t.\t.\t2\t.\t.\t.",
+        v[1].toString()
+        );
 }
