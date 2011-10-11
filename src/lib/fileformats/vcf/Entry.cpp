@@ -52,6 +52,7 @@ Entry::Entry(const Header* h)
 
 Entry::Entry(const Header* h, const string& s)
     : _header(h)
+    , _qual(MISSING_QUALITY)
     , _start(0)
     , _stop(0)
 {

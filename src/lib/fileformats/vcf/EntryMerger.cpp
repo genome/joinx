@@ -33,6 +33,7 @@ EntryMerger::EntryMerger(const MergeStrategy& mergeStrategy, const Header* merge
     , _begin(begin)
     , _end(end)
     , _refEntry(max_element(begin, end, referenceSizeLessThan))
+    , _qual(Entry::MISSING_QUALITY)
     , _alleleIdx(0)
 {
     _newGTIndices.resize(_end - _begin);
