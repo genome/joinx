@@ -1,6 +1,6 @@
 #include "SortCommand.hpp"
 
-#include "bedutil/MergeSorted.hpp"
+#include "bedutil/BedDeduplicator.hpp"
 #include "bedutil/Sort.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/StreamFactory.hpp"
@@ -32,6 +32,7 @@ SortCommand::SortCommand()
     , _maxInMem(1000000)
     , _mergeOnly(false)
     , _stable(false)
+    , _unique(false)
 {
 }
 
@@ -49,6 +50,7 @@ void SortCommand::parseArguments(int argc, char** argv) {
             str(format("maximum number of lines to hold in memory at once (default=%1%)") %_maxInMem).c_str())
         ("stable,s", "perform a 'stable' sort (default=false)")
         ("compression,C", po::value<string>(&_compressionString), "type of compression to use for tmpfiles, n=none, g=gzip, b=bzip2. default=n")
+        ("unique,u", "print only unique entries (bed format only)")
         ;
     po::positional_options_description posOpts;
     posOpts.add("input-file", -1);
@@ -67,6 +69,9 @@ void SortCommand::parseArguments(int argc, char** argv) {
         ss << opts;
         throw runtime_error(ss.str());
     }
+
+    if (vm.count("unique"))
+        _unique = true;
 
     if (!vm.count("input-file"))
         _filenames.push_back("-");
@@ -117,6 +122,29 @@ namespace {
     }
 }
 
+namespace {
+    template<typename ReaderFactoryType, typename WriterType>
+    void doSort(
+            CompressionType compression,
+            vector<InputStream::ptr>& inputStreams,
+            ReaderFactoryType& readerFactory,
+            WriterType& writer,
+            uint64_t maxInMem,
+            bool stable
+        )
+    {
+        Sort<ReaderFactoryType, WriterType> sorter(
+            readerFactory,
+            inputStreams,
+            writer,
+            maxInMem,
+            stable,
+            compression
+        );
+        sorter.execute();
+    }
+}
+
 void SortCommand::exec() {
     CompressionType compression = compressionTypeFromString(_compressionString);
 
@@ -135,14 +163,22 @@ void SortCommand::exec() {
     typedef StreamFactory<Bed, BedExtractor> BedReaderFactory;
     typedef StreamFactory<Vcf::Entry, VcfExtractor> VcfReaderFactory;
 
-
     if (type == BED) {
         typedef OutputWriter<Bed> WriterType;
-        WriterType writer(*out);
-        BedExtractor be = bind(&Bed::parseLine, _1, _2, 0);
+        // note: if we are dedplicating, we need to tell the bed extractor to read an extra field (allele)
+        BedExtractor be = bind(&Bed::parseLine, _1, _2, _unique?1:0);
         BedReaderFactory brf(be);
-        Sort<BedReaderFactory, WriterType> sorter(brf, inputStreams, writer, _maxInMem, _stable, compression);
-        sorter.execute();
+        WriterType writer(*out);
+        if (_unique) {
+            BedDeduplicator<WriterType> dedup(writer);
+            doSort<BedReaderFactory, BedDeduplicator<WriterType> >(
+                compression, inputStreams, brf, dedup, _maxInMem, _stable
+            );
+        } else {
+            doSort<BedReaderFactory, WriterType>(
+                compression, inputStreams, brf, writer, _maxInMem, _stable
+            );
+        }
     } else if (type == VCF) {
         typedef OutputWriter<Vcf::Entry> WriterType;
         WriterType writer(*out);
@@ -153,8 +189,9 @@ void SortCommand::exec() {
         VcfExtractor ve = bind(&Vcf::Entry::parseLine, &hdr, _1, _2);
         *out << hdr;
         VcfReaderFactory vrf(ve);
-        Sort<VcfReaderFactory, WriterType> sorter(vrf, inputStreams, writer, _maxInMem, _stable, compression);
-        sorter.execute();
+        doSort<VcfReaderFactory, WriterType>(
+            compression, inputStreams, vrf, writer, _maxInMem, _stable
+        );
     } else {
         throw runtime_error("Unknown file type!");
     }

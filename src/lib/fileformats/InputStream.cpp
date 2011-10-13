@@ -7,6 +7,7 @@ using boost::format;
 using namespace std;
 
 namespace {
+/*
     const unsigned maxCompressionMagic = 3;
     const struct CompressionAlgorithm {
         CompressionType alg;
@@ -17,6 +18,7 @@ namespace {
         { BZIP2, 3, "BZh" }
     };
     unsigned nCompressionAlgs = sizeof(compressionMagic)/sizeof(compressionMagic[0]);
+*/
 }
 
 
@@ -44,20 +46,6 @@ InputStream::InputStream(const string& name, istream& rawStream)
     , _cacheIter(_cache.begin())
     , _lineNum(0)
 {
-    switch (detectCompression()) {
-        case GZIP:
-            _in.push(_gzipDecompressor);
-            break;
-
-        case BZIP2:
-            _in.push(_bzip2Decompressor);
-            break;
-
-        default:
-        case NONE:
-            break;
-    }
-
     _in.push(_rawStream);
 }
 
@@ -80,6 +68,11 @@ bool InputStream::getline(string& line) {
         ++_lineNum;
     ++_lineNum;
 
+    if (!_peekBuf.empty()) {
+        line = _peekBuf + line;
+        _peekBuf.clear();
+    }
+
     if (_caching && _in) {
         _cache.push_back(line);
         _cacheIter = _cache.end();
@@ -88,7 +81,6 @@ bool InputStream::getline(string& line) {
     return _in;
 }
 
-
 char InputStream::peek() const {
     if (_cacheIter != _cache.end())
         return (*_cacheIter)[0];
@@ -96,6 +88,7 @@ char InputStream::peek() const {
     char c(0);
     if (boost::iostreams::read(_in, &c, 1))
         boost::iostreams::putback(_in, c);
+
     return c;
 }
 
@@ -106,19 +99,4 @@ bool InputStream::eof() const {
 
 uint64_t InputStream::lineNum() const {
     return _lineNum;
-}
-
-CompressionType InputStream::detectCompression() {
-    CompressionType rv = NONE;
-    char magic[maxCompressionMagic];
-    for (unsigned i = 0; i < maxCompressionMagic; ++i)
-        magic[i] = _rawStream.get();
-    for (unsigned i = 0; i < nCompressionAlgs; ++i) {
-        if (strncmp(compressionMagic[i].magic, magic, compressionMagic[i].len) == 0)
-            rv = compressionMagic[i].alg;
-    }
-    for (unsigned i = 0; i < maxCompressionMagic; ++i)
-        _rawStream.unget();
-
-    return rv;
 }

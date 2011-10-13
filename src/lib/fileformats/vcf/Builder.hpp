@@ -16,6 +16,7 @@ class Builder {
 public:
     typedef std::function<void(const Entry&)> OutputFunc;
     Builder(const MergeStrategy& mergeStrategy, Header* header, OutputFunc out);
+    ~Builder();
 
     void operator()(const Entry& e);
     void flush();

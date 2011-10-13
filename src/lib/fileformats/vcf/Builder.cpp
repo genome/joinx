@@ -20,6 +20,10 @@ Builder::Builder(const MergeStrategy& mergeStrategy, Header* header, OutputFunc 
 {
 }
 
+Builder::~Builder() {
+    flush();
+}
+
 void Builder::push(const Entry& e) {
     _entries.push_back(e);
     _maxRefLen = max(_maxRefLen, _entries.rbegin()->ref().size());

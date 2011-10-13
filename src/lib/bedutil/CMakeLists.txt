@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 project(bedutil)
 
 set(SOURCES
+    BedDeduplicator.hpp
     ConcordanceQuality.cpp
     ConcordanceQuality.hpp
     IResultCollector.hpp

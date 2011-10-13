@@ -1,5 +1,5 @@
 #include "IntersectCommand.hpp"
-#include "Collector.hpp"
+#include "IntersectCollector.hpp"
 
 #include "bedutil/IntersectionOutputFormatter.hpp"
 #include "bedutil/Intersect.hpp"
@@ -171,14 +171,13 @@ void IntersectCommand::exec() {
     BedReaderType fa(parserA, *inStreamA);
     BedReaderType fb(parserB, *inStreamB);
 
-
     // optional "miss" output streams
     ostream* outMissA(NULL);
     ostream* outMissB(NULL);
     if (!_missFileA.empty()) outMissA = _streams.get<ostream>(_missFileA);
     if (!_missFileB.empty()) outMissB = _streams.get<ostream>(_missFileB);
 
-    Collector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, _dbsnpMatch, outputFormatter, outMissA, outMissB);
-    Intersect<BedReaderType,BedReaderType,Collector> intersector(fa, fb, c, _adjacentInsertions);
+    IntersectCollector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, _dbsnpMatch, outputFormatter, outMissA, outMissB);
+    Intersect<BedReaderType,BedReaderType,IntersectCollector> intersector(fa, fb, c, _adjacentInsertions);
     intersector.execute();
 }

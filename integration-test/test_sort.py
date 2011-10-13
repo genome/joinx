@@ -19,6 +19,19 @@ class TestSort(JoinxTest, unittest.TestCase):
             self.assertEqual('', err)
             self.assertFilesEqual(expected_file, output_file)
 
+    def test_sort_unique(self):
+        output_file = self.tempFile("output.bed")
+        params = [ "sort", "-u", "-o", output_file ]
+        params.extend(self.inputFiles(
+            "union-a.bed",
+            "union-b.bed"
+        ))
+        rv, err = self.joinx(params)
+        self.assertEqual('', err)
+        self.assertEqual(0, rv)
+        expected_file = self.inputFiles("expected-union.bed")[0]
+        self.assertFilesEqual(expected_file, output_file)
+ 
     def test_sort_tmp(self):
         input_files = self.inputFiles("unsorted*.bed")
         expected_file = self.inputFiles("expected-sort.bed")[0]
@@ -35,19 +48,21 @@ class TestSort(JoinxTest, unittest.TestCase):
         self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file)
 
-    def test_compression(self):
-        input_files = self.inputFiles("unsorted*.bed")
-        expected_file = self.inputFiles("expected-sort.bed")[0]
-        output_file = self.tempFile("output.bed")
+    # automatic compressed file detection is currently disabled
+    # TODO: re-enable
+    #def test_compression(self):
+        #input_files = self.inputFiles("unsorted*.bed")
+        #expected_file = self.inputFiles("expected-sort.bed")[0]
+        #output_file = self.tempFile("output.bed")
 
-        # test none, gzip, and bzip2 compression
-        for arg in ["", "-C g", "-C b" ]:
-            params = [ "sort", "-o", output_file, arg ]
-            params.extend(input_files)
-            rv, err = self.joinx(params)
-            self.assertEqual(0, rv)
-            self.assertEqual('', err)
-            self.assertFilesEqual(expected_file, output_file)
+        ## test none, gzip, and bzip2 compression
+        #for arg in ["", "-C g", "-C b" ]:
+            #params = [ "sort", "-o", output_file, arg ]
+            #params.extend(input_files)
+            #rv, err = self.joinx(params)
+            #self.assertEqual(0, rv)
+            #self.assertEqual('', err)
+            #self.assertFilesEqual(expected_file, output_file)
 
     def test_sort_vcf(self):
         # currently only 1 vcf file at a time can be sorted, as it is trickier

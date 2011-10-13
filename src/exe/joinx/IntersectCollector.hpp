@@ -6,9 +6,9 @@
 
 #include <iostream>
 
-class Collector {
+class IntersectCollector {
 public:
-    Collector(
+    IntersectCollector(
             bool outputBoth,
             bool exactPos,
             bool exactAllele,
@@ -59,7 +59,7 @@ public:
         if (_hitCount > 0 && !_outputBoth &&
             _lastA.positionMatch(va) && _lastA.alleleMatch(va))
         {
-                return true; // already hit
+            return true; // already hit
         }
         ++_hitCount;
 

@@ -5,13 +5,13 @@ project(joinx_app)
 set(SOURCES
     CheckRefCommand.cpp
     CheckRefCommand.hpp
-    Collector.hpp
     CommandBase.cpp
     CommandBase.hpp
     CreateContigsCommand.cpp
     CreateContigsCommand.hpp
     GenerateCommand.cpp
     GenerateCommand.hpp
+    IntersectCollector.hpp
     IntersectCommand.cpp
     IntersectCommand.hpp
     JoinX.cpp

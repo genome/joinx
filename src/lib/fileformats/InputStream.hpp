@@ -36,8 +36,6 @@ public:
 
     const std::string& name() const;
 
-    CompressionType detectCompression();
-
 protected:
     std::string _name;
     std::istream& _rawStream;
@@ -46,6 +44,7 @@ protected:
     boost::iostreams::bzip2_decompressor _bzip2Decompressor;
     bool _caching;
     std::deque<std::string> _cache;
+    std::string _peekBuf;
     std::deque<std::string>::iterator _cacheIter;
     uint64_t _lineNum;
 };
