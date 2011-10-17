@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 2.8)
 project(fileformats)
 
 set(SOURCES
-    BasesFile.cpp
-    BasesFile.hpp
     Bed.cpp
     Bed.hpp
     BedFilterBase.hpp
@@ -17,8 +15,6 @@ set(SOURCES
     InputStream.cpp
     InputStream.hpp
     OutputWriter.hpp
-    ReferenceSequence.cpp
-    ReferenceSequence.hpp
     StreamFactory.hpp
     StreamHandler.cpp
     StreamHandler.hpp
