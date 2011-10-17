@@ -154,6 +154,9 @@ std::string CustomValue::getString(SizeType idx) const {
 }
 
 void CustomValue::toStream(ostream& s) const {
+    if (empty()) {
+        type().emptyRepr(s);
+    }
     for (SizeType i = 0; i < size(); ++i) {
         if (i > 0)
             s << ",";

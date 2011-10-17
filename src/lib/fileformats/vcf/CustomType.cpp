@@ -154,5 +154,15 @@ CustomType::DataType CustomType::stringToType(const std::string& s) {
     }
 }
 
+void CustomType::emptyRepr(std::ostream& s) const {
+    if (_type == FLAG)
+        return;
+
+    if (_id == "FT") {
+        s << "PASS";
+    } else {
+        s << '.';
+    }
+}
 
 VCF_NAMESPACE_END

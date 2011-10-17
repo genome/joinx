@@ -70,6 +70,8 @@ public:
 
     std::string toString() const;
 
+    void emptyRepr(std::ostream& s) const;
+
 protected:
     std::string _id;
     NumberType _numberType;

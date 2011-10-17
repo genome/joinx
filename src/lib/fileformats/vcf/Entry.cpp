@@ -340,10 +340,7 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
             for (auto j = i->begin(); j != i->end(); ++j) {
                 if (j != i->begin())
                     s << ':';
-                if (j->empty())
-                    s << '.';
-                else
-                    j->toStream(s);
+                j->toStream(s);
             }
         } else
             s << ".";
