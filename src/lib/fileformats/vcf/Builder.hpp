@@ -34,7 +34,6 @@ protected:
     Header* _header;
     std::vector<Entry> _entries;
     OutputFunc _out;
-    std::string::size_type _maxRefLen;
 };
 
 VCF_NAMESPACE_END

@@ -16,7 +16,6 @@ Builder::Builder(const MergeStrategy& mergeStrategy, Header* header, OutputFunc 
     : _mergeStrategy(mergeStrategy)
     , _header(header)
     , _out(out)
-    , _maxRefLen(0)
 {
 }
 
@@ -26,7 +25,6 @@ Builder::~Builder() {
 
 void Builder::push(const Entry& e) {
     _entries.push_back(e);
-    _maxRefLen = max(_maxRefLen, _entries.rbegin()->ref().size());
 }
 
 void Builder::operator()(const Entry& e) {
@@ -75,9 +73,10 @@ void Builder::output(const Entry* begin, const Entry* end) const {
 
 
 void Builder::flush() {
-    output(&*_entries.begin(), &*_entries.end());
-    _entries.clear();
-    _maxRefLen = 0;
+    if (!_entries.empty()) {
+        output(&*_entries.begin(), &*_entries.end());
+        _entries.clear();
+    }
 }
 
 bool Builder::canMerge(const Entry& a, const Entry& b) {
