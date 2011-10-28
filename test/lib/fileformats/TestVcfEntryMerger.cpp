@@ -28,6 +28,8 @@ namespace {
         "##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta\n"
         "##contig=<ID=20,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species=\"Homo sapiens\",taxonomy=x>\n"
         "##phasing=partial\n"
+        "##FILTER=<ID=q10,Description=\"Quality below 10\">\n"
+        "##FILTER=<ID=s50,Description=\"Less than 50% of samples have data\">\n"
         "##INFO=<ID=VC,Number=.,Type=String,Description=\"Variant caller\">\n"
         "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n"
         "##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">\n"
@@ -41,6 +43,8 @@ namespace {
         "##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta\n"
         "##contig=<ID=20,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species=\"Homo sapiens\",taxonomy=x>\n"
         "##phasing=partial\n"
+        "##FILTER=<ID=q10,Description=\"Quality below 10\">\n"
+        "##FILTER=<ID=s50,Description=\"Less than 50% of samples have data\">\n"
         "##INFO=<ID=VC,Number=.,Type=String,Description=\"Variant caller\">\n"
         "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n"
         "##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">\n"
@@ -54,6 +58,8 @@ namespace {
         "##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta\n"
         "##contig=<ID=20,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species=\"Homo sapiens\",taxonomy=x>\n"
         "##phasing=partial\n"
+        "##FILTER=<ID=q10,Description=\"Quality below 10\">\n"
+        "##FILTER=<ID=s50,Description=\"Less than 50% of samples have data\">\n"
         "##INFO=<ID=VC,Number=.,Type=String,Description=\"Variant caller\">\n"
         "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n"
         "##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">\n"
@@ -201,6 +207,23 @@ TEST_F(TestVcfEntryMerger, mergeAlleles) {
     ASSERT_EQ(2, e.alt().size());
     ASSERT_EQ("TAG", e.alt()[0]);
     ASSERT_EQ("T", e.alt()[1]);
+}
+
+TEST_F(TestVcfEntryMerger, stripFilters) {
+    string t1="20\t14370\tid1\tT\tG\t.\tq10\tVC=Samtools\tDP\t1\t3";
+    string t2="20\t14370\tid1\tT\tC\t29\ts50\tVC=Samtools\tGT:GQ:DP:HQ\t0|1:48:1:51,51\t1|0:48:8:51,51";
+    Entry entries[2];
+    Entry::parseLine(&_headers[0], t1, entries[0]);
+    Entry::parseLine(&_headers[1], t2, entries[1]);
+    EntryMerger merger(*_defaultMs, &_mergedHeader, entries, entries+2);
+    Entry merged(merger);
+    ASSERT_EQ(2, merged.failedFilters().size());
+
+    MergeStrategy ms2(*_defaultMs);
+    ms2.clearFilters(true);
+    EntryMerger merger2(ms2, &_mergedHeader, entries, entries+2);
+    Entry e(merger2);
+    ASSERT_TRUE(e.failedFilters().empty());
 }
 
 TEST_F(TestVcfEntryMerger, GTfieldAlwaysFirst) {

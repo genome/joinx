@@ -123,8 +123,16 @@ void Entry::parse(const Header* h, const string& s) {
     if (!tok.extract(tmp))
         throw runtime_error("Failed to extract filters from vcf entry: " + s);
     extractList(_failedFilters, tmp);
-    if (_failedFilters.size() == 1 && _failedFilters[0] == "PASS")
-        _failedFilters.clear();
+    // If pass is present as well as other failed filters, remove pass
+    if (_failedFilters.size() > 1) {
+        auto iter = find(_failedFilters.begin(), _failedFilters.end(), "PASS");
+        if (iter != _failedFilters.end()) {
+            auto end = _failedFilters.erase(iter);
+            _failedFilters.resize(distance(_failedFilters.begin(), end));
+        }
+    }
+
+
 
     // info entries
     if (!tok.extract(tmp))
@@ -311,10 +319,7 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
     else
         s << '\t' << e.qual() << '\t';
 
-    if (e.failedFilters().empty())
-        s << "PASS";
-    else
-        e.printList(s, e.failedFilters());
+    e.printList(s, e.failedFilters());
     s << '\t';
 
     const Vcf::Entry::CustomValueMap& info = e.info();

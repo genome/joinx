@@ -54,6 +54,14 @@ public:
     /// \exception runtime_error thrown if the action name is not known
     void setMerger(const std::string& id, const std::string& mergerName);
 
+    /// If set to true, clearFilters will strip all filter information from merged 
+    /// entries.
+    /// \param boolean value indication whether or not to strip merged filters
+    void clearFilters(bool value);
+
+    /// \return a boolean value indicating whether or not merged Entries should have
+    /// their filters stripped
+    bool clearFilters() const;
 
 protected:
     /// The merged Vcf header for the final output file
@@ -64,6 +72,7 @@ protected:
     const ValueMergers::Base* _default;
     /// This registry allows looking up ValueMergers by name 
     const ValueMergers::Registry* _registry;
+    bool _clearFilters;
 };
 
 VCF_NAMESPACE_END

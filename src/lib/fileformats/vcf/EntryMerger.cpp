@@ -97,6 +97,10 @@ EntryMerger::EntryMerger(const MergeStrategy& mergeStrategy, const Header* merge
             }
         }
     }
+    if (mergeStrategy.clearFilters())
+        _filters.clear();
+    else if (_filters.size() > 1)
+        _filters.erase("PASS");
 
     // If there was only a single qual value, we will use it. Otherwise, it's not clear how to merge them
     if (qualCount > 1)

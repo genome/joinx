@@ -28,6 +28,7 @@ CommandBase::ptr VcfMergeCommand::create(int argc, char** argv) {
 
 VcfMergeCommand::VcfMergeCommand()
     : _outputFile("-")
+    , _clearFilters(false)
 {
 }
 
@@ -38,6 +39,7 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
         ("input-file,i", po::value< vector<string> >(&_filenames), "input file(s) (empty or - means stdin, which is the default)")
         ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
         ("merge-strategy-file,M", po::value<string>(&_mergeStrategyFile), "merge strategy file for info fields (see man page for format")
+        ("clear-filters,c", "When set, merged entries will have FILTER data stripped out")
         ;
     po::positional_options_description posOpts;
     posOpts.add("input-file", -1);
@@ -59,6 +61,9 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
 
     if (!vm.count("input-file"))
         _filenames.push_back("-");
+
+    if (vm.count("clear-filters"))
+        _clearFilters = true;
 }
 
 namespace {
@@ -97,6 +102,7 @@ void VcfMergeCommand::exec() {
         InputStream::ptr msFile(_streams.wrap<istream, InputStream>(_mergeStrategyFile));
         mergeStrategy.parse(*msFile);
     }
+    mergeStrategy.clearFilters(_clearFilters);
 
     Vcf::Builder builder(mergeStrategy, &mergedHeader, writer);
     *out << mergedHeader;

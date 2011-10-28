@@ -38,8 +38,17 @@ MergeStrategy::MergeStrategy(const Header* header)
     : _header(header)
     , _default(0)
     , _registry(ValueMergers::Registry::getInstance())
+    , _clearFilters(false)
 {
     _default = _registry->getMerger("ignore");
+}
+
+void MergeStrategy::clearFilters(bool value) {
+    _clearFilters = value;
+}
+
+bool MergeStrategy::clearFilters() const {
+    return _clearFilters;
 }
 
 void MergeStrategy::setMerger(const std::string& id, const std::string& mergerName) {

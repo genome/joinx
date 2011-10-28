@@ -27,4 +27,5 @@ protected:
     std::string _outputFile;
     std::string _mergeStrategyFile;
     StreamHandler _streams;
+    bool _clearFilters;
 };

@@ -131,7 +131,7 @@ void Header::merge(const Header& other) {
     _metaInfoLines.erase(newEnd, _metaInfoLines.end());
     char dateStr[32] = {0};
     time_t now = time(NULL);
-    strftime(dateStr, sizeof(now), "%Y%m%d", localtime(&now));
+    strftime(dateStr, sizeof(dateStr), "%Y%m%d", localtime(&now));
     add(str(format("##fileDate=%1%") %dateStr));
 }
 
