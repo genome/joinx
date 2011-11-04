@@ -36,9 +36,9 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
     po::options_description opts("Available Options");
     opts.add_options()
         ("help,h", "this message")
-        ("input-file,i", po::value< vector<string> >(&_filenames), "input file(s) (empty or - means stdin, which is the default)")
+        ("input-file,i", po::value< vector<string> >(&_filenames), "input file(s) (positional arguments work also)")
         ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
-        ("merge-strategy-file,M", po::value<string>(&_mergeStrategyFile), "merge strategy file for info fields (see man page for format")
+        ("merge-strategy-file,M", po::value<string>(&_mergeStrategyFile), "merge strategy file for info fields (see man page for format)")
         ("clear-filters,c", "When set, merged entries will have FILTER data stripped out")
         ;
     po::positional_options_description posOpts;

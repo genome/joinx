@@ -1,28 +1,30 @@
 =head1 NAME
 
-joinx - a tool for performing set operations on .bed files
+joinx - a tool for manipulating genomic data
 
 =head1 SYNOPSIS
 
-joinx [--version|-v] SUBCOMMAND [SUBCOMMAND-ARGS] 
+joinx [--version|-v] SUBCOMMAND [SUBCOMMAND-ARGS]
 
 =head1 DESCRIPTION
 
-Joinx is a lightweight tool for performing set operations (e.g., intersection,
-difference, ...) on genomic data contained in .bed files. It also
-provides some limited analysis functions (concordance reports), and can be used
-to generate contigs from variant files and a reference sequence. An important
-assumption that joinx makes is that the input data is always sorted. This
-allows it to compute its results in an efficient manner.
+Joinx is a lightweight tool for performing manipulating genomic data contained
+in BED or VCF files. It also provides some limited analysis functions
+(concordance reports), and can be used to generate contigs from variant files
+and a reference sequence. An important assumption that joinx makes is that the
+input data is always sorted. This allows it to compute its results in an
+efficient manner.
 
 =head1 INTERSECT SUBCOMMAND
-
-joinx intersect
-    Perform set intersection and difference operations.
 
 =head2 SYNOPSIS
 
 joinx intersect [OPTIONS] a.bed b.bed
+
+=head2 DESCRIPTION
+
+This subcommand is used to perform set operations (intersect, difference,
+symmetric difference) on BED files.
 
 =head2 OPTIONS
 
@@ -31,7 +33,7 @@ joinx intersect [OPTIONS] a.bed b.bed
 
 -a, --file-a <path> (or first positional argument)
     Path to sorted input .bed file "A" (- for stdin)
-    
+
 -b, --file-b <path> (or second positional argument)
     Path to sorted input .bed file "B" (- for stdin, note: not both "A"
     and "B" can be stdin)
@@ -41,7 +43,7 @@ joinx intersect [OPTIONS] a.bed b.bed
 
 --miss-a <path>
     Write entries in A that are not in B (set difference, A\B) to <path>.
-    
+
 --miss-b <path>
     Write entries in B that are not in A (set difference, B\A) to <path>.
 
@@ -90,22 +92,85 @@ joinx intersect [OPTIONS] a.bed b.bed
     position 1 1 2 (snv or 1bp deletion at 1) will intersect position 1 2 2
     (insertion at 2).
 
-=head1 SNV-CONCORDANCE SUBCOMMAND
+=head1 CHECK-REF SUBCOMMAND
 
-joinx snv-concordance
-    Generate basic concordance reports given 2 .bed files.
+=head2 SYNOPSIS
+
+joinx check-ref [OPTIONS] -f ref.fasta -b variants.bed
+
+=head2 DESCRIPTION
+
+This subcommand can be used to check the reference information embedded
+in variant files against a FASTA file. This is useful when trying to
+determine whether or not a particular set of features are actually
+described relative to a particular reference sequence.
+
+=head2 OPTIONS
+
+-h, --help
+    Display usage information
+
+-b, --bed <path>
+    Specifies the input .bed file to check
+
+-f, --fasta <path>
+    Specifies the fasta file to check against
+
+-o, --report-file <path>
+    Output file (empty or - means stdout, which is the default)
+
+-m, --miss-file <path>
+    Output entries which do not match the reference to this file
+
+=head1 CREATE-CONTIGS SUBCOMMAND
+
+=head2 SYNOPSIS
+
+    joinx create-contigs [OPTIONS] -r ref.fasta -v variants.bed
+
+=head2 DESCRIPTION
+
+    Generates FASTA format contigs from a variant file and a reference FASTA
+    file.
+
+=head2 OPTIONS
+
+-h, --help
+    Display usage information
+
+-r, --reference <path>
+    Specifies the reference sequence to generate against (FASTA format)
+
+-v, --variants <path>
+    Specifies the variants file to generate contigs from (.bed format)
+
+-o, --output-file <path>
+    Output file (empty or - means stdout, which is the default)
+
+-f, --flank <path>
+    Flank size on either end of the variant (default=99)
+
+-q, --quality <path>
+    Minimum quality cutoff for variants (default=0)
+
+=head1 SNV-CONCORDANCE SUBCOMMAND
 
 =head2 SYNOPSIS
 
 joinx snv-concordance [OPTIONS] a.bed b.bed
 
+=head2 DESCRIPTION
+
+Generates basic concordance reports given 2 .bed files.
+
 =head2 OPTIONS
+
 -h, --help
     Display usage information
 
 -a, --file-a <path> (or first positional argument)
     Path to sorted input .bed file "A" (- for stdin)
-    
+
 -b, --file-b <path> (or second positional argument)
     Path to sorted input .bed file "B" (- for stdin, note: not both "A"
     and "B" can be stdin)
@@ -121,18 +186,19 @@ joinx snv-concordance [OPTIONS] a.bed b.bed
 
 --miss-a <path>
     Write entries in A that are not in B (set difference, A\B) to <path>.
-    
+
 --miss-b <path>
     Write entries in B that are not in A (set difference, B\A) to <path>.
 
 =head1 SORT SUBCOMMAND
 
-joinx sort
-    Sort .bed files by chromosome/sequence, start, end position.
-
 =head2 SYNOPSIS
 
-joinx sort [OPTIONS] a.bed b.bed c.bed ... 
+joinx sort [OPTIONS] a.bed b.bed c.bed ...
+
+=head2 DESCRIPTION
+
+Sort BED or VCF files by chromosome/sequence, start, end position.
 
 =head2 OPTIONS
 
@@ -140,7 +206,7 @@ joinx sort [OPTIONS] a.bed b.bed c.bed ...
     Display usage information
 
 -i, --input-file <path>
-    Input file to be sorted (can be specified multiple times, positional arguments work too)
+    Input file(s) to be sorted (positional arguments work also)
 
 -m, --merge-only
     Assume all input files are pre-sorted, merge only
@@ -149,15 +215,72 @@ joinx sort [OPTIONS] a.bed b.bed c.bed ...
     The path of the sorted output file to write
 
 -M, --max-mem-lines (default=1000000)
-    The maximum number of lines to hold in memory while sorting (before writing to tmp files)
+    The maximum number of lines to hold in memory while sorting
+    (before writing to tmp files)
 
 -s, --stable
     Perform a "stable" sort (equivalent records maintain their original order)
 
+-u, --unique
+    Print only unique entries (applies to BED format only)
+
+=head1 VCF-MERGE SUBCOMMAND
+
+=head2 SYNOPSIS
+
+joinx vcf-merge [OPTIONS] file1.vcf file2.vcf [file3.vcf ...]
+
+=head2 DESCRIPTION
+
+This subcommand performs multi-sample merging of features contained in
+VCF files. The current version requires that no two input files contain
+data for the same sample. Merging of INFO fields can be controlled by
+specifying a merge strategy file. This is a simple KEY=VALUE file that
+specifies actions for particular info fields. Valid actions are:
+
+    ignore
+        strip this info field out
+
+    first
+        retain the first value seen for this field
+
+    uniq-concat (variable length fields only)
+        unique values will be merged
+
+    enforce-equal
+        if an attempt is made to merge two records with different values for
+        this field, an error is raised
+
+    sum (numeric fields only)
+        sum the values for this field
+
+An example merge strategy that sums up DP (depth) values and concatenates
+information in a field called caller is:
+
+DP=sum
+CALLER=uniq-concat
+
+=head2 OPTIONS
+
+-h, --help
+    Display usage information
+
+-i, --input-file <path>
+    Input file(s) (positional arguments work also)
+
+-o, --output-file <path>
+    Output file (empty or - means stdout, which is the default)
+
+-M, --merge-strategy-file <path>
+    Merge strategy file for info fields.
+
+-c, --clear-filters
+    When set, merged entries will have FILTER data stripped out
+
 =head1 AUTHOR
 
-Joinx was written by Travis Abbott <tabbott@genome.wustl.edu>, and is maintained on
-Github at: L<https://github.com/genome/joinx/>.
+Joinx was written by Travis Abbott <tabbott@genome.wustl.edu>, and is maintained
+on Github at: L<https://github.com/genome/joinx/>.
 
 =head1 COPYRIGHT
 
