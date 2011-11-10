@@ -70,8 +70,9 @@ void CheckRefCommand::parseArguments(int argc, char** argv) {
 
 void CheckRefCommand::exec() {
     InputStream::ptr inStream = _streams.wrap<istream, InputStream>(_bedFile);
-    function<void(string&, Bed)> extractor = bind(&Bed::parseLine, _1, _2, 1);
-    typedef TypedStream<Bed, function<void(string&, Bed)> > BedReader;
+    typedef function<void(string&, Bed&)> ExtractorType;
+    ExtractorType extractor = bind(&Bed::parseLine, _1, _2, 1);
+    typedef TypedStream<Bed, ExtractorType> BedReader;
     BedReader bedReader(extractor, *inStream);
     FastaReader refSeq(_fastaFile);
 
@@ -79,18 +80,24 @@ void CheckRefCommand::exec() {
     ostream* miss(NULL);
     if (!_missFile.empty())
         miss = _streams.get<ostream>(_missFile);
+    else
+        miss = &cout;
 
     Bed entry;
     string referenceBases;
     uint64_t misses = 0;
     while (bedReader.next(entry)) {
         Variant v(entry);
-        // bed is 0-based, so we add 1 to the start position
-        refSeq.sequence(v.chrom(), v.start(), v.stop(), referenceBases);
-        if (v.reference().data() != referenceBases) {
-            ++misses;
-            if (miss)
-                *miss << entry << "\tREF:" << referenceBases << "\n";
+        try {
+            // bed is 0-based, so we add 1 to the start position
+            refSeq.sequence(v.chrom(), v.start(), v.stop(), referenceBases);
+            if (v.reference().data() != referenceBases) {
+                ++misses;
+                if (miss)
+                    *miss << entry << "\tREF:" << referenceBases << "\n";
+            }
+        } catch (const exception& e) {
+            *miss << entry << "\tERROR: " << e.what() << "\n";
         }
     }
 
