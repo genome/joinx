@@ -125,11 +125,20 @@ TEST(VcfHeader, merge) {
     Header different = parse(differentData);
 
     // throw due to sample conflict
-    ASSERT_THROW(h1.merge(h1copy), runtime_error);
-    ASSERT_THROW(h1.merge(conflict), runtime_error);
+    ASSERT_THROW(h1.merge(h1copy, false), runtime_error);
+    ASSERT_THROW(h1.merge(conflict, false), runtime_error);
     ASSERT_NO_THROW(h1.merge(different));
-    stringstream ss;
-    ss << h1;
+    ASSERT_EQ(6, h1.sampleNames().size());
+    ASSERT_EQ("NA00001", h1.sampleNames()[0]);
+    ASSERT_EQ("NA00002", h1.sampleNames()[1]);
+    ASSERT_EQ("NA00003", h1.sampleNames()[2]);
+    ASSERT_EQ("MA00001", h1.sampleNames()[3]);
+    ASSERT_EQ("MA00002", h1.sampleNames()[4]);
+    ASSERT_EQ("MA00003", h1.sampleNames()[5]);
+
+    // doesn't throw if we allow duplicate sample names
+    ASSERT_NO_THROW(h1.merge(h1copy, true));
+    // make sure we didn't get duplicate names
     ASSERT_EQ(6, h1.sampleNames().size());
     ASSERT_EQ("NA00001", h1.sampleNames()[0]);
     ASSERT_EQ("NA00002", h1.sampleNames()[1]);
@@ -152,6 +161,9 @@ TEST(VcfHeader, merge) {
     time_t now = time(NULL);
     strftime(dateStr, sizeof(dateStr), "%Y%m%d", localtime(&now));
     ASSERT_EQ(dateStr, date);
+
+    // conflicting info field still throws an error even allowing duplicate samples
+    ASSERT_THROW(h1.merge(conflict, true), runtime_error);
 }
 
 TEST(VcfHeader, sampleIndex) {

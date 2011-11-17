@@ -3,6 +3,7 @@
 #include "CommandBase.hpp"
 #include "fileformats/StreamHandler.hpp"
 
+#include <cstdint>
 #include <string>
 
 class VcfMergeCommand : public CommandBase {
@@ -28,4 +29,5 @@ protected:
     std::string _mergeStrategyFile;
     StreamHandler _streams;
     bool _clearFilters;
+    bool _mergeSamples;
 };

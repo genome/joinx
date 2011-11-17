@@ -2,7 +2,7 @@
 
 #include "namespace.hpp"
 
-#include <cstdint>
+#include <cstddef>
 #include <map>
 #include <string>
 #include <vector>
@@ -21,12 +21,25 @@ public:
         const std::vector<std::string>& fields,
         const Entry* e,
         uint32_t sampleIdx,
-        const std::vector<size_t>& alleleIndices) const;
+        const std::vector<size_t>& alleleIndices
+        ) const;
+
+    void merge(
+        bool overridePreviousValues,
+        std::vector<CustomValue>& previousValues,
+        const std::vector<std::string>& fields,
+        const Entry* e,
+        uint32_t sampleIdx,
+        const std::vector<size_t>& alleleIndices
+        ) const;
+        
 
     std::string renumberGT(
         const Entry* e,
         uint32_t sampleIdx,
         const std::vector<size_t>& alleleIndices) const;
+
+    static bool areGenotypesDisjoint(const std::string& gt1, const std::string& gt2);
 
 protected:
     const Header* _header;

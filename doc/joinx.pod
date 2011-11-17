@@ -233,10 +233,14 @@ joinx vcf-merge [OPTIONS] file1.vcf file2.vcf [file3.vcf ...]
 =head2 DESCRIPTION
 
 This subcommand performs multi-sample merging of features contained in
-VCF files. The current version requires that no two input files contain
-data for the same sample. Merging of INFO fields can be controlled by
-specifying a merge strategy file. This is a simple KEY=VALUE file that
-specifies actions for particular info fields. Valid actions are:
+VCF files. By default, no two input files are allowed to contain data
+for the same sample. This behavior can be changed with the -s flag,
+which will attempt to merge per-sample data, favoring data from the
+first file.
+
+Merging of INFO fields can be controlled by specifying a merge strategy
+file. This is a simple KEY=VALUE file that specifies actions for
+particular info fields. Valid actions are:
 
     ignore
         strip this info field out
@@ -273,6 +277,9 @@ CALLER=uniq-concat
 
 -M, --merge-strategy-file <path>
     Merge strategy file for info fields.
+
+-s, --merge-samples
+    Allow input files with overlapping sample data.
 
 -c, --clear-filters
     When set, merged entries will have FILTER data stripped out

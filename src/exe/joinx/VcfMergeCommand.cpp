@@ -29,6 +29,7 @@ CommandBase::ptr VcfMergeCommand::create(int argc, char** argv) {
 VcfMergeCommand::VcfMergeCommand()
     : _outputFile("-")
     , _clearFilters(false)
+    , _mergeSamples(false)
 {
 }
 
@@ -40,6 +41,7 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
         ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
         ("merge-strategy-file,M", po::value<string>(&_mergeStrategyFile), "merge strategy file for info fields (see man page for format)")
         ("clear-filters,c", "When set, merged entries will have FILTER data stripped out")
+        ("merge-samples,s", "allow input files with overlapping samples")
         ;
     po::positional_options_description posOpts;
     posOpts.add("input-file", -1);
@@ -64,6 +66,9 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
 
     if (vm.count("clear-filters"))
         _clearFilters = true;
+
+    if (vm.count("merge-samples"))
+        _mergeSamples = true;
 }
 
 namespace {
@@ -84,8 +89,11 @@ void VcfMergeCommand::exec() {
     vector<ReaderPtr> readers;
     vector<Vcf::Header> headers;
     vector<VcfExtractor> extractors;
-    for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i)
+    uint32_t headerIndex(0);
+    for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i) {
         headers.push_back(Vcf::Header::fromStream(**i));
+        headers.back().sourceIndex(headerIndex++);
+    }
 
     for (size_t i = 0; i < headers.size(); ++i) {
         extractors.push_back(bind(&Vcf::Entry::parseLine, &headers[i], _1, _2));
@@ -94,7 +102,7 @@ void VcfMergeCommand::exec() {
 
     Vcf::Header mergedHeader = headers[0];
     for (auto i = headers.begin() + 1; i != headers.end(); ++i)
-        mergedHeader.merge(*i);
+        mergedHeader.merge(*i, _mergeSamples);
 
     WriterType writer(*out);
     Vcf::MergeStrategy mergeStrategy(&mergedHeader);
@@ -103,6 +111,8 @@ void VcfMergeCommand::exec() {
         mergeStrategy.parse(*msFile);
     }
     mergeStrategy.clearFilters(_clearFilters);
+    mergeStrategy.mergeSamples(_mergeSamples);
+    mergeStrategy.primarySampleStreamIndex(0);
 
     Vcf::Builder builder(mergeStrategy, &mergedHeader, writer);
     *out << mergedHeader;

@@ -39,6 +39,8 @@ MergeStrategy::MergeStrategy(const Header* header)
     , _default(0)
     , _registry(ValueMergers::Registry::getInstance())
     , _clearFilters(false)
+    , _mergeSamples(false)
+    , _primarySampleStreamIndex(0)
 {
     _default = _registry->getMerger("ignore");
 }
@@ -49,6 +51,22 @@ void MergeStrategy::clearFilters(bool value) {
 
 bool MergeStrategy::clearFilters() const {
     return _clearFilters;
+}
+
+void MergeStrategy::mergeSamples(bool value) {
+    _mergeSamples = value;
+}
+
+bool MergeStrategy::mergeSamples() const {
+    return _mergeSamples;
+}
+
+void MergeStrategy::primarySampleStreamIndex(uint32_t value) {
+    _primarySampleStreamIndex = value;
+}
+
+uint32_t MergeStrategy::primarySampleStreamIndex() const {
+    return _primarySampleStreamIndex;
 }
 
 void MergeStrategy::setMerger(const std::string& id, const std::string& mergerName) {

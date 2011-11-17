@@ -84,7 +84,7 @@ EntryMerger::EntryMerger(const MergeStrategy& mergeStrategy, const Header* merge
         const vector<string>& samples = e->header().sampleNames();
         for (auto i = samples.begin(); i != samples.end(); ++i) {
             auto inserted = _sampleNames.insert(*i);
-            if (!inserted.second)
+            if (!inserted.second && !_mergeStrategy.mergeSamples())
                 throw runtime_error(str(format("Duplicate sample name '%1%' in %2%") %*i %e->toString()));
         }
 
@@ -185,7 +185,12 @@ void EntryMerger::setAltAndGenotypeData(
                 const string& sampleName = e->header().sampleNames()[sampleIdx];
                 uint32_t mergedIdx = _mergedHeader->sampleIndex(sampleName);
                 size_t idx = e - _begin;
-                genotypeData[mergedIdx] = genotypeFormatter.process(format, e, sampleIdx, _newGTIndices[idx]);
+                if (!genotypeData[mergedIdx].empty() && _mergeStrategy.mergeSamples() && !genotypeData[mergedIdx].empty()) {
+                    bool fromPrimaryStream = e->header().sourceIndex() == _mergeStrategy.primarySampleStreamIndex();
+                    genotypeFormatter.merge(fromPrimaryStream, genotypeData[mergedIdx], format, e, sampleIdx, _newGTIndices[idx]);
+                } else {
+                    genotypeData[mergedIdx] = genotypeFormatter.process(format, e, sampleIdx, _newGTIndices[idx]);
+                }
             }
         } catch (const exception& ex) {
             throw runtime_error(str(boost::format(

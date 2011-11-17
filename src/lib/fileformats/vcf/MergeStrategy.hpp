@@ -3,6 +3,7 @@
 #include "ValueMergers.hpp"
 #include "namespace.hpp"
 
+#include <cstddef>
 #include <map>
 #include <string>
 
@@ -63,6 +64,11 @@ public:
     /// their filters stripped
     bool clearFilters() const;
 
+    void mergeSamples(bool value);
+    bool mergeSamples() const;
+    void primarySampleStreamIndex(uint32_t value);
+    uint32_t primarySampleStreamIndex() const;
+
 protected:
     /// The merged Vcf header for the final output file
     const Header* _header;
@@ -73,6 +79,8 @@ protected:
     /// This registry allows looking up ValueMergers by name 
     const ValueMergers::Registry* _registry;
     bool _clearFilters;
+    bool _mergeSamples;
+    uint32_t _primarySampleStreamIndex;
 };
 
 VCF_NAMESPACE_END

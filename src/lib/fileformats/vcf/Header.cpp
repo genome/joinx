@@ -42,7 +42,7 @@ namespace {
     };
 }
 
-Header::Header() : _headerSeen(false) {}
+Header::Header() : _headerSeen(false), _sourceIndex(0) {}
 Header::~Header() {
 }
 
@@ -112,18 +112,22 @@ void Header::assertValid() const {
         throw runtime_error("invalid or missing header");
 }
 
-void Header::merge(const Header& other) {
+void Header::merge(const Header& other, bool allowDuplicateSamples) {
+    for (auto iter = other._sampleNames.begin(); iter != other._sampleNames.end(); ++iter) {
+        if (find(_sampleNames.begin(), _sampleNames.end(), *iter) != _sampleNames.end()) {
+            if (allowDuplicateSamples)
+                continue;
+            
+            throw runtime_error(str(format("Error merging VCF headers, sample name conflict: %1%") %*iter));
+        }
+        _sampleNames.push_back(*iter);
+    }
+
     for (auto iter = other._metaInfoLines.begin(); iter != other._metaInfoLines.end(); ++iter) {
         // we already have that exact line
         if (find(_metaInfoLines.begin(), _metaInfoLines.end(), *iter) != _metaInfoLines.end())
             continue;
         add("##"+iter->first+"="+iter->second);
-    }
-
-    for (auto iter = other._sampleNames.begin(); iter != other._sampleNames.end(); ++iter) {
-        if (find(_sampleNames.begin(), _sampleNames.end(), *iter) != _sampleNames.end())
-            throw runtime_error(str(format("Error merging VCF headers, sample name conflict: %1%") %*iter));
-        _sampleNames.push_back(*iter);
     }
 
     MetaInfoFilter filter("fileDate");

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdlib>
 #include <iostream>
 #include <map>
 #include <set>
@@ -29,7 +30,7 @@ public:
     ~Header();
 
     void add(const std::string& line);
-    void merge(const Header& other);
+    void merge(const Header& other, bool allowDuplicateSamples = false);
     bool empty() const;
 
     const std::vector<RawLine>& metaInfoLines() const;
@@ -45,6 +46,9 @@ public:
     // throws when sampleName is not found
     uint32_t sampleIndex(const std::string& sampleName) const;
 
+    void sourceIndex(uint32_t value) { _sourceIndex = value; }
+    uint32_t sourceIndex() const { return _sourceIndex; }
+
     // will throw if the header is invalid
     void assertValid() const;
 
@@ -59,6 +63,7 @@ protected:
     std::vector<RawLine> _metaInfoLines;
     std::vector<std::string> _sampleNames;
     bool _headerSeen;
+    uint32_t _sourceIndex;
 };
 
 VCF_NAMESPACE_END
