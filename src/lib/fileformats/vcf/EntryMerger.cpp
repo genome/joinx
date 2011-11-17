@@ -38,14 +38,11 @@ EntryMerger::EntryMerger(const MergeStrategy& mergeStrategy, const Header* merge
 {
     _newGTIndices.resize(_end - _begin);
 
-    uint32_t qualCount(0);
+    if (end-begin == 1)
+        _qual = begin->qual();
+
     for (const Entry* e = begin; e != end; ++e) {
         size_t idx = e-begin;
-
-        if (e->qual() != Entry::MISSING_QUALITY) {
-            ++qualCount;
-            _qual = e->qual();
-        }
 
         if (e > begin && (e->chrom() != begin->chrom() || e->pos() != begin->pos())) {
             throw runtime_error(
@@ -101,10 +98,6 @@ EntryMerger::EntryMerger(const MergeStrategy& mergeStrategy, const Header* merge
         _filters.clear();
     else if (_filters.size() > 1)
         _filters.erase("PASS");
-
-    // If there was only a single qual value, we will use it. Otherwise, it's not clear how to merge them
-    if (qualCount > 1)
-        _qual = Entry::MISSING_QUALITY;
 }
 
 const string& EntryMerger::chrom() const {

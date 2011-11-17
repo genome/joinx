@@ -158,11 +158,7 @@ void CustomType::emptyRepr(std::ostream& s) const {
     if (_type == FLAG)
         return;
 
-    if (_id == "FT") {
-        s << "PASS";
-    } else {
-        s << '.';
-    }
+    s << '.';
 }
 
 VCF_NAMESPACE_END

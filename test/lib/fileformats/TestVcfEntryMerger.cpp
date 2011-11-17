@@ -224,6 +224,7 @@ TEST_F(TestVcfEntryMerger, stripFilters) {
     EntryMerger merger2(ms2, &_mergedHeader, entries, entries+2);
     Entry e(merger2);
     ASSERT_TRUE(e.failedFilters().empty());
+    ASSERT_EQ(Entry::MISSING_QUALITY, merged.qual());
 }
 
 TEST_F(TestVcfEntryMerger, GTfieldAlwaysFirst) {
@@ -236,6 +237,7 @@ TEST_F(TestVcfEntryMerger, GTfieldAlwaysFirst) {
     Entry merged(merger);
     ASSERT_EQ(4, merged.formatDescription().size());
     ASSERT_EQ("GT", merged.formatDescription()[0]);
+    ASSERT_EQ(Entry::MISSING_QUALITY, merged.qual());
 }
 
 // Let's make sure the builder correctly reheaders Entry objects that are not merged.
