@@ -1,9 +1,10 @@
 #pragma once
 
-#include <cstring>
-#include <deque>
-#include <stdexcept>
 #include <boost/format.hpp>
+#include <cstring>
+#include <list>
+#include <stdexcept>
+#include <vector>
 
 template<typename StreamTypeA, typename StreamTypeB, typename CollectorType>
 class Intersect {
@@ -71,18 +72,24 @@ public:
 
     bool checkCache(const TypeA& valueA) {
         bool rv = false;
+        std::vector<CacheIterator> toErase;
         for (CacheIterator iter = _cache.begin(); iter != _cache.end(); ++iter) {
             Compare cmp = _compareFunc(valueA, iter->value);
             if (cmp == BEFORE) {
                 break;
             } else if (cmp == AFTER) {
-                iter = _cache.erase(iter);
+                toErase.push_back(iter);
                 continue;
             }
 
             bool isHit = _rc.hit(valueA, iter->value);
             rv |= isHit;
             iter->hit |= isHit;
+        }
+        for (auto i = toErase.begin(); i != toErase.end(); ++i) {
+            if (!(*i)->hit && _rc.wantMissB())
+                _rc.missB((*i)->value);
+            _cache.erase(*i);
         }
         return rv;
     }
@@ -148,7 +155,7 @@ public:
 
     void popCache() {
         const CacheEntry& ce = _cache.front();
-        if (!ce.hit)
+        if (!ce.hit && _rc.wantMissB())
             _rc.missB(ce.value);
         _cache.pop_front();
     }
@@ -162,7 +169,7 @@ protected:
         bool hit;
     };
 
-    typedef typename std::deque<CacheEntry> CacheType;
+    typedef typename std::list<CacheEntry> CacheType;
     typedef typename CacheType::iterator CacheIterator;
 
     StreamTypeA& _a;

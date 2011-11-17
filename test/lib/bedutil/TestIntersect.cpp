@@ -8,6 +8,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 
 using namespace std;
 using namespace std::placeholders;
@@ -25,10 +26,23 @@ namespace {
         "1\t5\t8\tTTT/*\t30\t30\n"
         "2\t1\t2\tA/T\t30\t30";
 
+    const string BEDC =
+        "17	7985753	7985754	T/0	-	-\n"
+        "17	7985785	7985786	T/0	-	-\n"
+        "17	7993250	7993257	AAAAACA/0	-	-"
+        ;
+
+    const string BEDD =
+        "17	7985753	7985754	T/0	-	-\n"
+        "17	7985753	7985786	TTTTTTCTCCCCCTTGAACTTGAGCTCAATTCT/0	-	-\n"
+        "17	7985754	7985754	0/TTTTTCTCCCCCTTGAACTTGAGCTCAATTC	-	-\n"
+        "17	7985785	7985786	T/0	-	-"
+        ;
+
     struct MockCollector {
         bool hit(const Bed& a, const Bed& b) {
-            hitsA.push_back(a);
-            hitsB.push_back(b);
+            hitsA.push_back(make_pair(a,b));
+            hitsB.push_back(make_pair(b,a));
             return true;
         }
         bool wantMissA() const { return true; }
@@ -36,8 +50,8 @@ namespace {
         void missA(const Bed& a) { missesA.push_back(a); }
         void missB(const Bed& b) { missesB.push_back(b); }
 
-        vector<Bed> hitsA;
-        vector<Bed> hitsB;
+        vector<pair<Bed,Bed> > hitsA;
+        vector<pair<Bed,Bed> > hitsB;
         vector<Bed> missesA;
         vector<Bed> missesB;
     };
@@ -80,5 +94,23 @@ TEST(TestIntersect, misses) {
     ASSERT_EQ(6, rc.hitsA.size());
     ASSERT_EQ(6, rc.hitsB.size());
     ASSERT_EQ(0, rc.missesA.size());
+    ASSERT_EQ(1, rc.missesB.size());
+}
+
+TEST(TestIntersect, cacheCrash) {
+    MockCollector rc;
+    stringstream ssA(BEDC);
+    stringstream ssB(BEDD);
+    InputStream streamA("C", ssA);
+    InputStream streamB("D", ssB);
+    BedReader s1(extractor, streamA);
+    BedReader s2(extractor, streamB);
+    Intersect<BedReader,BedReader,MockCollector> intersector(s1, s2, rc);
+    intersector.execute();
+
+    // first 2 lines hit twice each, last 2 lines once each, total of 6 hits
+    ASSERT_EQ(4, rc.hitsA.size());
+    ASSERT_EQ(4, rc.hitsB.size());
+    ASSERT_EQ(1, rc.missesA.size());
     ASSERT_EQ(1, rc.missesB.size());
 }
