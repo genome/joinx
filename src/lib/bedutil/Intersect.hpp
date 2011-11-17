@@ -4,25 +4,41 @@
 #include <cstring>
 #include <list>
 #include <stdexcept>
-#include <vector>
 
 template<typename StreamTypeA, typename StreamTypeB, typename CollectorType>
 class Intersect {
-public:
+public: // types and data
+    // value types
     typedef typename StreamTypeA::ValueType TypeA;
     typedef typename StreamTypeB::ValueType TypeB;
 
+    // cache types
+    struct CacheEntry {
+        CacheEntry(const TypeB& v) : value(v), hit(false) {}
+        CacheEntry(const TypeB& v, bool hit) : value(v), hit(hit) {}
+
+        TypeB value;
+        bool hit;
+    };
+
+    typedef typename std::list<CacheEntry> CacheType;
+    typedef typename CacheType::iterator CacheIterator;
+
+    // compare results
     enum Compare {
         BEFORE,
         INTERSECT,
         AFTER
     };
 
+
+public: // code
     Intersect(StreamTypeA& a, StreamTypeB& b, CollectorType& rc, bool adjacentInsertions = false)
         : _a(a) , _b(b), _rc(rc)
         , _compareFunc(adjacentInsertions ? compareWithAdjacentInsertions : compare)
     {
     }
+
     virtual ~Intersect() {}
 
     static Compare compare(const TypeA& a, const TypeB& b) {
@@ -72,24 +88,22 @@ public:
 
     bool checkCache(const TypeA& valueA) {
         bool rv = false;
-        std::vector<CacheIterator> toErase;
-        for (CacheIterator iter = _cache.begin(); iter != _cache.end(); ++iter) {
+        auto iter = _cache.begin();
+        while (iter != _cache.end()) {
             Compare cmp = _compareFunc(valueA, iter->value);
             if (cmp == BEFORE) {
                 break;
             } else if (cmp == AFTER) {
-                toErase.push_back(iter);
+                auto toRemove = iter;
+                ++iter;
+                cacheRemove(toRemove);
                 continue;
             }
 
             bool isHit = _rc.hit(valueA, iter->value);
             rv |= isHit;
             iter->hit |= isHit;
-        }
-        for (auto i = toErase.begin(); i != toErase.end(); ++i) {
-            if (!(*i)->hit && _rc.wantMissB())
-                _rc.missB((*i)->value);
-            _cache.erase(*i);
+            ++iter;
         }
         return rv;
     }
@@ -153,25 +167,17 @@ public:
         _cache.push_back(CacheEntry(valueB, hit));
     }
 
+    void cacheRemove(const CacheIterator& iter) {
+        if (!iter->hit && _rc.wantMissB())
+            _rc.missB(iter->value);
+        _cache.erase(iter);
+    }
+
     void popCache() {
-        const CacheEntry& ce = _cache.front();
-        if (!ce.hit && _rc.wantMissB())
-            _rc.missB(ce.value);
-        _cache.pop_front();
+        cacheRemove(_cache.begin());
     }
 
 protected:
-    struct CacheEntry {
-        CacheEntry(const TypeB& v) : value(v), hit(false) {}
-        CacheEntry(const TypeB& v, bool hit) : value(v), hit(hit) {}
-
-        TypeB value;
-        bool hit;
-    };
-
-    typedef typename std::list<CacheEntry> CacheType;
-    typedef typename CacheType::iterator CacheIterator;
-
     StreamTypeA& _a;
     StreamTypeB& _b;
     CollectorType& _rc;
