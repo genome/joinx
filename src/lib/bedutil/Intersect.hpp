@@ -34,14 +34,17 @@ public: // types and data
 
 public: // code
     Intersect(StreamTypeA& a, StreamTypeB& b, CollectorType& rc, bool adjacentInsertions = false)
-        : _a(a) , _b(b), _rc(rc)
-        , _compareFunc(adjacentInsertions ? compareWithAdjacentInsertions : compare)
+        : _a(a) , _b(b), _rc(rc), _adjacentInsertions(adjacentInsertions)
     {
     }
 
     virtual ~Intersect() {}
 
-    static Compare compare(const TypeA& a, const TypeB& b) {
+    template<typename TA, typename TB>
+    Compare compare(const TA& a, const TB& b) const {
+        if (_adjacentInsertions)
+            return compareWithAdjacentInsertions(a, b);
+
         int rv = strverscmp(a.chrom().c_str(), b.chrom().c_str());
         if (rv < 0)
             return BEFORE;
@@ -60,7 +63,8 @@ public: // code
         return INTERSECT;
     }
 
-    static Compare compareWithAdjacentInsertions(const TypeA& a, const TypeB& b) {
+    template<typename TA, typename TB>
+    Compare compareWithAdjacentInsertions(const TA& a, const TB& b) const {
         int rv = strverscmp(a.chrom().c_str(), b.chrom().c_str());
         if (rv < 0)
             return BEFORE;
@@ -90,7 +94,7 @@ public: // code
         bool rv = false;
         auto iter = _cache.begin();
         while (iter != _cache.end()) {
-            Compare cmp = _compareFunc(valueA, iter->value);
+            Compare cmp = compare(valueA, iter->value);
             if (cmp == BEFORE) {
                 break;
             } else if (cmp == AFTER) {
@@ -113,7 +117,7 @@ public: // code
         using std::runtime_error;
         using boost::format;
         T* peek = NULL;
-        if (stream.peek(&peek) && _compareFunc(*peek, value) == BEFORE)
+        if (stream.peek(&peek) && compare(*peek, value) == BEFORE)
             throw runtime_error(str(format("Unsorted data found in stream %1%\n'%2%' follows '%3%'") %stream.name() %peek->toString() %value.toString()));
         return stream.next(value);
     }
@@ -123,13 +127,13 @@ public: // code
         TypeB valueB;
         while (!_a.eof() && advanceSorted(_a, valueA)) {
             // burn entries from the cache
-            while (!_cache.empty() && _compareFunc(valueA, _cache.front().value) == AFTER)
+            while (!_cache.empty() && compare(valueA, _cache.front().value) == AFTER)
                 popCache();
 
             // look ahead and burn entries from the input file
             TypeB* peek = NULL;
             if (_cache.empty()) {
-                while (!_b.eof() && _b.peek(&peek) && _compareFunc(valueA, *peek) == AFTER) {
+                while (!_b.eof() && _b.peek(&peek) && compare(valueA, *peek) == AFTER) {
                     advanceSorted(_b, valueB);
                     if (_rc.wantMissB())
                         _rc.missB(valueB);
@@ -138,7 +142,7 @@ public: // code
 
             bool hitA = checkCache(valueA);
             while (!_b.eof() && advanceSorted(_b, valueB)) {
-                Compare cmp = _compareFunc(valueA, valueB);
+                Compare cmp = compare(valueA, valueB);
                 if (cmp == BEFORE) {
                     cache(valueB, false);
                     break;
@@ -182,5 +186,5 @@ protected:
     StreamTypeB& _b;
     CollectorType& _rc;
     CacheType _cache;
-    Compare (*_compareFunc)(const TypeA&, const TypeB&);
+    bool _adjacentInsertions;
 };
