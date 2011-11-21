@@ -7,6 +7,7 @@
 #include "SnvConcordanceByQualityCommand.hpp"
 #include "SnvConcordanceCommand.hpp"
 #include "SortCommand.hpp"
+#include "VcfAnnotateCommand.hpp"
 #include "VcfFilterCommand.hpp"
 #include "VcfMergeCommand.hpp"
 
@@ -29,6 +30,7 @@ JoinX::JoinX(int argc, char** argv)
     registerSubCommand(SnvConcordanceByQualityCommand::ptr(new SnvConcordanceByQualityCommand));
     registerSubCommand(SnvConcordanceCommand::ptr(new SnvConcordanceCommand));
     registerSubCommand(SortCommand::ptr(new SortCommand));
+    registerSubCommand(VcfAnnotateCommand::ptr(new VcfAnnotateCommand));
     registerSubCommand(VcfFilterCommand::ptr(new VcfFilterCommand));
     registerSubCommand(VcfMergeCommand::ptr(new VcfMergeCommand));
 

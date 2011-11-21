@@ -189,6 +189,12 @@ void Entry::parse(const Header* h, const string& s) {
     setPositions();
 }
 
+void Entry::addIdentifier(const std::string& id) {
+    if (find(_identifiers.begin(), _identifiers.end(), id) == _identifiers.end())
+        _identifiers.push_back(id);
+}
+
+
 string Entry::toString() const {
     stringstream ss;
     ss << *this;
@@ -220,6 +226,7 @@ void Entry::swap(Entry& other) {
     _formatDescription.swap(other._formatDescription);
     _genotypeData.swap(other._genotypeData);
     std::swap(_header, other._header);
+    setPositions();
 }
 
 int32_t Entry::altIdx(const string& alt) const {

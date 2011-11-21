@@ -33,6 +33,8 @@ public:
     const Header& header() const;
     void parse(const Header* h, const std::string& s);
 
+    void addIdentifier(const std::string& id);
+
     const std::string& chrom() const { return _chrom; }
     const uint64_t& pos() const { return _pos; }
     const std::vector<std::string>& identifiers() const { return _identifiers; }
