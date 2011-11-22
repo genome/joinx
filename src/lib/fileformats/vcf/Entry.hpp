@@ -18,6 +18,7 @@ class Header;
 
 class Entry {
 public:
+    typedef Header HeaderType;
     typedef std::map<std::string, CustomValue> CustomValueMap;
     const static double MISSING_QUALITY;
 
@@ -25,13 +26,23 @@ public:
         e.parse(hdr, s);
     }
 
+    static void parseLineAndReheader(const Header* hdr, const Header* newH, std::string& s, Entry& e) {
+        e.parseAndReheader(hdr, newH, s);
+    }
+
     Entry();
     explicit Entry(const Header* h);
     Entry(const EntryMerger& merger);
     Entry(const Header* h, const std::string& s);
 
+    // This updates the entry to use the new header instead. This can
+    // move the sample data around, but does not currently do any more
+    // validation.
+    void reheader(const Header* newHeader);
+
     const Header& header() const;
     void parse(const Header* h, const std::string& s);
+    void parseAndReheader(const Header* h, const Header* newH, const std::string& s);
 
     void addIdentifier(const std::string& id);
 

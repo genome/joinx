@@ -6,17 +6,12 @@ set(SOURCES
     BedDeduplicator.hpp
     ConcordanceQuality.cpp
     ConcordanceQuality.hpp
-    IResultCollector.hpp
     Intersect.hpp
     IntersectionOutputFormatter.cpp
     IntersectionOutputFormatter.hpp
     MergeSorted.hpp
     NoReferenceFilter.hpp
     RemappedContig.hpp
-    ResultMultiplexer.hpp
-    ResultStreamWriter.cpp
-    ResultStreamWriter.hpp
-    SnvComparator.cpp
     SnvComparator.hpp
     SnvConcordance.cpp
     SnvConcordance.hpp

@@ -56,9 +56,9 @@ namespace {
         vector<Bed> missesB;
     };
 
-    typedef function<void(string&, Bed&)> Extractor;
+    typedef function<void(const BedHeader*, string&, Bed&)> Extractor;
     typedef TypedStream<Bed, Extractor> BedReader;
-    Extractor extractor = bind(&Bed::parseLine, _1, _2, 2);
+    Extractor extractor = bind(&Bed::parseLine, _1, _2, _3, 2);
 }
 
 TEST(TestIntersect, intersectSelf) {

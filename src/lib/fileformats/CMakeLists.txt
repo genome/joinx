@@ -5,11 +5,10 @@ project(fileformats)
 set(SOURCES
     Bed.cpp
     Bed.hpp
-    BedFilterBase.hpp
+    BedReader.cpp
+    BedReader.hpp
     FastaReader.cpp
     FastaReader.hpp
-    IGenomicPosition.hpp
-    ISequenceReader.hpp
     InferFileType.cpp
     InferFileType.hpp
     InputStream.cpp
@@ -18,13 +17,11 @@ set(SOURCES
     StreamFactory.hpp
     StreamHandler.cpp
     StreamHandler.hpp
-    TranscriptStructure.cpp
-    TranscriptStructure.hpp
-    TranscriptStructureStream.cpp
-    TranscriptStructureStream.hpp
     TypedStream.hpp
     Variant.cpp
     Variant.hpp
+    VcfReader.cpp
+    VcfReader.hpp
     vcf/Builder.cpp
     vcf/Builder.hpp
     vcf/CustomType.cpp

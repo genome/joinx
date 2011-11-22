@@ -15,15 +15,17 @@
 #include <memory>
 #include <stdexcept>
 
-template<typename StreamFactoryType, typename OutputFunc>
+template<typename StreamType, typename StreamOpener, typename OutputFunc>
 class SortBuffer {
 public:
-    typedef typename StreamFactoryType::StreamPtr StreamPtr;
-    typedef typename StreamFactoryType::ValueType ValueType;
+    typedef typename std::shared_ptr<StreamType> StreamPtr;
+    typedef typename StreamType::ValueType ValueType;
+    typedef typename ValueType::HeaderType HeaderType;
     typedef typename std::deque<ValueType*>::size_type size_type;
 
-    SortBuffer(StreamFactoryType& streamFactory, bool stable, CompressionType compression)
-        : _streamFactory(streamFactory)
+    SortBuffer(StreamOpener& streamOpener, const HeaderType& h, bool stable, CompressionType compression)
+        : _streamOpener(streamOpener)
+        , _header(h)
         , _stable(stable)
         , _compression(compression)
         , _inputStream("anon", _in)
@@ -81,6 +83,7 @@ public:
             }
 
             out.push(_tmpfile->stream());
+            out << _header;
             for (auto iter = _buf.begin(); iter != _buf.end(); ++iter) {
                 out << **iter << "\n";
                 delete *iter;
@@ -100,7 +103,7 @@ public:
 
         _in.push(_tmpfile->stream());
 
-        _stream = _streamFactory.open(_inputStream);
+        _stream = _streamOpener(_inputStream);
     }
 
     bool peek(ValueType** v) {
@@ -139,7 +142,8 @@ protected:
     }
 
 protected:
-    StreamFactoryType& _streamFactory;
+    StreamOpener& _streamOpener;
+    const HeaderType& _header;
     bool _stable;
     CompressionType _compression;
     std::deque<ValueType*> _buf;

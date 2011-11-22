@@ -79,10 +79,28 @@ Entry::Entry(const EntryMerger& merger)
     setPositions();
 }
 
+void Entry::reheader(const Header* newHeader) {
+    std::vector< std::vector<CustomValue> > newGTData(newHeader->sampleNames().size());
+    for (auto i = _genotypeData.begin(); i != _genotypeData.end(); ++i) {
+        auto offset = distance(_genotypeData.begin(), i);
+        const string& sampleName = header().sampleNames()[offset];
+        uint32_t newIdx = newHeader->sampleIndex(sampleName);
+        newGTData[newIdx] = *i;
+    }
+    _genotypeData.swap(newGTData);
+    _header = newHeader;
+}
+
+
 const Header& Entry::header() const {
     if (!_header)
         throw runtime_error("Attempted to use Vcf Entry with no header!");
     return *_header;
+}
+
+void Entry::parseAndReheader(const Header* h, const Header* newHeader, const string& s) {
+    parse(h, s);
+    reheader(newHeader);
 }
 
 void Entry::parse(const Header* h, const string& s) {
@@ -362,4 +380,3 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
     }
     return s;
 }
-

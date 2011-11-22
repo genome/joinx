@@ -97,8 +97,9 @@ void CreateContigsCommand::exec() {
 
     InputStream::ptr inStream(_streams.wrap<istream, InputStream>(_variantsFile));
     // this stream will read 2 extra fields, ref/call and quality
-    function<void(string&, Bed&)> extractor = bind(&Bed::parseLine, _1, _2, 2);
-    typedef TypedStream<Bed, function<void(string&, Bed&)> > BedReader;
+    typedef function<void(const BedHeader*, string&, Bed&)> Extractor;
+    typedef TypedStream<Bed, Extractor> BedReader;
+    Extractor extractor = bind(&Bed::parseLine, _1, _2, _3, 2);
     BedReader reader(extractor, *inStream);
     RemappedContigFastaWriter writer(*output);
     RemappedContigGenerator<FastaReader, RemappedContigFastaWriter> generator(ref, _flankSize, writer);

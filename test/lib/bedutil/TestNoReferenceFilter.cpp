@@ -14,11 +14,12 @@ TEST(NoReferenceFilter, exclude) {
     string baseLine("1\t2\t3\t");
     vector<string> excludes = list_of("A/")("\0\0")("   ")("NNN");
 
+    BedHeader hdr;
     NoReferenceFilter filter;
     for (unsigned i = 0; i < excludes.size(); ++i) {
         Bed snv;
         string bad = baseLine + excludes[i];
-        Bed::parseLine(bad, snv, 1);
+        Bed::parseLine(&hdr, bad, snv, 1);
         ASSERT_TRUE(filter.exclude(snv));
     }
 
@@ -26,7 +27,7 @@ TEST(NoReferenceFilter, exclude) {
     while (*valid) {
         Bed snv;
         string line = baseLine + *valid + string("/C");
-        Bed::parseLine(line, snv, 1);
+        Bed::parseLine(&hdr, line, snv, 1);
         ASSERT_FALSE(filter.exclude(snv)) <<
             "don't exclude '" << *valid << "' as reference value (" << line << ")";
         ++valid;

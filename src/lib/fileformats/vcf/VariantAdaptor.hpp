@@ -1,14 +1,13 @@
 #pragma once
 
 #include "Entry.hpp"
-#include "fileformats/IGenomicPosition.hpp"
 #include "namespace.hpp"
 
 #include <cstdint>
 
 VCF_NAMESPACE_BEGIN
 
-class VariantAdaptor : public IGenomicPosition {
+class VariantAdaptor {
 public:
     VariantAdaptor(const Entry& entry);
 

@@ -7,8 +7,17 @@
 using namespace std;
 using namespace std::placeholders;
 
+class InputStream;
+
 struct Foo {
-    static void parseLine(string& s, Foo& value) {
+    class HeaderType {
+    public:
+        static HeaderType fromStream(InputStream& s) {
+            return HeaderType();
+        }
+    };
+
+    static void parseLine(const HeaderType*, string& s, Foo& value) {
         value.line = s;
     }
 
@@ -20,9 +29,9 @@ struct Foo {
 };
 
 TEST(StreamFactory, works) {
-    typedef std::function<void(string&, Foo&)> Extractor;
+    typedef std::function<void(const Foo::HeaderType*, string&, Foo&)> Extractor;
     typedef StreamFactory<Foo, Extractor> FactoryType;
-    Extractor e(bind(&Foo::parseLine, _1, _2));
+    Extractor e(bind(&Foo::parseLine, _1, _2, _3));
     FactoryType factory(e);
     stringstream ss1("test1\n");
     stringstream ss2("test2\n");

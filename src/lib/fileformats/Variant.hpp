@@ -84,14 +84,14 @@ public:
             stop() == rhs.stop();
     }
 
-    virtual bool alleleMatch(const Variant& rhs) const {
+    bool alleleMatch(const Variant& rhs) const {
         return
             reference() == rhs.reference()
             && variant() == rhs.variant();
     }
 
-    virtual bool allelePartialMatch(const Variant& rhs) const;
-    virtual bool alleleDbSnpMatch(const Variant& rhs) const;
+    bool allelePartialMatch(const Variant& rhs) const;
+    bool alleleDbSnpMatch(const Variant& rhs) const;
 
     std::ostream& toStream(std::ostream& stream) const;
 

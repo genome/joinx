@@ -41,9 +41,10 @@ TEST(BedDeduplicator, deduplicate) {
     stringstream result;
     OutputWriter<Bed> out(result);
     BedDeduplicator<OutputWriter<Bed> > bdd(out);
+    BedHeader hdr;
     for (size_t i = 0; i < nBeds; ++i) {
         Bed b;
-        Bed::parseLine(inputText[i], b, 1); // 1 extra field: allele
+        Bed::parseLine(&hdr, inputText[i], b, 1); // 1 extra field: allele
         bdd(b);
     }
     bdd.flush();

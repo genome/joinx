@@ -6,6 +6,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <algorithm>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -13,36 +14,38 @@
 #include <memory>
 #include <vector>
 
-template<typename StreamFactoryType, typename OutputFunc>
+template<typename StreamType, typename StreamOpener, typename OutputFunc>
 class Sort {
 public:
-    typedef typename StreamFactoryType::StreamPtr StreamPtr;
-    typedef typename StreamFactoryType::ValueType ValueType;
-    typedef SortBuffer<StreamFactoryType, OutputFunc> BufferType;
+    typedef typename std::shared_ptr<StreamType> StreamPtr;
+    typedef typename StreamType::ValueType ValueType;
+    typedef typename ValueType::HeaderType HeaderType;
+    typedef SortBuffer<StreamType, StreamOpener, OutputFunc> BufferType;
     typedef std::shared_ptr<BufferType> BufferPtr;
 
     Sort(
-            StreamFactoryType& streamFactory,
-            std::vector<InputStream::ptr> inputs,
+            const std::vector<StreamPtr>& inputs,
+            StreamOpener& streamOpener,
             OutputFunc& out,
-            unsigned maxInMem,
+            HeaderType& outputHeader,
+            uint64_t maxInMem,
             bool stable,
             CompressionType compression = NONE
         )
-        : _streamFactory(streamFactory)
+        : _inputs(inputs)
+        , _streamOpener(streamOpener)
         , _out(out)
+        , _outputHeader(outputHeader)
         , _maxInMem(maxInMem)
         , _stable(stable)
         , _compression(compression)
     {
-        for (auto iter = inputs.begin(); iter != inputs.end(); ++iter)
-            _inputs.push_back(streamFactory.open(**iter));
     }
 
     void execute() {
         using namespace std;
 
-        BufferPtr buf(new BufferType(_streamFactory, _stable, _compression));
+        BufferPtr buf(new BufferType(_streamOpener, _outputHeader, _stable, _compression));
 
         for (unsigned idx = 0; idx < _inputs.size(); ++idx) {
 
@@ -57,7 +60,7 @@ public:
                     buf->sort();
                     buf->writeTmp();
                     _buffers.push_back(buf);
-                    buf.reset(new BufferType(_streamFactory, _stable, _compression));
+                    buf.reset(new BufferType(_streamOpener, _outputHeader, _stable, _compression));
                 }
             }
         }
@@ -76,11 +79,12 @@ public:
     }
 
 protected:
-    StreamFactoryType& _streamFactory;
-    std::vector<BufferPtr> _buffers;
     std::vector<StreamPtr> _inputs;
+    StreamOpener& _streamOpener;
     OutputFunc& _out;
-    unsigned _maxInMem;
+    HeaderType& _outputHeader;
+    std::vector<BufferPtr> _buffers;
+    uint64_t _maxInMem;
     bool _stable;
     CompressionType _compression;
 };

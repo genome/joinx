@@ -9,6 +9,10 @@
 using boost::format;
 using namespace std;
 
+std::ostream& operator<<(std::ostream& s, const BedHeader& h) {
+    return s;
+}
+
 Bed::Bed()
     : _start(0)
     , _stop(0)
@@ -32,7 +36,7 @@ Bed::Bed(const std::string& chrom, int64_t start, int64_t stop, const ExtraField
 }
 
 
-void Bed::parseLine(std::string& line, Bed& bed, int maxExtraFields) {
+void Bed::parseLine(const BedHeader*, std::string& line, Bed& bed, int maxExtraFields) {
     Tokenizer<char> tokenizer(line);
     if (!tokenizer.extract(bed._chrom))
         throw runtime_error(str(format("Failed to extract chromosome from bed line '%1%'") %line));

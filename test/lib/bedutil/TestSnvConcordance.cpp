@@ -2,7 +2,6 @@
 #include "common/Sequence.hpp"
 #include "fileformats/Variant.hpp"
 #include "fileformats/Bed.hpp"
-#include "fileformats/ISequenceReader.hpp"
 
 #include <gtest/gtest.h>
 #include <string>

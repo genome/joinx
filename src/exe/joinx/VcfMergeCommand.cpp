@@ -81,28 +81,21 @@ void VcfMergeCommand::exec() {
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
 
-    typedef function<void(string&, Vcf::Entry&)> VcfExtractor;
+    typedef function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
     typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
     typedef shared_ptr<ReaderType> ReaderPtr;
     typedef OutputWriter<Vcf::Entry> WriterType;
 
     vector<ReaderPtr> readers;
-    vector<Vcf::Header> headers;
-    vector<VcfExtractor> extractors;
+    VcfExtractor extractor = bind(&Vcf::Entry::parseLine, _1, _2, _3);
     uint32_t headerIndex(0);
-    for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i) {
-        headers.push_back(Vcf::Header::fromStream(**i));
-        headers.back().sourceIndex(headerIndex++);
-    }
 
-    for (size_t i = 0; i < headers.size(); ++i) {
-        extractors.push_back(bind(&Vcf::Entry::parseLine, &headers[i], _1, _2));
-        readers.push_back(ReaderPtr(new ReaderType(extractors[i], *inputStreams[i])));
+    Vcf::Header mergedHeader;
+    for (size_t i = 0; i < inputStreams.size(); ++i) {
+        readers.push_back(ReaderPtr(new ReaderType(extractor, *inputStreams[i])));
+        mergedHeader.merge(readers.back()->header(), _mergeSamples);
+        readers.back()->header().sourceIndex(headerIndex++);
     }
-
-    Vcf::Header mergedHeader = headers[0];
-    for (auto i = headers.begin() + 1; i != headers.end(); ++i)
-        mergedHeader.merge(*i, _mergeSamples);
 
     WriterType writer(*out);
     Vcf::MergeStrategy mergeStrategy(&mergedHeader);

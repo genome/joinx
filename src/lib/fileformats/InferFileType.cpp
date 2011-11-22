@@ -74,8 +74,8 @@ namespace {
 FileType inferFileType(InputStream& in) {
     FileType rv(UNKNOWN);
 
-    typedef function<void(string&, Bed&)> BedExtractor;
-    BedExtractor bedExtractor = bind(&Bed::parseLine, _1, _2, -1);
+    typedef function<void(const BedHeader*, string&, Bed&)> BedExtractor;
+    BedExtractor bedExtractor = bind(&Bed::parseLine, _1, _2, _3, -1);
     if (testReader<Bed, BedExtractor>(in, bedExtractor)) {
         rv = BED;
     } else if (testVcf(in)) {

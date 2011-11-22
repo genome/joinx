@@ -2,6 +2,7 @@
 #include "fileformats/Bed.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/StreamFactory.hpp"
+#include "fileformats/BedReader.hpp"
 
 #include <gtest/gtest.h>
 #include <algorithm>
@@ -28,18 +29,16 @@ namespace {
         stringstream out;
     };
 
+    BedOpenerType bedOpener = bind(&openBed, _1, 0);
+    BedHeader hdr;
 }
 
 class TestSort : public ::testing::Test {
 protected:
-    typedef std::function<void(string&, Bed&)> BedExtractor;
-    typedef StreamFactory<Bed, BedExtractor> BedReaderFactory;
-    typedef Sort<BedReaderFactory, Collector<Bed> > SortType;
+    typedef Sort<BedReader, BedOpenerType, Collector<Bed> > SortType;
 
     TestSort()
         : _rawStreams(NULL)
-        , _bedExtractor(bind(&Bed::parseLine, _1, _2, 0))
-        , _streamFactory(_bedExtractor)
     {}
 
     string chromName(int chrom) {
@@ -75,8 +74,10 @@ protected:
             }
         }
 
-        for (int i = 0; i < nStreams; ++i)
+        for (int i = 0; i < nStreams; ++i) {
             _inputStreams.push_back(InputStream::ptr(new InputStream("test", _rawStreams[i])));
+            _bedReaders.push_back(openBed(*_inputStreams.back(), 0));
+        }
     }
 
     void TearDown() {
@@ -90,34 +91,33 @@ protected:
 
     stringstream* _rawStreams;
     vector<InputStream::ptr> _inputStreams;
-    BedExtractor _bedExtractor;
-    BedReaderFactory _streamFactory;
+    vector<BedReader::ptr> _bedReaders;
 };
 
 TEST_F(TestSort, unstable) {
     Collector<Bed> out;
-    SortType sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false);
+    SortType sorter(_bedReaders, bedOpener, out, hdr, _expectedBeds.size()/10, false);
     sorter.execute();
     ASSERT_EQ(_expectedStr.str(), out.out.str());
 }
 
 TEST_F(TestSort, bzip2) {
     Collector<Bed> out;
-    SortType sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false, BZIP2);
+    SortType sorter(_bedReaders, bedOpener, out, hdr, _expectedBeds.size()/10, false, BZIP2);
     sorter.execute();
     ASSERT_EQ(_expectedStr.str(), out.out.str());
 }
 
 TEST_F(TestSort, gzip) {
     Collector<Bed> out;
-    SortType sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, false, GZIP);
+    SortType sorter(_bedReaders, bedOpener, out, hdr, _expectedBeds.size()/10, false, GZIP);
     sorter.execute();
     ASSERT_EQ(_expectedStr.str(), out.out.str());
 }
 
 TEST_F(TestSort, stable) {
     Collector<Bed> out;
-    SortType sorter(_streamFactory, _inputStreams, out, _expectedBeds.size()/10, true);
+    SortType sorter(_bedReaders, bedOpener, out, hdr, _expectedBeds.size()/10, true);
     sorter.execute();
     ASSERT_EQ(_expectedStr.str(), out.out.str());
 }

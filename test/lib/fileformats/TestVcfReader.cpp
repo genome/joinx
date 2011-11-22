@@ -46,13 +46,14 @@ namespace {
 TEST(VcfReader, read) {
     stringstream ss(testData);
     InputStream in("test", ss);
-    Header h = Header::fromStream(in);
 
-    typedef function<void(string&, Entry&)> Extractor;
+    typedef function<void(const Vcf::Header*, string&, Entry&)> Extractor;
     typedef TypedStream<Entry, Extractor> VcfReader;
-    Extractor extractor = bind(&Entry::parseLine, &h, _1, _2);
+    Extractor extractor = bind(&Entry::parseLine, _1, _2, _3);
     VcfReader r(extractor, in);
     Entry e;
+
+    const Vcf::Header& h = r.header();
 
     ASSERT_EQ(6, h.infoTypes().size());
     ASSERT_EQ(2, h.filters().size());

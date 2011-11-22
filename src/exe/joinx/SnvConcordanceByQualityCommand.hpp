@@ -3,12 +3,7 @@
 #include "CommandBase.hpp"
 #include "fileformats/StreamHandler.hpp"
 
-#include <fstream>
 #include <string>
-#include <vector>
-#include <memory>
-
-class ResultStreamWriter;
 
 class SnvConcordanceByQualityCommand : public CommandBase {
 public:
@@ -24,8 +19,6 @@ public:
 
     void exec();
 
-    std::unique_ptr<ResultStreamWriter> setupStreamWriter();
-
 protected:
     void parseArguments(int argc, char** argv);
 
@@ -38,10 +31,5 @@ protected:
     std::string _missFileA;
     std::string _missFileB;
 
-    StreamHandler _streamHandler;
-
-    std::ofstream _hitA;
-    std::ofstream _hitB;
-    std::ofstream _missA;
-    std::ofstream _missB;
+    StreamHandler _streams;
 };

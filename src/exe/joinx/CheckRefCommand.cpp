@@ -70,8 +70,8 @@ void CheckRefCommand::parseArguments(int argc, char** argv) {
 
 void CheckRefCommand::exec() {
     InputStream::ptr inStream = _streams.wrap<istream, InputStream>(_bedFile);
-    typedef function<void(string&, Bed&)> ExtractorType;
-    ExtractorType extractor = bind(&Bed::parseLine, _1, _2, 1);
+    typedef function<void(const BedHeader*, string&, Bed&)> ExtractorType;
+    ExtractorType extractor = bind(&Bed::parseLine, _1, _2, _3, 1);
     typedef TypedStream<Bed, ExtractorType> BedReader;
     BedReader bedReader(extractor, *inStream);
     FastaReader refSeq(_fastaFile);

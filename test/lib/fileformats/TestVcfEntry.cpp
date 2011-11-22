@@ -37,6 +37,32 @@ namespace {
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNA00001\tNA00002\tNA00003\n"
         );
 
+    // this header is identical save for the sample ids, it prepends one called 'EXTRA' and
+    // reverses the order of NA1-3
+    string header2Text(
+        "##fileformat=VCFv4.1"
+        "##fileDate=20090805\n"
+        "##source=myImputationProgramV3.1\n"
+        "##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta\n"
+        "##contig=<ID=20,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species=\"Homo sapiens\",taxonomy=x>\n"
+        "##phasing=partial\n"
+        "##INFO=<ID=NS,Number=1,Type=Integer,Description=\"Number of Samples With Data\">\n"
+        "##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total Depth\">\n"
+        "##INFO=<ID=AF,Number=A,Type=Float,Description=\"Allele Frequency\">\n"
+        "##INFO=<ID=AA,Number=1,Type=String,Description=\"Ancestral Allele\">\n"
+        "##INFO=<ID=DB,Number=0,Type=Flag,Description=\"dbSNP membership, build 129\">\n"
+        "##INFO=<ID=H2,Number=0,Type=Flag,Description=\"HapMap2 membership\">\n"
+        "##FILTER=<ID=q10,Description=\"Quality below 10\">\n"
+        "##FILTER=<ID=s50,Description=\"Less than 50% of samples have data\">\n"
+        "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n"
+        "##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">\n"
+        "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">\n"
+        "##FORMAT=<ID=HQ,Number=2,Type=Integer,Description=\"Haplotype Quality\">\n"
+        "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tEXTRA\tNA00003\tNA00002\tNA00001\n"
+        );
+
+
+
     string vcfLines =
         "20\t14370\trs6054257\tG\tA\t29\t.\tAF=0.5;DB;DP=14;H2;NS=3\tGT:GQ:DP:HQ\t0|0:48:1:51,51\t1|0:48:8:51,51\t1/1:43:5:.,.\n"
         "20\t17330\t.\tT\tA\t3\tq10\tAF=0.017;DP=11;NS=3\tGT:GQ:DP:HQ\t0|0:49:3:58,50\t0|1:3:5:65,3\t.\n"
@@ -163,4 +189,24 @@ TEST_F(TestVcfEntry, removeLowDepthGenotypes) {
     ASSERT_EQ(3, v[4].samplesWithData());
     v[4].removeLowDepthGenotypes(4);
     ASSERT_EQ(1, v[4].samplesWithData());
+}
+
+TEST_F(TestVcfEntry, reheader) {
+    stringstream ss(header2Text);
+    Header merged = Header::fromStream(ss);
+    merged.merge(_header, true); // true to allow sample name overlaps
+    vector< vector<CustomValue> > origGT = v[0].genotypeData();
+    ASSERT_EQ(3, origGT.size());
+    ASSERT_EQ(&_header, &v[0].header());
+    v[0].reheader(&merged);
+    ASSERT_EQ(&merged, &v[0].header());
+    ASSERT_EQ(4, v[0].genotypeData().size());
+    ASSERT_TRUE(v[0].genotypeData()[0].empty());
+    ASSERT_TRUE(origGT[2] == v[0].genotypeData()[1]);
+    ASSERT_TRUE(origGT[1] == v[0].genotypeData()[2]);
+    ASSERT_TRUE(origGT[0] == v[0].genotypeData()[3]);
+
+    // Now that we have added the sample EXTRA, trying to reheader with the original
+    // header should throw an exception when it tries to look up the index for EXTRA
+    ASSERT_THROW(v[0].reheader(&_header), runtime_error);
 }

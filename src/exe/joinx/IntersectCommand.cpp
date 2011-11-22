@@ -162,14 +162,12 @@ void IntersectCommand::exec() {
     if (_streams.cinReferences() > 1)
         throw runtime_error("Multiple input streams from stdin specified. Abort.");
 
-    typedef TypedStream<Bed, function<void (std::string&, Bed&)> >BedReaderType;
-    function<void (std::string&, Bed&)>
-        parserA = bind(&Bed::parseLine, _1, _2, extraFieldsA);
-    function<void (std::string&, Bed&)>
-        parserB = bind(&Bed::parseLine, _1, _2, extraFieldsB);
-
-    BedReaderType fa(parserA, *inStreamA);
-    BedReaderType fb(parserB, *inStreamB);
+    typedef function<void (const BedHeader*, std::string&, Bed&)> Extractor;
+    typedef TypedStream<Bed, Extractor> BedReaderType;
+    Extractor exA = bind(&Bed::parseLine, _1, _2, _3, extraFieldsA);
+    Extractor exB = bind(&Bed::parseLine, _1, _2, _3, extraFieldsB);
+    BedReaderType fa(exA, *inStreamA);
+    BedReaderType fb(exB, *inStreamB);
 
     // optional "miss" output streams
     ostream* outMissA(NULL);

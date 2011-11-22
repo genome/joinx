@@ -14,7 +14,7 @@ public:
     typedef ValueClass ValueType;
 
     TypedStreamFilterBase() : _filtered(0) {}
-    ~TypedStreamFilterBase() {}
+    virtual ~TypedStreamFilterBase() {}
 
     uint64_t filtered() {
         return _filtered;
@@ -38,6 +38,7 @@ protected:
 template<typename ValueClass, typename Extractor>
 class TypedStream {
 public:
+    typedef typename ValueClass::HeaderType HeaderType;
     typedef ValueClass ValueType;
     typedef TypedStreamFilterBase<ValueType> FilterType;
     typedef std::shared_ptr<TypedStream<ValueClass, Extractor> > ptr;
@@ -50,6 +51,17 @@ public:
         , _cached(false)
         , _cachedRv(false)
     {
+        _header = HeaderType::fromStream(_in);
+    }
+
+    virtual ~TypedStream() {}
+
+    const HeaderType& header() const {
+        return _header;
+    }
+
+    HeaderType& header() {
+        return _header;
     }
 
     void addFilter(FilterType* filter);
@@ -66,6 +78,7 @@ protected:
     std::string nextLine();
 
 protected:
+    HeaderType _header;
     Extractor _extractor;
 
     std::string _name;
@@ -141,7 +154,7 @@ inline bool TypedStream<ValueType, Extractor>::next(ValueType& value) {
             return false;
 
         try {
-            _extractor(line, value);
+            _extractor(&_header, line, value);
         } catch (const std::exception& e) {
             using boost::format;
             throw std::runtime_error(

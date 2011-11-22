@@ -2,8 +2,6 @@
 
 #include "bedutil/ConcordanceQuality.hpp"
 #include "bedutil/NoReferenceFilter.hpp"
-#include "bedutil/ResultMultiplexer.hpp"
-#include "bedutil/ResultStreamWriter.hpp"
 #include "bedutil/SnvComparator.hpp"
 #include "bedutil/TypeFilter.hpp"
 #include "fileformats/Bed.hpp"
@@ -21,6 +19,85 @@
 using namespace std;
 using namespace std::placeholders;
 namespace po = boost::program_options;
+
+namespace {
+void outputBed(ostream* out, const Bed& b) {
+    *out << b << "\n";
+}
+
+class ResultCollector {
+public:
+    typedef function<void(const Bed&)> EventFunc;
+
+    ResultCollector(
+        StreamHandler& streams,
+        const std::string& hitFileA,
+        const std::string& hitFileB,
+        const std::string& missFileA,
+        const std::string& missFileB)
+    {
+
+        if (!hitFileA.empty()) {
+            ostream* out = streams.get<ostream>(hitFileA);
+            addHitAListener(bind(&outputBed, out, _1));
+        }
+
+        if (!hitFileB.empty()) {
+            ostream* out = streams.get<ostream>(hitFileB);
+            addHitBListener(bind(&outputBed, out, _1));
+        }
+
+        if (!missFileA.empty()) {
+            ostream* out = streams.get<ostream>(missFileA);
+            addMissAListener(bind(&outputBed, out, _1));
+        }
+
+        if (!missFileB.empty()) {
+            ostream* out = streams.get<ostream>(missFileB);
+            addMissBListener(bind(&outputBed, out, _1));
+        }
+    }
+
+    template<typename T>
+    void addAll(T* obj) {
+        addHitAListener(bind(&T::hitA, obj, _1));
+        addHitBListener(bind(&T::hitB, obj, _1));
+        addMissAListener(bind(&T::missA, obj, _1));
+        addMissBListener(bind(&T::missB, obj, _1));
+    }
+
+    void addHitAListener(const EventFunc& func) { _hitAFuncs.push_back(func); }
+    void addHitBListener(const EventFunc& func) { _hitBFuncs.push_back(func); }
+    void addMissAListener(const EventFunc& func) { _missAFuncs.push_back(func); }
+    void addMissBListener(const EventFunc& func) { _missBFuncs.push_back(func); }
+
+    void hitA(const Bed& x) {
+        for (auto i = _hitAFuncs.begin(); i != _hitAFuncs.end(); ++i)
+            (*i)(x);
+    }
+
+    void hitB(const Bed& x) {
+        for (auto i = _hitBFuncs.begin(); i != _hitBFuncs.end(); ++i)
+            (*i)(x);
+    }
+
+    void missA(const Bed& x) {
+        for (auto i = _missAFuncs.begin(); i != _missAFuncs.end(); ++i)
+            (*i)(x);
+    }
+
+    void missB(const Bed& x) {
+        for (auto i = _missBFuncs.begin(); i != _missBFuncs.end(); ++i)
+            (*i)(x);
+    }
+
+protected:
+    vector<EventFunc> _hitAFuncs;
+    vector<EventFunc> _hitBFuncs;
+    vector<EventFunc> _missAFuncs;
+    vector<EventFunc> _missBFuncs;
+};
+}
 
 SnvConcordanceByQualityCommand::SnvConcordanceByQualityCommand() {
 }
@@ -74,73 +151,33 @@ void SnvConcordanceByQualityCommand::parseArguments(int argc, char** argv) {
     }
 }
 
-unique_ptr<ResultStreamWriter> SnvConcordanceByQualityCommand::setupStreamWriter() {
-    unique_ptr<ResultStreamWriter> resultStreamWriter;
-
-    ofstream* hitA(NULL);
-    ofstream* hitB(NULL);
-    ofstream* missA(NULL);
-    ofstream* missB(NULL);
-
-    if (!_hitFileA.empty()) {
-        _hitA.open(_hitFileA.c_str(), ios::out|ios::binary);
-        if (!_hitA)
-            throw runtime_error("Failed to open output file for hits in 'a': '" + _hitFileA + "'");
-        hitA = &_hitA;
-    }
-
-    if (!_hitFileB.empty()) {
-        _hitB.open(_hitFileB.c_str(), ios::out|ios::binary);
-        if (!_hitB)
-            throw runtime_error("Failed to open output file for hits in 'a': '" + _hitFileB + "'");
-        hitB = &_hitB;
-    }
-
-    if (!_missFileA.empty()) {
-        _missA.open(_missFileA.c_str(), ios::out|ios::binary);
-        if (!_missA)
-            throw runtime_error("Failed to open output file for misss in 'a': '" + _missFileA + "'");
-        missA = &_missA;
-    }
-
-    if (!_missFileB.empty()) {
-        _missB.open(_missFileB.c_str(), ios::out|ios::binary);
-        if (!_missB)
-            throw runtime_error("Failed to open output file for misss in 'a': '" + _missFileB + "'");
-        missB = &_missB;
-    }
-
-    resultStreamWriter.reset(new ResultStreamWriter(hitA, hitB, missA, missB));
-    return resultStreamWriter;
-}
-
 void SnvConcordanceByQualityCommand::exec() {
-    typedef TypedStream<Bed, function<void(string&, Bed&)> > BedReader;
 
-    InputStream::ptr inStreamA(_streamHandler.wrap<istream, InputStream>(_fileA));
-    InputStream::ptr inStreamB(_streamHandler.wrap<istream, InputStream>(_fileB));
+    InputStream::ptr inStreamA(_streams.wrap<istream, InputStream>(_fileA));
+    InputStream::ptr inStreamB(_streams.wrap<istream, InputStream>(_fileB));
 
     // set up input filters, keep SNV only, and reject entries with N ref value
     NoReferenceFilter nref;
     TypeFilter snvOnly(Bed::SNV);
 
-    function<void(string&, Bed&)> extractorA = bind(&Bed::parseLine, _1, _2, 2);
-    BedReader fa(extractorA, *inStreamA);
+    typedef function<void(const BedHeader*, string&, Bed&)> Extractor;
+    typedef TypedStream<Bed, Extractor> BedReader;
+
+    Extractor exA = bind(&Bed::parseLine, _1, _2, _3, 2);
+    Extractor exB = bind(&Bed::parseLine, _1, _2, _3, 0);
+
+    BedReader fa(exA, *inStreamA);
     fa.addFilter(&snvOnly);
     fa.addFilter(&nref);
 
-    function<void(string&, Bed&)> extractorB = bind(&Bed::parseLine, _1, _2, 0);
-    BedReader fb(extractorB, *inStreamB);
+    BedReader fb(exB, *inStreamB);
     fb.addFilter(&snvOnly);
 
     ConcordanceQuality qc;
-    ResultMultiplexer rmux;
-    rmux.add(&qc);
+    ResultCollector rc(_streams, _hitFileA, _hitFileB, _missFileA, _missFileB);
+    rc.addAll(&qc);
 
-    unique_ptr<ResultStreamWriter> resultStreamWriter = setupStreamWriter();
-    if (resultStreamWriter.get())
-        rmux.add(resultStreamWriter.get());
-    SnvComparator snvi(fa, fb, rmux);
+    SnvComparator<BedReader, ResultCollector> snvi(fa, fb, rc);
     snvi.exec();
     qc.report(cout);
 

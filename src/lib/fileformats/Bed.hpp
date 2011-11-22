@@ -1,16 +1,28 @@
 #pragma once
 
-#include "IGenomicPosition.hpp"
-
-#include <cstdint>
 #include <algorithm>
-#include <string>
+#include <cstdint>
+#include <ostream>
 #include <sstream>
-#include <vector>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
-class Bed : public IGenomicPosition {
+class InputStream;
+
+// dummy class, BED doesn't have a header
+class BedHeader {
 public:
+    static BedHeader fromStream(InputStream& in) {
+        return BedHeader();
+    }
+};
+
+std::ostream& operator<<(std::ostream& s, const BedHeader& h);
+
+class Bed {
+public:
+    typedef BedHeader HeaderType;
     typedef std::vector<std::string> ExtraFieldsType;
 
     enum Type {
@@ -22,7 +34,7 @@ public:
     Bed(const std::string& chrom, int64_t start, int64_t stop);
     Bed(const std::string& chrom, int64_t start, int64_t stop, const ExtraFieldsType& extraFields);
 
-    static void parseLine(std::string& line, Bed& bed, int maxExtraFields = -1);
+    static void parseLine(const BedHeader*, std::string& line, Bed& bed, int maxExtraFields = -1);
     void swap(Bed& rhs);
 
     const std::string& chrom() const;

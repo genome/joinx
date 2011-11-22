@@ -17,9 +17,9 @@ namespace {
     const int CHROM_MAX = 22;
     const int START_MAX = 5;
     const int END_MAX   = 5;
-    typedef function<void(string&, Bed&)> Extractor;
+    typedef function<void(const BedHeader*, string&, Bed&)> Extractor;
     typedef TypedStream<Bed, Extractor> BedReader;
-    Extractor extractor = bind(&Bed::parseLine, _1, _2, -1);
+    Extractor extractor = bind(&Bed::parseLine, _1, _2, _3, -1);
 
     struct Collector {
         void operator()(const Bed& value) {

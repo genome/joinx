@@ -1,6 +1,5 @@
 #pragma once
 
-#include "IResultCollector.hpp"
 #include "fileformats/Bed.hpp"
 
 #include <cstdint>
@@ -10,7 +9,7 @@
 #include <sstream>
 #include <utility>
 
-class ConcordanceQuality : public IResultCollector {
+class ConcordanceQuality {
 public:
     ConcordanceQuality() : _hitCount(0), _missCount(0) {}
 

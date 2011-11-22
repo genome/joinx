@@ -104,19 +104,18 @@ void VcfAnnotateCommand::exec() {
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
 
-    typedef function<void(string&, Vcf::Entry&)> VcfExtractor;
+    typedef function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
     typedef TypedStream<Vcf::Entry, VcfExtractor> VcfReader;
 
-    typedef function<void (std::string&, Bed&)> BedExtractor;
+    typedef function<void (const BedHeader*, std::string&, Bed&)> BedExtractor;
     typedef TypedStream<Bed, BedExtractor> BedReader;
 
     typedef OutputWriter<Vcf::Entry> Writer;
 
-    BedExtractor bedEx = bind(&Bed::parseLine, _1, _2, -1); // -1 => parse all fields, not just first 3
+    BedExtractor bedEx = bind(&Bed::parseLine, _1, _2, _3, -1); // -1 => parse all fields, not just first 3
     BedReader bedReader(bedEx, *inputStreams[0]);
 
-    Vcf::Header header = Vcf::Header::fromStream(*inputStreams[1]);
-    VcfExtractor vcfEx = bind(&Vcf::Entry::parseLine, &header, _1, _2);
+    VcfExtractor vcfEx = bind(&Vcf::Entry::parseLine, _1, _2, _3);
     VcfReader vcfReader(vcfEx, *inputStreams[1]);
 
     Bed bed;
@@ -125,6 +124,6 @@ void VcfAnnotateCommand::exec() {
     Writer writer(*out);
     Catcher<Writer> c(writer);
     Intersect<VcfReader,BedReader,Catcher<Writer> > intersector(vcfReader, bedReader, c);
-    *out << header;
+    *out << vcfReader.header();
     intersector.execute();
 }

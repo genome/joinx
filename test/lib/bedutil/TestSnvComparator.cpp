@@ -1,6 +1,7 @@
 #include "bedutil/SnvComparator.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/InputStream.hpp"
+#include "fileformats/TypedStream.hpp"
 
 #include "MockResultCollector.hpp"
 
@@ -34,10 +35,10 @@ const string BEDB =
     "Y\t2\t3\tA/T\t44\n";
 
 namespace {
-    typedef function<void(string&, Bed&)> Extractor;
-    Extractor exA = bind(&Bed::parseLine, _1, _2, 2);
-    Extractor exB = bind(&Bed::parseLine, _1, _2, 0);
-    typedef SnvComparator::BedReader BedReader;
+    typedef function<void(const BedHeader*, string&, Bed&)> Extractor;
+    Extractor exA = bind(&Bed::parseLine, _1, _2, _3, 2);
+    Extractor exB = bind(&Bed::parseLine, _1, _2, _3, 0);
+    typedef TypedStream<Bed, std::function<void(const BedHeader*, std::string&, Bed&)> > BedReader;
 }
 
 TEST(SnvComparator, intersectAll) {
@@ -49,7 +50,7 @@ TEST(SnvComparator, intersectAll) {
     BedReader sB(exB, streamB);
     MockResultCollector rc;
 
-    SnvComparator ss(sA, sB, rc);
+    SnvComparator<BedReader, MockResultCollector> ss(sA, sB, rc);
     ss.exec();
 
     ASSERT_EQ(6u, rc._hitA.size());
@@ -68,7 +69,7 @@ TEST(SnvComparator, intersectSome) {
 
     MockResultCollector rc;
 
-    SnvComparator ss(sA, sB, rc);
+    SnvComparator<BedReader, MockResultCollector> ss(sA, sB, rc);
     ss.exec();
 
     ASSERT_EQ(3u, rc._hitA.size());

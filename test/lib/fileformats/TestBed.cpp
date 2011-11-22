@@ -6,6 +6,10 @@
 
 using namespace std;
 
+namespace {
+    BedHeader hdr;
+}
+
 class TestableBed : public Bed {
 public:
     using Bed::_chrom;
@@ -16,7 +20,7 @@ public:
 TEST(Bed, parse) {
     string snvLine = "1\t2\t3\tA/T\t44";
     TestableBed snv;
-    Bed::parseLine(snvLine, snv, 2);
+    Bed::parseLine(&hdr, snvLine, snv, 2);
     ASSERT_EQ("1", snv.chrom());
     ASSERT_EQ(2u, snv.start());
     ASSERT_EQ(3u, snv.stop());
@@ -44,8 +48,8 @@ TEST(Bed, swap) {
     string snvLine1 = "1\t2\t3\tA/T\t44\t19";
     string snvLine2 = "2\t3\t4\tA/T\t44\t20";
     Bed a, b, oa, ob;
-    Bed::parseLine(snvLine1, oa, 3);
-    Bed::parseLine(snvLine2, ob, 3);
+    Bed::parseLine(&hdr, snvLine1, oa, 3);
+    Bed::parseLine(&hdr, snvLine2, ob, 3);
 
     a = oa;
     b = ob;
@@ -71,7 +75,7 @@ TEST(Bed, parseBad) {
     };
     for (unsigned i = 0; i < sizeof(baddies)/sizeof(baddies[0]); ++i) {
         string tmp = baddies[i]; // string gets swapped
-        ASSERT_THROW(Bed::parseLine(tmp, b), runtime_error) <<
+        ASSERT_THROW(Bed::parseLine(&hdr, tmp, b), runtime_error) <<
             "i is " << i << ", input was: '" << baddies[i] << "', got: " << b;
     }
 }
@@ -79,7 +83,7 @@ TEST(Bed, parseBad) {
 TEST(Bed, cmp) {
     TestableBed a;
     string data ("1\t1\t1\tA/T\t44");
-    Bed::parseLine(data, a, 2);
+    Bed::parseLine(&hdr, data, a, 2);
 
     TestableBed b = a;
     b._stop++;

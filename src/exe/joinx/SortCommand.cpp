@@ -2,11 +2,12 @@
 
 #include "bedutil/BedDeduplicator.hpp"
 #include "bedutil/Sort.hpp"
-#include "fileformats/Bed.hpp"
-#include "fileformats/StreamFactory.hpp"
+#include "fileformats/BedReader.hpp"
 #include "fileformats/InferFileType.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/OutputWriter.hpp"
+#include "fileformats/StreamFactory.hpp"
+#include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 
@@ -122,29 +123,6 @@ namespace {
     }
 }
 
-namespace {
-    template<typename ReaderFactoryType, typename WriterType>
-    void doSort(
-            CompressionType compression,
-            vector<InputStream::ptr>& inputStreams,
-            ReaderFactoryType& readerFactory,
-            WriterType& writer,
-            uint64_t maxInMem,
-            bool stable
-        )
-    {
-        Sort<ReaderFactoryType, WriterType> sorter(
-            readerFactory,
-            inputStreams,
-            writer,
-            maxInMem,
-            stable,
-            compression
-        );
-        sorter.execute();
-    }
-}
-
 void SortCommand::exec() {
     CompressionType compression = compressionTypeFromString(_compressionString);
 
@@ -158,40 +136,69 @@ void SortCommand::exec() {
     if (type == EMPTY)
         return;
 
-    typedef function<void(string&, Bed&)> BedExtractor;
-    typedef function<void(string&, Vcf::Entry&)> VcfExtractor;
-    typedef StreamFactory<Bed, BedExtractor> BedReaderFactory;
-    typedef StreamFactory<Vcf::Entry, VcfExtractor> VcfReaderFactory;
-
     if (type == BED) {
+        int extraFields = _unique ? 1 : 0;
+        BedOpenerType bedOpener = bind(&openBed, _1, 0);
         typedef OutputWriter<Bed> WriterType;
-        // note: if we are dedplicating, we need to tell the bed extractor to read an extra field (allele)
-        BedExtractor be = bind(&Bed::parseLine, _1, _2, _unique?1:0);
-        BedReaderFactory brf(be);
         WriterType writer(*out);
+        vector<BedReader::ptr> readers;
+        for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i)
+            readers.push_back(openBed(**i, extraFields));
+        BedHeader outputHeader;
+
         if (_unique) {
             BedDeduplicator<WriterType> dedup(writer);
-            doSort<BedReaderFactory, BedDeduplicator<WriterType> >(
-                compression, inputStreams, brf, dedup, _maxInMem, _stable
+            Sort<BedReader, BedOpenerType, BedDeduplicator<WriterType> > sorter(
+                readers,
+                bedOpener,
+                dedup,
+                outputHeader,
+                _maxInMem,
+                _stable,
+                compression
             );
+            sorter.execute();
         } else {
-            doSort<BedReaderFactory, WriterType>(
-                compression, inputStreams, brf, writer, _maxInMem, _stable
+            Sort<BedReader, BedOpenerType, WriterType> sorter(
+                readers,
+                bedOpener,
+                writer,
+                outputHeader,
+                _maxInMem,
+                _stable,
+                compression
             );
+            sorter.execute();
         }
     } else if (type == VCF) {
         typedef OutputWriter<Vcf::Entry> WriterType;
         WriterType writer(*out);
-        Vcf::Header hdr = Vcf::Header::fromStream(*inputStreams[0]);
-        for (auto i = inputStreams.begin()+1; i != inputStreams.end(); ++i) {
-            hdr.merge(Vcf::Header::fromStream(**i));
+
+        typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
+        typedef shared_ptr<ReaderType> ReaderPtr;
+        vector<ReaderPtr> readers;
+
+        Vcf::Header mergedHeader;
+        VcfExtractor extractor = bind(&Vcf::Entry::parseLineAndReheader, _1, &mergedHeader, _2, _3);
+
+        for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i) {
+            readers.push_back(ReaderPtr(new ReaderType(extractor, **i)));
+            mergedHeader.merge(readers.back()->header());
         }
-        VcfExtractor ve = bind(&Vcf::Entry::parseLine, &hdr, _1, _2);
-        *out << hdr;
-        VcfReaderFactory vrf(ve);
-        doSort<VcfReaderFactory, WriterType>(
-            compression, inputStreams, vrf, writer, _maxInMem, _stable
+
+        *out << mergedHeader;
+
+        VcfOpenerType vcfOpener = bind(&openVcf, _1);
+        Sort<VcfReader, VcfOpenerType, WriterType> sorter(
+            readers,
+            vcfOpener,
+            writer,
+            mergedHeader,
+            _maxInMem,
+            _stable,
+            compression
         );
+        sorter.execute();
     } else {
         throw runtime_error("Unknown file type!");
     }

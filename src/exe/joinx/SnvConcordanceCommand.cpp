@@ -205,8 +205,9 @@ void SnvConcordanceCommand::exec() {
 
     InputStream inA(_fileA, *s.inA);
     InputStream inB(_fileB, *s.inB);
-    function<void(string&, Bed&)> extractor = bind(&Bed::parseLine, _1, _2, -1);
-    typedef TypedStream<Bed, function<void(string&, Bed&)> > BedReader;
+    typedef function<void(const BedHeader*, string&, Bed&)> Extractor;
+    Extractor extractor = bind(&Bed::parseLine, _1, _2, _3, -1);
+    typedef TypedStream<Bed, Extractor> BedReader;
     BedReader fa(extractor, inA);
     BedReader fb(extractor, inB);
 

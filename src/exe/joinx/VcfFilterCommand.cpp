@@ -57,27 +57,22 @@ void VcfFilterCommand::parseArguments(int argc, char** argv) {
     }
 }
 
-namespace {
-
-}
-
 void VcfFilterCommand::exec() {
     InputStream::ptr instream(_streams.wrap<istream, InputStream>(_infile));
     ostream* out = _streams.get<ostream>(_outputFile);
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
 
-    typedef function<void(string&, Vcf::Entry&)> VcfExtractor;
+    typedef function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
     typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
     typedef shared_ptr<ReaderType> ReaderPtr;
     typedef OutputWriter<Vcf::Entry> WriterType;
 
-    Vcf::Header header = Vcf::Header::fromStream(*instream);
-    VcfExtractor extractor = bind(&Vcf::Entry::parseLine, &header, _1, _2);
+    VcfExtractor extractor = bind(&Vcf::Entry::parseLine, _1, _2, _3);
     WriterType writer(*out);
     ReaderType reader(extractor, *instream);
     Vcf::Entry e;
-    *out << header;
+    *out << reader.header();
     while (reader.next(e)) {
         e.removeLowDepthGenotypes(_minDepth);
         if (e.samplesWithData())
