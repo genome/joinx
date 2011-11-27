@@ -5,12 +5,12 @@ from subprocess import Popen, PIPE
 from valgrind import Valgrind
 import difflib
 import os
+import re
 import shlex
 import shutil
 import sys
 import tempfile
 import unittest
-
 
 class JoinxTest():
     exe_path = None
@@ -41,10 +41,13 @@ class JoinxTest():
     def tempFile(self, name):
         return os.path.join(self.tmp_dir, name)
 
-    def assertFilesEqual(self, first, second, msg=None):
-       first_data = open(first).read()
-       second_data = open(second).read()
-       self.assertMultiLineEqual(first_data, second_data)
+    def assertFilesEqual(self, first, second, msg=None, filter_regex=None):
+        first_data = open(first).readlines()
+        second_data = open(second).readlines()
+        if filter_regex:
+            first_data = [x for x in first_data if not re.match(filter_regex, x)]
+            second_data = [x for x in second_data if not re.match(filter_regex, x)]
+        self.assertMultiLineEqual("".join(first_data), "".join(second_data))
 
         
     def assertMultiLineEqual(self, first, second, msg=None):
