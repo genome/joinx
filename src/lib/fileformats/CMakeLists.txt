@@ -44,7 +44,6 @@ set(SOURCES
     vcf/ValueMergers.hpp
     vcf/VariantAdaptor.cpp
     vcf/VariantAdaptor.hpp
-    vcf/namespace.hpp
 )
 
 add_library(fileformats ${SOURCES})
