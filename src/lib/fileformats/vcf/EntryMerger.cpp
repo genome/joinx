@@ -185,6 +185,8 @@ void EntryMerger::setAltAndGenotypeData(
                     genotypeData[mergedIdx] = genotypeFormatter.process(format, e, sampleIdx, _newGTIndices[idx]);
                 }
             }
+        } catch (const DisjointGenotypesError&) {
+            throw;
         } catch (const exception& ex) {
             throw runtime_error(str(boost::format(
                 "Failed while merging genotype data for entry:\n%1%\nError: %2%")
