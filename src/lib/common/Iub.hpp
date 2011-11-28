@@ -41,26 +41,10 @@ inline unsigned alleles2bin(const char* alleles) {
 }
 
 inline char alleles2iub(unsigned binAlleles) {
-    char rv = 'N';
-    switch (binAlleles) {
-        case  1: rv = 'A'; break;
-        case  2: rv = 'C'; break;
-        case  3: rv = 'M'; break;
-        case  4: rv = 'G'; break;
-        case  5: rv = 'R'; break;
-        case  6: rv = 'S'; break;
-        case  7: rv = 'V'; break;
-        case  8: rv = 'T'; break;
-        case  9: rv = 'W'; break;
-        case 10: rv = 'Y'; break;
-        case 11: rv = 'H'; break;
-        case 12: rv = 'K'; break;
-        case 13: rv = 'D'; break;
-        case 14: rv = 'B'; break;
-        case 15: rv = 'N'; break;
-        default: break;
-    }
-    return rv;
+    if (binAlleles < 1 || binAlleles > 15)
+        return 'N';
+    const static char* _tbl = "NACMGRSVTWYHKDBN";
+    return _tbl[binAlleles];
 }
 
 inline char alleles2iub(const std::string& alleles) {
