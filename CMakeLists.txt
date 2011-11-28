@@ -29,6 +29,11 @@ if (CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "-Wall -ansi -pedantic -std=c++0x -Wnon-virtual-dtor")
 endif ()
 
+# on linux mint 12, libgtest requires pthreads, so link thread libraries
+# everywhere
+find_package(Threads)
+link_libraries(${CMAKE_THREAD_LIBS_INIT})
+
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
 

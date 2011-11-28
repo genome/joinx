@@ -8,8 +8,8 @@ namespace {
     template<typename StreamPtr>
     bool streamLessThan(const StreamPtr& a, const StreamPtr& b) {
         typedef typename StreamPtr::element_type::ValueType ValueType;
-        ValueType* pa;
-        ValueType* pb;
+        ValueType* pa(0);
+        ValueType* pb(0);
         if (a->eof()) return false;
         if (b->eof()) return true;
         a->peek(&pa);
