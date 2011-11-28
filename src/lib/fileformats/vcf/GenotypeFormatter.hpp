@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -12,6 +13,13 @@ VCF_NAMESPACE_BEGIN
 class CustomValue;
 class Entry;
 class Header;
+
+class DisjointGenotypesError : public std::runtime_error {
+public:
+    DisjointGenotypesError(const std::string& what)
+        : std::runtime_error(what)
+    {}
+};
 
 class GenotypeFormatter {
 public:

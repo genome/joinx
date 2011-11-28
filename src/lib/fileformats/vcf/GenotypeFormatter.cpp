@@ -66,7 +66,7 @@ void GenotypeFormatter::merge(
             string newGt = renumberGT(e, sampleIdx, alleleIndices);
             if (!previousValues[0].empty()) {
                 if (areGenotypesDisjoint(previousValues[0].toString(), newGt)) {
-                    throw runtime_error(
+                    throw DisjointGenotypesError(
                         str(format("Incompatible genotypes while merging sample data: '%1%' and '%2%'")
                         %previousValues[0].toString() %newGt));
                 }

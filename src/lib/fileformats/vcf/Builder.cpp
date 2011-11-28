@@ -1,9 +1,11 @@
 #include "Builder.hpp"
 #include "Entry.hpp"
 #include "EntryMerger.hpp"
+#include "GenotypeFormatter.hpp" // TODO: move DisjointAllelesException out of this header
+#include "Header.hpp"
 
+#include <iostream>
 #ifdef DEBUG_VCF_MERGE
-# include <iostream>
 # include <iterator>
 # include <set>
 #endif // DEBUG_VCF_MERGE
@@ -39,9 +41,31 @@ void Builder::operator()(const Entry& e) {
 }
 
 void Builder::output(const Entry* begin, const Entry* end) const {
-    EntryMerger merger(_mergeStrategy, _header, begin, end);
-    Entry merged(merger);
-    _out(merged);
+    try {
+        EntryMerger merger(_mergeStrategy, _header, begin, end);
+        Entry merged(merger);
+        _out(merged);
+    } catch (const DisjointGenotypesError& e) {
+        // TODO: real logging
+        cerr << e.what() << "\nEntries:\n";
+        // we'll pick the guy with sourceIndex = 0
+        const Entry* chosen = begin;
+        for (const Entry* ee = begin; ee != end; ++ee) {
+            cerr << *ee << "\n";
+            // TODO: NO NO NO NO NO NO take this hack out
+            if (ee->header().sourceIndex() == 0)
+                chosen = ee;
+        }
+        if (end - begin == 2) {
+            cerr << "Going with entry #" << int(chosen-begin)+1 << ".\n";
+            EntryMerger merger(_mergeStrategy, _header, chosen, chosen+1);
+            Entry merged(merger);
+            _out(merged);
+        } else {
+            cerr << "More than 2 entries, abort.\n";
+            throw;
+        }
+    }
 
 #ifdef DEBUG_VCF_MERGE
     if (merged.alt().size() > 1) {
