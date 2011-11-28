@@ -13,7 +13,7 @@
 using boost::format;
 using namespace std;
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 GenotypeFormatter::GenotypeFormatter(const Header* header, const vector<string>& alleles)
     : _header(header)
@@ -132,4 +132,4 @@ bool GenotypeFormatter::areGenotypesDisjoint(const std::string& gt1, const std::
     return true;
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

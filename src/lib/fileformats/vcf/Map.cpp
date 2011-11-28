@@ -5,7 +5,7 @@
 using boost::format;
 using namespace std;
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 Map::Map() {}
 
@@ -46,4 +46,4 @@ const std::string& Map::toString() const {
     }
     return _str;
 }
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

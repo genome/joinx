@@ -10,7 +10,7 @@ using boost::format;
 using boost::lexical_cast;
 using namespace std;
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 CustomType::CustomType()
     : _numberType(VARIABLE_SIZE)
@@ -161,4 +161,4 @@ void CustomType::emptyRepr(std::ostream& s) const {
     s << '.';
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

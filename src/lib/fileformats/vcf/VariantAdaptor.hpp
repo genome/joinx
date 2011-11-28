@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Entry.hpp"
-#include "namespace.hpp"
+#include "common/namespaces.hpp"
 
 #include <cstdint>
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 class VariantAdaptor {
 public:
@@ -43,4 +43,4 @@ inline int64_t VariantAdaptor::stop() const {
     return _stop;
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

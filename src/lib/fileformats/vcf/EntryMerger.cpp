@@ -12,7 +12,7 @@
 using boost::format;
 using namespace std;
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 namespace {
     bool referenceSizeLessThan(const Entry& a, const Entry& b) {
@@ -199,4 +199,4 @@ const Header* EntryMerger::mergedHeader() const {
     return _mergedHeader;
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

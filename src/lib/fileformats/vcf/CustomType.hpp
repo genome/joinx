@@ -1,12 +1,12 @@
 #pragma once
 
-#include "namespace.hpp"
+#include "common/namespaces.hpp"
 
 #include <boost/format.hpp>
 #include <cstdint>
 #include <string>
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 class CustomType {
 public:
@@ -150,4 +150,4 @@ inline void CustomType::typecheck<uint32_t>() const {
     typecheck<int64_t>();
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "namespace.hpp"
+#include "common/namespaces.hpp"
 
 #include <cstddef>
 #include <map>
@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 class CustomValue;
 class Entry;
@@ -54,4 +54,4 @@ protected:
     const std::vector<std::string>& _alleles;
 };
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

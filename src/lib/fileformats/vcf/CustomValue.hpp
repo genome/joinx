@@ -2,7 +2,7 @@
 
 #include "CustomType.hpp"
 #include "common/Tokenizer.hpp"
-#include "namespace.hpp"
+#include "common/namespaces.hpp"
 
 #include <boost/any.hpp>
 #include <boost/lexical_cast.hpp>
@@ -11,7 +11,7 @@
 #include <vector>
 #include <ostream>
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 class CustomValue {
 public:
@@ -127,6 +127,6 @@ inline bool CustomValue::operator!=(const CustomValue& rhs) const {
     return !(*this == rhs);
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)
 
 std::ostream& operator<<(std::ostream& s, const Vcf::CustomValue& v);

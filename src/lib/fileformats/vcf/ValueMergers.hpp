@@ -1,6 +1,6 @@
 #pragma once
 
-#include "namespace.hpp"
+#include "common/namespaces.hpp"
 
 #include <boost/noncopyable.hpp>
 #include <functional>
@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 class CustomType;
 class CustomValue;
@@ -133,4 +133,4 @@ namespace ValueMergers {
     };
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

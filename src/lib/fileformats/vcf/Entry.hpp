@@ -2,7 +2,7 @@
 
 #include "CustomValue.hpp"
 #include "common/Tokenizer.hpp"
-#include "namespace.hpp"
+#include "common/namespaces.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <cstdint>
@@ -11,16 +11,32 @@
 #include <string>
 #include <vector>
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 class EntryMerger;
 class Header;
 
 class Entry {
 public:
+    enum FieldName {
+        CHROM,
+        POS,
+        ID,
+        REF,
+        ALT,
+        QUAL,
+        FILTER,
+        INFO,
+        FORMAT,
+        SAMPLE_DATA,
+        UNDEFINED
+    };
     typedef Header HeaderType;
     typedef std::map<std::string, CustomValue> CustomValueMap;
     const static double MISSING_QUALITY;
+
+    static const char* fieldToString(FieldName field);
+    static FieldName fieldFromString(const char* name);
 
     static void parseLine(const Header* hdr, std::string& s, Entry& e) {
         e.parse(hdr, s);
@@ -124,6 +140,6 @@ inline bool Entry::operator<(const Entry& rhs) const {
     return cmp(rhs) < 0;
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)
 
 std::ostream& operator<<(std::ostream& s, const Vcf::Entry& e);

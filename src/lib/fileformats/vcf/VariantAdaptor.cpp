@@ -9,7 +9,7 @@
 using boost::format;
 using namespace std;
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 VariantAdaptor::VariantAdaptor(const Entry& entry)
     : _entry(entry)
@@ -44,4 +44,4 @@ string::size_type VariantAdaptor::commonPrefix(const string& a, const string& b)
     return p;
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

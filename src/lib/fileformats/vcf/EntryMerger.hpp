@@ -1,13 +1,13 @@
 #pragma once
 
-#include "namespace.hpp"
+#include "common/namespaces.hpp"
 #include <cstdint>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 class CustomValue;
 class Entry;
@@ -55,4 +55,4 @@ protected:
     std::vector< std::vector< size_t > > _newGTIndices;
 };
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

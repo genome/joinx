@@ -14,7 +14,7 @@ using boost::format;
 using namespace std;
 using namespace std::placeholders;
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 namespace {
     const char *expectedHeaderFields[] = {
@@ -186,7 +186,7 @@ const std::vector<std::string>& Header::sampleNames() const {
 }
 
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)
 
 std::ostream& operator<<(std::ostream& s, const Vcf::Header& h) {
     const vector<Vcf::Header::RawLine>& mlines = h.metaInfoLines();

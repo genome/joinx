@@ -7,7 +7,7 @@ using boost::format;
 using boost::lexical_cast;
 using namespace std;
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 CustomValue::CustomValue()
     : _type(0)
@@ -217,7 +217,7 @@ CustomValue& CustomValue::operator+=(const CustomValue& rhs) {
     return *this;
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)
 
 std::ostream& operator<<(std::ostream& s, const Vcf::CustomValue& v) {
     return s;

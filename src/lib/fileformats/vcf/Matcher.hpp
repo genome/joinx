@@ -1,13 +1,13 @@
 #pragma once
 
 #include "CustomValue.hpp"
-#include "namespace.hpp"
+#include "common/namespaces.hpp"
 #include <iostream>
 
 #include <string>
 #include <functional>
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 class Entry;
 
@@ -75,4 +75,4 @@ namespace Conditions {
     };
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

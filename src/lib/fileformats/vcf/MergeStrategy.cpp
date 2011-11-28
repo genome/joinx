@@ -14,7 +14,7 @@ using boost::format;
 using namespace std;
 using namespace std::placeholders;
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 typedef ValueMergers::Base::FetchFunc FetchFunc;
 
@@ -110,4 +110,4 @@ CustomValue MergeStrategy::mergeInfo(const string& which, const Entry* begin, co
     return (*merger)(type, fetch, begin, end);
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

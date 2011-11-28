@@ -1,6 +1,6 @@
 #pragma once
 
-#include "namespace.hpp"
+#include "common/namespaces.hpp"
 
 #include <boost/format.hpp>
 
@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 // Defines a map class parsed as k1=v1,k2=v2,...
 // also remembers the original order of the elements
@@ -111,4 +111,4 @@ inline bool Map::operator!=(const Map& rhs) const {
     return _map != rhs._map;
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

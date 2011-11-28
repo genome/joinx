@@ -11,7 +11,7 @@
 using boost::format;
 using namespace std;
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 namespace ValueMergers {
 
@@ -146,4 +146,4 @@ CustomValue Ignore::operator()(
 
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

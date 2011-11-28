@@ -12,7 +12,7 @@
 
 using namespace std;
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 Builder::Builder(const MergeStrategy& mergeStrategy, Header* header, OutputFunc out)
     : _mergeStrategy(mergeStrategy)
@@ -107,4 +107,4 @@ bool Builder::canMerge(const Entry& a, const Entry& b) {
     return a.chrom() == b.chrom() && a.pos() == b.pos();
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

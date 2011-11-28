@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ValueMergers.hpp"
-#include "namespace.hpp"
+#include "common/namespaces.hpp"
 
 #include <cstddef>
 #include <map>
@@ -9,7 +9,7 @@
 
 class InputStream;
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 class CustomType;
 class CustomValue;
@@ -83,4 +83,4 @@ protected:
     uint32_t _primarySampleStreamIndex;
 };
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

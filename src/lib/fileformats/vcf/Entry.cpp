@@ -20,7 +20,7 @@ using boost::lexical_cast;
 using namespace placeholders;
 using namespace std;
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 namespace {
     string::size_type commonPrefix(const string& a, const string& b) {
         string::size_type p = 0;
@@ -28,7 +28,39 @@ namespace {
             ++p;
         return p;
     }
+
+    const static char* entryFieldNames[] = {
+        "chrom",
+        "pos",
+        "id",
+        "ref",
+        "alt",
+        "qual",
+        "filter",
+        "info",
+        "format",
+        "sample_data"
+    };
+
+
 }
+
+const char* Entry::fieldToString(FieldName field) {
+    if (field >= UNDEFINED)
+        return 0;
+
+    return entryFieldNames[field];
+}
+
+Entry::FieldName Entry::fieldFromString(const char* name) {
+    for (int i = 0; i < UNDEFINED; ++i) {
+        if (name == entryFieldNames[i])
+            return FieldName(i);
+    }
+    return UNDEFINED;
+}
+
+
 
 const double Entry::MISSING_QUALITY = numeric_limits<double>::min();
 
@@ -332,7 +364,7 @@ int64_t Entry::stop() const {
     return _stop;
 }
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)
 
 ostream& operator<<(ostream& s, const Vcf::Entry& e) {
     s << e.chrom() << '\t' << e.pos() << '\t';

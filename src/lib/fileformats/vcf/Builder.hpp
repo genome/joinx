@@ -1,12 +1,12 @@
 #pragma once
 
-#include "namespace.hpp"
+#include "common/namespaces.hpp"
 
 #include <functional>
 #include <vector>
 #include <string>
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 class Entry;
 class Header;
@@ -36,4 +36,4 @@ protected:
     OutputFunc _out;
 };
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)

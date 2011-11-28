@@ -9,9 +9,9 @@
 #include <vector>
 
 #include "CustomType.hpp"
-#include "namespace.hpp"
+#include "common/namespaces.hpp"
 
-VCF_NAMESPACE_BEGIN
+BEGIN_NAMESPACE(Vcf)
 
 class Header {
 public:
@@ -66,6 +66,6 @@ protected:
     uint32_t _sourceIndex;
 };
 
-VCF_NAMESPACE_END
+END_NAMESPACE(Vcf)
 
 std::ostream& operator<<(std::ostream& s, const Vcf::Header& h);
