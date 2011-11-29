@@ -75,6 +75,7 @@ public:
     const CustomValue* info(const std::string& key) const;
     const CustomValue* genotypeData(uint32_t sampleIdx, const std::string& key) const;
     uint32_t samplesWithData() const;
+    uint32_t samplesFailedFilter() const;
     void removeLowDepthGenotypes(uint32_t lowDepth);
 
     void setPositions();

@@ -333,6 +333,26 @@ uint32_t Entry::samplesWithData() const {
     return rv;
 }
 
+uint32_t Entry::samplesFailedFilter() const {
+    auto i = find(_formatDescription.begin(), _formatDescription.end(), "FT");
+    if (i == _formatDescription.end())
+        return 0;
+
+    uint32_t offset = distance(_formatDescription.begin(), i);
+    uint32_t numFailedFilter = 0;
+    for (auto i = _genotypeData.begin(); i != _genotypeData.end(); ++i) {
+        if (i->size()) {
+            //then we have some data
+            const std::string *filter;
+            //if it has a value (assume . is processed correctly) and we're able to get a value and it is not pass then failed
+            if (!(*i)[offset].empty() && (filter = (*i)[offset].get<std::string>(0)) != NULL && *filter != std::string("PASS")) {
+               numFailedFilter++;
+            }
+        }
+    }
+    return numFailedFilter;
+}
+
 void Entry::setPositions() {
     _start = _stop = _pos;
     for (uint32_t idx = 0; idx < _alt.size(); ++idx) {

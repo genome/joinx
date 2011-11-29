@@ -34,6 +34,7 @@ namespace {
         "##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">\n"
         "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">\n"
         "##FORMAT=<ID=HQ,Number=2,Type=Integer,Description=\"Haplotype Quality\">\n"
+        "##FORMAT=<ID=FT,Number=1,Type=String,Description=\"Sample Filtering\">\n"
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNA00001\tNA00002\tNA00003\n"
         );
 
@@ -58,6 +59,7 @@ namespace {
         "##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">\n"
         "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">\n"
         "##FORMAT=<ID=HQ,Number=2,Type=Integer,Description=\"Haplotype Quality\">\n"
+        "##FORMAT=<ID=FT,Number=1,Type=String,Description=\"Sample Filtering\">\n"
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tEXTRA\tNA00003\tNA00002\tNA00001\n"
         );
 
@@ -65,9 +67,9 @@ namespace {
 
     string vcfLines =
         "20\t14370\trs6054257\tG\tA\t29\t.\tAF=0.5;DB;DP=14;H2;NS=3\tGT:GQ:DP:HQ\t0|0:48:1:51,51\t1|0:48:8:51,51\t1/1:43:5:.,.\n"
-        "20\t17330\t.\tT\tA\t3\tq10\tAF=0.017;DP=11;NS=3\tGT:GQ:DP:HQ\t0|0:49:3:58,50\t0|1:3:5:65,3\t.\n"
-        "20\t1110696\trs6040355\tA\tG,T\t67\tPASS\tAA=T;AF=0.333,0.667;DB;DP=10;NS=2\tGT:GQ:DP:HQ\t1|2:21:6:23,27\t2|1:2:0:18,2\t2/2:35:4\n"
-        "20\t1230237\t.\tT\t.\t47\tPASS\tAA=T;DP=13;NS=3\tGT:GQ:DP:HQ\t0|0:54:7:56,60\t0|0:48:4:51,51\t0/0:.:2\n"
+        "20\t17330\t.\tT\tA\t3\tq10\tAF=0.017;DP=11;NS=3\tGT:GQ:DP:HQ:FT\t0|0:49:3:58,50:.\t0|1:3:5:65,3:PASS\t.\n"
+        "20\t1110696\trs6040355\tA\tG,T\t67\tPASS\tAA=T;AF=0.333,0.667;DB;DP=10;NS=2\tGT:GQ:DP:HQ:FT\t1|2:21:6:23,27:SnpFilter\t2|1:2:0:18,2:SnpFilter\t2/2:35:4:.:SnpFilter\n"
+        "20\t1230237\t.\tT\t.\t47\tPASS\tAA=T;DP=13;NS=3\tGT:GQ:DP:HQ:FT\t0|0:54:7:56,60:SnpFilter\t0|0:48:4:51,51:PASS\t0/0:.:2:.:.\n"
         "20\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:3:3\n"
         "21\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\t.\n"
         "22\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\t.\t.\n"
@@ -181,6 +183,13 @@ TEST_F(TestVcfEntry, samplesWithData) {
     ASSERT_EQ(3, v[3].samplesWithData());
     ASSERT_EQ(3, v[4].samplesWithData());
     ASSERT_EQ(0, v[5].samplesWithData());
+}
+
+TEST_F(TestVcfEntry, samplesFailedFilter) {
+    ASSERT_EQ(0, v[0].samplesFailedFilter());
+    ASSERT_EQ(0, v[1].samplesFailedFilter());
+    ASSERT_EQ(3, v[2].samplesFailedFilter());
+    ASSERT_EQ(1, v[3].samplesFailedFilter());
 }
 
 TEST_F(TestVcfEntry, removeLowDepthGenotypes) {
