@@ -306,6 +306,10 @@ const CustomValue* Entry::sampleData(uint32_t sampleIdx, const string& key) cons
     return &_sampleData[sampleIdx][offset];
 }
 
+bool Entry::hasGenotypeData() const {
+    return !_formatDescription.empty() && _formatDescription.front() == "GT";
+}
+
 GenotypeCall Entry::genotypeForSample(uint32_t sampleIdx) const {
     const string* gtString(0);
     const CustomValue* v = sampleData(sampleIdx, "GT");

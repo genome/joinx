@@ -76,7 +76,11 @@ public:
     const std::vector< std::vector<CustomValue> >& sampleData() const { return _sampleData; }
     const CustomValue* info(const std::string& key) const;
     const CustomValue* sampleData(uint32_t sampleIdx, const std::string& key) const;
+
+    // returns true if GT is the first FORMAT entry 
+    bool hasGenotypeData() const;
     GenotypeCall genotypeForSample(uint32_t sampleIdx) const;
+
     uint32_t samplesWithData() const;
     int32_t samplesFailedFilter() const;
     void removeLowDepthGenotypes(uint32_t lowDepth);
