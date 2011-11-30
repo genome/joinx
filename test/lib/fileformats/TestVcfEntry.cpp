@@ -166,7 +166,12 @@ TEST_F(TestVcfEntry, badCustomTypes) {
 TEST_F(TestVcfEntry, swap) {
     Entry e1 = v[0];
     Entry e2 = v[1];
+    string str1 = e1.toString();
+    string str2 = e2.toString();
+
     e1.swap(e2);
+    ASSERT_EQ(str1, e2.toString());
+    ASSERT_EQ(str2, e1.toString());
 
     // this was a bug
     ASSERT_EQ(&e1.header(), &v[1].header());
