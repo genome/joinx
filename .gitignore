@@ -11,6 +11,7 @@ Testing/
 _CPack_Packages/
 bin/
 build/
+rbuild/
 cmake_install.cmake
 debian/postinst
 debian/prerm

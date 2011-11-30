@@ -54,12 +54,14 @@ void InputStream::caching(bool value) {
 }
 
 void InputStream::rewind() {
+    _lineNum -= distance(_cache.begin(), _cacheIter);
     _cacheIter = _cache.begin();
 }
 
 bool InputStream::getline(string& line) {
     if (_cacheIter != _cache.end()) {
         line = *_cacheIter++;
+        ++_lineNum;
         return true;
     }
 

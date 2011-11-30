@@ -31,7 +31,7 @@ public:
     void setAltAndGenotypeData(
         std::vector<std::string>& alt,
         std::vector<std::string>& format,
-        std::vector< std::vector<CustomValue> >& genotypeData) const;
+        std::vector< std::vector<CustomValue> >& sampleData) const;
 
     const Header* mergedHeader() const;
 

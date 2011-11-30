@@ -43,6 +43,8 @@ public:
     const std::map<std::string, std::string>& filters() const;
     const std::vector<std::string>& sampleNames() const;
 
+    uint32_t sampleCount() const { return _sampleNames.size(); }
+
     // throws when sampleName is not found
     uint32_t sampleIndex(const std::string& sampleName) const;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CustomValue.hpp"
+#include "GenotypeCall.hpp"
 #include "common/Tokenizer.hpp"
 #include "common/namespaces.hpp"
 
@@ -72,9 +73,14 @@ public:
     const std::set<std::string>& failedFilters() const { return _failedFilters; }
     const CustomValueMap& info() const { return _info; }
     const std::vector<std::string>& formatDescription() const { return _formatDescription; }
-    const std::vector< std::vector<CustomValue> >& genotypeData() const { return _genotypeData; }
+    const std::vector< std::vector<CustomValue> >& sampleData() const { return _sampleData; }
     const CustomValue* info(const std::string& key) const;
-    const CustomValue* genotypeData(uint32_t sampleIdx, const std::string& key) const;
+    const CustomValue* sampleData(uint32_t sampleIdx, const std::string& key) const;
+
+    // returns true if GT is the first FORMAT entry 
+    bool hasGenotypeData() const;
+    GenotypeCall genotypeForSample(uint32_t sampleIdx) const;
+
     uint32_t samplesWithData() const;
     int32_t samplesFailedFilter() const;
     void removeLowDepthGenotypes(uint32_t lowDepth);
@@ -132,7 +138,7 @@ protected:
     std::set<std::string> _failedFilters;
     CustomValueMap _info;
     std::vector<std::string> _formatDescription;
-    std::vector< std::vector<CustomValue> > _genotypeData;
+    std::vector< std::vector<CustomValue> > _sampleData;
 
     int64_t _start;
     int64_t _stop;

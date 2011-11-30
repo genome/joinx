@@ -149,31 +149,31 @@ TEST_F(TestVcfEntryMerger, merge) {
 
     // check that genotype allele references were updated
     // sample 1 (from entry 1)
-    const CustomValue* v = mergedEntry.genotypeData(0, "GT");
+    const CustomValue* v = mergedEntry.sampleData(0, "GT");
     ASSERT_TRUE(v);
     ASSERT_EQ("0|1", v->toString());
 
     // sample 2 (from entry 1)
-    v = mergedEntry.genotypeData(1, "GT");
+    v = mergedEntry.sampleData(1, "GT");
     ASSERT_TRUE(v);
     ASSERT_EQ("1|0", v->toString());
 
     // sample 3 (from entry 2)
-    v = mergedEntry.genotypeData(2, "GT");
+    v = mergedEntry.sampleData(2, "GT");
     ASSERT_TRUE(v);
     ASSERT_EQ("0|2", v->toString());
 
     // sample 4 (from entry 2)
-    v = mergedEntry.genotypeData(3, "GT");
+    v = mergedEntry.sampleData(3, "GT");
     ASSERT_TRUE(v);
     ASSERT_EQ("2/2", v->toString());
 
     // sample 5 (from entry 3)
-    v = mergedEntry.genotypeData(4, "GT");
+    v = mergedEntry.sampleData(4, "GT");
     ASSERT_FALSE(v);
 
     // sample 6 (from entry 3)
-    v = mergedEntry.genotypeData(5, "GT");
+    v = mergedEntry.sampleData(5, "GT");
     ASSERT_TRUE(v);
     ASSERT_EQ("2/0", v->toString());
 
