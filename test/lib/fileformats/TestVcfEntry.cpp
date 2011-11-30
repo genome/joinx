@@ -186,7 +186,7 @@ TEST_F(TestVcfEntry, samplesWithData) {
 }
 
 TEST_F(TestVcfEntry, samplesFailedFilter) {
-    ASSERT_EQ(0, v[0].samplesFailedFilter());
+    ASSERT_EQ(-1, v[0].samplesFailedFilter());
     ASSERT_EQ(0, v[1].samplesFailedFilter());
     ASSERT_EQ(3, v[2].samplesFailedFilter());
     ASSERT_EQ(1, v[3].samplesFailedFilter());
