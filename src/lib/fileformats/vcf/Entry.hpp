@@ -69,7 +69,7 @@ public:
     const std::string& ref() const { return _ref; }
     const std::vector<std::string>& alt() const { return _alt; }
     double qual() const { return _qual; }
-    const std::vector<std::string>& failedFilters() const { return _failedFilters; }
+    const std::set<std::string>& failedFilters() const { return _failedFilters; }
     const CustomValueMap& info() const { return _info; }
     const std::vector<std::string>& formatDescription() const { return _formatDescription; }
     const std::vector< std::vector<CustomValue> >& genotypeData() const { return _genotypeData; }
@@ -98,7 +98,7 @@ public:
         Tokenizer<char> t(s, delim);
         typename T::value_type tmp;
         while (t.extract(tmp)) {
-            v.push_back(tmp);
+            v.insert(v.end(),tmp);
         }
     }
 
@@ -129,7 +129,7 @@ protected:
     std::string _ref;
     std::vector<std::string> _alt;
     double _qual;
-    std::vector<std::string> _failedFilters;
+    std::set<std::string> _failedFilters;
     CustomValueMap _info;
     std::vector<std::string> _formatDescription;
     std::vector< std::vector<CustomValue> > _genotypeData;

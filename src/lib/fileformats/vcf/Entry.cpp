@@ -104,7 +104,7 @@ Entry::Entry(const EntryMerger& merger)
     copy(idents.begin(), idents.end(), back_inserter(_identifiers));
 
     const std::set<std::string>& filts = merger.failedFilters();
-    copy(filts.begin(), filts.end(), back_inserter(_failedFilters));
+    copy(filts.begin(), filts.end(), inserter(_failedFilters, _failedFilters.begin()));
 
     merger.setInfo(_info);
     merger.setAltAndGenotypeData(_alt, _formatDescription, _genotypeData);
@@ -177,8 +177,7 @@ void Entry::parse(const Header* h, const string& s) {
     if (_failedFilters.size() > 1) {
         auto iter = find(_failedFilters.begin(), _failedFilters.end(), "PASS");
         if (iter != _failedFilters.end()) {
-            auto end = _failedFilters.erase(iter);
-            _failedFilters.resize(distance(_failedFilters.begin(), end));
+            _failedFilters.erase(iter);
         }
     }
 
