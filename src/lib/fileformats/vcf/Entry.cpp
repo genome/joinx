@@ -333,10 +333,10 @@ uint32_t Entry::samplesWithData() const {
     return rv;
 }
 
-uint32_t Entry::samplesFailedFilter() const {
+int32_t Entry::samplesFailedFilter() const {
     auto i = find(_formatDescription.begin(), _formatDescription.end(), "FT");
     if (i == _formatDescription.end())
-        return 0;
+        return -1;
 
     uint32_t offset = distance(_formatDescription.begin(), i);
     uint32_t numFailedFilter = 0;

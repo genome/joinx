@@ -10,7 +10,8 @@
 #include <ostream>
 #include <string>
 #include <vector>
-
+//TODO Needs set for filters
+//TODO needs addFilter function. Make sure to check if filter is available in header
 BEGIN_NAMESPACE(Vcf)
 
 class EntryMerger;
@@ -75,7 +76,7 @@ public:
     const CustomValue* info(const std::string& key) const;
     const CustomValue* genotypeData(uint32_t sampleIdx, const std::string& key) const;
     uint32_t samplesWithData() const;
-    uint32_t samplesFailedFilter() const;
+    int32_t samplesFailedFilter() const;
     void removeLowDepthGenotypes(uint32_t lowDepth);
 
     void setPositions();
