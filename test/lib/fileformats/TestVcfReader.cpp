@@ -2,6 +2,7 @@
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/InputStream.hpp"
+#include "fileformats/InferFileType.hpp"
 
 #include <gtest/gtest.h>
 #include <functional>
@@ -16,7 +17,7 @@ using namespace Vcf;
 
 namespace {
     string testData =
-        "##fileformat=VCFv4.1"
+        "##fileformat=VCFv4.1\n"
         "##fileDate=20090805\n"
         "##source=myImputationProgramV3.1\n"
         "##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta\n"
@@ -46,6 +47,7 @@ namespace {
 TEST(VcfReader, read) {
     stringstream ss(testData);
     InputStream in("test", ss);
+    inferFileType(in);
 
     typedef function<void(const Vcf::Header*, string&, Entry&)> Extractor;
     typedef TypedStream<Entry, Extractor> VcfReader;
@@ -55,13 +57,17 @@ TEST(VcfReader, read) {
 
     const Vcf::Header& h = r.header();
 
+    ASSERT_EQ(19, r.lineNum()); //This prolly shouldn't be here as it is a test for TypedStream not VcfReader
     ASSERT_EQ(6, h.infoTypes().size());
     ASSERT_EQ(2, h.filters().size());
     ASSERT_EQ(4, h.formatTypes().size());
 
+    uint64_t lineCount = 19;
     vector<Entry> v;
     while (r.next(e)) {
         v.push_back(e);
+
+        ASSERT_EQ(++lineCount,r.lineNum());   //should be at line 1 of the VCF lines (it skips the header)
     }
 
     ASSERT_EQ(5, v.size());
