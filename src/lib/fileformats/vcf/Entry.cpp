@@ -41,8 +41,6 @@ namespace {
         "format",
         "sample_data"
     };
-
-
 }
 
 const char* Entry::fieldToString(FieldName field) {
@@ -107,19 +105,19 @@ Entry::Entry(const EntryMerger& merger)
     copy(filts.begin(), filts.end(), back_inserter(_failedFilters));
 
     merger.setInfo(_info);
-    merger.setAltAndGenotypeData(_alt, _formatDescription, _genotypeData);
+    merger.setAltAndGenotypeData(_alt, _formatDescription, _sampleData);
     setPositions();
 }
 
 void Entry::reheader(const Header* newHeader) {
     std::vector< std::vector<CustomValue> > newGTData(newHeader->sampleNames().size());
-    for (auto i = _genotypeData.begin(); i != _genotypeData.end(); ++i) {
-        auto offset = distance(_genotypeData.begin(), i);
+    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
+        auto offset = distance(_sampleData.begin(), i);
         const string& sampleName = header().sampleNames()[offset];
         uint32_t newIdx = newHeader->sampleIndex(sampleName);
         newGTData[newIdx] = *i;
     }
-    _genotypeData.swap(newGTData);
+    _sampleData.swap(newGTData);
     _header = newHeader;
 }
 
@@ -220,7 +218,7 @@ void Entry::parse(const Header* h, const string& s) {
                 throw runtime_error(str(format("Unknown id in FORMAT field: %1%") %*i));
         }
 
-        _genotypeData.clear();
+        _sampleData.clear();
         // per sample formatted data
         while (tok.extract(tmp)) {
             vector<string> data;
@@ -233,7 +231,7 @@ void Entry::parse(const Header* h, const string& s) {
                 const CustomType* type = header().formatType(_formatDescription[i]);
                 perSampleValues.push_back(CustomValue(type, data[i]));
             }
-            _genotypeData.push_back(perSampleValues);
+            _sampleData.push_back(perSampleValues);
         }
     }
     setPositions();
@@ -243,7 +241,6 @@ void Entry::addIdentifier(const std::string& id) {
     if (find(_identifiers.begin(), _identifiers.end(), id) == _identifiers.end())
         _identifiers.push_back(id);
 }
-
 
 string Entry::toString() const {
     stringstream ss;
@@ -274,7 +271,7 @@ void Entry::swap(Entry& other) {
     _failedFilters.swap(other._failedFilters);
     _info.swap(other._info);
     _formatDescription.swap(other._formatDescription);
-    _genotypeData.swap(other._genotypeData);
+    _sampleData.swap(other._sampleData);
     std::swap(_header, other._header);
     setPositions();
 }
@@ -293,9 +290,9 @@ const CustomValue* Entry::info(const string& key) const {
     return &i->second;
 }
 
-const CustomValue* Entry::genotypeData(uint32_t sampleIdx, const string& key) const {
+const CustomValue* Entry::sampleData(uint32_t sampleIdx, const string& key) const {
     // no data for that sample
-    if (sampleIdx >= _genotypeData.size() || _genotypeData[sampleIdx].empty())
+    if (sampleIdx >= _sampleData.size() || _sampleData[sampleIdx].empty())
         return 0;
 
     // no info for that format key
@@ -304,9 +301,17 @@ const CustomValue* Entry::genotypeData(uint32_t sampleIdx, const string& key) co
         return 0;
 
     uint32_t offset = distance(_formatDescription.begin(), i);
-    if (offset >= _genotypeData[sampleIdx].size())
+    if (offset >= _sampleData[sampleIdx].size())
         return 0;
-    return &_genotypeData[sampleIdx][offset];
+    return &_sampleData[sampleIdx][offset];
+}
+
+GenotypeCall Entry::genotypeForSample(uint32_t sampleIdx) const {
+    const string* gtString(0);
+    const CustomValue* v = sampleData(sampleIdx, "GT");
+    if (!v || v->empty() || (gtString = v->get<string>(0)) == 0 || gtString->empty())
+        return GenotypeCall();
+    return GenotypeCall(*gtString);
 }
 
 void Entry::removeLowDepthGenotypes(uint32_t lowDepth) {
@@ -315,7 +320,7 @@ void Entry::removeLowDepthGenotypes(uint32_t lowDepth) {
         return;
 
     uint32_t offset = distance(_formatDescription.begin(), i);
-    for (auto i = _genotypeData.begin(); i != _genotypeData.end(); ++i) {
+    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
         if (i->empty())
             continue;
         const int64_t *v;
@@ -326,7 +331,7 @@ void Entry::removeLowDepthGenotypes(uint32_t lowDepth) {
 
 uint32_t Entry::samplesWithData() const {
     uint32_t rv = 0;
-    for (auto i = _genotypeData.begin(); i != _genotypeData.end(); ++i) {
+    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
         if (i->size())
             ++rv;
     }
@@ -340,7 +345,7 @@ int32_t Entry::samplesFailedFilter() const {
 
     uint32_t offset = distance(_formatDescription.begin(), i);
     uint32_t numFailedFilter = 0;
-    for (auto i = _genotypeData.begin(); i != _genotypeData.end(); ++i) {
+    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
         if (i->size()) {
             //then we have some data
             const std::string *filter;
@@ -415,7 +420,7 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
     s << '\t';
 
     e.printList(s, e.formatDescription(), ':');
-    const vector< vector<Vcf::CustomValue> >& psd = e.genotypeData();
+    const vector< vector<Vcf::CustomValue> >& psd = e.sampleData();
     for (auto i = psd.begin(); i != psd.end(); ++i) {
         s << '\t';
         if (!i->empty()) {

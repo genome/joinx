@@ -209,18 +209,50 @@ TEST_F(TestVcfEntry, reheader) {
     stringstream ss(header2Text);
     Header merged = Header::fromStream(ss);
     merged.merge(_header, true); // true to allow sample name overlaps
-    vector< vector<CustomValue> > origGT = v[0].genotypeData();
+    vector< vector<CustomValue> > origGT = v[0].sampleData();
     ASSERT_EQ(3, origGT.size());
     ASSERT_EQ(&_header, &v[0].header());
     v[0].reheader(&merged);
     ASSERT_EQ(&merged, &v[0].header());
-    ASSERT_EQ(4, v[0].genotypeData().size());
-    ASSERT_TRUE(v[0].genotypeData()[0].empty());
-    ASSERT_TRUE(origGT[2] == v[0].genotypeData()[1]);
-    ASSERT_TRUE(origGT[1] == v[0].genotypeData()[2]);
-    ASSERT_TRUE(origGT[0] == v[0].genotypeData()[3]);
+    ASSERT_EQ(4, v[0].sampleData().size());
+    ASSERT_TRUE(v[0].sampleData()[0].empty());
+    ASSERT_TRUE(origGT[2] == v[0].sampleData()[1]);
+    ASSERT_TRUE(origGT[1] == v[0].sampleData()[2]);
+    ASSERT_TRUE(origGT[0] == v[0].sampleData()[3]);
 
     // Now that we have added the sample EXTRA, trying to reheader with the original
     // header should throw an exception when it tries to look up the index for EXTRA
     ASSERT_THROW(v[0].reheader(&_header), runtime_error);
+}
+
+TEST_F(TestVcfEntry, genotypeForSample) {
+    GenotypeCall gt;
+
+    gt = v[0].genotypeForSample(0);
+    ASSERT_EQ(2, gt.size());
+    ASSERT_EQ(0, gt[0]);
+    ASSERT_EQ(0, gt[1]);
+
+    gt = v[0].genotypeForSample(1);
+    ASSERT_EQ(2, gt.size());
+    ASSERT_EQ(1, gt[0]);
+    ASSERT_EQ(0, gt[1]);
+
+    gt = v[0].genotypeForSample(2);
+    ASSERT_EQ(2, gt.size());
+    ASSERT_EQ(1, gt[0]);
+    ASSERT_EQ(1, gt[1]);
+
+    gt = v[1].genotypeForSample(0);
+    ASSERT_EQ(2, gt.size());
+    ASSERT_EQ(0, gt[0]);
+    ASSERT_EQ(0, gt[1]);
+
+    gt = v[1].genotypeForSample(1);
+    ASSERT_EQ(2, gt.size());
+    ASSERT_EQ(0, gt[0]);
+    ASSERT_EQ(1, gt[1]);
+
+    gt = v[1].genotypeForSample(2);
+    ASSERT_TRUE(gt.empty());
 }

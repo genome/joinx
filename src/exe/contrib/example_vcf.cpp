@@ -20,9 +20,9 @@ uint32_t samplesWithNonRefGenotypes(const Vcf::Entry& entry, const Vcf::Header& 
     if (entry.formatDescription().empty() || entry.formatDescription().front() != "GT")
         return 0;
 
-    auto const& genotypeData = entry.genotypeData();
+    auto const& sampleData = entry.sampleData();
     // for each sample
-    for (auto i = genotypeData.begin(); i != genotypeData.end(); ++i) {
+    for (auto i = sampleData.begin(); i != sampleData.end(); ++i) {
         if (i->empty())
             continue;
 
@@ -47,7 +47,7 @@ uint32_t samplesWithNonRefGenotypes(const Vcf::Entry& entry, const Vcf::Header& 
                 ++rv;
 
                 // if we wanted the sample name:
-                // auto samplePos = distance(genotypeData.begin(), i);
+                // auto samplePos = distance(sampleData.begin(), i);
                 // const string& sampleName = h.sampleNames()[samplePos];
                 // cout << sampleName << "\n";
                 break;

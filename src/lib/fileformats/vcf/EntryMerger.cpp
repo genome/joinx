@@ -142,7 +142,7 @@ void EntryMerger::setInfo(CustomValueMap& info) const {
 void EntryMerger::setAltAndGenotypeData(
         std::vector<std::string>& alt,
         std::vector<std::string>& format,
-        std::vector< std::vector<CustomValue> >& genotypeData) const
+        std::vector< std::vector<CustomValue> >& sampleData) const
 {
     // set alt alleles
     alt.resize(_alleleMap.size());
@@ -150,7 +150,7 @@ void EntryMerger::setAltAndGenotypeData(
         alt[i->second] = i->first;
 
     // build list of all format fields
-    genotypeData.resize(_mergedHeader->sampleNames().size());
+    sampleData.resize(_mergedHeader->sampleNames().size());
     GenotypeFormatter genotypeFormatter(_mergedHeader, alt);
     set<string> seen;
     for (const Entry* e = _begin; e != _end; ++e) {
@@ -170,7 +170,7 @@ void EntryMerger::setAltAndGenotypeData(
     }
 
     for (const Entry* e = _begin; e != _end; ++e) {
-        const vector< vector<CustomValue> >& samples = e->genotypeData();
+        const vector< vector<CustomValue> >& samples = e->sampleData();
         try {
             for (uint32_t sampleIdx = 0; sampleIdx < samples.size(); ++sampleIdx) {
                 if (samples[sampleIdx].empty())
@@ -178,11 +178,11 @@ void EntryMerger::setAltAndGenotypeData(
                 const string& sampleName = e->header().sampleNames()[sampleIdx];
                 uint32_t mergedIdx = _mergedHeader->sampleIndex(sampleName);
                 size_t idx = e - _begin;
-                if (!genotypeData[mergedIdx].empty() && _mergeStrategy.mergeSamples() && !genotypeData[mergedIdx].empty()) {
+                if (!sampleData[mergedIdx].empty() && _mergeStrategy.mergeSamples() && !sampleData[mergedIdx].empty()) {
                     bool fromPrimaryStream = e->header().sourceIndex() == _mergeStrategy.primarySampleStreamIndex();
-                    genotypeFormatter.merge(fromPrimaryStream, genotypeData[mergedIdx], format, e, sampleIdx, _newGTIndices[idx]);
+                    genotypeFormatter.merge(fromPrimaryStream, sampleData[mergedIdx], format, e, sampleIdx, _newGTIndices[idx]);
                 } else {
-                    genotypeData[mergedIdx] = genotypeFormatter.process(format, e, sampleIdx, _newGTIndices[idx]);
+                    sampleData[mergedIdx] = genotypeFormatter.process(format, e, sampleIdx, _newGTIndices[idx]);
                 }
             }
         } catch (const DisjointGenotypesError&) {
