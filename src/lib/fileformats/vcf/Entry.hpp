@@ -11,6 +11,7 @@
 #include <ostream>
 #include <string>
 #include <vector>
+#include <set>
 //TODO Needs set for filters
 //TODO needs addFilter function. Make sure to check if filter is available in header
 BEGIN_NAMESPACE(Vcf)
@@ -95,16 +96,16 @@ public:
 
     std::string toString() const;
 
-    template<typename T>
-    void extractList(T& v, const std::string& s, char delim = ';') {
-        v.clear();
+    //if need to clear, then do before calling
+    template<typename itertype>
+    void extractList(itertype v, const std::string& s, char delim = ';') {
         if (s == ".")
             return;
 
         Tokenizer<char> t(s, delim);
-        typename T::value_type tmp;
+        typename itertype::container_type::value_type tmp;
         while (t.extract(tmp)) {
-            v.insert(v.end(),tmp);
+            *v++=tmp;
         }
     }
 

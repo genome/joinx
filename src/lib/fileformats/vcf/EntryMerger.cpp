@@ -75,7 +75,7 @@ EntryMerger::EntryMerger(const MergeStrategy& mergeStrategy, const Header* merge
         }
 
         // Merge filters
-        const vector<string>& filters = e->failedFilters();
+        const set<string>& filters = e->failedFilters();
         copy(filters.begin(), filters.end(), inserter(_filters, _filters.begin()));
 
         const vector<string>& samples = e->header().sampleNames();

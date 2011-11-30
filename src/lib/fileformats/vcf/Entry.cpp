@@ -147,7 +147,7 @@ void Entry::parse(const Header* h, const string& s) {
     // ids
     if (!tok.extract(tmp))
         throw runtime_error("Failed to extract id from vcf entry: " + s);
-    extractList(_identifiers, tmp);
+    extractList(back_inserter(_identifiers), tmp);
 
     // ref alleles
     if (!tok.extract(_ref))
@@ -156,7 +156,7 @@ void Entry::parse(const Header* h, const string& s) {
     // alt alleles
     if (!tok.extract(tmp))
         throw runtime_error("Failed to extract alt alleles from vcf entry: " + s);
-    extractList(_alt, tmp, ',');
+    extractList(back_inserter(_alt), tmp, ',');
 
     // phred quality
     string qualstr;
@@ -170,13 +170,10 @@ void Entry::parse(const Header* h, const string& s) {
     // failed filters
     if (!tok.extract(tmp))
         throw runtime_error("Failed to extract filters from vcf entry: " + s);
-    extractList(_failedFilters, tmp);
+    extractList(inserter(_failedFilters,_failedFilters.end()), tmp);
     // If pass is present as well as other failed filters, remove pass
     if (_failedFilters.size() > 1) {
-        auto iter = find(_failedFilters.begin(), _failedFilters.end(), "PASS");
-        if (iter != _failedFilters.end()) {
-            _failedFilters.erase(iter);
-        }
+        _failedFilters.erase("PASS");
     }
 
 
@@ -185,7 +182,7 @@ void Entry::parse(const Header* h, const string& s) {
     if (!tok.extract(tmp))
         throw runtime_error("Failed to extract info from vcf entry: " + s);
     vector<string> infoStrings;
-    extractList(infoStrings, tmp);
+    extractList(back_inserter(infoStrings), tmp);
 
     // TODO: refactor into function addInfoField(s)
     _info.clear();
@@ -209,7 +206,7 @@ void Entry::parse(const Header* h, const string& s) {
     // TODO: refactor into function
     // format description
     if (tok.extract(tmp)) {
-        extractList(_formatDescription, tmp, ':');
+        extractList(back_inserter(_formatDescription), tmp, ':');
         for (auto i = _formatDescription.begin(); i != _formatDescription.end(); ++i) {
             if (i->empty())
                 continue;
@@ -221,7 +218,7 @@ void Entry::parse(const Header* h, const string& s) {
         // per sample formatted data
         while (tok.extract(tmp)) {
             vector<string> data;
-            extractList(data, tmp, ':');
+            extractList(back_inserter(data), tmp, ':');
             if (data.size() > _formatDescription.size())
                 throw runtime_error("More per-sample values than described in format section");
 
