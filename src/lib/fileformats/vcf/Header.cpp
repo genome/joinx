@@ -79,6 +79,10 @@ void Header::add(const string& line) {
     }
 }
 
+void Header::addFilter(const string& id, const string& desc) {
+    add(str(format("##FILTER=<ID=%1%,Description=\"%2%\">") %id %desc));
+}
+
 void Header::parseHeaderLine(const std::string& line) {
     if (_headerSeen)
         throw runtime_error(str(format("Multiple header line detected:\n%1%\nAND\n%2%") %line %line));

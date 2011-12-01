@@ -30,6 +30,7 @@ public:
     ~Header();
 
     void add(const std::string& line);
+    void addFilter(const std::string& name, const std::string& desc);
     void merge(const Header& other, bool allowDuplicateSamples = false);
     bool empty() const;
 
