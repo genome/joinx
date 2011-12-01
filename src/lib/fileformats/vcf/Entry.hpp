@@ -36,19 +36,17 @@ public:
     };
     typedef Header HeaderType;
     typedef std::map<std::string, CustomValue> CustomValueMap;
+
+    // static data
     const static double MISSING_QUALITY;
 
+    // static functions
     static const char* fieldToString(FieldName field);
     static FieldName fieldFromString(const char* name);
+    static void parseLine(const Header* hdr, std::string& s, Entry& e);
+    static void parseLineAndReheader(const Header* hdr, const Header* newH, std::string& s, Entry& e);
 
-    static void parseLine(const Header* hdr, std::string& s, Entry& e) {
-        e.parse(hdr, s);
-    }
-
-    static void parseLineAndReheader(const Header* hdr, const Header* newH, std::string& s, Entry& e) {
-        e.parseAndReheader(hdr, newH, s);
-    }
-
+    // member functions
     Entry();
     explicit Entry(const Header* h);
     Entry(const EntryMerger& merger);
@@ -95,19 +93,6 @@ public:
     int32_t altIdx(const std::string& alt) const;
 
     std::string toString() const;
-
-    //if need to clear, then do before calling
-    template<typename itertype>
-    void extractList(itertype v, const std::string& s, char delim = ';') {
-        if (s == ".")
-            return;
-
-        Tokenizer<char> t(s, delim);
-        typename itertype::container_type::value_type tmp;
-        while (t.extract(tmp)) {
-            *v++=tmp;
-        }
-    }
 
     template<typename T>
     void printList(std::ostream& s, const T& v, char delim = ';') const {

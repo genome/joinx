@@ -43,6 +43,14 @@ namespace {
     };
 }
 
+void Entry::parseLine(const Header* hdr, std::string& s, Entry& e) {
+    e.parse(hdr, s);
+}
+
+void Entry::parseLineAndReheader(const Header* hdr, const Header* newH, std::string& s, Entry& e) {
+    e.parseAndReheader(hdr, newH, s);
+}
+
 const char* Entry::fieldToString(FieldName field) {
     if (field >= UNDEFINED)
         return 0;
@@ -136,6 +144,15 @@ void Entry::parseAndReheader(const Header* h, const Header* newHeader, const str
 void Entry::parse(const Header* h, const string& s) {
     _header = h;
 
+    // clear containers
+    _info.clear();
+    _sampleData.clear();
+    _identifiers.clear();
+    _alt.clear();
+    _failedFilters.clear();
+    _formatDescription.clear();
+    _sampleData.clear();
+
     Tokenizer<char> tok(s, '\t');
     if (!tok.extract(_chrom))
         throw runtime_error("Failed to extract chromosome from vcf entry: " + s);
@@ -147,7 +164,9 @@ void Entry::parse(const Header* h, const string& s) {
     // ids
     if (!tok.extract(tmp))
         throw runtime_error("Failed to extract id from vcf entry: " + s);
-    extractList(back_inserter(_identifiers), tmp);
+
+    if (tmp != ".")
+        Tokenizer<char>::split(tmp, ';', back_inserter(_identifiers));
 
     // ref alleles
     if (!tok.extract(_ref))
@@ -156,7 +175,9 @@ void Entry::parse(const Header* h, const string& s) {
     // alt alleles
     if (!tok.extract(tmp))
         throw runtime_error("Failed to extract alt alleles from vcf entry: " + s);
-    extractList(back_inserter(_alt), tmp, ',');
+
+    if (tmp != ".")
+        Tokenizer<char>::split(tmp, ',', back_inserter(_alt));
 
     // phred quality
     string qualstr;
@@ -170,22 +191,24 @@ void Entry::parse(const Header* h, const string& s) {
     // failed filters
     if (!tok.extract(tmp))
         throw runtime_error("Failed to extract filters from vcf entry: " + s);
-    extractList(inserter(_failedFilters,_failedFilters.end()), tmp);
+
+    if (tmp != ".")
+        Tokenizer<char>::split(tmp, ';', inserter(_failedFilters,_failedFilters.end()));
+
+
     // If pass is present as well as other failed filters, remove pass
     if (_failedFilters.size() > 1) {
         _failedFilters.erase("PASS");
     }
 
-
-
     // info entries
     if (!tok.extract(tmp))
         throw runtime_error("Failed to extract info from vcf entry: " + s);
     vector<string> infoStrings;
-    extractList(back_inserter(infoStrings), tmp);
+    if (tmp != ".")
+        Tokenizer<char>::split(tmp, ';', back_inserter(infoStrings));
 
     // TODO: refactor into function addInfoField(s)
-    _info.clear();
     for (auto i = infoStrings.begin(); i != infoStrings.end(); ++i) {
         if (i->empty())
             continue;
@@ -205,8 +228,9 @@ void Entry::parse(const Header* h, const string& s) {
 
     // TODO: refactor into function
     // format description
-    if (tok.extract(tmp)) {
-        extractList(back_inserter(_formatDescription), tmp, ':');
+    if (tok.extract(tmp) && tmp != ".") {
+        Tokenizer<char>::split(tmp, ':', back_inserter(_formatDescription));
+
         for (auto i = _formatDescription.begin(); i != _formatDescription.end(); ++i) {
             if (i->empty())
                 continue;
@@ -214,11 +238,12 @@ void Entry::parse(const Header* h, const string& s) {
                 throw runtime_error(str(format("Unknown id in FORMAT field: %1%") %*i));
         }
 
-        _sampleData.clear();
         // per sample formatted data
         while (tok.extract(tmp)) {
             vector<string> data;
-            extractList(back_inserter(data), tmp, ':');
+            if (tmp != ".")
+                Tokenizer<char>::split(tmp, ':', back_inserter(data));
+
             if (data.size() > _formatDescription.size())
                 throw runtime_error("More per-sample values than described in format section");
 

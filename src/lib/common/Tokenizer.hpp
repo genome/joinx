@@ -14,7 +14,7 @@ using namespace std;
 template<typename DelimType>
 class Tokenizer {
 public:
-    Tokenizer(const std::string& s, DelimType delim = '\t')
+    Tokenizer(std::string const& s, DelimType const& delim = '\t')
         : _s(s)
         , _delim(delim)
         , _pos(0)
@@ -25,7 +25,7 @@ public:
         rewind();
     }
 
-    void reset(const std::string& s) {
+    void reset(std::string const& s) {
         _s = s;
         _pos = 0;
         _end = 0;
@@ -35,6 +35,15 @@ public:
 
     template<typename T>
     bool extract(T& value);
+
+    template<typename IterType>
+    static void split(std::string const& s, DelimType const& delim, IterType v) {
+        Tokenizer<DelimType> t(s, delim);
+        typename IterType::container_type::value_type tmp;
+        while (t.extract(tmp))
+            *v++=tmp;
+    }
+
     void remaining(std::string& s);
 
     bool advance();
