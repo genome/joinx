@@ -9,6 +9,7 @@
 #include "SortCommand.hpp"
 #include "VcfAnnotateCommand.hpp"
 #include "VcfFilterCommand.hpp"
+#include "VcfSiteFilterCommand.hpp"
 #include "VcfMergeCommand.hpp"
 
 #include "common/ProgramVersion.hpp"
@@ -32,6 +33,7 @@ JoinX::JoinX(int argc, char** argv)
     registerSubCommand(SortCommand::ptr(new SortCommand));
     registerSubCommand(VcfAnnotateCommand::ptr(new VcfAnnotateCommand));
     registerSubCommand(VcfFilterCommand::ptr(new VcfFilterCommand));
+    registerSubCommand(VcfSiteFilterCommand::ptr(new VcfSiteFilterCommand));
     registerSubCommand(VcfMergeCommand::ptr(new VcfMergeCommand));
 
     stringstream cmdHelp;
