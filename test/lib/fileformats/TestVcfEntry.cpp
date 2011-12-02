@@ -16,7 +16,7 @@ using namespace std;
 
 namespace {
     string headerText(
-        "##fileformat=VCFv4.1"
+        "##fileformat=VCFv4.1\n"
         "##fileDate=20090805\n"
         "##source=myImputationProgramV3.1\n"
         "##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta\n"
@@ -41,7 +41,7 @@ namespace {
     // this header is identical save for the sample ids, it prepends one called 'EXTRA' and
     // reverses the order of NA1-3
     string header2Text(
-        "##fileformat=VCFv4.1"
+        "##fileformat=VCFv4.1\n"
         "##fileDate=20090805\n"
         "##source=myImputationProgramV3.1\n"
         "##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta\n"
@@ -188,6 +188,13 @@ TEST_F(TestVcfEntry, samplesWithData) {
     ASSERT_EQ(3, v[3].samplesWithData());
     ASSERT_EQ(3, v[4].samplesWithData());
     ASSERT_EQ(0, v[5].samplesWithData());
+}
+
+TEST_F(TestVcfEntry, samplesEvaluatedByFilter) {
+    ASSERT_EQ(-1, v[0].samplesEvaluatedByFilter());
+    ASSERT_EQ(1, v[1].samplesEvaluatedByFilter());
+    ASSERT_EQ(3, v[2].samplesEvaluatedByFilter());
+    ASSERT_EQ(2, v[3].samplesEvaluatedByFilter());
 }
 
 TEST_F(TestVcfEntry, samplesFailedFilter) {
