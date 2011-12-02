@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include <boost/format.hpp>
 #include <algorithm>
 #include <cstdint>
@@ -23,6 +25,11 @@ public:
         , _lastDelim(0)
     {
         rewind();
+    }
+
+    bool nextTokenMatches(std::string const& value) const {
+        return _end-_pos == value.size()
+            && _s.compare(_pos, value.size(), value) == 0;
     }
 
     void reset(std::string const& s) {
@@ -73,7 +80,7 @@ protected:
             return true;
         } else {
             using boost::format;
-            throw std::runtime_error(str(format("Attempted to cast string '%1%' to char") %value));
+            throw std::runtime_error(str(format("Attempted to cast string '%1%' to char") %s));
         }
         return false;
     }
@@ -90,6 +97,7 @@ protected:
     bool _extract(uint64_t& value) { return _extractUnsigned(value); }
     bool _extract(float& value) { return _extractFloat(strtof, value); }
     bool _extract(double& value) { return _extractFloat(strtod, value); }
+    bool _extract(long double& value) { return _extractFloat(strtold, value); }
     template<typename T>
     bool _extractSigned(T& value);
     template<typename T>

@@ -174,3 +174,18 @@ TEST(TestTokenizer, floats) {
     ASSERT_TRUE(t.eof());
     ASSERT_FALSE(t.extract(d));
 }
+
+TEST(TestTokenizer, nextTokenMatches) {
+    string input("1,2,.,4");
+    Tokenizer<char> t(input, ',');
+    ASSERT_TRUE(t.nextTokenMatches("1"));
+    t.advance();
+    ASSERT_TRUE(t.nextTokenMatches("2"));
+    t.advance();
+    ASSERT_TRUE(t.nextTokenMatches("."));
+    t.advance();
+    ASSERT_TRUE(t.nextTokenMatches("4"));
+    t.advance();
+    ASSERT_TRUE(t.nextTokenMatches(""));
+    ASSERT_TRUE(t.eof());
+}

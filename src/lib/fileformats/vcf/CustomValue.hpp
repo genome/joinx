@@ -1,12 +1,12 @@
 #pragma once
 
 #include "CustomType.hpp"
+#include "common/MultiType.hpp"
 #include "common/Tokenizer.hpp"
 #include "common/namespaces.hpp"
 
-#include <boost/any.hpp>
-#include <boost/lexical_cast.hpp>
 #include <algorithm>
+#include <functional>
 #include <string>
 #include <vector>
 #include <ostream>
@@ -15,7 +15,7 @@ BEGIN_NAMESPACE(Vcf)
 
 class CustomValue {
 public:
-    typedef boost::any ValueType;
+    typedef MultiType ValueType;
     typedef std::vector<ValueType>::size_type SizeType;
 
     CustomValue();
@@ -61,30 +61,33 @@ protected:
 
     template<typename T>
     bool set(const std::string& value) {
-        type().typecheck<T>();
-        SizeType idx = 0;
-        Tokenizer<char> t(value, ',');
-        std::string tok;
-        if (!t.extract(tok))
+        if (value.empty())
             return false;
 
-        do {
-            type().validateIndex(idx);
-            ensureCapacity(idx+1);
-            if (tok == ".") {
-                _values[idx++] = boost::any();
-            } else {
-                try {
-                    T tmp = boost::lexical_cast<T>(tok);
-                    _values[idx++] = tmp;
-                } catch (const boost::bad_lexical_cast& e) {
-                    return false;
-                }
-            }
-        } while (t.extract(tok));
+        type().typecheck<T>();
+        uint32_t nItems = std::count_if(value.begin(), value.end(),
+            std::bind1st(std::equal_to<char>(), ','));
+        _values.resize(nItems+1);
+
+        Tokenizer<char> t(value, ',');
+
+        const static std::string nullString(".");
+        uint32_t idx(0);
+        while (!t.eof()) {
+            if (t.nextTokenMatches(""))
+                return false;
+
+            if (t.nextTokenMatches(nullString)) {
+                t.advance();
+            } else if (!t.extract(_values[idx].ref<T>()))
+                return false;
+            ++idx;
+        }
+        type().validateIndex(_values.size()-1);
 
         return t.eof();
     }
+
 
     void ensureCapacity(uint32_t size);
 
@@ -99,7 +102,7 @@ inline const T* CustomValue::get(SizeType idx) const {
     type().validateIndex(idx);
     if (idx >= _values.size())
         return 0;
-    return boost::any_cast<T>(&_values[idx]);
+    return _values[idx].get<T>();
 }
 
 template<typename T>
