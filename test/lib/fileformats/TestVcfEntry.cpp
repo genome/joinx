@@ -256,3 +256,13 @@ TEST_F(TestVcfEntry, genotypeForSample) {
     gt = v[1].genotypeForSample(2);
     ASSERT_TRUE(gt.empty());
 }
+
+TEST_F(TestVcfEntry, addFilter) {
+    Entry e1 = v[0];
+
+    ASSERT_THROW(e1.addFilter(string("sq;50")),runtime_error);
+    ASSERT_THROW(e1.addFilter(string("sq 50")),runtime_error);
+    ASSERT_NO_THROW(e1.addFilter(string("sq.50")));
+    ASSERT_NO_THROW(e1.addFilter(string("sq50")));
+    ASSERT_FALSE(e1.toString() == v[0].toString());
+}

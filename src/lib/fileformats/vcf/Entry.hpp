@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 #include <set>
-//TODO Needs set for filters
+
 //TODO needs addFilter function. Make sure to check if filter is available in header
 BEGIN_NAMESPACE(Vcf)
 
@@ -62,6 +62,11 @@ public:
     void parseAndReheader(const Header* h, const Header* newH, const std::string& s);
 
     void addIdentifier(const std::string& id);
+    static bool isInvalidFilterId (char c) {
+        return (c == ';' || isspace(c));
+    }
+
+    void addFilter(const std::string& filterName);
 
     const std::string& chrom() const { return _chrom; }
     const uint64_t& pos() const { return _pos; }

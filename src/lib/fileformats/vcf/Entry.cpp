@@ -263,6 +263,23 @@ void Entry::addIdentifier(const std::string& id) {
         _identifiers.push_back(id);
 }
 
+
+void Entry::addFilter(const std::string& filterName) {
+    //filters cannot contain whitespace or semicolons
+    std::string::const_iterator it = find_if(filterName.begin(),filterName.end(),isInvalidFilterId);
+    if( it != filterName.end()) {
+        //then it is invalid
+        cerr << *it << endl;
+        throw runtime_error(str(format("Invalid filter name %1%. Contains whitespace or a semicolon.") %filterName ));
+    }
+
+    if (_failedFilters.find("PASS") != _failedFilters.end()) {
+        _failedFilters.erase("PASS");
+    }
+
+    _failedFilters.insert(filterName);
+}
+
 string Entry::toString() const {
     stringstream ss;
     ss << *this;
