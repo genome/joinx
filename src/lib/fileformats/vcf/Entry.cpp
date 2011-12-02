@@ -400,6 +400,25 @@ int32_t Entry::samplesFailedFilter() const {
     return numFailedFilter;
 }
 
+int32_t Entry::samplesEvaluatedByFilter() const {
+    auto i = find(_formatDescription.begin(), _formatDescription.end(), "FT");
+    if (i == _formatDescription.end())
+        return -1;
+
+    uint32_t offset = distance(_formatDescription.begin(), i);
+    uint32_t numEvaluatedByFilter = 0;
+    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
+        if (i->size()) {
+            //then we have some data
+            //if it has a value (assume . is processed correctly) and we're able to get a value and it is not pass then failed
+            if (!(*i)[offset].empty() && (*i)[offset].get<std::string>(0) != NULL) {
+               numEvaluatedByFilter++;
+            }
+        }
+    }
+    return numEvaluatedByFilter;
+}
+
 void Entry::setPositions() {
     _start = _stop = _pos;
     for (uint32_t idx = 0; idx < _alt.size(); ++idx) {

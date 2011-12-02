@@ -87,6 +87,7 @@ public:
 
     uint32_t samplesWithData() const;
     int32_t samplesFailedFilter() const;
+    int32_t samplesEvaluatedByFilter() const;
     void removeLowDepthGenotypes(uint32_t lowDepth);
 
     void setPositions();
