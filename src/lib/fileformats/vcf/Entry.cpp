@@ -151,7 +151,7 @@ void Entry::parse(const Header* h, const string& s) {
     _alt.clear();
     _failedFilters.clear();
     _formatDescription.clear();
-    _sampleData.clear();
+    _sampleData.resize(h->sampleCount());
 
     Tokenizer<char> tok(s, '\t');
     if (!tok.extract(_chrom))
@@ -239,20 +239,22 @@ void Entry::parse(const Header* h, const string& s) {
         }
 
         // per sample formatted data
+        uint32_t sampleIdx(0);
         while (tok.extract(tmp)) {
             vector<string> data;
-            if (tmp != ".")
+            if (tmp != ".") {
                 Tokenizer<char>::split(tmp, ':', back_inserter(data));
 
-            if (data.size() > _formatDescription.size())
-                throw runtime_error("More per-sample values than described in format section");
+                if (data.size() > _formatDescription.size())
+                    throw runtime_error("More per-sample values than described in format section");
 
-            vector<CustomValue> perSampleValues;
-            for (uint32_t i = 0; i < data.size(); ++i) {
-                const CustomType* type = header().formatType(_formatDescription[i]);
-                perSampleValues.push_back(CustomValue(type, data[i]));
+                _sampleData[sampleIdx].resize(_formatDescription.size());
+                for (uint32_t i = 0; i < data.size(); ++i) {
+                    const CustomType* type = header().formatType(_formatDescription[i]);
+                    _sampleData[sampleIdx][i] = CustomValue(type, data[i]);
+                }
             }
-            _sampleData.push_back(perSampleValues);
+            ++sampleIdx;
         }
     }
     setPositions();
