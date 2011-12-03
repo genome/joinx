@@ -182,3 +182,16 @@ TEST(VcfHeader, toStream) {
     ss << h;
     ASSERT_EQ(headerText, ss.str());
 }
+
+TEST(VcfHeader, addFilter) {
+    Header h = parse(headerText);
+    h.addFilter("FOO12", "Test filter");
+    const auto& filters = h.filters();
+    auto iter = filters.find("FOO12");
+    ASSERT_FALSE(iter == filters.end());
+    ASSERT_EQ("\"Test filter\"", iter->second);
+    stringstream ss;
+    ss << h;
+    string expected = "##FILTER=<ID=FOO12,Description=\"Test filter\">";
+    ASSERT_NE(string::npos, ss.str().find(expected));
+}

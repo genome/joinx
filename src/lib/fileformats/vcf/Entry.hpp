@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CustomValue.hpp"
+#include "GenotypeCall.hpp"
 #include "common/Tokenizer.hpp"
 #include "common/namespaces.hpp"
 
@@ -10,7 +11,9 @@
 #include <ostream>
 #include <string>
 #include <vector>
+#include <set>
 
+//TODO needs addFilter function. Make sure to check if filter is available in header
 BEGIN_NAMESPACE(Vcf)
 
 class EntryMerger;
@@ -33,19 +36,18 @@ public:
     };
     typedef Header HeaderType;
     typedef std::map<std::string, CustomValue> CustomValueMap;
+    typedef std::map<uint32_t, std::vector<CustomValue> > SampleData;
+
+    // static data
     const static double MISSING_QUALITY;
 
+    // static functions
     static const char* fieldToString(FieldName field);
     static FieldName fieldFromString(const char* name);
+    static void parseLine(const Header* hdr, std::string& s, Entry& e);
+    static void parseLineAndReheader(const Header* hdr, const Header* newH, std::string& s, Entry& e);
 
-    static void parseLine(const Header* hdr, std::string& s, Entry& e) {
-        e.parse(hdr, s);
-    }
-
-    static void parseLineAndReheader(const Header* hdr, const Header* newH, std::string& s, Entry& e) {
-        e.parseAndReheader(hdr, newH, s);
-    }
-
+    // member functions
     Entry();
     explicit Entry(const Header* h);
     Entry(const EntryMerger& merger);
@@ -61,6 +63,11 @@ public:
     void parseAndReheader(const Header* h, const Header* newH, const std::string& s);
 
     void addIdentifier(const std::string& id);
+    static bool isInvalidFilterId (char c) {
+        return (c == ';' || isspace(c));
+    }
+
+    void addFilter(const std::string& filterName);
 
     const std::string& chrom() const { return _chrom; }
     const uint64_t& pos() const { return _pos; }
@@ -68,13 +75,21 @@ public:
     const std::string& ref() const { return _ref; }
     const std::vector<std::string>& alt() const { return _alt; }
     double qual() const { return _qual; }
-    const std::vector<std::string>& failedFilters() const { return _failedFilters; }
+    const std::set<std::string>& failedFilters() const { return _failedFilters; }
     const CustomValueMap& info() const { return _info; }
     const std::vector<std::string>& formatDescription() const { return _formatDescription; }
-    const std::vector< std::vector<CustomValue> >& genotypeData() const { return _genotypeData; }
+    const SampleData& sampleData() const { return _sampleData; }
+    const std::vector<CustomValue>* sampleData(uint32_t idx) const;
     const CustomValue* info(const std::string& key) const;
-    const CustomValue* genotypeData(uint32_t sampleIdx, const std::string& key) const;
+    const CustomValue* sampleData(uint32_t sampleIdx, const std::string& key) const;
+
+    // returns true if GT is the first FORMAT entry 
+    bool hasGenotypeData() const;
+    GenotypeCall genotypeForSample(uint32_t sampleIdx) const;
+
     uint32_t samplesWithData() const;
+    int32_t samplesFailedFilter() const;
+    int32_t samplesEvaluatedByFilter() const;
     void removeLowDepthGenotypes(uint32_t lowDepth);
 
     void setPositions();
@@ -86,19 +101,6 @@ public:
     int32_t altIdx(const std::string& alt) const;
 
     std::string toString() const;
-
-    template<typename T>
-    void extractList(T& v, const std::string& s, char delim = ';') {
-        v.clear();
-        if (s == ".")
-            return;
-
-        Tokenizer<char> t(s, delim);
-        typename T::value_type tmp;
-        while (t.extract(tmp)) {
-            v.push_back(tmp);
-        }
-    }
 
     template<typename T>
     void printList(std::ostream& s, const T& v, char delim = ';') const {
@@ -118,7 +120,6 @@ public:
 
     void swap(Entry& other);
 
-
 protected:
     const Header* _header;
     std::string _chrom;
@@ -127,10 +128,10 @@ protected:
     std::string _ref;
     std::vector<std::string> _alt;
     double _qual;
-    std::vector<std::string> _failedFilters;
+    std::set<std::string> _failedFilters;
     CustomValueMap _info;
     std::vector<std::string> _formatDescription;
-    std::vector< std::vector<CustomValue> > _genotypeData;
+    SampleData _sampleData;
 
     int64_t _start;
     int64_t _stop;

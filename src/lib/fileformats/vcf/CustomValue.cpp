@@ -154,13 +154,31 @@ std::string CustomValue::getString(SizeType idx) const {
 }
 
 void CustomValue::toStream(ostream& s) const {
-    if (empty()) {
-        type().emptyRepr(s);
-    }
-    for (SizeType i = 0; i < size(); ++i) {
-        if (i > 0)
-            s << ",";
-        s << getString(i);
+
+    switch (type().type()) {
+        case CustomType::INTEGER:
+            toStream_impl<int64_t>(s);
+            break;
+
+        case CustomType::FLOAT:
+            toStream_impl<double>(s);
+            break;
+
+        case CustomType::CHAR:
+            toStream_impl<char>(s);
+            break;
+
+        case CustomType::STRING:
+            toStream_impl<string>(s);
+            break;
+
+        case CustomType::FLAG:
+            toStream_impl<bool>(s);
+            break;
+
+        default:
+            throw runtime_error("Invalid custom VCF type!");
+            break;
     }
 }
 
@@ -222,4 +240,3 @@ END_NAMESPACE(Vcf)
 std::ostream& operator<<(std::ostream& s, const Vcf::CustomValue& v) {
     return s;
 }
-

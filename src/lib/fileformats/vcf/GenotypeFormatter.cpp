@@ -1,12 +1,14 @@
 #include "GenotypeFormatter.hpp"
 
 #include "Entry.hpp"
+#include "GenotypeCall.hpp"
 #include "Header.hpp"
 #include "CustomValue.hpp"
-#include "common/Tokenizer.hpp"
 
 #include <boost/format.hpp>
+#include <algorithm>
 #include <cassert>
+#include <iterator>
 #include <sstream>
 #include <stdexcept>
 
@@ -38,7 +40,7 @@ vector<CustomValue> GenotypeFormatter::process(
         if (*i == "GT") {
             rv.push_back(CustomValue(type, renumberGT(e, sampleIdx, alleleIndices)));
         } else {
-            const CustomValue* v = e->genotypeData(sampleIdx, *i);
+            const CustomValue* v = e->sampleData(sampleIdx, *i);
             rv.push_back(v ? *v : CustomValue());
         }
     }
@@ -76,7 +78,7 @@ void GenotypeFormatter::merge(
                 previousValues[i] = CustomValue(type, newGt);
             }
         } else {
-            const CustomValue* v = e->genotypeData(sampleIdx, fields[i]);
+            const CustomValue* v = e->sampleData(sampleIdx, fields[i]);
             if (v && !v->empty() && (overridePreviousValues || previousValues[i].empty())) {
                 previousValues[i] = *v;
             }
@@ -90,45 +92,44 @@ string GenotypeFormatter::renumberGT(
     const std::vector<size_t>& alleleIndices
     ) const
 {
-    const CustomValue* oldGT = e->genotypeData(sampleIdx, "GT");
-    if (!oldGT)
+    GenotypeCall oldGT = e->genotypeForSample(sampleIdx);
+    if (oldGT.empty())
         return ".";
+
+    char delim = oldGT.phased() ? '|' : '/';
 
     stringstream newGT;
-    string oldGTstr = oldGT->toString();
-    if (oldGTstr.empty())
-        return ".";
+    for (auto i = oldGT.begin(); i != oldGT.end(); ++i) {
+        if (i > oldGT.begin())
+            newGT << delim;
 
-    Tokenizer<string> t(oldGTstr, "|/");
-    uint32_t oldIdx;
-    while (t.extract(oldIdx)) {
-        if (oldIdx > 0) {
-            --oldIdx;
-            assert(oldIdx < alleleIndices.size());
-            uint32_t newIdx = alleleIndices[oldIdx];
+        // index > 0 => non-ref
+        if (*i > 0) {
+            // the index in the alt array will be *i - 1, since 0 denotes ref
+            assert(*i-1 < alleleIndices.size());
+            uint32_t newIdx = alleleIndices[*i-1];
             assert(newIdx <= _alleles.size());
             newGT << newIdx+1;
         } else {
+            // this is the ref allele
             newGT << 0;
         }
-        if (t.lastDelim())
-            newGT << t.lastDelim();
     }
+
     return newGT.str();
 }
 
-bool GenotypeFormatter::areGenotypesDisjoint(const std::string& gt1, const std::string& gt2) {
+bool GenotypeFormatter::areGenotypesDisjoint(const std::string& str1, const std::string& str2) {
     set<uint32_t> values;
-    uint32_t idx;
-    Tokenizer<string> t1(gt1, "|/");
-    while (t1.extract(idx))
-        values.insert(idx);
+    GenotypeCall gt1(str1);
+    GenotypeCall gt2(str2);
+    copy(gt1.begin(), gt1.end(), inserter(values, values.begin()));
 
-    Tokenizer<string> t2(gt2, "|/");
-    while (t2.extract(idx)) {
-        if (values.count(idx) > 0)
+    for (auto i = gt2.begin(); i != gt2.end(); ++i) {
+        if (values.count(*i) > 0)
             return false;
     }
+
     return true;
 }
 

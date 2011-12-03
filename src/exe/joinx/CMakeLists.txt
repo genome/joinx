@@ -28,6 +28,8 @@ set(SOURCES
     VcfAnnotateCommand.hpp
     VcfFilterCommand.cpp
     VcfFilterCommand.hpp
+    VcfSiteFilterCommand.cpp
+    VcfSiteFilterCommand.hpp
     VcfMergeCommand.cpp
     VcfMergeCommand.hpp
     main.cpp

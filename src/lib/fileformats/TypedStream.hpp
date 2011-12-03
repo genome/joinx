@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+//TODO Needs accessor for lineNum
 template<typename ValueClass>
 class TypedStreamFilterBase {
 public:
@@ -46,7 +47,6 @@ public:
     TypedStream(Extractor& extractor, InputStream& in)
         : _extractor(extractor)
         , _in(in)
-        , _lineNum(0)
         , _valueCount(0)
         , _cached(false)
         , _cachedRv(false)
@@ -73,6 +73,7 @@ public:
     bool next(ValueType& value);
     uint64_t valueCount() const;
     void checkEof() const;
+    uint64_t lineNum() const;
 
 protected:
     std::string nextLine();
@@ -170,7 +171,6 @@ inline std::string TypedStream<ValueType, Extractor>::nextLine() {
     std::string line;
     do {
         _in.getline(line);
-        ++_lineNum;
     } while (!eof() && (line.empty() || line[0] == '#'));
     return line;
 }
@@ -184,6 +184,11 @@ template<typename ValueType, typename Extractor>
 inline void TypedStream<ValueType, Extractor>::checkEof() const {
     if (!_cached && eof())
         throw std::runtime_error("Attempted to read past eof of stream " + name());
+}
+
+template<typename ValueType, typename Extractor>
+inline uint64_t TypedStream<ValueType, Extractor>::lineNum() const {
+    return _in.lineNum();
 }
 
 template<typename ValueType, typename Extractor>

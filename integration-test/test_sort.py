@@ -73,8 +73,8 @@ class TestSort(JoinxTest, unittest.TestCase):
         params = [ "sort", "-o", output_file ]
         params.extend(input_files)
         rv, err = self.joinx(params)
-        self.assertEqual(0, rv)
         self.assertEqual('', err)
+        self.assertEqual(0, rv)
         self.assertFilesEqual(expected_file, output_file, filter_regex="##fileDate=")
 
     def test_sort_some_empty(self):

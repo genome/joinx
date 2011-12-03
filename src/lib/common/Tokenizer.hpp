@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include <boost/format.hpp>
 #include <algorithm>
 #include <cstdint>
@@ -14,7 +16,7 @@ using namespace std;
 template<typename DelimType>
 class Tokenizer {
 public:
-    Tokenizer(const std::string& s, DelimType delim = '\t')
+    Tokenizer(std::string const& s, DelimType const& delim = '\t')
         : _s(s)
         , _delim(delim)
         , _pos(0)
@@ -25,7 +27,12 @@ public:
         rewind();
     }
 
-    void reset(const std::string& s) {
+    bool nextTokenMatches(std::string const& value) const {
+        return _end-_pos == value.size()
+            && _s.compare(_pos, value.size(), value) == 0;
+    }
+
+    void reset(std::string const& s) {
         _s = s;
         _pos = 0;
         _end = 0;
@@ -35,6 +42,15 @@ public:
 
     template<typename T>
     bool extract(T& value);
+
+    template<typename IterType>
+    static void split(std::string const& s, DelimType const& delim, IterType v) {
+        Tokenizer<DelimType> t(s, delim);
+        typename IterType::container_type::value_type tmp;
+        while (t.extract(tmp))
+            *v++=tmp;
+    }
+
     void remaining(std::string& s);
 
     bool advance();
@@ -64,7 +80,7 @@ protected:
             return true;
         } else {
             using boost::format;
-            throw std::runtime_error(str(format("Attempted to cast string '%1%' to char") %value));
+            throw std::runtime_error(str(format("Attempted to cast string '%1%' to char") %s));
         }
         return false;
     }
@@ -81,6 +97,7 @@ protected:
     bool _extract(uint64_t& value) { return _extractUnsigned(value); }
     bool _extract(float& value) { return _extractFloat(strtof, value); }
     bool _extract(double& value) { return _extractFloat(strtod, value); }
+    bool _extract(long double& value) { return _extractFloat(strtold, value); }
     template<typename T>
     bool _extractSigned(T& value);
     template<typename T>

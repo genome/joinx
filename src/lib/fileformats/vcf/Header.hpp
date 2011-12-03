@@ -30,6 +30,7 @@ public:
     ~Header();
 
     void add(const std::string& line);
+    void addFilter(const std::string& name, const std::string& desc);
     void merge(const Header& other, bool allowDuplicateSamples = false);
     bool empty() const;
 
@@ -42,6 +43,8 @@ public:
     const std::map<std::string, CustomType>& formatTypes() const;
     const std::map<std::string, std::string>& filters() const;
     const std::vector<std::string>& sampleNames() const;
+
+    uint32_t sampleCount() const { return _sampleNames.size(); }
 
     // throws when sampleName is not found
     uint32_t sampleIndex(const std::string& sampleName) const;

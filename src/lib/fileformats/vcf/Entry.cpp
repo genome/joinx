@@ -41,8 +41,14 @@ namespace {
         "format",
         "sample_data"
     };
+}
 
+void Entry::parseLine(const Header* hdr, std::string& s, Entry& e) {
+    e.parse(hdr, s);
+}
 
+void Entry::parseLineAndReheader(const Header* hdr, const Header* newH, std::string& s, Entry& e) {
+    e.parseAndReheader(hdr, newH, s);
 }
 
 const char* Entry::fieldToString(FieldName field) {
@@ -104,22 +110,21 @@ Entry::Entry(const EntryMerger& merger)
     copy(idents.begin(), idents.end(), back_inserter(_identifiers));
 
     const std::set<std::string>& filts = merger.failedFilters();
-    copy(filts.begin(), filts.end(), back_inserter(_failedFilters));
+    copy(filts.begin(), filts.end(), inserter(_failedFilters, _failedFilters.begin()));
 
     merger.setInfo(_info);
-    merger.setAltAndGenotypeData(_alt, _formatDescription, _genotypeData);
+    merger.setAltAndGenotypeData(_alt, _formatDescription, _sampleData);
     setPositions();
 }
 
 void Entry::reheader(const Header* newHeader) {
-    std::vector< std::vector<CustomValue> > newGTData(newHeader->sampleNames().size());
-    for (auto i = _genotypeData.begin(); i != _genotypeData.end(); ++i) {
-        auto offset = distance(_genotypeData.begin(), i);
-        const string& sampleName = header().sampleNames()[offset];
+    SampleData newGTData;
+    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
+        const string& sampleName = header().sampleNames()[i->first];
         uint32_t newIdx = newHeader->sampleIndex(sampleName);
-        newGTData[newIdx] = *i;
+        newGTData[newIdx] = i->second;
     }
-    _genotypeData.swap(newGTData);
+    _sampleData.swap(newGTData);
     _header = newHeader;
 }
 
@@ -138,6 +143,14 @@ void Entry::parseAndReheader(const Header* h, const Header* newHeader, const str
 void Entry::parse(const Header* h, const string& s) {
     _header = h;
 
+    // clear containers
+    _info.clear();
+    _sampleData.clear();
+    _identifiers.clear();
+    _alt.clear();
+    _failedFilters.clear();
+    _formatDescription.clear();
+
     Tokenizer<char> tok(s, '\t');
     if (!tok.extract(_chrom))
         throw runtime_error("Failed to extract chromosome from vcf entry: " + s);
@@ -149,7 +162,9 @@ void Entry::parse(const Header* h, const string& s) {
     // ids
     if (!tok.extract(tmp))
         throw runtime_error("Failed to extract id from vcf entry: " + s);
-    extractList(_identifiers, tmp);
+
+    if (tmp != ".")
+        Tokenizer<char>::split(tmp, ';', back_inserter(_identifiers));
 
     // ref alleles
     if (!tok.extract(_ref))
@@ -158,7 +173,9 @@ void Entry::parse(const Header* h, const string& s) {
     // alt alleles
     if (!tok.extract(tmp))
         throw runtime_error("Failed to extract alt alleles from vcf entry: " + s);
-    extractList(_alt, tmp, ',');
+
+    if (tmp != ".")
+        Tokenizer<char>::split(tmp, ',', back_inserter(_alt));
 
     // phred quality
     string qualstr;
@@ -172,26 +189,24 @@ void Entry::parse(const Header* h, const string& s) {
     // failed filters
     if (!tok.extract(tmp))
         throw runtime_error("Failed to extract filters from vcf entry: " + s);
-    extractList(_failedFilters, tmp);
+
+    if (tmp != ".")
+        Tokenizer<char>::split(tmp, ';', inserter(_failedFilters,_failedFilters.end()));
+
+
     // If pass is present as well as other failed filters, remove pass
     if (_failedFilters.size() > 1) {
-        auto iter = find(_failedFilters.begin(), _failedFilters.end(), "PASS");
-        if (iter != _failedFilters.end()) {
-            auto end = _failedFilters.erase(iter);
-            _failedFilters.resize(distance(_failedFilters.begin(), end));
-        }
+        _failedFilters.erase("PASS");
     }
-
-
 
     // info entries
     if (!tok.extract(tmp))
         throw runtime_error("Failed to extract info from vcf entry: " + s);
     vector<string> infoStrings;
-    extractList(infoStrings, tmp);
+    if (tmp != ".")
+        Tokenizer<char>::split(tmp, ';', back_inserter(infoStrings));
 
     // TODO: refactor into function addInfoField(s)
-    _info.clear();
     for (auto i = infoStrings.begin(); i != infoStrings.end(); ++i) {
         if (i->empty())
             continue;
@@ -211,31 +226,36 @@ void Entry::parse(const Header* h, const string& s) {
 
     // TODO: refactor into function
     // format description
-    if (tok.extract(tmp)) {
-        extractList(_formatDescription, tmp, ':');
+    if (tok.extract(tmp) && tmp != ".") {
+        Tokenizer<char>::split(tmp, ':', back_inserter(_formatDescription));
+
         for (auto i = _formatDescription.begin(); i != _formatDescription.end(); ++i) {
             if (i->empty())
                 continue;
             if (!header().formatType(*i))
                 throw runtime_error(str(format("Unknown id in FORMAT field: %1%") %*i));
         }
-
-        _genotypeData.clear();
-        // per sample formatted data
-        while (tok.extract(tmp)) {
-            vector<string> data;
-            extractList(data, tmp, ':');
-            if (data.size() > _formatDescription.size())
-                throw runtime_error("More per-sample values than described in format section");
-
-            vector<CustomValue> perSampleValues;
-            for (uint32_t i = 0; i < data.size(); ++i) {
-                const CustomType* type = header().formatType(_formatDescription[i]);
-                perSampleValues.push_back(CustomValue(type, data[i]));
-            }
-            _genotypeData.push_back(perSampleValues);
-        }
     }
+
+    // per sample formatted data
+    uint32_t sampleIdx(0);
+    while (tok.extract(tmp)) {
+        vector<string> data;
+        if (tmp != ".")
+            Tokenizer<char>::split(tmp, ':', back_inserter(data));
+
+        if (data.size() > _formatDescription.size())
+            throw runtime_error("More per-sample values than described in format section");
+
+        vector<CustomValue>& values = (_sampleData[sampleIdx] = vector<CustomValue>());
+        values.resize(data.size());
+        for (uint32_t i = 0; i < data.size(); ++i) {
+            const CustomType* type = header().formatType(_formatDescription[i]);
+            values[i] = CustomValue(type, data[i]);
+        }
+        ++sampleIdx;
+    }
+
     setPositions();
 }
 
@@ -244,6 +264,22 @@ void Entry::addIdentifier(const std::string& id) {
         _identifiers.push_back(id);
 }
 
+
+void Entry::addFilter(const std::string& filterName) {
+    //filters cannot contain whitespace or semicolons
+    std::string::const_iterator it = find_if(filterName.begin(),filterName.end(),isInvalidFilterId);
+    if( it != filterName.end()) {
+        //then it is invalid
+        cerr << *it << endl;
+        throw runtime_error(str(format("Invalid filter name %1%. Contains whitespace or a semicolon.") %filterName ));
+    }
+
+    if (_failedFilters.find("PASS") != _failedFilters.end()) {
+        _failedFilters.erase("PASS");
+    }
+
+    _failedFilters.insert(filterName);
+}
 
 string Entry::toString() const {
     stringstream ss;
@@ -274,7 +310,7 @@ void Entry::swap(Entry& other) {
     _failedFilters.swap(other._failedFilters);
     _info.swap(other._info);
     _formatDescription.swap(other._formatDescription);
-    _genotypeData.swap(other._genotypeData);
+    _sampleData.swap(other._sampleData);
     std::swap(_header, other._header);
     setPositions();
 }
@@ -293,9 +329,17 @@ const CustomValue* Entry::info(const string& key) const {
     return &i->second;
 }
 
-const CustomValue* Entry::genotypeData(uint32_t sampleIdx, const string& key) const {
+const vector<CustomValue>* Entry::sampleData(uint32_t idx) const {
+    auto iter = _sampleData.find(idx);
+    if (iter == _sampleData.end())
+        return 0;
+    return &iter->second;
+}
+
+const CustomValue* Entry::sampleData(uint32_t sampleIdx, const string& key) const {
     // no data for that sample
-    if (sampleIdx >= _genotypeData.size() || _genotypeData[sampleIdx].empty())
+    auto iter = _sampleData.find(sampleIdx);
+    if (iter == _sampleData.end())
         return 0;
 
     // no info for that format key
@@ -304,9 +348,22 @@ const CustomValue* Entry::genotypeData(uint32_t sampleIdx, const string& key) co
         return 0;
 
     uint32_t offset = distance(_formatDescription.begin(), i);
-    if (offset >= _genotypeData[sampleIdx].size())
+    if (offset >= iter->second.size())
         return 0;
-    return &_genotypeData[sampleIdx][offset];
+
+    return &iter->second[offset];
+}
+
+bool Entry::hasGenotypeData() const {
+    return !_formatDescription.empty() && _formatDescription.front() == "GT";
+}
+
+GenotypeCall Entry::genotypeForSample(uint32_t sampleIdx) const {
+    const string* gtString(0);
+    const CustomValue* v = sampleData(sampleIdx, "GT");
+    if (!v || v->empty() || (gtString = v->get<string>(0)) == 0 || gtString->empty())
+        return GenotypeCall();
+    return GenotypeCall(*gtString);
 }
 
 void Entry::removeLowDepthGenotypes(uint32_t lowDepth) {
@@ -315,22 +372,60 @@ void Entry::removeLowDepthGenotypes(uint32_t lowDepth) {
         return;
 
     uint32_t offset = distance(_formatDescription.begin(), i);
-    for (auto i = _genotypeData.begin(); i != _genotypeData.end(); ++i) {
-        if (i->empty())
-            continue;
+    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
         const int64_t *v;
-        if ((*i)[offset].empty() || (v = (*i)[offset].get<int64_t>(0)) == NULL || *v < lowDepth)
-            i->clear();
+        if (i->second[offset].empty() || (v = i->second[offset].get<int64_t>(0)) == NULL || *v < lowDepth)
+            i->second.clear();
     }
 }
 
 uint32_t Entry::samplesWithData() const {
-    uint32_t rv = 0;
-    for (auto i = _genotypeData.begin(); i != _genotypeData.end(); ++i) {
-        if (i->size())
+    uint32_t rv(0);
+    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i)
+        if (!i->second.empty())
             ++rv;
-    }
     return rv;
+}
+
+int32_t Entry::samplesFailedFilter() const {
+    auto i = find(_formatDescription.begin(), _formatDescription.end(), "FT");
+    if (i == _formatDescription.end())
+        return -1;
+
+    uint32_t offset = distance(_formatDescription.begin(), i);
+    uint32_t numFailedFilter = 0;
+    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
+        auto const& values = i->second;
+        if (values.size() > offset) {
+            //then we have some data
+            const std::string *filter;
+            //if it has a value (assume . is processed correctly) and we're able to get a value and it is not pass then failed
+            if (!values[offset].empty() && (filter = values[offset].get<std::string>(0)) != NULL && *filter != std::string("PASS")) {
+               numFailedFilter++;
+            }
+        }
+    }
+    return numFailedFilter;
+}
+
+int32_t Entry::samplesEvaluatedByFilter() const {
+    auto i = find(_formatDescription.begin(), _formatDescription.end(), "FT");
+    if (i == _formatDescription.end())
+        return -1;
+
+    uint32_t offset = distance(_formatDescription.begin(), i);
+    uint32_t numEvaluatedByFilter = 0;
+    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
+        auto const& values = i->second;
+        if (values.size() > offset) {
+            //then we have some data
+            //if it has a value (assume . is processed correctly) and we're able to get a value and it is not pass then failed
+            if (!values[offset].empty() && values[offset].get<std::string>(0) != NULL) {
+               numEvaluatedByFilter++;
+            }
+        }
+    }
+    return numEvaluatedByFilter;
 }
 
 void Entry::setPositions() {
@@ -395,12 +490,19 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
     s << '\t';
 
     e.printList(s, e.formatDescription(), ':');
-    const vector< vector<Vcf::CustomValue> >& psd = e.genotypeData();
+    Vcf::Entry::SampleData const& psd = e.sampleData();
+    uint32_t sampleCounter(0);
     for (auto i = psd.begin(); i != psd.end(); ++i) {
         s << '\t';
-        if (!i->empty()) {
-            for (auto j = i->begin(); j != i->end(); ++j) {
-                if (j != i->begin())
+        while (sampleCounter < i->first) {
+            s << ".\t";
+            ++sampleCounter;
+        }
+
+        auto const& values = i->second;
+        if (!values.empty()) {
+            for (auto j = values.begin(); j != values.end(); ++j) {
+                if (j != values.begin())
                     s << ':';
                 if (j->empty())
                     s << '.';
@@ -409,6 +511,7 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
             }
         } else
             s << ".";
+        ++sampleCounter;
     }
     return s;
 }
