@@ -157,25 +157,26 @@ void Entry::parse(const Header* h, const string& s) {
     if (!tok.extract(_pos))
         throw runtime_error("Failed to extract position from vcf entry: " + s);
 
-    string tmp;
+    char const* beg(0);
+    char const* end(0);
 
     // ids
-    if (!tok.extract(tmp))
+    if (!tok.extract(&beg, &end))
         throw runtime_error("Failed to extract id from vcf entry: " + s);
 
-    if (tmp != ".")
-        Tokenizer<char>::split(tmp, ';', back_inserter(_identifiers));
+    if (end-beg != 1 || *beg != '.')
+        Tokenizer<char>::split(beg, end, ';', back_inserter(_identifiers));
 
     // ref alleles
     if (!tok.extract(_ref))
         throw runtime_error("Failed to extract ref alleles from vcf entry: " + s);
 
     // alt alleles
-    if (!tok.extract(tmp))
+    if (!tok.extract(&beg, &end))
         throw runtime_error("Failed to extract alt alleles from vcf entry: " + s);
 
-    if (tmp != ".")
-        Tokenizer<char>::split(tmp, ',', back_inserter(_alt));
+    if (end-beg != 1 || *beg != '.')
+        Tokenizer<char>::split(beg, end, ',', back_inserter(_alt));
 
     // phred quality
     string qualstr;
@@ -187,11 +188,11 @@ void Entry::parse(const Header* h, const string& s) {
         _qual = lexical_cast<double>(qualstr);
 
     // failed filters
-    if (!tok.extract(tmp))
+    if (!tok.extract(&beg, &end))
         throw runtime_error("Failed to extract filters from vcf entry: " + s);
 
-    if (tmp != ".")
-        Tokenizer<char>::split(tmp, ';', inserter(_failedFilters,_failedFilters.end()));
+    if (end-beg != 1 || *beg != '.')
+        Tokenizer<char>::split(beg, end, ';', inserter(_failedFilters,_failedFilters.end()));
 
 
     // If pass is present as well as other failed filters, remove pass
@@ -200,11 +201,12 @@ void Entry::parse(const Header* h, const string& s) {
     }
 
     // info entries
-    if (!tok.extract(tmp))
+    if (!tok.extract(&beg, &end))
         throw runtime_error("Failed to extract info from vcf entry: " + s);
+
     vector<string> infoStrings;
-    if (tmp != ".")
-        Tokenizer<char>::split(tmp, ';', back_inserter(infoStrings));
+    if (end-beg != 1 || *beg != '.')
+        Tokenizer<char>::split(beg, end, ';', back_inserter(infoStrings));
 
     // TODO: refactor into function addInfoField(s)
     for (auto i = infoStrings.begin(); i != infoStrings.end(); ++i) {
@@ -226,8 +228,8 @@ void Entry::parse(const Header* h, const string& s) {
 
     // TODO: refactor into function
     // format description
-    if (tok.extract(tmp) && tmp != ".") {
-        Tokenizer<char>::split(tmp, ':', back_inserter(_formatDescription));
+    if (tok.extract(&beg, &end) && (end - beg != 1 || *beg != '.')) {
+        Tokenizer<char>::split(beg, end, ':', back_inserter(_formatDescription));
 
         for (auto i = _formatDescription.begin(); i != _formatDescription.end(); ++i) {
             if (i->empty())
@@ -239,10 +241,10 @@ void Entry::parse(const Header* h, const string& s) {
 
     // per sample formatted data
     uint32_t sampleIdx(0);
-    while (tok.extract(tmp)) {
+    while (tok.extract(&beg, &end)) {
         vector<string> data;
-        if (tmp != ".")
-            Tokenizer<char>::split(tmp, ':', back_inserter(data));
+        if (end-beg != 1 || *beg != '.')
+            Tokenizer<char>::split(beg, end, ':', back_inserter(data));
 
         if (data.size() > _formatDescription.size())
             throw runtime_error("More per-sample values than described in format section");
@@ -483,8 +485,9 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
                 s << ';';
             s << i->second.type().id();
             string value = i->second.toString();
-            if (!value.empty())
+            if (!i->second.empty()) {
                 s << "=" << value;
+            }
         }
     }
     s << '\t';
