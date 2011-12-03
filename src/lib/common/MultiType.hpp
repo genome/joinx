@@ -1,6 +1,7 @@
 #pragma once
 
 // We were using boost::any, but it was slower
+#include <string>
 
 class MultiType;
 
@@ -14,32 +15,35 @@ namespace {
 
 class MultiType {
 public:
-    MultiType() : _empty(true) {}
+    MultiType() : _empty(true) {
+    }
 
     MultiType& operator=(std::string const& s) {
         _empty = false;
         _s = s;
+        _alloc = true;
         return *this;
     }
+
     MultiType& operator=(int64_t i) {
         _empty = false;
-        _i = i;
+        _u.i = i;
         return *this;
     }
     MultiType& operator=(double f) {
         _empty = false;
-        _f = f;
+        _u.f = f;
         return *this;
     }
     MultiType& operator=(char c) {
         _empty = false;
-        _c = c;
+        _u.c = c;
         return *this;
     }
 
     MultiType& operator=(bool b) {
         _empty = false;
-        _b = b;
+        _u.b = b;
         return *this;
     }
 
@@ -57,13 +61,16 @@ public:
     bool empty() const { return _empty; }
 
     std::string _s;
-    int64_t _i;
-    double _f;
-    char _c;
-    bool _b; 
+    union {
+        int64_t i;
+        double f;
+        char c;
+        bool b; 
+    } _u;
 
 protected:
     bool _empty;
+    bool _alloc;
 };
 
 namespace {
@@ -82,25 +89,25 @@ namespace {
     template<>
     inline int64_t const* multiGet<int64_t>(MultiType const* v) {
         if (v->empty()) return 0;
-        return &v->_i;
+        return &v->_u.i;
     }
 
     template<>
     inline double const* multiGet<double>(MultiType const* v) {
         if (v->empty()) return 0;
-        return &v->_f;
+        return &v->_u.f;
     }
 
     template<>
     inline char const* multiGet<char>(MultiType const* v) {
         if (v->empty()) return 0;
-        return &v->_c;
+        return &v->_u.c;
     }
 
     template<>
     inline bool const* multiGet<bool>(MultiType const* v) {
         if (v->empty()) return 0;
-        return &v->_b;
+        return &v->_u.b;
     }
 
     template<typename T>
@@ -115,21 +122,21 @@ namespace {
 
     template<>
     inline int64_t& multiGet<int64_t>(MultiType& v) {
-        return v._i;
+        return v._u.i;
     }
 
     template<>
     inline double& multiGet<double>(MultiType& v) {
-        return v._f;
+        return v._u.f;
     }
 
     template<>
     inline char& multiGet<char>(MultiType& v) {
-        return v._c;
+        return v._u.c;
     }
 
     template<>
     inline bool& multiGet<bool>(MultiType& v) {
-        return v._b;
+        return v._u.b;
     }
 }
