@@ -66,8 +66,8 @@ protected:
 
         type().typecheck<T>();
         uint32_t nItems = std::count_if(value.begin(), value.end(),
-            std::bind1st(std::equal_to<char>(), ','));
-        _values.resize(nItems+1);
+            std::bind1st(std::equal_to<char>(), ',')) + 1;
+        _values.resize(nItems);
 
         Tokenizer<char> t(value, ',');
 

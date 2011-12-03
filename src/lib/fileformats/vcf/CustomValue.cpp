@@ -238,5 +238,6 @@ CustomValue& CustomValue::operator+=(const CustomValue& rhs) {
 END_NAMESPACE(Vcf)
 
 std::ostream& operator<<(std::ostream& s, const Vcf::CustomValue& v) {
+    v.toStream(s);
     return s;
 }
