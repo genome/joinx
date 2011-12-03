@@ -48,16 +48,6 @@ public:
             && strncmp(_sbeg+_pos, value.data(), value.size()) == 0;
     }
 
-/*
-    void reset(std::string const& s) {
-        _s = s;
-        _pos = 0;
-        _end = 0;
-        _eofCalls = 0;
-        _lastDelim = 0;
-    }
-*/
-
     template<typename T>
     bool extract(T& value);
 

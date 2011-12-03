@@ -236,7 +236,7 @@ TEST_F(TestVcfEntryMerger, GTfieldAlwaysFirst) {
     EntryMerger merger(*_defaultMs, &_mergedHeader, entries, entries+2);
     Entry merged(merger);
     ASSERT_EQ(4, merged.formatDescription().size());
-    ASSERT_EQ("GT", merged.formatDescription()[0]);
+    ASSERT_EQ("GT", merged.formatDescription()[0]->id());
     ASSERT_EQ(Entry::MISSING_QUALITY, merged.qual());
 }
 

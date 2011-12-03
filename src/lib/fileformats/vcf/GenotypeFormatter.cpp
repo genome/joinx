@@ -3,6 +3,7 @@
 #include "Entry.hpp"
 #include "GenotypeCall.hpp"
 #include "Header.hpp"
+#include "CustomType.hpp"
 #include "CustomValue.hpp"
 
 #include <boost/format.hpp>
@@ -24,7 +25,7 @@ GenotypeFormatter::GenotypeFormatter(const Header* header, const vector<string>&
 }
 
 vector<CustomValue> GenotypeFormatter::process(
-    const std::vector<std::string>& fields,
+    const std::vector<CustomType const*>& fields,
     const Entry* e,
     uint32_t sampleIdx,
     const std::vector<size_t>& alleleIndices
@@ -33,14 +34,14 @@ vector<CustomValue> GenotypeFormatter::process(
     vector<CustomValue> rv;
     rv.reserve(fields.size());
     for (auto i = fields.begin(); i != fields.end(); ++i) {
-        const CustomType* type = _header->formatType(*i);
+        const CustomType* type = *i;
         if (!type)
             throw runtime_error(str(format("Unknown genotype field name '%1%'") %*i));
 
-        if (*i == "GT") {
+        if (type->id() == "GT") {
             rv.push_back(CustomValue(type, renumberGT(e, sampleIdx, alleleIndices)));
         } else {
-            const CustomValue* v = e->sampleData(sampleIdx, *i);
+            const CustomValue* v = e->sampleData(sampleIdx, type->id());
             rv.push_back(v ? *v : CustomValue());
         }
     }
@@ -51,7 +52,7 @@ vector<CustomValue> GenotypeFormatter::process(
 void GenotypeFormatter::merge(
     bool overridePreviousValues,
     vector<CustomValue>& previousValues,
-    const std::vector<std::string>& fields,
+    const std::vector<CustomType const*>& fields,
     const Entry* e,
     uint32_t sampleIdx,
     const std::vector<size_t>& alleleIndices
@@ -59,11 +60,11 @@ void GenotypeFormatter::merge(
 {
     assert(previousValues.size() == fields.size());
     for (uint32_t i = 0; i < fields.size(); ++i) {
-        const CustomType* type = _header->formatType(fields[i]);
+        const CustomType* type = fields[i];
         if (!type)
             throw runtime_error(str(format("Unknown genotype field name '%1%'") %fields[i]));
 
-        if (fields[i] == "GT") {
+        if (fields[i]->id() == "GT") {
             assert(i == 0);
             string newGt = renumberGT(e, sampleIdx, alleleIndices);
             if (!previousValues[0].empty()) {
@@ -78,7 +79,7 @@ void GenotypeFormatter::merge(
                 previousValues[i] = CustomValue(type, newGt);
             }
         } else {
-            const CustomValue* v = e->sampleData(sampleIdx, fields[i]);
+            const CustomValue* v = e->sampleData(sampleIdx, fields[i]->id());
             if (v && !v->empty() && (overridePreviousValues || previousValues[i].empty())) {
                 previousValues[i] = *v;
             }

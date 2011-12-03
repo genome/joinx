@@ -77,7 +77,7 @@ public:
     double qual() const { return _qual; }
     const std::set<std::string>& failedFilters() const { return _failedFilters; }
     const CustomValueMap& info() const { return _info; }
-    const std::vector<std::string>& formatDescription() const { return _formatDescription; }
+    const std::vector<CustomType const*>& formatDescription() const { return _formatDescription; }
     const SampleData& sampleData() const { return _sampleData; }
     const std::vector<CustomValue>* sampleData(uint32_t idx) const;
     const CustomValue* info(const std::string& key) const;
@@ -130,7 +130,7 @@ protected:
     double _qual;
     std::set<std::string> _failedFilters;
     CustomValueMap _info;
-    std::vector<std::string> _formatDescription;
+    std::vector<CustomType const*> _formatDescription;
     SampleData _sampleData;
 
     int64_t _start;

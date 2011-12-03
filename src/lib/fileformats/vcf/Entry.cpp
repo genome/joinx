@@ -41,6 +41,10 @@ namespace {
         "format",
         "sample_data"
     };
+
+    bool customTypeIdMatches(string const& id, CustomType const* type) {
+        return type && type->id() == id;
+    }
 }
 
 void Entry::parseLine(const Header* hdr, std::string& s, Entry& e) {
@@ -228,14 +232,19 @@ void Entry::parse(const Header* h, const string& s) {
 
     // TODO: refactor into function
     // format description
+    vector<string> formatDesc;
     if (tok.extract(&beg, &end) && (end - beg != 1 || *beg != '.')) {
-        Tokenizer<char>::split(beg, end, ':', back_inserter(_formatDescription));
+        Tokenizer<char>::split(beg, end, ':', back_inserter(formatDesc));
 
-        for (auto i = _formatDescription.begin(); i != _formatDescription.end(); ++i) {
+        _formatDescription.reserve(formatDesc.size());
+        for (auto i = formatDesc.begin(); i != formatDesc.end(); ++i) {
             if (i->empty())
                 continue;
-            if (!header().formatType(*i))
+
+            auto type = header().formatType(*i);
+            if (!type)
                 throw runtime_error(str(format("Unknown id in FORMAT field: %1%") %*i));
+            _formatDescription.push_back(type);
         }
     }
 
@@ -252,8 +261,7 @@ void Entry::parse(const Header* h, const string& s) {
         vector<CustomValue>& values = (_sampleData[sampleIdx] = vector<CustomValue>());
         values.resize(data.size());
         for (uint32_t i = 0; i < data.size(); ++i) {
-            const CustomType* type = header().formatType(_formatDescription[i]);
-            values[i] = CustomValue(type, data[i]);
+            values[i] = CustomValue(_formatDescription[i], data[i]);
         }
         ++sampleIdx;
     }
@@ -345,7 +353,7 @@ const CustomValue* Entry::sampleData(uint32_t sampleIdx, const string& key) cons
         return 0;
 
     // no info for that format key
-    auto i = find(_formatDescription.begin(), _formatDescription.end(), key);
+    auto i = find_if(_formatDescription.begin(), _formatDescription.end(), bind(&customTypeIdMatches, key, _1));
     if (i == _formatDescription.end())
         return 0;
 
@@ -357,7 +365,7 @@ const CustomValue* Entry::sampleData(uint32_t sampleIdx, const string& key) cons
 }
 
 bool Entry::hasGenotypeData() const {
-    return !_formatDescription.empty() && _formatDescription.front() == "GT";
+    return !_formatDescription.empty() && _formatDescription.front()->id() == "GT";
 }
 
 GenotypeCall Entry::genotypeForSample(uint32_t sampleIdx) const {
@@ -369,7 +377,7 @@ GenotypeCall Entry::genotypeForSample(uint32_t sampleIdx) const {
 }
 
 void Entry::removeLowDepthGenotypes(uint32_t lowDepth) {
-    auto i = find(_formatDescription.begin(), _formatDescription.end(), "DP");
+    auto i = find_if(_formatDescription.begin(), _formatDescription.end(), bind(&customTypeIdMatches, "DP", _1));
     if (i == _formatDescription.end())
         return;
 
@@ -390,7 +398,7 @@ uint32_t Entry::samplesWithData() const {
 }
 
 int32_t Entry::samplesFailedFilter() const {
-    auto i = find(_formatDescription.begin(), _formatDescription.end(), "FT");
+    auto i = find_if(_formatDescription.begin(), _formatDescription.end(), bind(&customTypeIdMatches, "FT", _1));
     if (i == _formatDescription.end())
         return -1;
 
@@ -411,7 +419,7 @@ int32_t Entry::samplesFailedFilter() const {
 }
 
 int32_t Entry::samplesEvaluatedByFilter() const {
-    auto i = find(_formatDescription.begin(), _formatDescription.end(), "FT");
+    auto i = find_if(_formatDescription.begin(), _formatDescription.end(), bind(&customTypeIdMatches, "FT", _1));
     if (i == _formatDescription.end())
         return -1;
 
@@ -492,7 +500,17 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
     }
     s << '\t';
 
-    e.printList(s, e.formatDescription(), ':');
+    auto const& fmt = e.formatDescription();
+    if (!fmt.empty()) {
+        for (auto i = fmt.begin(); i != fmt.end(); ++i) {
+            if (i != fmt.begin())
+                s << ':';
+            s << (*i)->id();
+        }
+    } else {
+        s << '.';
+    }
+
     Vcf::Entry::SampleData const& psd = e.sampleData();
     uint32_t sampleCounter(0);
     for (auto i = psd.begin(); i != psd.end(); ++i) {

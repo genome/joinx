@@ -1,5 +1,6 @@
 #include "EntryMerger.hpp"
 
+#include "CustomType.hpp"
 #include "CustomValue.hpp"
 #include "Entry.hpp"
 #include "GenotypeFormatter.hpp"
@@ -141,7 +142,7 @@ void EntryMerger::setInfo(CustomValueMap& info) const {
 
 void EntryMerger::setAltAndGenotypeData(
         std::vector<std::string>& alt,
-        std::vector<std::string>& format,
+        std::vector<CustomType const*>& format,
         std::map<uint32_t, std::vector<CustomValue> >& sampleData) const
 {
     // set alt alleles
@@ -153,12 +154,12 @@ void EntryMerger::setAltAndGenotypeData(
     GenotypeFormatter genotypeFormatter(_mergedHeader, alt);
     set<string> seen;
     for (const Entry* e = _begin; e != _end; ++e) {
-        const vector<string>& gtFormat = e->formatDescription();
+        const vector<CustomType const*>& gtFormat = e->formatDescription();
         for (auto i = gtFormat.begin(); i != gtFormat.end(); ++i) {
-            auto inserted = seen.insert(*i);
+            auto inserted = seen.insert((*i)->id());
             if (inserted.second) {
                 // GT field must always come first as per VCF4.1 spec
-                if (*i == "GT" && !format.empty()) {
+                if ((*i)->id() == "GT" && !format.empty()) {
                     format.push_back(format[0]);
                     format[0] = *i;
                 } else {

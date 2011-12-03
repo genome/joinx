@@ -9,6 +9,7 @@
 
 BEGIN_NAMESPACE(Vcf)
 
+class CustomType;
 class CustomValue;
 class Entry;
 class Header;
@@ -30,7 +31,7 @@ public:
     void setInfo(CustomValueMap& info) const;
     void setAltAndGenotypeData(
         std::vector<std::string>& alt,
-        std::vector<std::string>& format,
+        std::vector<CustomType const*>& format,
         std::map< uint32_t, std::vector<CustomValue> >& sampleData) const;
 
     const Header* mergedHeader() const;

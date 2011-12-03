@@ -10,6 +10,7 @@
 
 BEGIN_NAMESPACE(Vcf)
 
+class CustomType;
 class CustomValue;
 class Entry;
 class Header;
@@ -26,7 +27,7 @@ public:
     GenotypeFormatter(const Header* header, const std::vector<std::string>& alleles);
 
     std::vector<CustomValue> process(
-        const std::vector<std::string>& fields,
+        const std::vector<CustomType const*>& fields,
         const Entry* e,
         uint32_t sampleIdx,
         const std::vector<size_t>& alleleIndices
@@ -35,7 +36,7 @@ public:
     void merge(
         bool overridePreviousValues,
         std::vector<CustomValue>& previousValues,
-        const std::vector<std::string>& fields,
+        const std::vector<CustomType const*>& fields,
         const Entry* e,
         uint32_t sampleIdx,
         const std::vector<size_t>& alleleIndices
