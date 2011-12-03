@@ -189,3 +189,37 @@ TEST(TestTokenizer, nextTokenMatches) {
     ASSERT_TRUE(t.nextTokenMatches(""));
     ASSERT_TRUE(t.eof());
 }
+
+TEST(Tokenizer, extractPointers) {
+    string input("ax=11,bx=22,cx=33");
+    Tokenizer<char> t(input, ',');
+    char const* b(0);
+    char const* e(0);
+
+    t.extract(&b, &e);
+    ASSERT_EQ("ax=11", string(b, e));
+
+    Tokenizer<char> t2(b, e, '=');
+    t2.extract(&b, &e);
+    ASSERT_EQ("ax", string(b, e));
+    t2.extract(&b, &e);
+    ASSERT_EQ("11", string(b, e));
+
+    t.extract(&b, &e);
+    ASSERT_EQ("bx=22", string(b, e));
+
+    t2 = Tokenizer<char>(b, e, '=');
+    t2.extract(&b, &e);
+    ASSERT_EQ("bx", string(b, e));
+    t2.extract(&b, &e);
+    ASSERT_EQ("22", string(b, e));
+
+    t.extract(&b, &e);
+    ASSERT_EQ("cx=33", string(b, e));
+
+    t2 = Tokenizer<char>(b, e, '=');
+    t2.extract(&b, &e);
+    ASSERT_EQ("cx", string(b, e));
+    t2.extract(&b, &e);
+    ASSERT_EQ("33", string(b, e));
+}
