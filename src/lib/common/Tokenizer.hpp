@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <stdexcept>
 #include <string>
 
@@ -17,7 +18,22 @@ template<typename DelimType>
 class Tokenizer {
 public:
     Tokenizer(std::string const& s, DelimType const& delim = '\t')
-        : _s(s)
+        : _sbeg(s.data())
+        , _send(s.data()+s.size())
+        , _totalLen(s.size())
+        , _delim(delim)
+        , _pos(0)
+        , _end(0)
+        , _eofCalls(0) // to support the last field being empty, see eof()
+        , _lastDelim(0)
+    {
+        rewind();
+    }
+
+    Tokenizer(char const* sbeg, char const* send, DelimType const& delim = '\t')
+        : _sbeg(sbeg)
+        , _send(send)
+        , _totalLen(send-sbeg)
         , _delim(delim)
         , _pos(0)
         , _end(0)
@@ -29,9 +45,10 @@ public:
 
     bool nextTokenMatches(std::string const& value) const {
         return _end-_pos == value.size()
-            && _s.compare(_pos, value.size(), value) == 0;
+            && strncmp(_sbeg+_pos, value.data(), value.size()) == 0;
     }
 
+/*
     void reset(std::string const& s) {
         _s = s;
         _pos = 0;
@@ -39,13 +56,26 @@ public:
         _eofCalls = 0;
         _lastDelim = 0;
     }
+*/
 
     template<typename T>
     bool extract(T& value);
 
+    bool extract(char const** beg, char const** end) {
+        return _extract(beg, end);
+    }
+
     template<typename IterType>
     static void split(std::string const& s, DelimType const& delim, IterType v) {
         Tokenizer<DelimType> t(s, delim);
+        typename IterType::container_type::value_type tmp;
+        while (t.extract(tmp))
+            *v++=tmp;
+    }
+
+    template<typename IterType>
+    static void split(char const* beg, char const* end, DelimType const& delim, IterType v) {
+        Tokenizer<DelimType> t(beg, end, delim);
         typename IterType::container_type::value_type tmp;
         while (t.extract(tmp))
             *v++=tmp;
@@ -107,9 +137,12 @@ protected:
     template<typename T>
     bool _extractFloat(T (*func)(const char*, char**), T& value);
 
+    size_t nextDelim();
 
 protected:
-    const std::string& _s;
+    char const* _sbeg;
+    char const* _send;
+    std::string::size_type _totalLen;
     DelimType _delim;
     std::string::size_type _pos;
     std::string::size_type _end;
@@ -127,22 +160,20 @@ inline bool Tokenizer<DelimType>::extract(T& value) {
 
 template<typename DelimType>
 inline void Tokenizer<DelimType>::remaining(std::string& s) {
-    s = _s.substr(_pos);
+    s = _sbeg+_pos;
 }
 
 template<typename DelimType>
 inline bool Tokenizer<DelimType>::_extract(const char** begin, const char** end) {
-    *begin = _s.data() + _pos;
-    *end = _s.data()+_end;
-    advance();
-    return true;
+    *begin = _sbeg + _pos;
+    *end = _sbeg + _end;
+    return advance();
 }
 
 template<typename DelimType>
 inline bool Tokenizer<DelimType>::_extract(std::string& value) {
-
     std::string::size_type len = _end-_pos;
-    value = _s.substr(_pos, len);
+    value.assign(_sbeg+_pos, len);
     advance();
     return true;
 }
@@ -159,35 +190,35 @@ inline bool Tokenizer<DelimType>::advance() {
     if (eof())
         return false;
 
-    _lastDelim = _s[_end];
+    _lastDelim = _sbeg[_end];
 
-    if (_pos == _s.size())
+    if (_pos == _totalLen)
         ++_eofCalls;
 
-    _pos = std::min(_s.size(), _end+1);
-    _end = std::min(_s.size(), _s.find_first_of(_delim, _pos));
+    _pos = std::min(_totalLen, _end+1);
+    _end = std::min(_totalLen, nextDelim());
     return true;
 }
 
 template<typename DelimType>
 inline void Tokenizer<DelimType>::rewind() {
     _pos = 0;
-    _end = std::min(_s.size(), _s.find_first_of(_delim, _pos));
+    _end = std::min(_totalLen, nextDelim());
     _eofCalls = 0;
 }
 
 template<>
 inline bool Tokenizer<char>::eof() {
     // in order to handle the last field being empty, we don't want to
-    // just look at _pos == _s.size(). instead, we need to check if the
+    // just look at _pos == _totalLen. instead, we need to check if the
     // last char in the string is the delim, and if so, return an empty
     // result, but only once!
 
-    if (_s.empty())
+    if (_sbeg == _send)
         return true;
 
-    if (_pos == _s.size()) {
-        if (_s[_s.size()-1] == _delim && _eofCalls == 0)
+    if (_pos == _totalLen) {
+        if (_sbeg[_totalLen-1] == _delim && _eofCalls == 0)
             return false;
         else
             return true;
@@ -199,15 +230,15 @@ inline bool Tokenizer<char>::eof() {
 template<>
 inline bool Tokenizer<std::string>::eof() {
     // in order to handle the last field being empty, we don't want to
-    // just look at _pos == _s.size(). instead, we need to check if the
+    // just look at _pos == _totalLen. instead, we need to check if the
     // last char in the string is the delim, and if so, return an empty
     // result, but only once!
 
-    if (_s.empty())
+    if (_totalLen == 0)
         return true;
 
-    if (_pos == _s.size()) {
-        if (_delim.find_first_of(_s[_s.size()-1]) != std::string::npos &&
+    if (_pos == _totalLen) {
+        if (_delim.find_first_of(_sbeg[_totalLen-1]) != std::string::npos &&
             _eofCalls == 0)
             return false;
         else
@@ -222,8 +253,8 @@ template<typename T>
 inline bool Tokenizer<DelimType>::_extractSigned(T& value) {
     char* realEnd = NULL;
     string::size_type expectedLen =_end-_pos;
-    value = strtoll(&_s[_pos], &realEnd, 10);
-    ptrdiff_t len = realEnd - &_s[_pos];
+    value = strtoll(&_sbeg[_pos], &realEnd, 10);
+    ptrdiff_t len = realEnd - &_sbeg[_pos];
     bool rv = len == ptrdiff_t(expectedLen);
     if (rv)
         advance();
@@ -235,8 +266,8 @@ template<typename T>
 inline bool Tokenizer<DelimType>::_extractUnsigned(T& value) {
     char* realEnd = NULL;
     string::size_type expectedLen =_end-_pos;
-    value = strtoull(&_s[_pos], &realEnd, 10);
-    ptrdiff_t len = realEnd - &_s[_pos];
+    value = strtoull(&_sbeg[_pos], &realEnd, 10);
+    ptrdiff_t len = realEnd - &_sbeg[_pos];
     bool rv = len == ptrdiff_t(expectedLen);
     if (rv)
         advance();
@@ -248,10 +279,26 @@ template<typename T>
 inline bool Tokenizer<DelimType>::_extractFloat(T (*func)(const char*, char**), T& value) {
     char* realEnd = NULL;
     string::size_type expectedLen =_end-_pos;
-    value = func(&_s[_pos], &realEnd);
-    ptrdiff_t len = realEnd - &_s[_pos];
+    value = func(&_sbeg[_pos], &realEnd);
+    ptrdiff_t len = realEnd - &_sbeg[_pos];
     bool rv = len == ptrdiff_t(expectedLen);
     if (rv)
         advance();
     return rv;
+}
+
+template<>
+inline size_t Tokenizer<char>::nextDelim() {
+    if (_totalLen == 0) return 0;
+    char const* rv(0);
+    rv = strchr(_sbeg+_pos, _delim);
+    return rv == 0 ? std::string::npos : rv-_sbeg;
+}
+
+template<>
+inline size_t Tokenizer<std::string>::nextDelim() {
+    if (_totalLen == 0) return 0;
+    char const* rv(0);
+    rv = strpbrk(_sbeg+_pos, _delim.data());
+    return rv == 0 ? std::string::npos : rv-_sbeg;
 }
