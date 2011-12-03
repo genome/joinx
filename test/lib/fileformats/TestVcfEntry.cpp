@@ -71,7 +71,7 @@ namespace {
         "20\t1110696\trs6040355\tA\tG,T\t67\tPASS\tAA=T;AF=0.333,0.667;DB;DP=10;NS=2\tGT:GQ:DP:HQ:FT\t1|2:21:6:23,27:SnpFilter\t2|1:2:0:18,2:SnpFilter\t2/2:35:4:.:SnpFilter\n"
         "20\t1230237\t.\tT\t.\t47\tPASS\tAA=T;DP=13;NS=3\tGT:GQ:DP:HQ:FT\t0|0:54:7:56,60:SnpFilter\t0|0:48:4:51,51:PASS\t0/0:.:2:.:.\n"
         "20\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:3:3\n"
-        "21\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\t.\n"
+        "21\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\t.\t.\t.\t.\n"
         "22\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\t.\t.\n"
         ;
 }
@@ -216,20 +216,22 @@ TEST_F(TestVcfEntry, reheader) {
     stringstream ss(header2Text);
     Header merged = Header::fromStream(ss);
     merged.merge(_header, true); // true to allow sample name overlaps
-    vector< vector<CustomValue> > origGT = v[0].sampleData();
+    Entry::SampleData origGT = v[0].sampleData();
     ASSERT_EQ(3, origGT.size());
     ASSERT_EQ(&_header, &v[0].header());
     v[0].reheader(&merged);
     ASSERT_EQ(&merged, &v[0].header());
-    ASSERT_EQ(4, v[0].sampleData().size());
-    ASSERT_TRUE(v[0].sampleData()[0].empty());
-    ASSERT_TRUE(origGT[2] == v[0].sampleData()[1]);
-    ASSERT_TRUE(origGT[1] == v[0].sampleData()[2]);
-    ASSERT_TRUE(origGT[0] == v[0].sampleData()[3]);
-
-    // Now that we have added the sample EXTRA, trying to reheader with the original
-    // header should throw an exception when it tries to look up the index for EXTRA
-    ASSERT_THROW(v[0].reheader(&_header), runtime_error);
+    ASSERT_EQ(3, v[0].sampleData().size());
+    ASSERT_EQ(4, v[0].header().sampleCount());
+    
+    Entry::SampleData newGT = v[0].sampleData();
+    ASSERT_EQ(0, newGT.count(0));
+    ASSERT_EQ(1, newGT.count(1));
+    ASSERT_EQ(1, newGT.count(2));
+    ASSERT_EQ(1, newGT.count(3));
+    ASSERT_TRUE(origGT[2] == newGT[1]);
+    ASSERT_TRUE(origGT[1] == newGT[2]);
+    ASSERT_TRUE(origGT[0] == newGT[3]);
 }
 
 TEST_F(TestVcfEntry, genotypeForSample) {

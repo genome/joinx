@@ -118,12 +118,11 @@ Entry::Entry(const EntryMerger& merger)
 }
 
 void Entry::reheader(const Header* newHeader) {
-    std::vector< std::vector<CustomValue> > newGTData(newHeader->sampleNames().size());
+    SampleData newGTData;
     for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
-        auto offset = distance(_sampleData.begin(), i);
-        const string& sampleName = header().sampleNames()[offset];
+        const string& sampleName = header().sampleNames()[i->first];
         uint32_t newIdx = newHeader->sampleIndex(sampleName);
-        newGTData[newIdx] = *i;
+        newGTData[newIdx] = i->second;
     }
     _sampleData.swap(newGTData);
     _header = newHeader;
@@ -151,7 +150,6 @@ void Entry::parse(const Header* h, const string& s) {
     _alt.clear();
     _failedFilters.clear();
     _formatDescription.clear();
-    _sampleData.resize(h->sampleCount());
 
     Tokenizer<char> tok(s, '\t');
     if (!tok.extract(_chrom))
@@ -237,26 +235,27 @@ void Entry::parse(const Header* h, const string& s) {
             if (!header().formatType(*i))
                 throw runtime_error(str(format("Unknown id in FORMAT field: %1%") %*i));
         }
-
-        // per sample formatted data
-        uint32_t sampleIdx(0);
-        while (tok.extract(tmp)) {
-            vector<string> data;
-            if (tmp != ".") {
-                Tokenizer<char>::split(tmp, ':', back_inserter(data));
-
-                if (data.size() > _formatDescription.size())
-                    throw runtime_error("More per-sample values than described in format section");
-
-                _sampleData[sampleIdx].resize(_formatDescription.size());
-                for (uint32_t i = 0; i < data.size(); ++i) {
-                    const CustomType* type = header().formatType(_formatDescription[i]);
-                    _sampleData[sampleIdx][i] = CustomValue(type, data[i]);
-                }
-            }
-            ++sampleIdx;
-        }
     }
+
+    // per sample formatted data
+    uint32_t sampleIdx(0);
+    while (tok.extract(tmp)) {
+        vector<string> data;
+        if (tmp != ".")
+            Tokenizer<char>::split(tmp, ':', back_inserter(data));
+
+        if (data.size() > _formatDescription.size())
+            throw runtime_error("More per-sample values than described in format section");
+
+        vector<CustomValue>& values = (_sampleData[sampleIdx] = vector<CustomValue>());
+        values.resize(data.size());
+        for (uint32_t i = 0; i < data.size(); ++i) {
+            const CustomType* type = header().formatType(_formatDescription[i]);
+            values[i] = CustomValue(type, data[i]);
+        }
+        ++sampleIdx;
+    }
+
     setPositions();
 }
 
@@ -330,9 +329,17 @@ const CustomValue* Entry::info(const string& key) const {
     return &i->second;
 }
 
+const vector<CustomValue>* Entry::sampleData(uint32_t idx) const {
+    auto iter = _sampleData.find(idx);
+    if (iter == _sampleData.end())
+        return 0;
+    return &iter->second;
+}
+
 const CustomValue* Entry::sampleData(uint32_t sampleIdx, const string& key) const {
     // no data for that sample
-    if (sampleIdx >= _sampleData.size() || _sampleData[sampleIdx].empty())
+    auto iter = _sampleData.find(sampleIdx);
+    if (iter == _sampleData.end())
         return 0;
 
     // no info for that format key
@@ -341,9 +348,10 @@ const CustomValue* Entry::sampleData(uint32_t sampleIdx, const string& key) cons
         return 0;
 
     uint32_t offset = distance(_formatDescription.begin(), i);
-    if (offset >= _sampleData[sampleIdx].size())
+    if (offset >= iter->second.size())
         return 0;
-    return &_sampleData[sampleIdx][offset];
+
+    return &iter->second[offset];
 }
 
 bool Entry::hasGenotypeData() const {
@@ -365,20 +373,17 @@ void Entry::removeLowDepthGenotypes(uint32_t lowDepth) {
 
     uint32_t offset = distance(_formatDescription.begin(), i);
     for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
-        if (i->empty())
-            continue;
         const int64_t *v;
-        if ((*i)[offset].empty() || (v = (*i)[offset].get<int64_t>(0)) == NULL || *v < lowDepth)
-            i->clear();
+        if (i->second[offset].empty() || (v = i->second[offset].get<int64_t>(0)) == NULL || *v < lowDepth)
+            i->second.clear();
     }
 }
 
 uint32_t Entry::samplesWithData() const {
-    uint32_t rv = 0;
-    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
-        if (i->size())
+    uint32_t rv(0);
+    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i)
+        if (!i->second.empty())
             ++rv;
-    }
     return rv;
 }
 
@@ -390,11 +395,12 @@ int32_t Entry::samplesFailedFilter() const {
     uint32_t offset = distance(_formatDescription.begin(), i);
     uint32_t numFailedFilter = 0;
     for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
-        if (i->size()) {
+        auto const& values = i->second;
+        if (values.size() > offset) {
             //then we have some data
             const std::string *filter;
             //if it has a value (assume . is processed correctly) and we're able to get a value and it is not pass then failed
-            if (!(*i)[offset].empty() && (filter = (*i)[offset].get<std::string>(0)) != NULL && *filter != std::string("PASS")) {
+            if (!values[offset].empty() && (filter = values[offset].get<std::string>(0)) != NULL && *filter != std::string("PASS")) {
                numFailedFilter++;
             }
         }
@@ -410,10 +416,11 @@ int32_t Entry::samplesEvaluatedByFilter() const {
     uint32_t offset = distance(_formatDescription.begin(), i);
     uint32_t numEvaluatedByFilter = 0;
     for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
-        if (i->size()) {
+        auto const& values = i->second;
+        if (values.size() > offset) {
             //then we have some data
             //if it has a value (assume . is processed correctly) and we're able to get a value and it is not pass then failed
-            if (!(*i)[offset].empty() && (*i)[offset].get<std::string>(0) != NULL) {
+            if (!values[offset].empty() && values[offset].get<std::string>(0) != NULL) {
                numEvaluatedByFilter++;
             }
         }
@@ -483,12 +490,19 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
     s << '\t';
 
     e.printList(s, e.formatDescription(), ':');
-    const vector< vector<Vcf::CustomValue> >& psd = e.sampleData();
+    Vcf::Entry::SampleData const& psd = e.sampleData();
+    uint32_t sampleCounter(0);
     for (auto i = psd.begin(); i != psd.end(); ++i) {
         s << '\t';
-        if (!i->empty()) {
-            for (auto j = i->begin(); j != i->end(); ++j) {
-                if (j != i->begin())
+        while (sampleCounter < i->first) {
+            s << ".\t";
+            ++sampleCounter;
+        }
+
+        auto const& values = i->second;
+        if (!values.empty()) {
+            for (auto j = values.begin(); j != values.end(); ++j) {
+                if (j != values.begin())
                     s << ':';
                 if (j->empty())
                     s << '.';
@@ -497,6 +511,7 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
             }
         } else
             s << ".";
+        ++sampleCounter;
     }
     return s;
 }

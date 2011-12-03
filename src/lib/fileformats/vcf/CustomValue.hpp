@@ -92,6 +92,10 @@ protected:
     void ensureCapacity(uint32_t size);
 
 protected:
+    template<typename T>
+    void toStream_impl(std::ostream& s) const;
+
+protected:
     const CustomType* _type;
     std::vector<ValueType> _values;
 };
@@ -128,6 +132,22 @@ inline bool CustomValue::operator==(const CustomValue& rhs) const {
 
 inline bool CustomValue::operator!=(const CustomValue& rhs) const {
     return !(*this == rhs);
+}
+
+template<typename T>
+inline void CustomValue::toStream_impl(ostream& s) const {
+    if (empty()) {
+        type().emptyRepr(s);
+    }
+    for (SizeType i = 0; i < size(); ++i) {
+        if (i > 0)
+            s << ",";
+        T const* value(0);
+        if (!_values[i].empty() && (value = _values[i].get<T>()))
+            s << *value;
+        else
+            s << '.';
+    }
 }
 
 END_NAMESPACE(Vcf)

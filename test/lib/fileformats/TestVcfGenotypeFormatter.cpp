@@ -120,7 +120,7 @@ TEST_F(TestVcfGenotypeFormatter, mergeIncompatibleGenotypes) {
     Entry::parseLine(&_header, mergeLines[1], secondary);
 
     GenotypeFormatter fmt(&_header, altAlleles);
-    vector<CustomValue> previousValues = primary.sampleData()[0];
+    vector<CustomValue> previousValues = *primary.sampleData(0);
     ASSERT_THROW(
         fmt.merge(false, previousValues, secondary.formatDescription(), &secondary, 0, altAlleleIndices),
         runtime_error
@@ -144,7 +144,7 @@ TEST_F(TestVcfGenotypeFormatter, merge) {
     Entry::parseLine(&_header, mergeLines[1], secondary);
 
     GenotypeFormatter fmt(&_header, altAlleles);
-    vector<CustomValue> previousValues = primary.sampleData()[0];
+    vector<CustomValue> previousValues = *primary.sampleData(0);
     fmt.merge(
         false, // do not override values that are already set
         previousValues,

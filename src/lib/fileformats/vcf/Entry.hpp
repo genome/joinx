@@ -36,6 +36,7 @@ public:
     };
     typedef Header HeaderType;
     typedef std::map<std::string, CustomValue> CustomValueMap;
+    typedef std::map<uint32_t, std::vector<CustomValue> > SampleData;
 
     // static data
     const static double MISSING_QUALITY;
@@ -77,7 +78,8 @@ public:
     const std::set<std::string>& failedFilters() const { return _failedFilters; }
     const CustomValueMap& info() const { return _info; }
     const std::vector<std::string>& formatDescription() const { return _formatDescription; }
-    const std::vector< std::vector<CustomValue> >& sampleData() const { return _sampleData; }
+    const SampleData& sampleData() const { return _sampleData; }
+    const std::vector<CustomValue>* sampleData(uint32_t idx) const;
     const CustomValue* info(const std::string& key) const;
     const CustomValue* sampleData(uint32_t sampleIdx, const std::string& key) const;
 
@@ -118,7 +120,6 @@ public:
 
     void swap(Entry& other);
 
-
 protected:
     const Header* _header;
     std::string _chrom;
@@ -130,7 +131,7 @@ protected:
     std::set<std::string> _failedFilters;
     CustomValueMap _info;
     std::vector<std::string> _formatDescription;
-    std::vector< std::vector<CustomValue> > _sampleData;
+    SampleData _sampleData;
 
     int64_t _start;
     int64_t _stop;
