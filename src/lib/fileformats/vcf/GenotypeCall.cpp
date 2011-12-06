@@ -50,6 +50,26 @@ GenotypeCall::const_iterator GenotypeCall::end() const {
 bool GenotypeCall::phased() const {
     return _phased;
 }
+/*
+bool GenotypeCall::transition(const Entry& e) const {
+    return false;
+}
+
+bool GenotypeCall::transversion(const Entry& e) const {
+    return false;
+}
+*/
+bool GenotypeCall::heterozygous() const {
+    return diploid() && _indexSet.size() == 2;
+}
+
+bool GenotypeCall::homozygous() const {
+    return diploid() && _indexSet.size() == 1;   //if only one unique allele then homozygous  
+}
+
+bool GenotypeCall::diploid() const {
+    return _indices.size() == 2;
+}
 
 const uint32_t& GenotypeCall::operator[](size_type idx) const {
     return _indices[idx];    

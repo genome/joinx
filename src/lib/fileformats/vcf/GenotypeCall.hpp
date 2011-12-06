@@ -33,6 +33,7 @@ public:
     bool transversion(const Entry& e) const;
     bool heterozygous() const;
     bool homozygous() const;
+    bool diploid() const;
 
     const std::vector<uint32_t>& indices() const;
     const std::string& string() const;
