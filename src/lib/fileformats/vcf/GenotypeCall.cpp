@@ -12,6 +12,7 @@ GenotypeCall::GenotypeCall()
 GenotypeCall::GenotypeCall(const std::string& call)
     : _phased(false)
 {
+    _string = call;
     Tokenizer<std::string> tok(call, "|/");
     uint32_t idx(0);
     // TODO this doesn't seem to handle partially missing data yet
@@ -73,6 +74,9 @@ bool GenotypeCall::operator==(const GenotypeCall& rhs) const {
 }
 bool GenotypeCall::operator!=(const GenotypeCall& rhs) const {
     return !(*this == rhs);
+}
+bool GenotypeCall::operator<(const GenotypeCall& rhs) const {
+    return _string < rhs._string; //lame but fingers crossed
 }
 
 END_NAMESPACE(Vcf)

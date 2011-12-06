@@ -26,6 +26,7 @@ public:
     const uint32_t& operator[](size_type idx) const;
     bool operator==(const GenotypeCall& rhs) const;
     bool operator!=(const GenotypeCall& rhs) const;
+    bool operator<(const GenotypeCall& rhs) const;
 
     bool phased() const;
     bool transition(const Entry& e) const;
