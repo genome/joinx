@@ -42,7 +42,7 @@ uint32_t samplesWithNonRefGenotypes(const Vcf::Entry& entry) {
     return rv;
 }
 
-typedef std::map<uint32_t, map<uint32_t,uint32_t> > genotypes;
+typedef std::map<Vcf::GenotypeCall,uint32_t> genotypes;
 genotypes genotypeDistribution(const Vcf::Entry& entry) {
     genotypes distribution;  //missing genotypes are not counted, but perhaps should be counted separately
 
@@ -75,9 +75,7 @@ genotypes genotypeDistribution(const Vcf::Entry& entry) {
             continue;
         }
         else {
-            uint32_t smallestIndex = distance(gt.begin(),min_element(gt.begin(),gt.end()));
-            uint32_t biggerIndex = 1-smallestIndex; //since diploid
-            distribution[gt[smallestIndex]][gt[biggerIndex]]++; //probably ok since should use default contructor of new element before adding 1;
+            distribution[gt]++; //probably ok since should use default contructor of new element before adding 1;
         }
     }
 
@@ -87,9 +85,8 @@ genotypes genotypeDistribution(const Vcf::Entry& entry) {
 std::vector<uint32_t> alleleDistribution(const genotypes& genotypeDistribution) {
     std::vector<uint32_t> distribution(4,0);  //missing genotypes are not counted, but perhaps should be counted separately. TODO This should only really work for SNPs
     for( auto i = genotypeDistribution.begin(); i != genotypeDistribution.end(); ++i) {
-        for(auto j = (*i).second.begin(); j != (*i).second.end(); ++j) {
-            distribution[(*i).first] += (*j).second;
-            distribution[(*j).first] += (*j).second;
+        for(auto j = (*i).first.begin(); j != (*i).first.end(); ++j) {
+            distribution[(*j)] += (*i).second;
         }
     }
     return distribution;
