@@ -49,8 +49,10 @@ public:
 
     // member functions
     Entry();
+    // for move semantics
+    Entry(Entry&& e) throw();
     explicit Entry(const Header* h);
-    Entry(const EntryMerger& merger);
+    Entry(EntryMerger&& merger);
     Entry(const Header* h, const std::string& s);
 
     // This updates the entry to use the new header instead. This can
@@ -71,7 +73,7 @@ public:
 
     const std::string& chrom() const { return _chrom; }
     const uint64_t& pos() const { return _pos; }
-    const std::vector<std::string>& identifiers() const { return _identifiers; }
+    const std::set<std::string>& identifiers() const { return _identifiers; }
     const std::string& ref() const { return _ref; }
     const std::vector<std::string>& alt() const { return _alt; }
     double qual() const { return _qual; }
@@ -83,7 +85,7 @@ public:
     const CustomValue* info(const std::string& key) const;
     const CustomValue* sampleData(uint32_t sampleIdx, const std::string& key) const;
 
-    // returns true if GT is the first FORMAT entry 
+    // returns true if GT is the first FORMAT entry
     bool hasGenotypeData() const;
     GenotypeCall genotypeForSample(uint32_t sampleIdx) const;
 
@@ -124,7 +126,7 @@ protected:
     const Header* _header;
     std::string _chrom;
     uint64_t _pos;
-    std::vector<std::string> _identifiers;
+    std::set<std::string> _identifiers;
     std::string _ref;
     std::vector<std::string> _alt;
     double _qual;
