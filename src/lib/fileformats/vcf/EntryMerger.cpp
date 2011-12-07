@@ -59,7 +59,7 @@ EntryMerger::EntryMerger(const MergeStrategy& mergeStrategy, const Header* merge
         }
 
         // merge identifiers
-        const vector<string>& idents = e->identifiers();
+        const set<string>& idents = e->identifiers();
         copy(idents.begin(), idents.end(), inserter(_identifiers, _identifiers.begin()));
 
         // Merge alleles
@@ -72,7 +72,7 @@ EntryMerger::EntryMerger(const MergeStrategy& mergeStrategy, const Header* merge
             } else {
                 _newGTIndices[idx].push_back(addAllele(*alt));
             }
-                
+
         }
 
         // Merge filters
@@ -109,7 +109,7 @@ uint64_t EntryMerger::pos() const {
     return _begin->pos();
 }
 
-const set<string>& EntryMerger::identifiers() const {
+set<string>& EntryMerger::identifiers() {
     return _identifiers;
 }
 
@@ -117,7 +117,7 @@ const string& EntryMerger::ref() const {
     return _refEntry->ref();
 }
 
-const set<string>& EntryMerger::failedFilters() const {
+set<string>& EntryMerger::failedFilters() {
     return _filters;
 }
 

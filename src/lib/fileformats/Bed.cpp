@@ -5,6 +5,7 @@
 #include <boost/algorithm/string.hpp>
 #include <cstring>
 #include <iostream>
+#include <utility>
 
 using boost::format;
 using namespace std;
@@ -17,6 +18,11 @@ Bed::Bed()
     : _start(0)
     , _stop(0)
 {}
+
+Bed::Bed(Bed&& b) {
+    swap(b);
+}
+
 
 Bed::Bed(const std::string& chrom, int64_t start, int64_t stop)
     : _chrom(chrom)
@@ -54,7 +60,7 @@ void Bed::parseLine(const BedHeader*, std::string& line, Bed& bed, int maxExtraF
     while ((maxExtraFields == -1 || fields++ < maxExtraFields) && !tokenizer.eof()) {
         string extra;
         tokenizer.extract(extra);
-        bed._extraFields.push_back(extra);
+        bed._extraFields.push_back(std::move(extra));
     }
 
     bed._line.swap(line);

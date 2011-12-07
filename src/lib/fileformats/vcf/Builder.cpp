@@ -9,6 +9,7 @@
 # include <iterator>
 # include <set>
 #endif // DEBUG_VCF_MERGE
+#include <utility>
 
 using namespace std;
 
@@ -26,7 +27,7 @@ Builder::~Builder() {
 }
 
 void Builder::push(const Entry& e) {
-    _entries.push_back(e);
+    _entries.push_back(std::move(e));
 }
 
 void Builder::operator()(const Entry& e) {
@@ -43,7 +44,7 @@ void Builder::operator()(const Entry& e) {
 void Builder::output(const Entry* begin, const Entry* end) const {
     try {
         EntryMerger merger(_mergeStrategy, _header, begin, end);
-        Entry merged(merger);
+        Entry merged(std::move(merger));
         _out(merged);
     } catch (const DisjointGenotypesError& e) {
         // TODO: real logging
@@ -59,7 +60,7 @@ void Builder::output(const Entry* begin, const Entry* end) const {
         if (end - begin == 2) {
             cerr << "Going with entry #" << int(chosen-begin)+1 << ".\n";
             EntryMerger merger(_mergeStrategy, _header, chosen, chosen+1);
-            Entry merged(merger);
+            Entry merged(std::move(merger));
             _out(merged);
         } else {
             cerr << "More than 2 entries, abort.\n";
@@ -82,7 +83,7 @@ void Builder::output(const Entry* begin, const Entry* end) const {
                 cerr << " + ";
             cerr << *i;
         }
-        
+
         cerr << " = " << merged.ref() << ":";
         auto alts = merged.alt();
         for (auto i = alts.begin(); i != alts.end(); ++i) {

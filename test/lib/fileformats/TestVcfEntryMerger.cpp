@@ -136,9 +136,11 @@ TEST_F(TestVcfEntryMerger, merge) {
 
     // make sure identifiers are merged properly without duplicates
     ASSERT_EQ(3, mergedEntry.identifiers().size());
-    ASSERT_EQ("id1", mergedEntry.identifiers()[0]);
-    ASSERT_EQ("id2", mergedEntry.identifiers()[1]);
-    ASSERT_EQ("id3", mergedEntry.identifiers()[2]);
+    auto iter = mergedEntry.identifiers().begin();
+    ASSERT_EQ("id1", *iter++);
+    ASSERT_EQ("id2", *iter++);
+    ASSERT_EQ("id3", *iter++);
+    ASSERT_TRUE(iter == mergedEntry.identifiers().end());
 
     // make sure reference allele doesn't change
     ASSERT_EQ("G", mergedEntry.ref());

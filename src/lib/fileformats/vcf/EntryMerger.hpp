@@ -23,10 +23,10 @@ public:
 
     const std::string& chrom() const;
     uint64_t pos() const;
-    const std::set<std::string>& identifiers() const;
+    std::set<std::string>& identifiers();
     const std::string& ref() const;
     const AlleleMap& alleleMap() const;
-    const std::set<std::string>& failedFilters() const;
+    std::set<std::string>& failedFilters();
     double qual() const;
     void setInfo(CustomValueMap& info) const;
     void setAltAndGenotypeData(

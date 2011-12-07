@@ -83,6 +83,10 @@ Entry::Entry()
 {
 }
 
+Entry::Entry(Entry&& e) throw () {
+    swap(e);
+}
+
 Entry::Entry(const Header* h)
     : _header(h)
     , _pos(0)
@@ -101,7 +105,7 @@ Entry::Entry(const Header* h, const string& s)
     parse(h, s);
 }
 
-Entry::Entry(const EntryMerger& merger)
+Entry::Entry(EntryMerger&& merger)
     : _header(merger.mergedHeader())
     , _chrom(merger.chrom())
     , _pos(merger.pos())
@@ -110,11 +114,8 @@ Entry::Entry(const EntryMerger& merger)
     , _start(0)
     , _stop(0)
 {
-    const std::set<std::string>& idents = merger.identifiers();
-    copy(idents.begin(), idents.end(), back_inserter(_identifiers));
-
-    const std::set<std::string>& filts = merger.failedFilters();
-    copy(filts.begin(), filts.end(), inserter(_failedFilters, _failedFilters.begin()));
+    std::swap(_identifiers, merger.identifiers());
+    std::swap(_failedFilters, merger.failedFilters());
 
     merger.setInfo(_info);
     merger.setAltAndGenotypeData(_alt, _formatDescription, _sampleData);
@@ -169,7 +170,7 @@ void Entry::parse(const Header* h, const string& s) {
         throw runtime_error("Failed to extract id from vcf entry: " + s);
 
     if (end-beg != 1 || *beg != '.')
-        Tokenizer<char>::split(beg, end, ';', back_inserter(_identifiers));
+        Tokenizer<char>::split(beg, end, ';', inserter(_identifiers, _identifiers.begin()));
 
     // ref alleles
     if (!tok.extract(_ref))
@@ -270,8 +271,7 @@ void Entry::parse(const Header* h, const string& s) {
 }
 
 void Entry::addIdentifier(const std::string& id) {
-    if (find(_identifiers.begin(), _identifiers.end(), id) == _identifiers.end())
-        _identifiers.push_back(id);
+    _identifiers.insert(id);
 }
 
 
