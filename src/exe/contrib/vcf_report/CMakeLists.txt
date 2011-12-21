@@ -7,9 +7,7 @@ set(SOURCES_EXAMPLE
 )
 
 set(SOURCES_REPORT
-    vcf_report/vcf_report.cpp
-    vcf_report/Metrics.hpp
-    vcf_report/Metrics.cpp
+    vcf_report.cpp
 )
 
 set(REPORT_EXECUTABLE_NAME vcf-report)
