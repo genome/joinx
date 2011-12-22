@@ -1,10 +1,10 @@
 #include "CreateContigsCommand.hpp"
 
-#include "bedutil/RemappedContig.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/FastaReader.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/TypedStream.hpp"
+#include "processors/RemapContig.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
@@ -19,14 +19,14 @@ using namespace std::placeholders;
 namespace po = boost::program_options;
 
 namespace {
-    class RemappedContigFastaWriter {
+    class RemapContigFastaWriter {
     public:
-        RemappedContigFastaWriter(ostream& out)
+        RemapContigFastaWriter(ostream& out)
             : _out(out)
         {
         }
 
-        void operator()(const RemappedContig& ctg) {
+        void operator()(const RemapContig& ctg) {
             _out << ">" << ctg.name() << "\n" << ctg.sequence() << "\n";
         }
 
@@ -101,8 +101,8 @@ void CreateContigsCommand::exec() {
     typedef TypedStream<Bed, Extractor> BedReader;
     Extractor extractor = bind(&Bed::parseLine, _1, _2, _3, 2);
     BedReader reader(extractor, *inStream);
-    RemappedContigFastaWriter writer(*output);
-    RemappedContigGenerator<FastaReader, RemappedContigFastaWriter> generator(ref, _flankSize, writer);
+    RemapContigFastaWriter writer(*output);
+    RemapContigGenerator<FastaReader, RemapContigFastaWriter> generator(ref, _flankSize, writer);
     Bed b;
     while (reader.next(b)) {
         Variant v(b);

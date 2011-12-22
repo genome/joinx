@@ -1,9 +1,9 @@
 #include "IntersectCommand.hpp"
 #include "IntersectCollector.hpp"
 
-#include "bedutil/IntersectionOutputFormatter.hpp"
-#include "bedutil/Intersect.hpp"
 #include "fileformats/TypedStream.hpp"
+#include "processors/Intersect.hpp"
+#include "processors/IntersectionOutputFormatter.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>

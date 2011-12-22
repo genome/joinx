@@ -1,4 +1,4 @@
-#include "bedutil/SnvComparator.hpp"
+#include "processors/SnvComparator.hpp"
 
 #include <vector>
 

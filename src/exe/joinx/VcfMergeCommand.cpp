@@ -1,6 +1,5 @@
 #include "VcfMergeCommand.hpp"
 
-#include "bedutil/MergeSorted.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/OutputWriter.hpp"
 #include "fileformats/TypedStream.hpp"
@@ -8,6 +7,7 @@
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/vcf/MergeStrategy.hpp"
+#include "processors/MergeSorted.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>

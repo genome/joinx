@@ -1,4 +1,4 @@
-#include "bedutil/Intersect.hpp"
+#include "processors/Intersect.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/TypedStream.hpp"

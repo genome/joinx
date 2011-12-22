@@ -1,4 +1,4 @@
-#include "bedutil/SnvComparator.hpp"
+#include "processors/SnvComparator.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/TypedStream.hpp"

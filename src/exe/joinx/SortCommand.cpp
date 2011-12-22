@@ -1,7 +1,5 @@
 #include "SortCommand.hpp"
 
-#include "bedutil/BedDeduplicator.hpp"
-#include "bedutil/Sort.hpp"
 #include "fileformats/BedReader.hpp"
 #include "fileformats/InferFileType.hpp"
 #include "fileformats/InputStream.hpp"
@@ -10,6 +8,8 @@
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
+#include "processors/BedDeduplicator.hpp"
+#include "processors/Sort.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>

@@ -1,12 +1,12 @@
 #include "SnvConcordanceByQualityCommand.hpp"
 
-#include "bedutil/ConcordanceQuality.hpp"
-#include "bedutil/NoReferenceFilter.hpp"
-#include "bedutil/SnvComparator.hpp"
-#include "bedutil/TypeFilter.hpp"
 #include "fileformats/Bed.hpp"
-#include "fileformats/TypedStream.hpp"
 #include "fileformats/InputStream.hpp"
+#include "fileformats/TypedStream.hpp"
+#include "processors/NoReferenceFilter.hpp"
+#include "processors/SnvComparator.hpp"
+#include "processors/TypeFilter.hpp"
+#include "reports/ConcordanceQuality.hpp"
 
 #include <boost/program_options.hpp>
 #include <fstream>
