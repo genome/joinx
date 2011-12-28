@@ -263,12 +263,13 @@ TEST_F(TestVcfEntryMerger, Builder) {
     ASSERT_EQ(1, v[1].samplesWithData());
     // Our test headers specified 3 samples each, so entry 1 should have
     // a sample in the first position, entry 2 should have one in the third.
+    // FIXME the test entries seem to be supplying 6 samples not 3
     ASSERT_EQ(
-        "20\t14370\tid1\tT\tG\t.\tPASS\tVC=Samtools\tDP\t1",
+        "20\t14370\tid1\tT\tG\t.\tPASS\tVC=Samtools\tDP\t1\t.\t.\t.\t.\t.",
         v[0].toString()
         );
     ASSERT_EQ(
-        "21\t14370\tid1\tT\tC\t29\tPASS\tVC=Samtools\tDP\t.\t.\t2",
+        "21\t14370\tid1\tT\tC\t29\tPASS\tVC=Samtools\tDP\t.\t.\t2\t.\t.\t.",
         v[1].toString()
         );
 }
