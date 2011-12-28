@@ -34,6 +34,7 @@ void EntryMetrics::calculateGenotypeDistribution(Vcf::Entry& entry) {
         offset = distance(entry.formatDescription().begin(), it);
     }
     else {
+        cerr << "No FT tag for call " << entry.chrom() << "\t" << entry.pos() << endl;
         offset = -1;
     }
 
