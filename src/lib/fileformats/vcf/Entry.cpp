@@ -511,6 +511,7 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
 
     Vcf::Entry::SampleData const& psd = e.sampleData();
     uint32_t sampleCounter(0);
+    uint32_t nSamples = e.header().sampleCount();
     for (auto i = psd.begin(); i != psd.end(); ++i) {
         s << '\t';
         while (sampleCounter < i->first) {
@@ -532,5 +533,8 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
             s << ".";
         ++sampleCounter;
     }
+    while (sampleCounter++ < nSamples)
+        s << "\t.";
+
     return s;
 }

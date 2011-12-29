@@ -72,7 +72,7 @@ namespace {
         "20\t1230237\t.\tT\t.\t47\tPASS\tAA=T;DP=13;NS=3\tGT:GQ:DP:HQ:FT\t0|0:54:7:56,60:SnpFilter\t0|0:48:4:51,51:PASS\t0/0:.:2:.:.\n"
         "20\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:3:3\n"
         "21\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\t.\t.\t.\t.\n"
-        "22\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\t.\t.\n"
+        "22\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\t.\t.\t.\t.\t.\n"
         ;
 }
 
