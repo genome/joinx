@@ -116,12 +116,6 @@ Entry::Entry(EntryMerger&& merger)
 {
     std::swap(_identifiers, merger.identifiers());
     std::swap(_failedFilters, merger.failedFilters());
-    //initialize _sampleData for all samples
-    //not sure if this is a good idea. It implies that the index is simply the index within the sampleNames array. This could conceivably change as sampleIndex is abstracted within the header.
-    for(uint32_t index = 0; index < merger.mergedHeader()->sampleNames().size(); ++index) {
-        _sampleData.insert(make_pair(index, vector<CustomValue>()));
-    }
-
     merger.setInfo(_info);
     merger.setAltAndGenotypeData(_alt, _formatDescription, _sampleData);
     setPositions();
@@ -285,7 +279,6 @@ void Entry::addFilter(const std::string& filterName) {
     std::string::const_iterator it = find_if(filterName.begin(),filterName.end(),isInvalidFilterId);
     if( it != filterName.end()) {
         //then it is invalid
-        cerr << *it << endl;
         throw runtime_error(str(format("Invalid filter name %1%. Contains whitespace or a semicolon.") %filterName ));
     }
 
