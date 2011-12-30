@@ -80,9 +80,9 @@ public:
     const std::set<std::string>& failedFilters() const { return _failedFilters; }
     const CustomValueMap& info() const { return _info; }
     const std::vector<CustomType const*>& formatDescription() const { return _formatDescription; }
-    const SampleData& sampleData() const { return _sampleData; }
     const std::vector<CustomValue>* sampleData(uint32_t idx) const;
     const CustomValue* info(const std::string& key) const;
+    const SampleData& sampleData() const;
     const CustomValue* sampleData(uint32_t sampleIdx, const std::string& key) const;
 
     // returns true if GT is the first FORMAT entry
@@ -123,6 +123,12 @@ public:
     void swap(Entry& other);
 
 protected:
+    SampleData& sampleData();
+    // not really const, but we want to call from const functions
+    // so we make sampleData mutable
+    void parseSamples() const;
+
+protected:
     const Header* _header;
     std::string _chrom;
     uint64_t _pos;
@@ -133,7 +139,9 @@ protected:
     std::set<std::string> _failedFilters;
     CustomValueMap _info;
     std::vector<CustomType const*> _formatDescription;
-    SampleData _sampleData;
+    std::string _sampleString;
+    mutable bool _parsedSamples;
+    mutable SampleData _sampleData;
 
     int64_t _start;
     int64_t _stop;

@@ -215,16 +215,17 @@ TEST_F(TestVcfEntry, removeLowDepthGenotypes) {
 TEST_F(TestVcfEntry, reheader) {
     stringstream ss(header2Text);
     Header merged = Header::fromStream(ss);
+    Entry const& e = v[0];
     merged.merge(_header, true); // true to allow sample name overlaps
-    Entry::SampleData origGT = v[0].sampleData();
+    Entry::SampleData origGT = e.sampleData();
     ASSERT_EQ(3, origGT.size());
-    ASSERT_EQ(&_header, &v[0].header());
+    ASSERT_EQ(&_header, &e.header());
     v[0].reheader(&merged);
-    ASSERT_EQ(&merged, &v[0].header());
-    ASSERT_EQ(3, v[0].sampleData().size());
-    ASSERT_EQ(4, v[0].header().sampleCount());
+    ASSERT_EQ(&merged, &e.header());
+    ASSERT_EQ(3, e.sampleData().size());
+    ASSERT_EQ(4, e.header().sampleCount());
     
-    Entry::SampleData newGT = v[0].sampleData();
+    Entry::SampleData newGT = e.sampleData();
     ASSERT_EQ(0, newGT.count(0));
     ASSERT_EQ(1, newGT.count(1));
     ASSERT_EQ(1, newGT.count(2));

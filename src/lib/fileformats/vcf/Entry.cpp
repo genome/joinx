@@ -48,10 +48,12 @@ namespace {
 }
 
 void Entry::parseLine(const Header* hdr, std::string& s, Entry& e) {
+    e._parsedSamples = false;
     e.parse(hdr, s);
 }
 
 void Entry::parseLineAndReheader(const Header* hdr, const Header* newH, std::string& s, Entry& e) {
+    e._parsedSamples = false;
     e.parseAndReheader(hdr, newH, s);
 }
 
@@ -78,6 +80,7 @@ Entry::Entry()
     : _header(0)
     , _pos(0)
     , _qual(MISSING_QUALITY)
+    , _parsedSamples(false)
     , _start(0)
     , _stop(0)
 {
@@ -91,6 +94,7 @@ Entry::Entry(const Header* h)
     : _header(h)
     , _pos(0)
     , _qual(MISSING_QUALITY)
+    , _parsedSamples(false)
     , _start(0)
     , _stop(0)
 {
@@ -99,6 +103,7 @@ Entry::Entry(const Header* h)
 Entry::Entry(const Header* h, const string& s)
     : _header(h)
     , _qual(MISSING_QUALITY)
+    , _parsedSamples(false)
     , _start(0)
     , _stop(0)
 {
@@ -111,6 +116,7 @@ Entry::Entry(EntryMerger&& merger)
     , _pos(merger.pos())
     , _ref(merger.ref())
     , _qual(merger.qual())
+    , _parsedSamples(true)
     , _start(0)
     , _stop(0)
 {
@@ -123,7 +129,8 @@ Entry::Entry(EntryMerger&& merger)
 
 void Entry::reheader(const Header* newHeader) {
     SampleData newGTData;
-    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
+    auto const& sd = sampleData();
+    for (auto i = sd.begin(); i != sd.end(); ++i) {
         const string& sampleName = header().sampleNames()[i->first];
         uint32_t newIdx = newHeader->sampleIndex(sampleName);
         newGTData[newIdx] = i->second;
@@ -248,26 +255,39 @@ void Entry::parse(const Header* h, const string& s) {
         }
     }
 
+    tok.remaining(_sampleString);
+    setPositions();
+}
+
+void Entry::parseSamples() const {
+    if (_parsedSamples)
+        return;
+
     // per sample formatted data
     uint32_t sampleIdx(0);
+    Tokenizer<char> tok(_sampleString, '\t');
+    char const* beg(0);
+    char const* end(0);
     while (tok.extract(&beg, &end)) {
         vector<string> data;
-        if (end-beg != 1 || *beg != '.')
+        if (end-beg != 1 || *beg != '.') {
             Tokenizer<char>::split(beg, end, ':', back_inserter(data));
 
-        if (data.size() > _formatDescription.size())
-            throw runtime_error("More per-sample values than described in format section");
+            if (data.size() > _formatDescription.size())
+                throw runtime_error("More per-sample values than described in format section");
 
-        vector<CustomValue>& values = (_sampleData[sampleIdx] = vector<CustomValue>());
-        values.resize(data.size());
-        for (uint32_t i = 0; i < data.size(); ++i) {
-            values[i] = CustomValue(_formatDescription[i], data[i]);
+            vector<CustomValue>& values = (_sampleData[sampleIdx] = vector<CustomValue>());
+            values.resize(data.size());
+            for (uint32_t i = 0; i < data.size(); ++i) {
+                values[i] = CustomValue(_formatDescription[i], data[i]);
+            }
         }
         ++sampleIdx;
     }
-
-    setPositions();
+    _parsedSamples = true;
 }
+
+
 
 void Entry::addIdentifier(const std::string& id) {
     _identifiers.insert(id);
@@ -320,6 +340,8 @@ void Entry::swap(Entry& other) {
     _formatDescription.swap(other._formatDescription);
     _sampleData.swap(other._sampleData);
     std::swap(_header, other._header);
+    std::swap(_parsedSamples, other._parsedSamples);
+    _sampleString.swap(other._sampleString);
     setPositions();
 }
 
@@ -337,17 +359,29 @@ const CustomValue* Entry::info(const string& key) const {
     return &i->second;
 }
 
+const Entry::SampleData& Entry::sampleData() const {
+    parseSamples();
+    return _sampleData;
+}
+
+Entry::SampleData& Entry::sampleData() { // protected
+    parseSamples();
+    return _sampleData;
+}
+
 const vector<CustomValue>* Entry::sampleData(uint32_t idx) const {
-    auto iter = _sampleData.find(idx);
-    if (iter == _sampleData.end())
+    auto const& sd = sampleData();
+    auto iter = sd.find(idx);
+    if (iter == sd.end())
         return 0;
     return &iter->second;
 }
 
 const CustomValue* Entry::sampleData(uint32_t sampleIdx, const string& key) const {
+    auto const& sd = sampleData();
     // no data for that sample
-    auto iter = _sampleData.find(sampleIdx);
-    if (iter == _sampleData.end())
+    auto iter = sd.find(sampleIdx);
+    if (iter == sd.end())
         return 0;
 
     // no info for that format key
@@ -379,8 +413,9 @@ void Entry::removeLowDepthGenotypes(uint32_t lowDepth) {
     if (i == _formatDescription.end())
         return;
 
+    auto& sd = sampleData();
     uint32_t offset = distance(_formatDescription.begin(), i);
-    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
+    for (auto i = sd.begin(); i != sd.end(); ++i) {
         const int64_t *v;
         if (i->second[offset].empty() || (v = i->second[offset].get<int64_t>(0)) == NULL || *v < lowDepth)
             i->second.clear();
@@ -389,7 +424,8 @@ void Entry::removeLowDepthGenotypes(uint32_t lowDepth) {
 
 uint32_t Entry::samplesWithData() const {
     uint32_t rv(0);
-    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i)
+    auto const& sd = sampleData();
+    for (auto i = sd.begin(); i != sd.end(); ++i)
         if (!i->second.empty())
             ++rv;
     return rv;
@@ -402,7 +438,8 @@ int32_t Entry::samplesFailedFilter() const {
 
     uint32_t offset = distance(_formatDescription.begin(), i);
     uint32_t numFailedFilter = 0;
-    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
+    auto const& sd = sampleData();
+    for (auto i = sd.begin(); i != sd.end(); ++i) {
         auto const& values = i->second;
         if (values.size() > offset) {
             //then we have some data
@@ -423,7 +460,8 @@ int32_t Entry::samplesEvaluatedByFilter() const {
 
     uint32_t offset = distance(_formatDescription.begin(), i);
     uint32_t numEvaluatedByFilter = 0;
-    for (auto i = _sampleData.begin(); i != _sampleData.end(); ++i) {
+    auto const& sd = sampleData();
+    for (auto i = sd.begin(); i != sd.end(); ++i) {
         auto const& values = i->second;
         if (values.size() > offset) {
             //then we have some data
