@@ -1,4 +1,4 @@
-#include "bedutil/MergeSorted.hpp"
+#include "processors/MergeSorted.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/TypedStream.hpp"
 

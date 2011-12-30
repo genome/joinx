@@ -89,8 +89,8 @@ void VcfSiteFilterCommand::exec() {
     Vcf::Entry e;
     *out << reader.header();
     while (reader.next(e)) {
-        uint32_t numSamplesEval = e.samplesEvaluatedByFilter();
-        int32_t numFailed = e.samplesFailedFilter();
+        uint32_t numSamplesEval = e.sampleData().samplesEvaluatedByFilter();
+        int32_t numFailed = e.sampleData().samplesFailedFilter();
         if(numFailed < 0) {
             //there was no FT field available. Warn.
             cerr << "No per-sample filter field available for line " << reader.lineNum() << endl;

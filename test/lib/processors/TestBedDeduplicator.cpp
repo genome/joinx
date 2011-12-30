@@ -1,4 +1,4 @@
-#include "bedutil/BedDeduplicator.hpp"
+#include "processors/BedDeduplicator.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/StreamFactory.hpp"

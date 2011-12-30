@@ -1,10 +1,10 @@
 #include "SnvConcordanceCommand.hpp"
-#include "bedutil/SnvConcordance.hpp"
 
-#include "bedutil/Intersect.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/TypedStream.hpp"
+#include "processors/Intersect.hpp"
+#include "reports/SnvConcordance.hpp"
 
 #include <boost/program_options.hpp>
 #include <algorithm>

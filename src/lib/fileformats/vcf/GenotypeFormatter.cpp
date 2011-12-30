@@ -41,7 +41,7 @@ vector<CustomValue> GenotypeFormatter::process(
         if (type->id() == "GT") {
             rv.push_back(CustomValue(type, renumberGT(e, sampleIdx, alleleIndices)));
         } else {
-            const CustomValue* v = e->sampleData(sampleIdx, type->id());
+            const CustomValue* v = e->sampleData().get(sampleIdx, type->id());
             rv.push_back(v ? *v : CustomValue());
         }
     }
@@ -79,7 +79,7 @@ void GenotypeFormatter::merge(
                 previousValues[i] = CustomValue(type, newGt);
             }
         } else {
-            const CustomValue* v = e->sampleData(sampleIdx, fields[i]->id());
+            const CustomValue* v = e->sampleData().get(sampleIdx, fields[i]->id());
             if (v && !v->empty() && (overridePreviousValues || previousValues[i].empty())) {
                 previousValues[i] = *v;
             }
@@ -93,7 +93,7 @@ string GenotypeFormatter::renumberGT(
     const std::vector<size_t>& alleleIndices
     ) const
 {
-    GenotypeCall oldGT = e->genotypeForSample(sampleIdx);
+    GenotypeCall oldGT = e->sampleData().genotype(sampleIdx);
     if (oldGT.empty())
         return ".";
 

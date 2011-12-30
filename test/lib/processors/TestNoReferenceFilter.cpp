@@ -1,4 +1,4 @@
-#include "bedutil/NoReferenceFilter.hpp"
+#include "processors/NoReferenceFilter.hpp"
 #include "fileformats/Bed.hpp"
 
 #include <boost/assign/list_of.hpp>

@@ -74,8 +74,8 @@ void VcfFilterCommand::exec() {
     Vcf::Entry e;
     *out << reader.header();
     while (reader.next(e)) {
-        e.removeLowDepthGenotypes(_minDepth);
-        if (e.samplesWithData())
+        e.sampleData().removeLowDepthGenotypes(_minDepth);
+        if (e.sampleData().samplesWithData())
             writer(e);
     }
 }

@@ -60,6 +60,9 @@ void Bed::parseLine(const BedHeader*, std::string& line, Bed& bed, int maxExtraF
     while ((maxExtraFields == -1 || fields++ < maxExtraFields) && !tokenizer.eof()) {
         string extra;
         tokenizer.extract(extra);
+        // make ref/call uppercase
+        if (fields == 1)
+            boost::to_upper(extra);
         bed._extraFields.push_back(std::move(extra));
     }
 

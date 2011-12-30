@@ -6,6 +6,8 @@
 #include "GenotypeFormatter.hpp"
 #include "Header.hpp"
 #include "MergeStrategy.hpp"
+#include "SampleData.hpp"
+
 #include <boost/format.hpp>
 #include <algorithm>
 #include <iterator>
@@ -142,19 +144,20 @@ void EntryMerger::setInfo(CustomValueMap& info) const {
 
 void EntryMerger::setAltAndGenotypeData(
         std::vector<std::string>& alt,
-        std::vector<CustomType const*>& format,
-        std::map<uint32_t, std::vector<CustomValue> >& sampleData) const
+        SampleData& sampleData) const
 {
     // set alt alleles
     alt.resize(_alleleMap.size());
     for (auto i = _alleleMap.begin(); i != _alleleMap.end(); ++i)
         alt[i->second] = i->first;
 
+
     // build list of all format fields
+    SampleData::FormatType format;
     GenotypeFormatter genotypeFormatter(_mergedHeader, alt);
     set<string> seen;
     for (const Entry* e = _begin; e != _end; ++e) {
-        const vector<CustomType const*>& gtFormat = e->formatDescription();
+        const vector<CustomType const*>& gtFormat = e->sampleData().format();
         for (auto i = gtFormat.begin(); i != gtFormat.end(); ++i) {
             auto inserted = seen.insert((*i)->id());
             if (inserted.second) {
@@ -169,8 +172,9 @@ void EntryMerger::setAltAndGenotypeData(
         }
     }
 
+    SampleData::MapType sdMap;
     for (const Entry* e = _begin; e != _end; ++e) {
-        Entry::SampleData const& samples = e->sampleData();
+        SampleData const& samples = e->sampleData();
         try {
             for (auto i = samples.begin(); i != samples.end(); ++i) {
                 auto const& sampleIdx = i->first;
@@ -184,7 +188,7 @@ void EntryMerger::setAltAndGenotypeData(
                 size_t idx = e - _begin;
 
                 // TODO: try to eliminate double map lookup here
-                auto inserted = sampleData.insert(make_pair(mergedIdx, vector<CustomValue>()));
+                auto inserted = sdMap.insert(make_pair(mergedIdx, vector<CustomValue>()));
                 if (inserted.second || inserted.first->second.empty()) {
                     inserted.first->second = genotypeFormatter.process(format, e, sampleIdx, _newGTIndices[idx]);
                 } else if (_mergeStrategy.mergeSamples()) {
@@ -202,6 +206,8 @@ void EntryMerger::setAltAndGenotypeData(
                 %e->toString() %ex.what()));
         }
     }
+
+    sampleData = SampleData(_mergedHeader, std::move(format), std::move(sdMap));
 }
 
 const Header* EntryMerger::mergedHeader() const {

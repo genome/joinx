@@ -1,4 +1,4 @@
-#include "bedutil/Sort.hpp"
+#include "processors/Sort.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/StreamFactory.hpp"

@@ -10,9 +10,9 @@
 #include <vector>
 #include <sstream>
 
-class RemappedContig {
+class RemapContig {
 public:
-    RemappedContig(
+    RemapContig(
             const std::string& chrom,
             uint32_t start,
             uint32_t stop,
@@ -69,10 +69,10 @@ protected:
 };
 
 template<typename RefSeq, typename Callback>
-class RemappedContigGenerator {
+class RemapContigGenerator {
 public:
 
-    RemappedContigGenerator(RefSeq& refSeq, unsigned flankSize, Callback& cb)
+    RemapContigGenerator(RefSeq& refSeq, unsigned flankSize, Callback& cb)
         : _refSeq(refSeq)
         , _flankSize(flankSize)
         , _cb(cb)
@@ -102,7 +102,7 @@ public:
             const char* bases = translateIub(var);
             while (*bases) {
                 if (*bases != ref[0]) { // non-reference base, that is
-                    RemappedContig ctg(
+                    RemapContig ctg(
                         v.chrom(),
                         start,
                         stop,
@@ -118,7 +118,7 @@ public:
         } else {
             int isize = v.type() == Variant::DEL ? -ref.size() : var.size();
             int strLen = v.type() == Variant::DEL ? ref.size() : var.size();
-            RemappedContig ctg(
+            RemapContig ctg(
                 v.chrom(),
                 start,
                 stop,

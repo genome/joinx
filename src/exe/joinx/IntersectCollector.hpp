@@ -1,8 +1,8 @@
 #pragma once
 
-#include "bedutil/IntersectionOutputFormatter.hpp"
-#include "fileformats/Variant.hpp"
 #include "fileformats/Bed.hpp"
+#include "fileformats/Variant.hpp"
+#include "processors/IntersectionOutputFormatter.hpp"
 
 #include <iostream>
 

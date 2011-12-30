@@ -1,4 +1,4 @@
-#include "bedutil/SnvConcordance.hpp"
+#include "reports/SnvConcordance.hpp"
 #include "common/Sequence.hpp"
 #include "fileformats/Variant.hpp"
 #include "fileformats/Bed.hpp"

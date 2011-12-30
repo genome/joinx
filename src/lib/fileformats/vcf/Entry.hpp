@@ -2,6 +2,7 @@
 
 #include "CustomValue.hpp"
 #include "GenotypeCall.hpp"
+#include "SampleData.hpp"
 #include "common/Tokenizer.hpp"
 #include "common/namespaces.hpp"
 
@@ -36,7 +37,6 @@ public:
     };
     typedef Header HeaderType;
     typedef std::map<std::string, CustomValue> CustomValueMap;
-    typedef std::map<uint32_t, std::vector<CustomValue> > SampleData;
 
     // static data
     const static double MISSING_QUALITY;
@@ -79,20 +79,9 @@ public:
     double qual() const { return _qual; }
     const std::set<std::string>& failedFilters() const { return _failedFilters; }
     const CustomValueMap& info() const { return _info; }
-    const std::vector<CustomType const*>& formatDescription() const { return _formatDescription; }
-    const SampleData& sampleData() const { return _sampleData; }
-    const std::vector<CustomValue>* sampleData(uint32_t idx) const;
-    const CustomValue* info(const std::string& key) const;
-    const CustomValue* sampleData(uint32_t sampleIdx, const std::string& key) const;
-
-    // returns true if GT is the first FORMAT entry
-    bool hasGenotypeData() const;
-    GenotypeCall genotypeForSample(uint32_t sampleIdx) const;
-
-    uint32_t samplesWithData() const;
-    int32_t samplesFailedFilter() const;
-    int32_t samplesEvaluatedByFilter() const;
-    void removeLowDepthGenotypes(uint32_t lowDepth);
+    const CustomValue* info(const string& key) const;
+    const SampleData& sampleData() const;
+    SampleData& sampleData();
 
     void setPositions();
     int64_t start() const;
@@ -132,8 +121,9 @@ protected:
     double _qual;
     std::set<std::string> _failedFilters;
     CustomValueMap _info;
-    std::vector<CustomType const*> _formatDescription;
-    SampleData _sampleData;
+    std::string _sampleString;
+    mutable bool _parsedSamples;
+    mutable SampleData _sampleData;
 
     int64_t _start;
     int64_t _stop;

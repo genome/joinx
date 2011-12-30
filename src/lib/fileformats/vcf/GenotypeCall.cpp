@@ -11,8 +11,8 @@ GenotypeCall::GenotypeCall()
 
 GenotypeCall::GenotypeCall(const std::string& call)
     : _phased(false)
+    , _string(call)
 {
-    _string = call;
     Tokenizer<std::string> tok(call, "|/");
     uint32_t idx(0);
     // TODO this doesn't seem to handle partially missing data yet

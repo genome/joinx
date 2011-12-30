@@ -18,11 +18,11 @@ using namespace std::placeholders;
 namespace {
 uint32_t samplesWithNonRefGenotypes(const Vcf::Entry& entry) {
     uint32_t rv(0);
-    if (!entry.hasGenotypeData())
+    if (!entry.sampleData().hasGenotypeData())
         return 0;
 
     for (uint32_t i = 0; i < entry.header().sampleCount(); ++i) {
-        Vcf::GenotypeCall gt = entry.genotypeForSample(i);
+        Vcf::GenotypeCall gt = entry.sampleData().genotype(i);
         if (gt.empty())
             continue;
 
