@@ -182,34 +182,34 @@ TEST_F(TestVcfEntry, swap) {
 }
 
 TEST_F(TestVcfEntry, samplesWithData) {
-    ASSERT_EQ(3, v[0].samplesWithData());
-    ASSERT_EQ(2, v[1].samplesWithData());
-    ASSERT_EQ(3, v[2].samplesWithData());
-    ASSERT_EQ(3, v[3].samplesWithData());
-    ASSERT_EQ(3, v[4].samplesWithData());
-    ASSERT_EQ(0, v[5].samplesWithData());
+    ASSERT_EQ(3, v[0].sampleData().samplesWithData());
+    ASSERT_EQ(2, v[1].sampleData().samplesWithData());
+    ASSERT_EQ(3, v[2].sampleData().samplesWithData());
+    ASSERT_EQ(3, v[3].sampleData().samplesWithData());
+    ASSERT_EQ(3, v[4].sampleData().samplesWithData());
+    ASSERT_EQ(0, v[5].sampleData().samplesWithData());
 }
 
 TEST_F(TestVcfEntry, samplesEvaluatedByFilter) {
-    ASSERT_EQ(-1, v[0].samplesEvaluatedByFilter());
-    ASSERT_EQ(1, v[1].samplesEvaluatedByFilter());
-    ASSERT_EQ(3, v[2].samplesEvaluatedByFilter());
-    ASSERT_EQ(2, v[3].samplesEvaluatedByFilter());
+    ASSERT_EQ(-1, v[0].sampleData().samplesEvaluatedByFilter());
+    ASSERT_EQ(1, v[1].sampleData().samplesEvaluatedByFilter());
+    ASSERT_EQ(3, v[2].sampleData().samplesEvaluatedByFilter());
+    ASSERT_EQ(2, v[3].sampleData().samplesEvaluatedByFilter());
 }
 
 TEST_F(TestVcfEntry, samplesFailedFilter) {
-    ASSERT_EQ(-1, v[0].samplesFailedFilter());
-    ASSERT_EQ(0, v[1].samplesFailedFilter());
-    ASSERT_EQ(3, v[2].samplesFailedFilter());
-    ASSERT_EQ(1, v[3].samplesFailedFilter());
+    ASSERT_EQ(-1, v[0].sampleData().samplesFailedFilter());
+    ASSERT_EQ(0, v[1].sampleData().samplesFailedFilter());
+    ASSERT_EQ(3, v[2].sampleData().samplesFailedFilter());
+    ASSERT_EQ(1, v[3].sampleData().samplesFailedFilter());
 }
 
 TEST_F(TestVcfEntry, removeLowDepthGenotypes) {
-    ASSERT_EQ(3, v[4].samplesWithData());
-    v[4].removeLowDepthGenotypes(2);
-    ASSERT_EQ(3, v[4].samplesWithData());
-    v[4].removeLowDepthGenotypes(4);
-    ASSERT_EQ(1, v[4].samplesWithData());
+    ASSERT_EQ(3, v[4].sampleData().samplesWithData());
+    v[4].sampleData().removeLowDepthGenotypes(2);
+    ASSERT_EQ(3, v[4].sampleData().samplesWithData());
+    v[4].sampleData().removeLowDepthGenotypes(4);
+    ASSERT_EQ(1, v[4].sampleData().samplesWithData());
 }
 
 TEST_F(TestVcfEntry, reheader) {
@@ -217,7 +217,7 @@ TEST_F(TestVcfEntry, reheader) {
     Header merged = Header::fromStream(ss);
     Entry const& e = v[0];
     merged.merge(_header, true); // true to allow sample name overlaps
-    Entry::SampleData origGT = e.sampleData();
+    SampleData origGT = e.sampleData();
     ASSERT_EQ(3, origGT.size());
     ASSERT_EQ(&_header, &e.header());
     v[0].reheader(&merged);
@@ -225,45 +225,45 @@ TEST_F(TestVcfEntry, reheader) {
     ASSERT_EQ(3, e.sampleData().size());
     ASSERT_EQ(4, e.header().sampleCount());
     
-    Entry::SampleData newGT = e.sampleData();
+    SampleData newGT = e.sampleData();
     ASSERT_EQ(0, newGT.count(0));
     ASSERT_EQ(1, newGT.count(1));
     ASSERT_EQ(1, newGT.count(2));
     ASSERT_EQ(1, newGT.count(3));
-    ASSERT_TRUE(origGT[2] == newGT[1]);
-    ASSERT_TRUE(origGT[1] == newGT[2]);
-    ASSERT_TRUE(origGT[0] == newGT[3]);
+    ASSERT_TRUE(*origGT.get(2) == *newGT.get(1));
+    ASSERT_TRUE(*origGT.get(1) == *newGT.get(2));
+    ASSERT_TRUE(*origGT.get(0) == *newGT.get(3));
 }
 
 TEST_F(TestVcfEntry, genotypeForSample) {
     GenotypeCall gt;
 
-    gt = v[0].genotypeForSample(0);
+    gt = v[0].sampleData().genotype(0);
     ASSERT_EQ(2, gt.size());
     ASSERT_EQ(0, gt[0]);
     ASSERT_EQ(0, gt[1]);
 
-    gt = v[0].genotypeForSample(1);
+    gt = v[0].sampleData().genotype(1);
     ASSERT_EQ(2, gt.size());
     ASSERT_EQ(1, gt[0]);
     ASSERT_EQ(0, gt[1]);
 
-    gt = v[0].genotypeForSample(2);
+    gt = v[0].sampleData().genotype(2);
     ASSERT_EQ(2, gt.size());
     ASSERT_EQ(1, gt[0]);
     ASSERT_EQ(1, gt[1]);
 
-    gt = v[1].genotypeForSample(0);
+    gt = v[1].sampleData().genotype(0);
     ASSERT_EQ(2, gt.size());
     ASSERT_EQ(0, gt[0]);
     ASSERT_EQ(0, gt[1]);
 
-    gt = v[1].genotypeForSample(1);
+    gt = v[1].sampleData().genotype(1);
     ASSERT_EQ(2, gt.size());
     ASSERT_EQ(0, gt[0]);
     ASSERT_EQ(1, gt[1]);
 
-    gt = v[1].genotypeForSample(2);
+    gt = v[1].sampleData().genotype(2);
     ASSERT_TRUE(gt.empty());
 }
 

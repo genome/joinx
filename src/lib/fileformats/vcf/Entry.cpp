@@ -41,19 +41,15 @@ namespace {
         "format",
         "sample_data"
     };
-
-    bool customTypeIdMatches(string const& id, CustomType const* type) {
-        return type && type->id() == id;
-    }
 }
 
+const double Entry::MISSING_QUALITY = numeric_limits<double>::min();
+
 void Entry::parseLine(const Header* hdr, std::string& s, Entry& e) {
-    e._parsedSamples = false;
     e.parse(hdr, s);
 }
 
 void Entry::parseLineAndReheader(const Header* hdr, const Header* newH, std::string& s, Entry& e) {
-    e._parsedSamples = false;
     e.parseAndReheader(hdr, newH, s);
 }
 
@@ -71,10 +67,6 @@ Entry::FieldName Entry::fieldFromString(const char* name) {
     }
     return UNDEFINED;
 }
-
-
-
-const double Entry::MISSING_QUALITY = numeric_limits<double>::min();
 
 Entry::Entry()
     : _header(0)
@@ -123,22 +115,14 @@ Entry::Entry(EntryMerger&& merger)
     std::swap(_identifiers, merger.identifiers());
     std::swap(_failedFilters, merger.failedFilters());
     merger.setInfo(_info);
-    merger.setAltAndGenotypeData(_alt, _formatDescription, _sampleData);
+    merger.setAltAndGenotypeData(_alt, _sampleData);
     setPositions();
 }
 
 void Entry::reheader(const Header* newHeader) {
-    SampleData newGTData;
-    auto const& sd = sampleData();
-    for (auto i = sd.begin(); i != sd.end(); ++i) {
-        const string& sampleName = header().sampleNames()[i->first];
-        uint32_t newIdx = newHeader->sampleIndex(sampleName);
-        newGTData[newIdx] = i->second;
-    }
-    _sampleData.swap(newGTData);
+    sampleData().reheader(newHeader);
     _header = newHeader;
 }
-
 
 const Header& Entry::header() const {
     if (!_header)
@@ -152,6 +136,7 @@ void Entry::parseAndReheader(const Header* h, const Header* newHeader, const str
 }
 
 void Entry::parse(const Header* h, const string& s) {
+    _parsedSamples = false;
     _header = h;
 
     // clear containers
@@ -160,7 +145,6 @@ void Entry::parse(const Header* h, const string& s) {
     _identifiers.clear();
     _alt.clear();
     _failedFilters.clear();
-    _formatDescription.clear();
 
     Tokenizer<char> tok(s, '\t');
     if (!tok.extract(_chrom))
@@ -237,62 +221,14 @@ void Entry::parse(const Header* h, const string& s) {
             throw runtime_error(str(format("Duplicate value for info field '%1%'") %key));
     }
 
-    // TODO: refactor into function
-    // format description
-    vector<string> formatDesc;
-    if (tok.extract(&beg, &end) && (end - beg != 1 || *beg != '.')) {
-        Tokenizer<char>::split(beg, end, ':', back_inserter(formatDesc));
-
-        _formatDescription.reserve(formatDesc.size());
-        for (auto i = formatDesc.begin(); i != formatDesc.end(); ++i) {
-            if (i->empty())
-                continue;
-
-            auto type = header().formatType(*i);
-            if (!type)
-                throw runtime_error(str(format("Unknown id in FORMAT field: %1%") %*i));
-            _formatDescription.push_back(type);
-        }
-    }
-
     tok.remaining(_sampleString);
+    _parsedSamples = false;
     setPositions();
 }
-
-void Entry::parseSamples() const {
-    if (_parsedSamples)
-        return;
-
-    // per sample formatted data
-    uint32_t sampleIdx(0);
-    Tokenizer<char> tok(_sampleString, '\t');
-    char const* beg(0);
-    char const* end(0);
-    while (tok.extract(&beg, &end)) {
-        vector<string> data;
-        if (end-beg != 1 || *beg != '.') {
-            Tokenizer<char>::split(beg, end, ':', back_inserter(data));
-
-            if (data.size() > _formatDescription.size())
-                throw runtime_error("More per-sample values than described in format section");
-
-            vector<CustomValue>& values = (_sampleData[sampleIdx] = vector<CustomValue>());
-            values.resize(data.size());
-            for (uint32_t i = 0; i < data.size(); ++i) {
-                values[i] = CustomValue(_formatDescription[i], data[i]);
-            }
-        }
-        ++sampleIdx;
-    }
-    _parsedSamples = true;
-}
-
-
 
 void Entry::addIdentifier(const std::string& id) {
     _identifiers.insert(id);
 }
-
 
 void Entry::addFilter(const std::string& filterName) {
     //filters cannot contain whitespace or semicolons
@@ -337,7 +273,6 @@ void Entry::swap(Entry& other) {
     std::swap(_qual, other._qual);
     _failedFilters.swap(other._failedFilters);
     _info.swap(other._info);
-    _formatDescription.swap(other._formatDescription);
     _sampleData.swap(other._sampleData);
     std::swap(_header, other._header);
     std::swap(_parsedSamples, other._parsedSamples);
@@ -359,119 +294,22 @@ const CustomValue* Entry::info(const string& key) const {
     return &i->second;
 }
 
-const Entry::SampleData& Entry::sampleData() const {
-    parseSamples();
+SampleData& Entry::sampleData() {
+    if (!_parsedSamples) {
+        _sampleData = SampleData(_header, _sampleString);
+        _parsedSamples = true;
+    }
+
     return _sampleData;
 }
 
-Entry::SampleData& Entry::sampleData() { // protected
-    parseSamples();
+const SampleData& Entry::sampleData() const {
+    if (!_parsedSamples) {
+        _sampleData = SampleData(_header, _sampleString);
+        _parsedSamples = true;
+    }
+
     return _sampleData;
-}
-
-const vector<CustomValue>* Entry::sampleData(uint32_t idx) const {
-    auto const& sd = sampleData();
-    auto iter = sd.find(idx);
-    if (iter == sd.end())
-        return 0;
-    return &iter->second;
-}
-
-const CustomValue* Entry::sampleData(uint32_t sampleIdx, const string& key) const {
-    auto const& sd = sampleData();
-    // no data for that sample
-    auto iter = sd.find(sampleIdx);
-    if (iter == sd.end())
-        return 0;
-
-    // no info for that format key
-    auto i = find_if(_formatDescription.begin(), _formatDescription.end(), bind(&customTypeIdMatches, key, _1));
-    if (i == _formatDescription.end())
-        return 0;
-
-    uint32_t offset = distance(_formatDescription.begin(), i);
-    if (offset >= iter->second.size())
-        return 0;
-
-    return &iter->second[offset];
-}
-
-bool Entry::hasGenotypeData() const {
-    return !_formatDescription.empty() && _formatDescription.front()->id() == "GT";
-}
-
-GenotypeCall Entry::genotypeForSample(uint32_t sampleIdx) const {
-    const string* gtString(0);
-    const CustomValue* v = sampleData(sampleIdx, "GT");
-    if (!v || v->empty() || (gtString = v->get<string>(0)) == 0 || gtString->empty())
-        return GenotypeCall();
-    return GenotypeCall(*gtString);
-}
-
-void Entry::removeLowDepthGenotypes(uint32_t lowDepth) {
-    auto i = find_if(_formatDescription.begin(), _formatDescription.end(), bind(&customTypeIdMatches, "DP", _1));
-    if (i == _formatDescription.end())
-        return;
-
-    auto& sd = sampleData();
-    uint32_t offset = distance(_formatDescription.begin(), i);
-    for (auto i = sd.begin(); i != sd.end(); ++i) {
-        const int64_t *v;
-        if (i->second[offset].empty() || (v = i->second[offset].get<int64_t>(0)) == NULL || *v < lowDepth)
-            i->second.clear();
-    }
-}
-
-uint32_t Entry::samplesWithData() const {
-    uint32_t rv(0);
-    auto const& sd = sampleData();
-    for (auto i = sd.begin(); i != sd.end(); ++i)
-        if (!i->second.empty())
-            ++rv;
-    return rv;
-}
-
-int32_t Entry::samplesFailedFilter() const {
-    auto i = find_if(_formatDescription.begin(), _formatDescription.end(), bind(&customTypeIdMatches, "FT", _1));
-    if (i == _formatDescription.end())
-        return -1;
-
-    uint32_t offset = distance(_formatDescription.begin(), i);
-    uint32_t numFailedFilter = 0;
-    auto const& sd = sampleData();
-    for (auto i = sd.begin(); i != sd.end(); ++i) {
-        auto const& values = i->second;
-        if (values.size() > offset) {
-            //then we have some data
-            const std::string *filter;
-            //if it has a value (assume . is processed correctly) and we're able to get a value and it is not pass then failed
-            if (!values[offset].empty() && (filter = values[offset].get<std::string>(0)) != NULL && *filter != std::string("PASS")) {
-               numFailedFilter++;
-            }
-        }
-    }
-    return numFailedFilter;
-}
-
-int32_t Entry::samplesEvaluatedByFilter() const {
-    auto i = find_if(_formatDescription.begin(), _formatDescription.end(), bind(&customTypeIdMatches, "FT", _1));
-    if (i == _formatDescription.end())
-        return -1;
-
-    uint32_t offset = distance(_formatDescription.begin(), i);
-    uint32_t numEvaluatedByFilter = 0;
-    auto const& sd = sampleData();
-    for (auto i = sd.begin(); i != sd.end(); ++i) {
-        auto const& values = i->second;
-        if (values.size() > offset) {
-            //then we have some data
-            //if it has a value (assume . is processed correctly) and we're able to get a value and it is not pass then failed
-            if (!values[offset].empty() && values[offset].get<std::string>(0) != NULL) {
-               numEvaluatedByFilter++;
-            }
-        }
-    }
-    return numEvaluatedByFilter;
 }
 
 void Entry::setPositions() {
@@ -534,45 +372,7 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
             }
         }
     }
-    s << '\t';
-
-    auto const& fmt = e.formatDescription();
-    if (!fmt.empty()) {
-        for (auto i = fmt.begin(); i != fmt.end(); ++i) {
-            if (i != fmt.begin())
-                s << ':';
-            s << (*i)->id();
-        }
-    } else {
-        s << '.';
-    }
-
-    Vcf::Entry::SampleData const& psd = e.sampleData();
-    uint32_t sampleCounter(0);
-    uint32_t nSamples = e.header().sampleCount();
-    for (auto i = psd.begin(); i != psd.end(); ++i) {
-        s << '\t';
-        while (sampleCounter < i->first) {
-            s << ".\t";
-            ++sampleCounter;
-        }
-
-        auto const& values = i->second;
-        if (!values.empty()) {
-            for (auto j = values.begin(); j != values.end(); ++j) {
-                if (j != values.begin())
-                    s << ':';
-                if (j->empty())
-                    s << '.';
-                else
-                    j->toStream(s);
-            }
-        } else
-            s << ".";
-        ++sampleCounter;
-    }
-    while (sampleCounter++ < nSamples)
-        s << "\t.";
+    s << '\t' << e.sampleData();
 
     return s;
 }

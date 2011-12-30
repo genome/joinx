@@ -25,11 +25,11 @@ bool customTypeIdMatches(string const& id, Vcf::CustomType const* type) {
 
 uint32_t samplesWithNonRefGenotypes(const Vcf::Entry& entry) {
     uint32_t rv(0);
-    if (!entry.hasGenotypeData())
+    if (!entry.sampleData().hasGenotypeData())
         return 0;
 
     for (uint32_t i = 0; i < entry.header().sampleCount(); ++i) {
-        Vcf::GenotypeCall gt = entry.genotypeForSample(i);
+        Vcf::GenotypeCall gt = entry.sampleData().genotype(i);
         if (gt.empty())
             continue;
 
@@ -46,11 +46,12 @@ typedef std::map<Vcf::GenotypeCall,uint32_t> genotypes;
 genotypes genotypeDistribution(const Vcf::Entry& entry) {
     genotypes distribution;  //missing genotypes are not counted, but perhaps should be counted separately
 
-    auto it = find_if(entry.formatDescription().begin(), entry.formatDescription().end(), bind(&customTypeIdMatches, "FT", _1));
+    auto const& fmt = entry.sampleData().format();
+    auto it = find_if(fmt.begin(), fmt.end(), bind(&customTypeIdMatches, "FT", _1));
 
     int32_t offset;
-    if (it != entry.formatDescription().end()) {
-        offset = distance(entry.formatDescription().begin(), it);
+    if (it != fmt.end()) {
+        offset = distance(fmt.begin(), it);
     }
     else {
         offset = -1;
@@ -61,11 +62,15 @@ genotypes genotypeDistribution(const Vcf::Entry& entry) {
 
         if (offset >= 0) {
             const std::string *filter;
-            if (entry.sampleData(i,"FT") != NULL && (filter = entry.sampleData(i,"FT")->get<std::string>(0)) != NULL &&  *filter != "PASS")
+            if (entry.sampleData().get(i,"FT") != NULL 
+                && (filter = entry.sampleData().get(i,"FT")->get<std::string>(0)) != NULL 
+                &&  *filter != "PASS")
+            {
                 continue;
+            }
         }
         //if no FT then we assume all have passed :-(
-        Vcf::GenotypeCall gt = entry.genotypeForSample(i);
+        Vcf::GenotypeCall gt = entry.sampleData().genotype(i);
         if(gt.size() == 0) {
             continue;
         }
@@ -124,7 +129,7 @@ int main(int argc, char** argv) {
             if(entry.failedFilters().size() != 1 || entry.failedFilters().find("PASS") == entry.failedFilters().end())
                 continue;
             totalSites++;
-            if(!entry.hasGenotypeData())
+            if(!entry.sampleData().hasGenotypeData())
                 continue;
             genotypes distribution = genotypeDistribution(entry);
             std::vector<uint32_t> alleles = alleleDistribution(distribution);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/namespaces.hpp"
+
 #include <cstdint>
 #include <map>
 #include <set>
@@ -14,6 +15,7 @@ class CustomValue;
 class Entry;
 class Header;
 class MergeStrategy;
+class SampleData;
 
 class EntryMerger {
 public:
@@ -29,10 +31,7 @@ public:
     std::set<std::string>& failedFilters();
     double qual() const;
     void setInfo(CustomValueMap& info) const;
-    void setAltAndGenotypeData(
-        std::vector<std::string>& alt,
-        std::vector<CustomType const*>& format,
-        std::map< uint32_t, std::vector<CustomValue> >& sampleData) const;
+    void setAltAndGenotypeData(std::vector<std::string>& alt, SampleData& sampleData) const;
 
     const Header* mergedHeader() const;
 
