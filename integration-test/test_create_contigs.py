@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from joinxtest import JoinxTest, main
+from integrationtest import IntegrationTest, main
 import unittest
 
-class TestCreateContigs(JoinxTest, unittest.TestCase):
+class TestCreateContigs(IntegrationTest, unittest.TestCase):
 
     def test_create_contigs(self):
         input_files = self.inputFiles("small.fa", "variants-contig.bed")
@@ -11,7 +11,7 @@ class TestCreateContigs(JoinxTest, unittest.TestCase):
         expected_file = self.inputFiles("expected-contigs.fa")[0]
         params = ["create-contigs", "--flank=10", "-o", output_file ]
         params.extend(input_files)
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual(0, rv)
         self.assertFilesEqual(expected_file, output_file)
 
@@ -21,7 +21,7 @@ class TestCreateContigs(JoinxTest, unittest.TestCase):
         params = ["create-contigs", "--flank=10", "-o", output_file ]
         params.append("boof.fa")
         params.extend(input_files)
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual(1, rv)
         self.assertTrue("Failed to load fasta file: boof.fa" in err, "value was %s" %err)
 
@@ -31,7 +31,7 @@ class TestCreateContigs(JoinxTest, unittest.TestCase):
         params = ["create-contigs", "--flank=10", "-o", output_file ]
         params.extend(input_files)
         params.append("boof.bed")
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual(1, rv)
         self.assertTrue("Failed to open file boof.bed" in err, "value was %s" %err)
 

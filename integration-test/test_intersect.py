@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
-from joinxtest import JoinxTest, main
+import os
+print "ENV OMG: ", os.getenv("PYTHONPATH")
+
+from integrationtest import IntegrationTest, main
 import unittest
 import sys
 
-class TestIntersect(JoinxTest, unittest.TestCase):
+class TestIntersect(IntegrationTest, unittest.TestCase):
 
     def test_intersect(self):
         data = {
@@ -22,7 +25,7 @@ class TestIntersect(JoinxTest, unittest.TestCase):
             params = [ "intersect", args, "-o", output_file ]
             params.extend(self.inputFiles("a.bed", "b.bed"))
 
-            rv, err = self.joinx(params)
+            rv, err = self.execute(params)
             self.assertEqual(0, rv)
             self.assertEqual('', err)
             expected_file = self.inputFiles(expected)[0]
@@ -39,7 +42,7 @@ class TestIntersect(JoinxTest, unittest.TestCase):
             "adjacent-insertions-a.bed",
             "adjacent-insertions-b.bed"
         ))
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual(0, rv)
         self.assertEqual('', err)
         expected_file = self.inputFiles("expected-adjacent-insertions.bed")[0]
@@ -55,7 +58,7 @@ class TestIntersect(JoinxTest, unittest.TestCase):
             "adjacent-insertions-a.bed",
             "adjacent-insertions-b.bed"
         ))
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual(0, rv)
         self.assertEqual('', err)
         expected_file = self.inputFiles("expected-no-adjacent-insertions.bed")[0]
@@ -69,7 +72,7 @@ class TestIntersect(JoinxTest, unittest.TestCase):
             "-o", output_file
         ]
         params.extend(self.inputFiles("iub-a.bed", "iub-b.bed"))
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual(0, rv)
         self.assertEqual('', err)
         expected_file = self.inputFiles("expected-iub-both.bed")[0]
@@ -79,26 +82,26 @@ class TestIntersect(JoinxTest, unittest.TestCase):
         output_file = self.tempFile("output.bed")
         params = [ "intersect", "-o", output_file ]
         params.extend(self.inputFiles("a.bed", "posonly.bed"))
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual(0, rv)
         self.assertEqual('', err)
         expected_file = self.inputFiles("a.bed")[0]
         self.assertFilesEqual(expected_file, output_file)
 
     def test_file_not_found(self):
-        rv, err = self.joinx(["intersect", "qwert", "djfsoidjfdj"])
+        rv, err = self.execute(["intersect", "qwert", "djfsoidjfdj"])
         self.assertEqual(1, rv)
         self.assertEqual("Failed to open file qwert\n", err)
 
     def test_invalid_arguments(self):
-        rv, err = self.joinx(["the bear went over the mountain"])
+        rv, err = self.execute(["the bear went over the mountain"])
         self.assertEqual(1, rv)
         self.assertTrue(err.startswith("Invalid subcommand 'the'"))
 
     def test_unsorted_data(self):
         params = ["intersect"]
         params.extend(self.inputFiles("a.bed", "unsorted0.bed"))
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual(1, rv)
         self.assertTrue(err.startswith("Unsorted data found in stream"))
 
@@ -110,7 +113,7 @@ class TestIntersect(JoinxTest, unittest.TestCase):
             "-o", output_file
         ]
         params.extend(self.inputFiles("a.bed", "b.bed"))
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual(0, rv)
         self.assertEqual('', err)
         expected_file = self.inputFiles("expected-format-I,A3-4.bed")[0]
