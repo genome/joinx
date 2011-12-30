@@ -27,11 +27,11 @@ EntryMetrics::EntryMetrics() {
 }
 
 void EntryMetrics::calculateGenotypeDistribution(Vcf::Entry& entry) {
-    auto it = find_if(entry.formatDescription().begin(), entry.formatDescription().end(), bind(&customTypeIdMatches, "FT", _1));
+    auto it = find_if(entry.sampleData().format().begin(), entry.sampleData().format().end(), bind(&customTypeIdMatches, "FT", _1));
 
     int32_t offset;
-    if (it != entry.formatDescription().end()) {
-        offset = distance(entry.formatDescription().begin(), it);
+    if (it != entry.sampleData().format().end()) {
+        offset = distance(entry.sampleData().format().begin(), it);
     }
     else {
         cerr << "No FT tag for call " << entry.chrom() << "\t" << entry.pos() << endl;
@@ -41,11 +41,11 @@ void EntryMetrics::calculateGenotypeDistribution(Vcf::Entry& entry) {
     for (uint32_t i = 0; i < entry.header().sampleCount(); ++i) {
         if (offset >= 0) {
             const std::string *filter;
-            if (entry.sampleData(i,"FT") != NULL && (filter = entry.sampleData(i,"FT")->get<std::string>(0)) != NULL &&  *filter != "PASS")
+            if (entry.sampleData().get(i,"FT") != NULL && (filter = entry.sampleData().get(i,"FT")->get<std::string>(0)) != NULL &&  *filter != "PASS")
                 continue;
         }
         //if no FT then we assume all have passed :-(
-        Vcf::GenotypeCall gt = entry.genotypeForSample(i);
+        Vcf::GenotypeCall gt = entry.sampleData().genotype(i);
         if(gt.size() == 0) {
             continue;
         }
@@ -161,11 +161,11 @@ void SampleMetrics::processEntry(Vcf::Entry& e, EntryMetrics& m) {
     _perSampleMutationSpectrum.resize(size);
 
     //now everything is the right size
-    auto it = find_if(e.formatDescription().begin(), e.formatDescription().end(), bind(&customTypeIdMatches, "FT", _1));
+    auto it = find_if(e.sampleData().format().begin(), e.sampleData().format().end(), bind(&customTypeIdMatches, "FT", _1));
 
     int32_t offset;
-    if (it != e.formatDescription().end()) {
-        offset = distance(e.formatDescription().begin(), it);
+    if (it != e.sampleData().format().end()) {
+        offset = distance(e.sampleData().format().begin(), it);
     }
     else {
         offset = -1;
@@ -188,13 +188,13 @@ void SampleMetrics::processEntry(Vcf::Entry& e, EntryMetrics& m) {
     for (uint32_t i = 0; i < e.header().sampleCount(); ++i) {
         if (offset >= 0) {
             const std::string *filter;
-            if (e.sampleData(i,"FT") != NULL && (filter = e.sampleData(i,"FT")->get<std::string>(0)) != NULL &&  *filter != "PASS") {
+            if (e.sampleData().get(i,"FT") != NULL && (filter = e.sampleData().get(i,"FT")->get<std::string>(0)) != NULL &&  *filter != "PASS") {
                 _perSampleFilteredCall[i]++;
                 continue;
             }
         }
         //if no FT then we assume all have passed :-(
-        Vcf::GenotypeCall gt = e.genotypeForSample(i);
+        Vcf::GenotypeCall gt = e.sampleData().genotype(i);
         if(gt.size() == 0) {
             _perSampleMissingCall[i]++;
             continue;

@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
             if(entry.failedFilters().size() != 1 || entry.failedFilters().find("PASS") == entry.failedFilters().end())
                 continue;
             totalSites++;
-            if(!entry.hasGenotypeData())
+            if(!entry.sampleData().hasGenotypeData())
                 continue;
             siteMetrics.processEntry(entry);
             sampleMetrics.processEntry(entry,siteMetrics);
