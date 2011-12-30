@@ -15,7 +15,7 @@ class TestVcfMerge(JoinxTest, unittest.TestCase):
         rv, err = self.joinx(params)
         self.assertEqual(0, rv)
         self.assertEqual('', err)
-        self.assertFilesEqual(expected_file, output_file)
+        self.assertFilesEqual(expected_file, output_file, filter_regex="##fileDate=")
 
 if __name__ == "__main__":
     main()
