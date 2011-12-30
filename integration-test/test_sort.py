@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from joinxtest import JoinxTest, main
+from integrationtest import IntegrationTest, main
 import unittest
 
-class TestSort(JoinxTest, unittest.TestCase):
+class TestSort(IntegrationTest, unittest.TestCase):
 
     def test_sort(self):
         input_files = self.inputFiles("unsorted*.bed")
@@ -14,7 +14,7 @@ class TestSort(JoinxTest, unittest.TestCase):
         for arg in ["", "-s"]:
             params = [ "sort", "-o", output_file, arg ]
             params.extend(input_files)
-            rv, err = self.joinx(params)
+            rv, err = self.execute(params)
             self.assertEqual(0, rv)
             self.assertEqual('', err)
             self.assertFilesEqual(expected_file, output_file)
@@ -26,7 +26,7 @@ class TestSort(JoinxTest, unittest.TestCase):
             "union-a.bed",
             "union-b.bed"
         ))
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual('', err)
         self.assertEqual(0, rv)
         expected_file = self.inputFiles("expected-union.bed")[0]
@@ -43,7 +43,7 @@ class TestSort(JoinxTest, unittest.TestCase):
         # test normal and stable sort
         params = [ "sort", "-M", str(max_lines), "-o", output_file ]
         params.extend(input_files)
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual(0, rv)
         self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file)
@@ -59,7 +59,7 @@ class TestSort(JoinxTest, unittest.TestCase):
         #for arg in ["", "-C g", "-C b" ]:
             #params = [ "sort", "-o", output_file, arg ]
             #params.extend(input_files)
-            #rv, err = self.joinx(params)
+            #rv, err = self.execute(params)
             #self.assertEqual(0, rv)
             #self.assertEqual('', err)
             #self.assertFilesEqual(expected_file, output_file)
@@ -72,7 +72,7 @@ class TestSort(JoinxTest, unittest.TestCase):
         output_file = self.tempFile("output.bed")
         params = [ "sort", "-o", output_file ]
         params.extend(input_files)
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual('', err)
         self.assertEqual(0, rv)
         self.assertFilesEqual(expected_file, output_file, filter_regex="##fileDate=")
@@ -86,7 +86,7 @@ class TestSort(JoinxTest, unittest.TestCase):
         output_file = self.tempFile("output.bed")
         params = [ "sort", "-o", output_file ]
         params.extend(input_files)
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual(0, rv, err)
         self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file)
@@ -98,7 +98,7 @@ class TestSort(JoinxTest, unittest.TestCase):
         output_file = self.tempFile("output.bed")
         params = [ "sort", "-o", output_file ]
         params.extend(input_files)
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual(0, rv, err)
         self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file)

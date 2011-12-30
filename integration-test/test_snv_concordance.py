@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from joinxtest import JoinxTest, main
+from integrationtest import IntegrationTest, main
 import unittest
 
-class TestSnvConcordance(JoinxTest, unittest.TestCase):
+class TestSnvConcordance(IntegrationTest, unittest.TestCase):
 
     def test_snv_concordance_ab(self):
         input_files = self.inputFiles("snva.bed", "snvb.bed")
@@ -12,7 +12,7 @@ class TestSnvConcordance(JoinxTest, unittest.TestCase):
 
         params = [ "snv-concordance", "-o", output_file ]
         params.extend(input_files)
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual(0, rv)
         self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file)
@@ -24,7 +24,7 @@ class TestSnvConcordance(JoinxTest, unittest.TestCase):
 
         params = [ "snv-concordance", "-o", output_file ]
         params.extend(input_files)
-        rv, err = self.joinx(params)
+        rv, err = self.execute(params)
         self.assertEqual(0, rv)
         self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file)
