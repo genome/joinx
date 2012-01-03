@@ -51,6 +51,22 @@ bool GenotypeCall::phased() const {
     return _phased;
 }
 
+bool GenotypeCall::heterozygous() const {
+    return diploid() && _indexSet.size() == 2;
+}
+
+bool GenotypeCall::homozygous() const {
+    return diploid() && _indexSet.size() == 1;   //if only one unique allele then homozygous  
+}
+
+bool GenotypeCall::diploid() const {
+    return _indices.size() == 2;
+}
+
+bool GenotypeCall::reference() const {
+    return _indexSet.size() == 1 && _indexSet.count(0);
+}
+
 const uint32_t& GenotypeCall::operator[](size_type idx) const {
     return _indices[idx];    
 }
@@ -58,6 +74,11 @@ const uint32_t& GenotypeCall::operator[](size_type idx) const {
 const vector<uint32_t>& GenotypeCall::indices() const {
     return _indices;
 }
+
+const set<uint32_t>& GenotypeCall::indexSet() const {
+    return _indexSet;
+}
+
 bool GenotypeCall::operator==(const GenotypeCall& rhs) const {
     if(_phased == rhs._phased) {
         if(_phased) {

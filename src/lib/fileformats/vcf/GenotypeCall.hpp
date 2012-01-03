@@ -29,13 +29,14 @@ public:
     bool operator<(const GenotypeCall& rhs) const;
 
     bool phased() const;
-    bool transition(const Entry& e) const;
-    bool transversion(const Entry& e) const;
     bool heterozygous() const;
     bool homozygous() const;
+    bool diploid() const;
+    bool reference() const;
 
     const std::vector<uint32_t>& indices() const;
     const std::string& string() const;
+    const std::set<uint32_t>& indexSet() const;
 
 
 protected:
