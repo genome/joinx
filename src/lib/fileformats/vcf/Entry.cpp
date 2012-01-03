@@ -14,6 +14,7 @@
 #include <iterator>
 #include <limits>
 #include <stdexcept>
+#include <utility>
 
 using boost::format;
 using boost::lexical_cast;
@@ -78,8 +79,22 @@ Entry::Entry()
 {
 }
 
-Entry::Entry(Entry&& e) throw () {
-    swap(e);
+Entry::Entry(Entry&& e) throw ()
+    : _header(e._header)
+    , _chrom(std::move(e._chrom))
+    , _pos(e._pos)
+    , _identifiers(std::move(e._identifiers))
+    , _ref(std::move(e._ref))    
+    , _alt(std::move(e._alt))
+    , _qual(e._qual)
+    , _failedFilters(std::move(e._failedFilters))
+    , _info(std::move(e._info))
+    , _sampleString(std::move(e._sampleString))
+    , _parsedSamples(e._parsedSamples)
+    , _sampleData(std::move(e._sampleData))
+    , _start(e._start)
+    , _stop(e._stop)
+{
 }
 
 Entry::Entry(const Header* h)
@@ -106,14 +121,14 @@ Entry::Entry(EntryMerger&& merger)
     : _header(merger.mergedHeader())
     , _chrom(merger.chrom())
     , _pos(merger.pos())
+    , _identifiers(std::move(merger.identifiers()))
     , _ref(merger.ref())
     , _qual(merger.qual())
+    , _failedFilters(std::move(merger.failedFilters()))
     , _parsedSamples(true)
     , _start(0)
     , _stop(0)
 {
-    std::swap(_identifiers, merger.identifiers());
-    std::swap(_failedFilters, merger.failedFilters());
     merger.setInfo(_info);
     merger.setAltAndGenotypeData(_alt, _sampleData);
     setPositions();

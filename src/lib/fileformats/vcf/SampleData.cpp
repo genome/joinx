@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <utility>
 
 using boost::format;
 using namespace std::placeholders;
@@ -24,6 +25,13 @@ namespace {
 
 SampleData::SampleData()
     : _header(0)
+{
+}
+
+SampleData::SampleData(SampleData&& other)
+    : _header(other._header)
+    , _format(std::move(other._format))
+    , _values(std::move(other._values))
 {
 }
 
