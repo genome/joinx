@@ -276,3 +276,53 @@ TEST_F(TestVcfEntry, addFilter) {
     ASSERT_NO_THROW(e1.addFilter(string("sq50")));
     ASSERT_FALSE(e1.toString() == v[0].toString());
 }
+
+// this is an efficiency test
+// it makes sure that move semantics are working properly (data is stolen from
+// rvalue references in the move constructor)
+TEST_F(TestVcfEntry, move) {
+    Entry& e(v[0]);
+    // we need to have data in every field for this test, so let's add a filter
+    e.addFilter("s50");
+
+    char const* addrChrom = e.chrom().data();
+    char const* addrRef = e.ref().data();
+    string const* addrAlt = e.alt().data();
+    string const* addrFilter = &*e.failedFilters().begin();
+    Entry::CustomValueMap::value_type const* addrInfo = &*e.info().begin(); 
+
+    // nested sample data addresses
+    SampleData const& sd = e.sampleData();
+    CustomType const* const* addrFormat = sd.format().data();
+    SampleData::MapType::value_type const* addrSampleValues = &*sd.begin();
+
+    // primitive types are copied, not moved. we still check that they get
+    // set properly though.
+    uint64_t origPos = e.pos();
+    int64_t origStart = e.start();
+    int64_t origStop = e.stop();
+    double origQual = e.qual();
+
+    // do the move and check that the resulting output strings are the same
+    // first
+    stringstream orig;
+    orig << e;
+    Entry e2(std::move(e));
+    stringstream moved;
+    moved << e2;
+    ASSERT_EQ(orig.str(), moved.str());
+
+    // now check that the addresses of data members of e2 have been stolen
+    // from the original e
+    ASSERT_EQ(addrChrom, e2.chrom().data());
+    ASSERT_EQ(origPos, e2.pos());
+    ASSERT_EQ(addrRef, e2.ref().data());
+    ASSERT_EQ(addrAlt, e2.alt().data());
+    ASSERT_EQ(origQual, e2.qual());
+    ASSERT_EQ(addrFilter, &*e2.failedFilters().begin());
+    ASSERT_EQ(addrInfo, &*e2.info().begin());
+    ASSERT_EQ(addrFormat, e2.sampleData().format().data());
+    ASSERT_EQ(addrSampleValues, &*e2.sampleData().begin());
+    ASSERT_EQ(origStart, e2.start());
+    ASSERT_EQ(origStop, e2.stop());
+}
