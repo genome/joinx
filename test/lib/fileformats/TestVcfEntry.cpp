@@ -182,6 +182,12 @@ TEST_F(TestVcfEntry, swap) {
 }
 
 TEST_F(TestVcfEntry, samplesWithData) {
+    Entry e(&_header,
+        "22\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\t.\tGT\t.\t.\t0|1\n"
+        );
+    ASSERT_EQ(1, e.sampleData().size());
+    ASSERT_EQ(1, e.sampleData().samplesWithData());
+
     ASSERT_EQ(3, v[0].sampleData().samplesWithData());
     ASSERT_EQ(2, v[1].sampleData().samplesWithData());
     ASSERT_EQ(3, v[2].sampleData().samplesWithData());

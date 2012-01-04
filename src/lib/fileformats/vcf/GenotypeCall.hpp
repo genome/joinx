@@ -15,6 +15,8 @@ public:
     typedef std::vector<uint32_t>::size_type size_type;
     typedef std::vector<uint32_t>::const_iterator const_iterator;
 
+    static GenotypeCall Null;
+
     GenotypeCall();
     explicit GenotypeCall(const std::string& call);
 

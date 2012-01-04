@@ -176,12 +176,17 @@ bool SampleData::hasGenotypeData() const {
     return !_format.empty() && _format.front()->id() == "GT";
 }
 
-GenotypeCall SampleData::genotype(uint32_t sampleIdx) const {
+GenotypeCall const& SampleData::genotype(uint32_t sampleIdx) const {
     const string* gtString(0);
     const CustomValue* v = get(sampleIdx, "GT");
     if (!v || v->empty() || (gtString = v->get<string>(0)) == 0 || gtString->empty())
-        return GenotypeCall();
-    return GenotypeCall(*gtString);
+        return GenotypeCall::Null;
+
+    auto inserted = _gtCache.insert(make_pair(*gtString, GenotypeCall()));
+    // if it wasn't already in the cache
+    if (inserted.second)
+        inserted.first->second = GenotypeCall(*gtString);
+    return inserted.first->second;
 }
 
 uint32_t SampleData::samplesWithData() const {
@@ -244,7 +249,6 @@ void SampleData::removeLowDepthGenotypes(uint32_t lowDepth) {
         if (i->second[offset].empty() || (v = i->second[offset].get<int64_t>(0)) == NULL || *v < lowDepth)
             i->second.clear();
     }
-
 }
 
 END_NAMESPACE(Vcf)

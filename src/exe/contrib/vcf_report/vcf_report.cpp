@@ -1,3 +1,4 @@
+#include "common/MutationSpectrum.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/StreamHandler.hpp"
 #include "fileformats/vcf/CustomType.hpp"
@@ -32,7 +33,7 @@ int main(int argc, char** argv) {
 
         uint32_t totalSites = 0;
         Vcf::Entry entry;
-        Metrics::SampleMetrics sampleMetrics;
+        Metrics::SampleMetrics sampleMetrics(reader->header().sampleCount());
         while (reader->next(entry)) {
             Metrics::EntryMetrics siteMetrics;
             if(entry.failedFilters().size() != 1 || entry.failedFilters().find("PASS") == entry.failedFilters().end())
@@ -42,8 +43,12 @@ int main(int argc, char** argv) {
                 continue;
             siteMetrics.processEntry(entry);
             sampleMetrics.processEntry(entry,siteMetrics);
-            map< Vcf::GenotypeCall, uint32_t>  distribution = siteMetrics.genotypeDistribution();
-            std::vector<uint32_t> alleles = siteMetrics.allelicDistribution();
+
+// commenting these next 2 lines out since nothing is using them right now (tabbott)
+//            map< Vcf::GenotypeCall, uint32_t>  distribution = siteMetrics.genotypeDistribution();
+//            std::vector<uint32_t> alleles = siteMetrics.allelicDistribution();
+
+
             //cout << entry.chrom() << "\t" << entry.pos();
             /*
             for( auto i = distribution.begin(); i != distribution.end(); ++i) {
@@ -86,15 +91,17 @@ int main(int argc, char** argv) {
             cout << "\t" << sampleMetrics.numVeryRareVariants(i);
             cout << "\t" << sampleMetrics.numRareVariants(i);
             cout << "\t" << sampleMetrics.numCommonVariants(i);
-            cout << "\t" << sampleMetrics.numTransitions(i);
-            cout << "\t" << sampleMetrics.numTransversions(i);
-            double ratio = sampleMetrics.transitionTransversionRatio(i);
-            if(ratio != std::numeric_limits<double>::quiet_NaN() && ratio < std::numeric_limits<double>::infinity()) {
-                cout << "\t" << sampleMetrics.transitionTransversionRatio(i) << endl;
+            MutationSpectrum const& spectrum = sampleMetrics.mutationSpectrum(i);
+            cout << "\t" << spectrum.transitions();
+            cout << "\t" << spectrum.transversions();
+            double ratio = spectrum.transitionTransversionRatio();
+            if(ratio != std::numeric_limits<double>::infinity()) {
+                cout << "\t" << ratio;
             }
             else {
-                cout << "\tNA" << endl;
+                cout << "\tNA";
             }
+            cout << "\n";
         }
         //cout << "Total number of segregating sites: " << totalSites << endl;
     /*} catch (const exception& e) {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GenotypeCall.hpp"
 #include "common/namespaces.hpp"
 
 #include <cstdint>
@@ -12,7 +13,6 @@ BEGIN_NAMESPACE(Vcf)
 
 class CustomType;
 class CustomValue;
-class GenotypeCall;
 class Header;
 
 class SampleData {
@@ -47,7 +47,7 @@ public:
 
     // returns true if GT is the first FORMAT entry
     bool hasGenotypeData() const;
-    GenotypeCall genotype(uint32_t sampleIdx) const;
+    GenotypeCall const& genotype(uint32_t sampleIdx) const;
 
     uint32_t samplesWithData() const;
     int32_t samplesFailedFilter() const;
@@ -58,6 +58,8 @@ protected:
     Header const* _header;
     std::vector<CustomType const*> _format;
     MapType _values;
+
+    mutable std::map<std::string, GenotypeCall> _gtCache;
 };
 
 END_NAMESPACE(Vcf)

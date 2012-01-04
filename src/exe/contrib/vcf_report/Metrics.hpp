@@ -1,11 +1,16 @@
 #pragma once
 
+#include "common/MutationSpectrum.hpp"
 #include "common/namespaces.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/GenotypeCall.hpp"
 
+#include <array>
+#include <cstddef>
 #include <map>
 #include <vector>
+
+class MutationSpectrum;
 
 BEGIN_NAMESPACE(Metrics)
 
@@ -16,53 +21,54 @@ public:
     void calculateGenotypeDistribution(Vcf::Entry& entry);
     void calculateAllelicDistribution();
     void calculateMutationSpectrum(Vcf::Entry& entry);
-    bool singleton(const Vcf::GenotypeCall& geno);
-    double minorAlleleFrequency();
+    double minorAlleleFrequency() const;
 
     const std::map<std::string,uint32_t>& mutationSpectrum() const;
     const std::map<std::string,uint32_t>& singletonMutationSpectrum() const;
-    const std::map<Vcf::GenotypeCall,uint32_t>& genotypeDistribution() const;
+    const std::map<Vcf::GenotypeCall const*,uint32_t>& genotypeDistribution() const;
     const std::vector<uint32_t>& allelicDistribution() const;
     
+    bool singleton(const Vcf::GenotypeCall* geno) const;
+
 protected:
+    uint32_t _maxGtIdx;
     std::map<std::string,uint32_t> _mutationSpectrum;
     std::map<std::string,uint32_t> _singletonMutationSpectrum;
-    std::map<Vcf::GenotypeCall,uint32_t> _genotypeDistribution;
+    std::map<Vcf::GenotypeCall const*,uint32_t> _genotypeDistribution;
     std::vector<uint32_t> _allelicDistribution;
 };
 
 class SampleMetrics {
 public:
-    SampleMetrics();
+    SampleMetrics(size_t sampleCount);
     void processEntry(Vcf::Entry& e, EntryMetrics& m);
-    uint32_t numHetVariants(uint32_t index);
-    uint32_t numHomVariants(uint32_t index);
-    uint32_t numRefCalls(uint32_t index);
-    uint32_t numFilteredCalls(uint32_t index);
-    uint32_t numMissingCalls(uint32_t index);
-    uint32_t numNonDiploidCalls(uint32_t index);
-    uint32_t numSingletonVariants(uint32_t index);
-    uint32_t numVeryRareVariants(uint32_t index);
-    uint32_t numRareVariants(uint32_t index);
-    uint32_t numCommonVariants(uint32_t index);
-    uint32_t numTransitions(uint32_t index);
-    uint32_t numTransversions(uint32_t index);
-    double transitionTransversionRatio(uint32_t index);
+    uint32_t numHetVariants(uint32_t index) const;
+    uint32_t numHomVariants(uint32_t index) const;
+    uint32_t numRefCalls(uint32_t index) const;
+    uint32_t numFilteredCalls(uint32_t index) const;
+    uint32_t numMissingCalls(uint32_t index) const;
+    uint32_t numNonDiploidCalls(uint32_t index) const;
+    uint32_t numSingletonVariants(uint32_t index) const;
+    uint32_t numVeryRareVariants(uint32_t index) const;
+    uint32_t numRareVariants(uint32_t index) const;
+    uint32_t numCommonVariants(uint32_t index) const;
+    MutationSpectrum const& mutationSpectrum(uint32_t index) const;
+
 protected:
+    uint64_t _totalSites;
     //per-sample metrics
     std::vector<uint32_t> _perSampleHetVariants;
     std::vector<uint32_t> _perSampleHomVariants;
     std::vector<uint32_t> _perSampleRefCall;
     std::vector<uint32_t> _perSampleFilteredCall;
-    std::vector<uint32_t> _perSampleMissingCall;
+    std::vector<uint32_t> _perSampleCalls;
     std::vector<uint32_t> _perSampleNonDiploidCall;
     std::vector<uint32_t> _perSampleSingletons;
     std::vector<uint32_t> _perSampleVeryRareVariants;
     std::vector<uint32_t> _perSampleRareVariants;
     std::vector<uint32_t> _perSampleCommonVariants;
     std::vector<uint32_t> _perSampleDbSnp;
-    std::vector<map<std::string,uint32_t>> _perSampleMutationSpectrum;
-
+    std::vector<MutationSpectrum> _perSampleMutationSpectrum;
 };
 
 

@@ -22,7 +22,7 @@ uint32_t samplesWithNonRefGenotypes(const Vcf::Entry& entry) {
         return 0;
 
     for (uint32_t i = 0; i < entry.header().sampleCount(); ++i) {
-        Vcf::GenotypeCall gt = entry.sampleData().genotype(i);
+        Vcf::GenotypeCall const& gt = entry.sampleData().genotype(i);
         if (gt.empty())
             continue;
 

@@ -4,6 +4,8 @@
 
 BEGIN_NAMESPACE(Vcf)
 
+GenotypeCall GenotypeCall::Null;
+
 GenotypeCall::GenotypeCall()
     : _phased(false)
 {

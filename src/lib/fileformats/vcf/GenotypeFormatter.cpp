@@ -93,7 +93,7 @@ string GenotypeFormatter::renumberGT(
     const std::vector<size_t>& alleleIndices
     ) const
 {
-    GenotypeCall oldGT = e->sampleData().genotype(sampleIdx);
+    GenotypeCall const& oldGT = e->sampleData().genotype(sampleIdx);
     if (oldGT.empty())
         return ".";
 
