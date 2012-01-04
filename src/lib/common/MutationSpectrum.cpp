@@ -6,24 +6,36 @@
 
 using boost::format;
 
-MutationSpectrum::MutationSpectrum() {
-    _indexTable.fill(-1);
-    _mtx.fill(0);
-    _indexTable['A'] = 0;
-    _indexTable['C'] = 1;
-    _indexTable['G'] = 2;
-    _indexTable['T'] = 3;
-    _indexTable['a'] = 0;
-    _indexTable['c'] = 1;
-    _indexTable['g'] = 2;
-    _indexTable['t'] = 3;
+namespace {
+    int const _indexTable[256] = {
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1,  0, -1,  1, -1, -1, -1,  2, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1,  3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1,  0, -1,  1, -1, -1, -1,  2, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1,  3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+    };
 }
 
-uint64_t& MutationSpectrum::operator()(char from, char to) {
+MutationSpectrum::MutationSpectrum() {
+    _mtx.fill(0);
+}
+
+uint64_t& MutationSpectrum::operator()(uint8_t from, uint8_t to) {
     return _mtx[index(from, to)];
 }
 
-uint64_t const& MutationSpectrum::operator()(char from, char to) const{
+uint64_t const& MutationSpectrum::operator()(uint8_t from, uint8_t to) const{
     return _mtx[index(from, to)];
 }
 
@@ -45,9 +57,9 @@ double MutationSpectrum::transitionTransversionRatio() const {
     return ts/double(tv);
 }
 
-int MutationSpectrum::index(char from, char to) const {
-    int fromIdx = _indexTable[from];
-    int toIdx = _indexTable[to];
+int MutationSpectrum::index(uint8_t from, uint8_t to) const {
+    int fromIdx = _indexTable[int(from)];
+    int toIdx = _indexTable[int(to)];
     if (fromIdx < 0 || toIdx < 0)
         throw std::runtime_error(str(format("Invalid alleles for mutation spectrum: %1%->%2%") %from %to));
     return fromIdx*4+toIdx;

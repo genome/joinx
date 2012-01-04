@@ -1,6 +1,7 @@
 #include "common/MutationSpectrum.hpp"
 
 #include <gtest/gtest.h>
+#include <limits>
 #include <stdexcept>
 
 TEST(TestMutationSpectrum, spectrum) {
@@ -15,12 +16,34 @@ TEST(TestMutationSpectrum, spectrum) {
     spectrum('C', 'A') = 4;
     spectrum('C', 'G') = 5;
 
-    ASSERT_EQ(9, spectrum.transitions()); 
-    ASSERT_EQ(14, spectrum.transversions()); 
+    ASSERT_EQ(9, spectrum.transitions());
+    ASSERT_EQ(14, spectrum.transversions());
+    ASSERT_NEAR(9.0/14.0, spectrum.transitionTransversionRatio(), 1e-14);
+}
 
-    // errors
-    ASSERT_THROW(spectrum('X', 'A'), std::runtime_error);
-    ASSERT_THROW(spectrum('A', 'N'), std::runtime_error);
-    ASSERT_THROW(spectrum('p', 'A'), std::runtime_error);
-    ASSERT_THROW(spectrum('A', 'q'), std::runtime_error);
+TEST(TestMutationSpectrum, infiniteRatio) {
+    MutationSpectrum spectrum;
+    double infinity = std::numeric_limits<double>::infinity();
+    ASSERT_EQ(infinity, spectrum.transitionTransversionRatio());
+    spectrum('A', 'G') = 1;
+    ASSERT_EQ(infinity, spectrum.transitionTransversionRatio());
+    spectrum('A', 'C') = 1;
+    ASSERT_EQ(1.0, spectrum.transitionTransversionRatio());
+}
+
+TEST(TestMutationSpectrum, invalidAlleles) {
+    MutationSpectrum spectrum;
+    for (int i = 0; i < 256; ++i) {
+        switch (i) {
+            case 'A': case 'C': case 'G': case 'T':
+            case 'a': case 'c': case 'g': case 't':
+                break;
+            default:
+                ASSERT_THROW(spectrum(i, 'A'), std::runtime_error)
+                    << "char was: " << char(i) << "(" << i << ")";
+                ASSERT_THROW(spectrum('A', i), std::runtime_error)
+                    << "char was: " << char(i) << "(" << i << ")";
+                break;
+        }
+    }
 }

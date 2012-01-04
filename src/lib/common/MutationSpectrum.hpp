@@ -10,8 +10,8 @@ class MutationSpectrum {
 public:
     MutationSpectrum();
 
-    uint64_t& operator()(char from, char to);
-    uint64_t const& operator()(char from, char to) const;
+    uint64_t& operator()(uint8_t from, uint8_t to);
+    uint64_t const& operator()(uint8_t from, uint8_t to) const;
 
     uint64_t transitions() const; 
     uint64_t transversions() const; 
@@ -19,9 +19,8 @@ public:
     double transitionTransversionRatio() const;
 
 protected:
-    int index(char from, char to) const;
+    int index(uint8_t from, uint8_t to) const;
 
 protected:
-    std::array<int, 255> _indexTable;
     std::array<uint64_t, 16> _mtx;
 };
