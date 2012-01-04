@@ -3,6 +3,13 @@
 #include <string>
 #include <cassert>
 
+namespace {
+    const int ALLELE_A = 1;
+    const int ALLELE_C = 2;
+    const int ALLELE_G = 4;
+    const int ALLELE_T = 8;
+}
+
 inline const char* translateIub(const std::string& base) {
     assert(base.size() == 1);
 
@@ -30,10 +37,10 @@ inline unsigned alleles2bin(const char* alleles) {
     unsigned rv = 0;
     while (*alleles) {
         switch(*alleles++) {
-            case 'A': rv |= 1; break;
-            case 'C': rv |= 2; break;
-            case 'G': rv |= 4; break;
-            case 'T': rv |= 8; break;
+            case 'A': rv |= ALLELE_A; break;
+            case 'C': rv |= ALLELE_C; break;
+            case 'G': rv |= ALLELE_G; break;
+            case 'T': rv |= ALLELE_T; break;
             default: break;
         }
     }

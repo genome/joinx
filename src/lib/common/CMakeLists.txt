@@ -6,6 +6,8 @@ set(SOURCES
     CigarString.cpp
     CigarString.hpp
     Iub.hpp
+    MutationSpectrum.cpp
+    MutationSpectrum.hpp
     ProgramVersion.hpp
     Region.cpp
     Region.hpp
