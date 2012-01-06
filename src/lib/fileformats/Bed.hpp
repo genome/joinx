@@ -32,6 +32,7 @@ public:
 
     Bed();
     // for move semantics
+    Bed(Bed const& b);
     Bed(Bed&& b);
     Bed(const std::string& chrom, int64_t start, int64_t stop);
     Bed(const std::string& chrom, int64_t start, int64_t stop, const ExtraFieldsType& extraFields);

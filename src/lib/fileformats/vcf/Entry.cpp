@@ -79,6 +79,24 @@ Entry::Entry()
 {
 }
 
+Entry::Entry(Entry const& e) throw ()
+    : _header(e._header)
+    , _chrom(e._chrom)
+    , _pos(e._pos)
+    , _identifiers(e._identifiers)
+    , _ref(e._ref)    
+    , _alt(e._alt)
+    , _qual(e._qual)
+    , _failedFilters(e._failedFilters)
+    , _info(e._info)
+    , _sampleString(e._sampleString)
+    , _parsedSamples(e._parsedSamples)
+    , _sampleData(e._sampleData)
+    , _start(e._start)
+    , _stop(e._stop)
+{
+}
+
 Entry::Entry(Entry&& e) throw ()
     : _header(e._header)
     , _chrom(std::move(e._chrom))

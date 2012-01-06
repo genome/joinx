@@ -3,6 +3,7 @@
 #include <set>
 #include <vector>
 #include <functional>
+#include <utility>
 
 namespace {
     template<typename StreamPtr>
@@ -54,7 +55,7 @@ public:
     void execute() {
         ValueType v;
         while (nextSorted(v))
-            _output(v);
+            _output(std::move(v));
     }
 
 protected:

@@ -28,6 +28,13 @@ SampleData::SampleData()
 {
 }
 
+SampleData::SampleData(SampleData const& other)
+    : _header(other._header)
+    , _format(other._format)
+    , _values(other._values)
+{
+}
+
 SampleData::SampleData(SampleData&& other)
     : _header(other._header)
     , _format(std::move(other._format))

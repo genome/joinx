@@ -49,6 +49,7 @@ public:
 
     // member functions
     Entry();
+    Entry(Entry const& e) throw();
     // for move semantics
     Entry(Entry&& e) throw();
     explicit Entry(const Header* h);

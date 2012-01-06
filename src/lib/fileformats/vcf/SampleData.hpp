@@ -23,6 +23,7 @@ public:
     typedef MapType::const_iterator const_iterator;
 
     SampleData();
+    SampleData(SampleData const& other);
     SampleData(SampleData&& other);
     SampleData(Header const* h, std::string const& raw);
     SampleData(Header const* h, FormatType&& fmt, MapType&& values);

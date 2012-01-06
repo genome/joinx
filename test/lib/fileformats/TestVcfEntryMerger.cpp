@@ -10,6 +10,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace std;
@@ -128,7 +129,7 @@ TEST_F(TestVcfEntryMerger, merge) {
     ASSERT_EQ("G", merger.ref());
     ASSERT_EQ(Entry::MISSING_QUALITY, merger.qual());
 
-    Entry mergedEntry(merger);
+    Entry mergedEntry(std::move(merger));
 
     // check the simple fields: chrom, pos, etc.
     ASSERT_EQ("20", mergedEntry.chrom());
@@ -199,13 +200,13 @@ TEST_F(TestVcfEntryMerger, mergeWrongPos) {
 // Test merging when only 1 entry has a valid quality. The score should be preserved
 TEST_F(TestVcfEntryMerger, singleQual) {
     EntryMerger merger(*_defaultMs, &_mergedHeader, &*_snvs.begin(), &*(_snvs.begin()+1));
-    Entry e(merger);
+    Entry e(std::move(merger));
     ASSERT_EQ(29, e.qual());
 }
 
 TEST_F(TestVcfEntryMerger, mergeAlleles) {
     EntryMerger merger(*_defaultMs, &_mergedHeader, &*_indels.begin(), &*_indels.end());
-    Entry e(merger);
+    Entry e(std::move(merger));
     ASSERT_EQ(2, e.alt().size());
     ASSERT_EQ("TAG", e.alt()[0]);
     ASSERT_EQ("T", e.alt()[1]);
@@ -218,13 +219,13 @@ TEST_F(TestVcfEntryMerger, stripFilters) {
     Entry::parseLine(&_headers[0], t1, entries[0]);
     Entry::parseLine(&_headers[1], t2, entries[1]);
     EntryMerger merger(*_defaultMs, &_mergedHeader, entries, entries+2);
-    Entry merged(merger);
+    Entry merged(std::move(merger));
     ASSERT_EQ(2, merged.failedFilters().size());
 
     MergeStrategy ms2(*_defaultMs);
     ms2.clearFilters(true);
     EntryMerger merger2(ms2, &_mergedHeader, entries, entries+2);
-    Entry e(merger2);
+    Entry e(std::move(merger2));
     ASSERT_TRUE(e.failedFilters().empty());
     ASSERT_EQ(Entry::MISSING_QUALITY, merged.qual());
 }
@@ -236,7 +237,7 @@ TEST_F(TestVcfEntryMerger, GTfieldAlwaysFirst) {
     Entry::parseLine(&_headers[0], t1, entries[0]);
     Entry::parseLine(&_headers[1], t2, entries[1]);
     EntryMerger merger(*_defaultMs, &_mergedHeader, entries, entries+2);
-    Entry merged(merger);
+    Entry merged(std::move(merger));
     ASSERT_EQ(4, merged.sampleData().format().size());
     ASSERT_EQ("GT", merged.sampleData().format()[0]->id());
     ASSERT_EQ(Entry::MISSING_QUALITY, merged.qual());

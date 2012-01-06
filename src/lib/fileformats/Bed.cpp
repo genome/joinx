@@ -19,10 +19,25 @@ Bed::Bed()
     , _stop(0)
 {}
 
-Bed::Bed(Bed&& b) {
-    swap(b);
+Bed::Bed(const Bed& b)
+    : _chrom(b._chrom)
+    , _start(b._start)
+    , _stop(b._stop)
+    , _length(b._length)
+    , _extraFields(b._extraFields)
+    , _line(b._line)
+{
 }
 
+Bed::Bed(Bed&& b)
+    : _chrom(std::move(b._chrom))
+    , _start(b._start)
+    , _stop(b._stop)
+    , _length(b._length)
+    , _extraFields(std::move(b._extraFields))
+    , _line(std::move(b._line))
+{
+}
 
 Bed::Bed(const std::string& chrom, int64_t start, int64_t stop)
     : _chrom(chrom)

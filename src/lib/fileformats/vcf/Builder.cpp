@@ -26,19 +26,26 @@ Builder::~Builder() {
     flush();
 }
 
-void Builder::push(const Entry& e) {
-    _entries.push_back(std::move(e));
-}
-
 void Builder::operator()(const Entry& e) {
     e.header();
     if (_entries.empty() || canMerge(e, _entries[0])) {
-        push(e);
+        _entries.push_back(e);
         return;
     }
 
     flush();
-    push(e);
+    _entries.push_back(e);
+}
+
+void Builder::operator()(Entry&& e) {
+    e.header();
+    if (_entries.empty() || canMerge(e, _entries[0])) {
+        _entries.push_back(std::move(e));
+        return;
+    }
+
+    flush();
+    _entries.push_back(std::move(e));
 }
 
 void Builder::output(const Entry* begin, const Entry* end) const {

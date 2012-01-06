@@ -19,12 +19,12 @@ public:
     ~Builder();
 
     void operator()(const Entry& e);
+    void operator()(Entry&& e);
     void flush();
 
     static bool canMerge(const Entry& a, const Entry& b);
 
 protected:
-    void push(const Entry& e);
     std::vector<Entry>::iterator partition();
     bool canMergeWithMaxRef(const Entry& e) const;
     void output(const Entry* begin, const Entry* end) const;
