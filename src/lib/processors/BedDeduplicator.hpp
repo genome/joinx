@@ -4,6 +4,7 @@
 #include "fileformats/Variant.hpp"
 
 #include <functional>
+#include <set>
 #include <vector>
 
 template<typename OutputType>
@@ -42,25 +43,26 @@ public:
     }
 
     bool cache(const ValueType& value) {
-        if (_cache.empty()) {
+        if (_cache.empty() || posCmp(_cache.front(), value)) {
             _cache.push_back(value);
             return true;
         }
-
-        if (!posCmp(_cache.front(), value)) {
-            return false;
-        }
-
-        if (!haveAlleles(value)) {
-            _cache.push_back(value);
-        }
-
-        return true;
+        return false;
     }
 
     void flush() {
-        for (auto i = _cache.begin(); i != _cache.end(); ++i)
-            _out(*i);
+        std::set<std::string> seen;
+        for (auto i = _cache.begin(); i != _cache.end(); ++i) {
+            if (i->extraFields().empty()) {
+                auto inserted = seen.insert("");
+                if (inserted.second)
+                    _out(*i);
+            } else {
+                auto inserted = seen.insert(i->extraFields()[0]);
+                if (inserted.second)
+                    _out(*i);
+            }
+        }
         _cache.clear();
     }
 
