@@ -138,7 +138,7 @@ void SortCommand::exec() {
 
     if (type == BED) {
         int extraFields = _unique ? 1 : 0;
-        BedOpenerType bedOpener = bind(&openBed, _1, 0);
+        BedOpenerType bedOpener = bind(&openBed, _1, extraFields);
         typedef OutputWriter<Bed> WriterType;
         WriterType writer(*out);
         vector<BedReader::ptr> readers;
