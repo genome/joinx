@@ -23,12 +23,21 @@ class CigarString {
 public:
 // types
     struct Op {
+        Op() {}
+        Op(uint32_t length, CigarOpType type)
+            : length(length)
+            , type(type)
+        {
+        }
+
         uint32_t length;
         CigarOpType type;
         bool operator==(const Op& rhs) const {
             return length == rhs.length && type == rhs.type;
         }
     };
+
+    typedef std::deque<Op>::const_iterator const_iterator;
 
 // functions
     static char translate(CigarOpType op);
@@ -57,6 +66,9 @@ public:
     CigarString structural() const;
 
     const Op& operator[](const uint32_t idx) const;
+
+    const_iterator begin() const;
+    const_iterator end() const;
 
 protected:
     std::deque<Op> _ops;

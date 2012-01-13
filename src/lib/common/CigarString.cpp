@@ -290,6 +290,15 @@ CigarString CigarString::structural() const {
     return rv;
 }
 
+CigarString::const_iterator CigarString::begin() const {
+    return _ops.begin();
+}
+
+CigarString::const_iterator CigarString::end() const {
+    return _ops.end();
+}
+
+
 ostream& operator<<(ostream& s, const CigarString::Op& op) {
     s << op.length << CigarString::translate(op.type);
     return s;
