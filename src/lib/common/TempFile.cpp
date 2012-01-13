@@ -60,7 +60,7 @@ void TempFile::_mkstemp() {
     }
 
     if (!_stream.is_open())
-        throw runtime_error(str(format("Failed to create temp file with template %1%: %s") %_path %strerror(errno)));
+        throw runtime_error(str(format("Failed to create temp file with template %1%: %2%") %_path %strerror(errno)));
 
     if (_mode == ANON) {
         bfs::remove(_path);
