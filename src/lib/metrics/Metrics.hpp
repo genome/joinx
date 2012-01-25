@@ -23,8 +23,8 @@ public:
     void calculateMutationSpectrum(Vcf::Entry& entry);
     double minorAlleleFrequency() const;
 
-    const std::map<std::string,uint32_t>& mutationSpectrum() const;
-    const std::map<std::string,uint32_t>& singletonMutationSpectrum() const;
+    const MutationSpectrum& mutationSpectrum() const;
+    const MutationSpectrum& singletonMutationSpectrum() const;
     const std::map<Vcf::GenotypeCall const*,uint32_t>& genotypeDistribution() const;
     const std::vector<uint32_t>& allelicDistribution() const;
     
@@ -32,8 +32,8 @@ public:
 
 protected:
     uint32_t _maxGtIdx;
-    std::map<std::string,uint32_t> _mutationSpectrum;
-    std::map<std::string,uint32_t> _singletonMutationSpectrum;
+    MutationSpectrum _mutationSpectrum;
+    MutationSpectrum _singletonMutationSpectrum;
     std::map<Vcf::GenotypeCall const*,uint32_t> _genotypeDistribution;
     std::vector<uint32_t> _allelicDistribution;
 };

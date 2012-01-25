@@ -79,36 +79,37 @@ void EntryMetrics::calculateAllelicDistribution() {
 }
 
 void EntryMetrics::calculateMutationSpectrum(Vcf::Entry& entry) {
-    if(entry.ref().size() != 1) {
-        throw runtime_error(str(format("Unable to calculate the mutation spectrum on non-snp positions at %1%\t%2%\t%3%") % entry.chrom() % entry.pos() % entry.ref()));
-    }
     locale loc;
     std::string ref(entry.ref());
-    toupper(ref[0],loc);
+
     bool complement = false;
-    if(ref == "G" || ref == "T") {
-        complement = true;
-        ref = Sequence::reverseComplement(ref);
-    }
-    for(auto geno = _genotypeDistribution.begin(); geno != _genotypeDistribution.end(); ++geno) {
-        std::string mutationClass = ref + "->"; //this feels a little too perly. too bad.
-        for(auto i = geno->first->indexSet().begin(); i != geno->first->indexSet().end(); ++i) {
-            if(*i == 0) //it's ref
-                continue;
 
-            std::string variant( entry.alt()[*i - 1] );
-            //cerr << variant;
-            toupper(variant[0],loc);
+    if(entry.ref().size() == 1) {
+        toupper(ref[0],loc);
 
-            if(complement) {
-                variant = Sequence::reverseComplement(variant);
-            }
-            mutationClass += variant;
-            if(this->singleton((*geno).first)) {
-               _singletonMutationSpectrum[mutationClass] += (*geno).second; //this is probably not right as it would double count homozygotes
-            }
-            else {
-                _mutationSpectrum[mutationClass] += (*geno).second;
+        if(ref == "G" || ref == "T") {
+            complement = true;
+            ref = Sequence::reverseComplement(ref);
+        }
+
+        for(auto geno = _genotypeDistribution.begin(); geno != _genotypeDistribution.end(); ++geno) {
+            for(auto i = geno->first->indexSet().begin(); i != geno->first->indexSet().end(); ++i) {
+                if(*i == 0) //it's ref
+                    continue;
+
+                std::string variant( entry.alt()[*i - 1] );
+                if (variant.size() != 1)
+                    throw runtime_error(str(format("Invalid variant for ref entry %1%: %2%") %ref %variant));
+                toupper(variant[0],loc);
+                if(complement) {
+                    variant = Sequence::reverseComplement(variant);
+                }
+                if(singleton((*geno).first)) {
+                    _singletonMutationSpectrum(ref[0],variant[0]) += (*geno).second;
+                }
+                else {
+                    _mutationSpectrum(ref[0],variant[0]) += (*geno).second;
+                }
             }
         }
     }
@@ -130,11 +131,11 @@ void EntryMetrics::processEntry(Vcf::Entry& entry) {
     calculateMutationSpectrum(entry);
 }
 
-const std::map<std::string,uint32_t>& EntryMetrics::mutationSpectrum() const {
+const MutationSpectrum& EntryMetrics::mutationSpectrum() const {
     return _mutationSpectrum;
 }
 
-const std::map<std::string,uint32_t>& EntryMetrics::singletonMutationSpectrum() const {
+const MutationSpectrum& EntryMetrics::singletonMutationSpectrum() const {
     return _singletonMutationSpectrum;
 }
 
