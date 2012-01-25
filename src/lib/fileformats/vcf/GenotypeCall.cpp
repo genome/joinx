@@ -81,6 +81,10 @@ const set<uint32_t>& GenotypeCall::indexSet() const {
     return _indexSet;
 }
 
+const string& GenotypeCall::string() const {
+    return _string;
+}
+
 bool GenotypeCall::operator==(const GenotypeCall& rhs) const {
     if(_phased == rhs._phased) {
         if(_phased) {
