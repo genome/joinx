@@ -11,6 +11,7 @@
 #include "VcfFilterCommand.hpp"
 #include "VcfSiteFilterCommand.hpp"
 #include "VcfMergeCommand.hpp"
+#include "VcfReportCommand.hpp"
 
 #include "common/ProgramVersion.hpp"
 
@@ -35,6 +36,7 @@ JoinX::JoinX(int argc, char** argv)
     registerSubCommand(VcfFilterCommand::ptr(new VcfFilterCommand));
     registerSubCommand(VcfSiteFilterCommand::ptr(new VcfSiteFilterCommand));
     registerSubCommand(VcfMergeCommand::ptr(new VcfMergeCommand));
+    registerSubCommand(VcfReportCommand::ptr(new VcfReportCommand));
 
     stringstream cmdHelp;
     cmdHelp << "Valid subcommands:" << endl << endl;

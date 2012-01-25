@@ -32,11 +32,13 @@ set(SOURCES
     VcfSiteFilterCommand.hpp
     VcfMergeCommand.cpp
     VcfMergeCommand.hpp
+    VcfReportCommand.cpp
+    VcfReportCommand.hpp
     main.cpp
 )
 
 set(EXECUTABLE_NAME joinx)
 add_executable(${EXECUTABLE_NAME} ${SOURCES})
-target_link_libraries(${EXECUTABLE_NAME} processors reports fileformats ${Boost_LIBRARIES})
+target_link_libraries(${EXECUTABLE_NAME} processors reports fileformats metrics ${Boost_LIBRARIES})
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES PACKAGE_OUTPUT_NAME ${EXECUTABLE_NAME}${EXE_VERSION_SUFFIX})
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin/)
