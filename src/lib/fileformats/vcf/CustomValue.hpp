@@ -22,6 +22,7 @@ public:
     explicit CustomValue(const CustomType* type);
     CustomValue(const CustomType* type, const std::string& value);
 
+    void setType(const CustomType* type) { _type = type; }
     const CustomType& type() const;
     SizeType size() const;
     bool empty() const;
@@ -38,6 +39,7 @@ public:
     void toStream(std::ostream& s) const;
     std::string toString() const;
     std::string toString(SizeType idx) const;
+    void setNumAlts(uint32_t n);
 
     void append(const CustomValue& other);
 

@@ -117,6 +117,11 @@ void CustomValue::setString(SizeType idx, const std::string& value) {
     }
 }
 
+void CustomValue::setNumAlts(uint32_t n) {
+    if (type().numberType() == CustomType::PER_ALLELE)
+        _values.resize(n);
+}
+
 std::string CustomValue::getString(SizeType idx) const {
     type().validateIndex(idx);
     stringstream ss;
