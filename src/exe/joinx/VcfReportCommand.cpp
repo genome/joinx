@@ -121,12 +121,12 @@ void VcfReportCommand::exec() {
         *perSampleOut << "\t" << spectrum.transversions();
         double ratio = spectrum.transitionTransversionRatio();
         if(ratio != std::numeric_limits<double>::infinity()) {
-            cout << "\t" << ratio;
+            *perSampleOut << "\t" << ratio;
         }
         else {
-            cout << "\tNA";
+            *perSampleOut << "\tNA";
         }
-        cout << "\n";
+        *perSampleOut << endl;
     }
     //cout << "Total number of segregating sites: " << totalSites << endl;
 }
