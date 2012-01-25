@@ -143,6 +143,7 @@ double EntryMetrics::minorAlleleFrequency() const {
 void EntryMetrics::processEntry(Vcf::Entry& entry) {
     calculateGenotypeDistribution(entry);
     calculateAllelicDistribution();
+    calculateAllelicDistributionBySample();
     calculateMutationSpectrum(entry);
 }
 
