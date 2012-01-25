@@ -59,7 +59,9 @@ void Header::add(const string& line) {
 
         if (p.first == "INFO") {
             CustomType t(p.second.substr(1, p.second.size()-2));
-            addInfoType(t);
+            auto inserted = _infoTypes.insert(make_pair(t.id(), t));
+            if (!inserted.second)
+                throw runtime_error(str(format("Duplicate value for INFO:%1%") %t.id()));
         } else if (p.first == "FORMAT") {
             CustomType t(p.second.substr(1, p.second.size()-2));
             auto inserted = _formatTypes.insert(make_pair(t.id(), t));
@@ -82,9 +84,7 @@ void Header::addFilter(const string& id, const string& desc) {
 }
 
 void Header::addInfoType(CustomType const& type) {
-    auto inserted = _infoTypes.insert(make_pair(type.id(), type));
-    if (!inserted.second)
-        throw runtime_error(str(format("Duplicate value for INFO:%1%") %type.id()));
+    add(str(format("##INFO=<%1%>") %type.toString()));
 }
 
 

@@ -111,6 +111,15 @@ inline const T* CustomValue::get(SizeType idx) const {
     return _values[idx].get<T>();
 }
 
+
+template<>
+inline void CustomValue::set<CustomValue::ValueType>(SizeType idx, const ValueType& value) {
+    // skip type checking
+    type().validateIndex(idx);
+    ensureCapacity(idx+1);
+    _values[idx] = value;
+}
+
 template<typename T>
 inline void CustomValue::set(SizeType idx, const T& value) {
     type().typecheck<T>();

@@ -90,20 +90,20 @@ void CustomValue::setString(SizeType idx, const std::string& value) {
 
     switch (type().type()) {
         case CustomType::INTEGER:
-             set<int64_t>(value);
+            set<int64_t>(value);
             break;
 
         case CustomType::FLOAT:
-             set<double>(value);
+            set<double>(value);
             ss << *get<double>(idx);
             break;
 
         case CustomType::CHAR:
-             set<char>(value);
+            set<char>(value);
             break;
 
         case CustomType::STRING:
-             set<string>(value);
+            set<string>(value);
             break;
 
         case CustomType::FLAG:

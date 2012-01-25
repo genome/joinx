@@ -195,3 +195,28 @@ TEST(VcfHeader, addFilter) {
     string expected = "##FILTER=<ID=FOO12,Description=\"Test filter\">";
     ASSERT_NE(string::npos, ss.str().find(expected));
 }
+
+TEST(VcfHeader, addInfoType) {
+    Header h = parse(headerText);
+    CustomType t(
+        "SUPERTYPE",
+        CustomType::FIXED_SIZE,
+        1,
+        CustomType::STRING,
+        "A type"
+        );
+
+    h.addInfoType(t);
+    auto const* fetch = h.infoType("SUPERTYPE");
+    ASSERT_TRUE(fetch);
+    ASSERT_EQ("SUPERTYPE", fetch->id());
+    ASSERT_EQ(CustomType::FIXED_SIZE, fetch->numberType());
+    ASSERT_EQ(1, fetch->number());
+    ASSERT_EQ(CustomType::STRING, fetch->type());
+    ASSERT_EQ("A type", fetch->description());
+    
+    stringstream ss;
+    ss << h;
+    string expected = "##INFO=<ID=SUPERTYPE,Number=1,Type=String,Description=\"A type\">";
+    ASSERT_NE(string::npos, ss.str().find(expected));
+}
