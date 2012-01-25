@@ -4,7 +4,7 @@ project(processors)
 
 set(SOURCES
     BedDeduplicator.hpp
-    Intersect.hpp
+    IntersectFull.hpp
     IntersectionOutputFormatter.cpp
     IntersectionOutputFormatter.hpp
     MergeSorted.hpp

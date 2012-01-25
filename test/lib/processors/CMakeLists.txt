@@ -4,7 +4,7 @@ set(TEST_LIBS processors)
 include_directories(${GTEST_INCLUDE_DIRS})
 
 def_test(BedDeduplicator)
-def_test(Intersect)
+def_test(IntersectFull)
 def_test(MergeSorted)
 def_test(NoReferenceFilter)
 def_test(SnvComparator)

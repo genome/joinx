@@ -2,7 +2,7 @@
 #include "IntersectCollector.hpp"
 
 #include "fileformats/TypedStream.hpp"
-#include "processors/Intersect.hpp"
+#include "processors/IntersectFull.hpp"
 #include "processors/IntersectionOutputFormatter.hpp"
 
 #include <boost/format.hpp>
@@ -176,6 +176,6 @@ void IntersectCommand::exec() {
     if (!_missFileB.empty()) outMissB = _streams.get<ostream>(_missFileB);
 
     IntersectCollector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, _dbsnpMatch, outputFormatter, outMissA, outMissB);
-    Intersect<BedReaderType,BedReaderType,IntersectCollector> intersector(fa, fb, c, _adjacentInsertions);
+    IntersectFull<BedReaderType,BedReaderType,IntersectCollector> intersector(fa, fb, c, _adjacentInsertions);
     intersector.execute();
 }

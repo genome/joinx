@@ -5,8 +5,10 @@
 #include <list>
 #include <stdexcept>
 
+// This class is capable of performing intersection as well as symmetric
+// difference.
 template<typename StreamTypeA, typename StreamTypeB, typename CollectorType>
-class Intersect {
+class IntersectFull {
 public: // types and data
     // value types
     typedef typename StreamTypeA::ValueType TypeA;
@@ -33,12 +35,12 @@ public: // types and data
 
 
 public: // code
-    Intersect(StreamTypeA& a, StreamTypeB& b, CollectorType& rc, bool adjacentInsertions = false)
+    IntersectFull(StreamTypeA& a, StreamTypeB& b, CollectorType& rc, bool adjacentInsertions = false)
         : _a(a) , _b(b), _rc(rc), _adjacentInsertions(adjacentInsertions)
     {
     }
 
-    virtual ~Intersect() {}
+    virtual ~IntersectFull() {}
 
     template<typename TA, typename TB>
     Compare compare(const TA& a, const TB& b) const {

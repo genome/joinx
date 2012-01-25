@@ -1,4 +1,4 @@
-#include "processors/Intersect.hpp"
+#include "processors/IntersectFull.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/TypedStream.hpp"
@@ -61,7 +61,7 @@ namespace {
     Extractor extractor = bind(&Bed::parseLine, _1, _2, _3, 2);
 }
 
-TEST(TestIntersect, intersectSelf) {
+TEST(TestIntersectFull, intersectSelf) {
     MockCollector rc;
     stringstream ssA(BEDA);
     stringstream ssB(BEDA);
@@ -69,7 +69,7 @@ TEST(TestIntersect, intersectSelf) {
     InputStream streamB("B", ssB);
     BedReader s1(extractor, streamA);
     BedReader s2(extractor, streamB);
-    Intersect<BedReader,BedReader,MockCollector> intersector(s1, s2, rc);
+    IntersectFull<BedReader,BedReader,MockCollector> intersector(s1, s2, rc);
     intersector.execute();
 
     // each line hits twice each generating 8 total matches
@@ -79,7 +79,7 @@ TEST(TestIntersect, intersectSelf) {
     ASSERT_EQ(0, rc.missesB.size());
 }
 
-TEST(TestIntersect, misses) {
+TEST(TestIntersectFull, misses) {
     MockCollector rc;
     stringstream ssA(BEDA);
     stringstream ssB(BEDB);
@@ -87,7 +87,7 @@ TEST(TestIntersect, misses) {
     InputStream streamB("B", ssB);
     BedReader s1(extractor, streamA);
     BedReader s2(extractor, streamB);
-    Intersect<BedReader,BedReader,MockCollector> intersector(s1, s2, rc);
+    IntersectFull<BedReader,BedReader,MockCollector> intersector(s1, s2, rc);
     intersector.execute();
 
     // first 2 lines hit twice each, last 2 lines once each, total of 6 hits
@@ -97,7 +97,7 @@ TEST(TestIntersect, misses) {
     ASSERT_EQ(1, rc.missesB.size());
 }
 
-TEST(TestIntersect, cacheCrash) {
+TEST(TestIntersectFull, cacheCrash) {
     MockCollector rc;
     stringstream ssA(BEDC);
     stringstream ssB(BEDD);
@@ -105,7 +105,7 @@ TEST(TestIntersect, cacheCrash) {
     InputStream streamB("D", ssB);
     BedReader s1(extractor, streamA);
     BedReader s2(extractor, streamB);
-    Intersect<BedReader,BedReader,MockCollector> intersector(s1, s2, rc);
+    IntersectFull<BedReader,BedReader,MockCollector> intersector(s1, s2, rc);
     intersector.execute();
 
     // first 2 lines hit twice each, last 2 lines once each, total of 6 hits

@@ -3,7 +3,7 @@
 #include "fileformats/Bed.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/TypedStream.hpp"
-#include "processors/Intersect.hpp"
+#include "processors/IntersectFull.hpp"
 #include "reports/SnvConcordance.hpp"
 
 #include <boost/program_options.hpp>
@@ -214,7 +214,7 @@ void SnvConcordanceCommand::exec() {
     SnvConcordance::DepthOrQual depthOrQual = _useDepth ? SnvConcordance::DEPTH : SnvConcordance::QUAL;
     SnvConcordance concordance(depthOrQual);
     Collector c(concordance, s);
-    Intersect<BedReader,BedReader,Collector> intersector(fa, fb, c);
+    IntersectFull<BedReader,BedReader,Collector> intersector(fa, fb, c);
     intersector.execute();
     concordance.reportText(*s.out);
 }
