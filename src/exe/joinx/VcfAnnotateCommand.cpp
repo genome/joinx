@@ -46,7 +46,7 @@ void VcfAnnotateCommand::parseArguments(int argc, char** argv) {
         ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
         ("info-fields,I", po::value<vector<string>>(&_infoFields), "info fields to use for annotation (default: all)")
         ("no-info", "do not copy info fields")
-        ("no-identifiers", "Do not copy identifiers from the annotation file")
+        ("no-identifiers", "do not copy identifiers from the annotation file")
         ;
     po::positional_options_description posOpts;
     posOpts.add("input-file", 1);
