@@ -80,7 +80,8 @@ public:
     double qual() const { return _qual; }
     const std::set<std::string>& failedFilters() const { return _failedFilters; }
     const CustomValueMap& info() const { return _info; }
-    const CustomValue* info(const string& key) const;
+    const CustomValue* info(std::string const& key) const;
+    void setInfo(std::string const& key, CustomValue const& value);
     const SampleData& sampleData() const;
     SampleData& sampleData();
 

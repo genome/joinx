@@ -249,6 +249,8 @@ void Entry::parse(const Header* h, const string& s) {
         const CustomType* type = header().infoType(key);
         if (type == NULL)
             throw runtime_error(str(format("Failed to lookup type for info field '%1%'") %key));
+        CustomValue cv(type, value);
+        cv.setNumAlts(_alt.size());
         auto inserted = _info.insert(make_pair(key, CustomValue(type, value)));
         if (!inserted.second)
             throw runtime_error(str(format("Duplicate value for info field '%1%'") %key));
@@ -326,6 +328,16 @@ const CustomValue* Entry::info(const string& key) const {
         return 0;
     return &i->second;
 }
+
+void Entry::setInfo(std::string const& key, CustomValue const& value) {
+    auto i = _info.find(key);
+    if (i == _info.end()) {
+        _info.insert(make_pair(key, value));
+    } else {
+        i->second = value;
+    }
+}
+
 
 SampleData& Entry::sampleData() {
     if (!_parsedSamples) {
