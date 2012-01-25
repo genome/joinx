@@ -24,6 +24,8 @@ set(SOURCES
     VcfReader.hpp
     vcf/Builder.cpp
     vcf/Builder.hpp
+    vcf/Compare.cpp
+    vcf/Compare.hpp
     vcf/CustomType.cpp
     vcf/CustomType.hpp
     vcf/CustomValue.cpp
