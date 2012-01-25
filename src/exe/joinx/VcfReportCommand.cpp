@@ -85,6 +85,26 @@ void VcfReportCommand::exec() {
         if(!entry.sampleData().hasGenotypeData())
             continue;
         siteMetrics.processEntry(entry);
+
+        //output per-site metrics
+        *perSiteOut << entry.chrom() << "\t" << entry.pos() << "\t" << entry.ref() << "\t";
+        auto altIter = entry.alt().begin();
+        while(altIter+1 != entry.alt().end()) {
+            *perSiteOut << *(altIter++) << ",";
+        }
+        *perSiteOut << *(altIter);
+
+        map<const Vcf::GenotypeCall*, uint32_t>  distribution = siteMetrics.genotypeDistribution();
+        for( auto i = distribution.begin(); i != distribution.end(); ++i) {
+            *perSiteOut << "\t" << (*i).first->string() << "\t" << (*i).second;
+        }
+        std::vector<uint32_t> alleles = siteMetrics.allelicDistribution();
+
+        for(uint32_t i = 0; i < alleles.size(); ++i) {
+            *perSiteOut << "\t" << alleles[i];
+        }
+        *perSiteOut << "\t" << siteMetrics.minorAlleleFrequency() << endl;
+
         sampleMetrics.processEntry(entry,siteMetrics);
 
         //plotting the above distribution in R
