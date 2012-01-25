@@ -59,9 +59,7 @@ void Header::add(const string& line) {
 
         if (p.first == "INFO") {
             CustomType t(p.second.substr(1, p.second.size()-2));
-            auto inserted = _infoTypes.insert(make_pair(t.id(), t));
-            if (!inserted.second)
-                throw runtime_error(str(format("Duplicate value for INFO:%1%") %t.id()));
+            addInfoType(t);
         } else if (p.first == "FORMAT") {
             CustomType t(p.second.substr(1, p.second.size()-2));
             auto inserted = _formatTypes.insert(make_pair(t.id(), t));
@@ -83,6 +81,13 @@ void Header::addFilter(const string& id, const string& desc) {
     add(str(format("##FILTER=<ID=%1%,Description=\"%2%\">") %id %desc));
 }
 
+void Header::addInfoType(CustomType const& type) {
+    auto inserted = _infoTypes.insert(make_pair(type.id(), type));
+    if (!inserted.second)
+        throw runtime_error(str(format("Duplicate value for INFO:%1%") %type.id()));
+}
+
+
 void Header::parseHeaderLine(const std::string& line) {
     if (_headerSeen)
         throw runtime_error(str(format("Multiple header line detected:\n%1%\nAND\n%2%") %line %line));
@@ -92,7 +97,13 @@ void Header::parseHeaderLine(const std::string& line) {
     string tok;
     for (unsigned i = 0; i < nExpectedHeaderFields; ++i) {
         const char* expected = expectedHeaderFields[i];
-        if (!t.extract(tok) || tok != expected)
+        // once again we make special exceptions for dbsnp :|
+        // they don't include FORMAT in the header of their vcf files
+        bool extracted = t.extract(tok);
+        if (!extracted && i == nExpectedHeaderFields-1)
+            break;
+
+        if (!extracted || tok != expected)
             throw runtime_error(str(format("Malformed header line: %1%\nExpected token: %2%") %line %expected));
     }
 

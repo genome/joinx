@@ -29,25 +29,26 @@ public:
     Header();
     ~Header();
 
-    void add(const std::string& line);
-    void addFilter(const std::string& name, const std::string& desc);
+    void add(std::string const& line);
+    void addFilter(std::string const& name, std::string const& desc);
+    void addInfoType(CustomType const& type);
     void merge(const Header& other, bool allowDuplicateSamples = false);
     bool empty() const;
 
     const std::vector<RawLine>& metaInfoLines() const;
     std::string headerLine() const;
     // infoType/formatType return NULL for non-existing ids
-    const CustomType* infoType(const std::string& id) const;
-    const CustomType* formatType(const std::string& id) const;
-    const std::map<std::string, CustomType>& infoTypes() const;
-    const std::map<std::string, CustomType>& formatTypes() const;
-    const std::map<std::string, std::string>& filters() const;
-    const std::vector<std::string>& sampleNames() const;
+    const CustomType* infoType(std::string const& id) const;
+    const CustomType* formatType(std::string const& id) const;
+    std::map<std::string, CustomType> const& infoTypes() const;
+    std::map<std::string, CustomType> const& formatTypes() const;
+    std::map<std::string, std::string> const& filters() const;
+    std::vector<std::string> const& sampleNames() const;
 
     uint32_t sampleCount() const { return _sampleNames.size(); }
 
     // throws when sampleName is not found
-    uint32_t sampleIndex(const std::string& sampleName) const;
+    uint32_t sampleIndex(std::string const& sampleName) const;
 
     void sourceIndex(uint32_t value) { _sourceIndex = value; }
     uint32_t sourceIndex() const { return _sourceIndex; }
@@ -56,7 +57,7 @@ public:
     void assertValid() const;
 
 protected:
-    void parseHeaderLine(const std::string& line);
+    void parseHeaderLine(std::string const& line);
 
 protected:
     std::map<std::string, CustomType> _infoTypes;
@@ -71,4 +72,4 @@ protected:
 
 END_NAMESPACE(Vcf)
 
-std::ostream& operator<<(std::ostream& s, const Vcf::Header& h);
+std::ostream& operator<<(std::ostream& s, Vcf::Header const& h);
