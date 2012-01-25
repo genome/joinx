@@ -20,6 +20,7 @@ public:
     void processEntry(Vcf::Entry& entry);
     void calculateGenotypeDistribution(Vcf::Entry& entry);
     void calculateAllelicDistribution();
+    void calculateAllelicDistributionBySample();
     void calculateMutationSpectrum(Vcf::Entry& entry);
     double minorAlleleFrequency() const;
 
@@ -27,6 +28,7 @@ public:
     const MutationSpectrum& singletonMutationSpectrum() const;
     const std::map<Vcf::GenotypeCall const*,uint32_t>& genotypeDistribution() const;
     const std::vector<uint32_t>& allelicDistribution() const;
+    const std::vector<uint32_t>& alleleDistributionBySample() const;
     
     bool singleton(const Vcf::GenotypeCall* geno) const;
 
@@ -36,6 +38,7 @@ protected:
     MutationSpectrum _singletonMutationSpectrum;
     std::map<Vcf::GenotypeCall const*,uint32_t> _genotypeDistribution;
     std::vector<uint32_t> _allelicDistribution;
+    std::vector<uint32_t> _allelicDistributionBySample;
 };
 
 class SampleMetrics {

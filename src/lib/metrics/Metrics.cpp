@@ -65,8 +65,13 @@ void EntryMetrics::calculateGenotypeDistribution(Vcf::Entry& entry) {
 }
 
 bool EntryMetrics::singleton(const Vcf::GenotypeCall* geno) const {
-    auto iter = _genotypeDistribution.find(geno);
-    return iter != _genotypeDistribution.end() && iter->second == 1;
+    for( auto i = geno->indexSet().begin(); i != geno->indexSet().end(); ++i) {
+        if(_allelicDistributionBySample[(*i)] == 1) {
+            //at least one of the alleles is a singleton
+            return true;
+        }
+    }
+    return false;
 }
 
 void EntryMetrics::calculateAllelicDistribution() {
@@ -77,6 +82,16 @@ void EntryMetrics::calculateAllelicDistribution() {
         }
     }
 }
+
+void EntryMetrics::calculateAllelicDistributionBySample() {
+    _allelicDistributionBySample.resize(_maxGtIdx + 1);
+    for( auto geno = _genotypeDistribution.begin(); geno != _genotypeDistribution.end(); ++geno) {
+        for(auto i = geno->first->indexSet().begin(); i != geno->first->indexSet().end(); ++i) {
+            _allelicDistributionBySample[(*i)] += (*geno).second;
+        }
+    }
+}
+
 
 void EntryMetrics::calculateMutationSpectrum(Vcf::Entry& entry) {
     locale loc;
