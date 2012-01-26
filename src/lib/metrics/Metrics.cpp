@@ -163,6 +163,10 @@ const std::vector<uint32_t>& EntryMetrics::allelicDistribution() const {
     return _allelicDistribution;
 }
 
+const std::vector<uint32_t>& EntryMetrics::allelicDistributionBySample() const {
+    return _allelicDistributionBySample;
+}
+
 SampleMetrics::SampleMetrics(size_t sampleCount)
     : _totalSites(0)
     , _perSampleHetVariants(sampleCount, 0)

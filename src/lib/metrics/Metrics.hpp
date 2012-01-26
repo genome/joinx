@@ -28,7 +28,7 @@ public:
     const MutationSpectrum& singletonMutationSpectrum() const;
     const std::map<Vcf::GenotypeCall const*,uint32_t>& genotypeDistribution() const;
     const std::vector<uint32_t>& allelicDistribution() const;
-    const std::vector<uint32_t>& alleleDistributionBySample() const;
+    const std::vector<uint32_t>& allelicDistributionBySample() const;
     
     bool singleton(const Vcf::GenotypeCall* geno) const;
 
