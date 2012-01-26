@@ -58,7 +58,7 @@ void EntryMetrics::calculateGenotypeDistribution(Vcf::Entry& entry) {
             continue;
         }
         else {
-            ++_genotypeDistribution[&gt]; //probably ok since should use default contructor of new element before adding 1;
+            ++_genotypeDistribution[gt]; //probably ok since should use default contructor of new element before adding 1;
             _maxGtIdx = std::max(_maxGtIdx, *gt.indexSet().rbegin());
         }
     }
@@ -77,7 +77,7 @@ bool EntryMetrics::singleton(const Vcf::GenotypeCall* geno) const {
 void EntryMetrics::calculateAllelicDistribution() {
     _allelicDistribution.resize(_maxGtIdx + 1);
     for( auto i = _genotypeDistribution.begin(); i != _genotypeDistribution.end(); ++i) {
-        for(auto j = i->first->begin(); j != i->first->end(); ++j) {
+        for(auto j = (i->first).begin(); j != (i->first).end(); ++j) {
             _allelicDistribution[(*j)] += (*i).second;
         }
     }
@@ -86,7 +86,7 @@ void EntryMetrics::calculateAllelicDistribution() {
 void EntryMetrics::calculateAllelicDistributionBySample() {
     _allelicDistributionBySample.resize(_maxGtIdx + 1);
     for( auto geno = _genotypeDistribution.begin(); geno != _genotypeDistribution.end(); ++geno) {
-        for(auto i = geno->first->indexSet().begin(); i != geno->first->indexSet().end(); ++i) {
+        for(auto i = (geno->first).indexSet().begin(); i != (geno->first).indexSet().end(); ++i) {
             _allelicDistributionBySample[(*i)] += (*geno).second;
         }
     }
@@ -108,7 +108,7 @@ void EntryMetrics::calculateMutationSpectrum(Vcf::Entry& entry) {
         }
 
         for(auto geno = _genotypeDistribution.begin(); geno != _genotypeDistribution.end(); ++geno) {
-            for(auto i = geno->first->indexSet().begin(); i != geno->first->indexSet().end(); ++i) {
+            for(auto i = (geno->first).indexSet().begin(); i != (geno->first).indexSet().end(); ++i) {
                 if(*i == 0) //it's ref
                     continue;
 
@@ -119,7 +119,7 @@ void EntryMetrics::calculateMutationSpectrum(Vcf::Entry& entry) {
                 if(complement) {
                     variant = Sequence::reverseComplement(variant);
                 }
-                if(singleton((*geno).first)) {
+                if(singleton(&(*geno).first)) {
                     _singletonMutationSpectrum(ref[0],variant[0]) += (*geno).second;
                 }
                 else {
@@ -155,7 +155,7 @@ const MutationSpectrum& EntryMetrics::singletonMutationSpectrum() const {
     return _singletonMutationSpectrum;
 }
 
-const std::map<Vcf::GenotypeCall const*,uint32_t>& EntryMetrics::genotypeDistribution() const {
+const std::map<Vcf::GenotypeCall const,uint32_t>& EntryMetrics::genotypeDistribution() const {
     return _genotypeDistribution;
 }
 

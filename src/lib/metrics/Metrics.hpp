@@ -26,7 +26,7 @@ public:
 
     const MutationSpectrum& mutationSpectrum() const;
     const MutationSpectrum& singletonMutationSpectrum() const;
-    const std::map<Vcf::GenotypeCall const*,uint32_t>& genotypeDistribution() const;
+    const std::map<Vcf::GenotypeCall const,uint32_t>& genotypeDistribution() const;
     const std::vector<uint32_t>& allelicDistribution() const;
     const std::vector<uint32_t>& allelicDistributionBySample() const;
     
@@ -36,7 +36,7 @@ protected:
     uint32_t _maxGtIdx;
     MutationSpectrum _mutationSpectrum;
     MutationSpectrum _singletonMutationSpectrum;
-    std::map<Vcf::GenotypeCall const*,uint32_t> _genotypeDistribution;
+    std::map<Vcf::GenotypeCall const,uint32_t> _genotypeDistribution;
     std::vector<uint32_t> _allelicDistribution;
     std::vector<uint32_t> _allelicDistributionBySample;
 };
