@@ -120,16 +120,30 @@ void VcfReportCommand::exec() {
         }
 
         //this hits up the allele distribution from above. We grabbed it there so we could know how many alts there were.
-        for(uint32_t i = 0; i < allelesBySample.size(); ++i) {
-            *perSiteOut << "\t" << allelesBySample[i];
+        *perSiteOut << "\t";
+        uint32_t bySampleIndex = 0;
+        while(bySampleIndex < (allelesBySample.size() - 1)) {
+            *perSiteOut << allelesBySample[bySampleIndex++] << ",";
         }
-        
-        std::vector<uint32_t> alleles = siteMetrics.allelicDistribution();
+        *perSiteOut << allelesBySample[bySampleIndex];
 
-        for(uint32_t i = 0; i < alleles.size(); ++i) {
-            *perSiteOut << "\t" << alleles[i];
+        *perSiteOut << "\t";
+        std::vector<uint32_t> alleles = siteMetrics.allelicDistribution();
+        uint32_t alleleIndex = 0;
+        while(alleleIndex < (alleles.size() - 1)) {
+            *perSiteOut  << alleles[alleleIndex++] << ",";
         }
+        *perSiteOut << alleles[alleleIndex];
+
+        *perSiteOut << "\t";
+        std::vector<double> frequencies = siteMetrics.alleleFrequencies();
+        uint32_t freqIndex = 0;
+        while(freqIndex < (frequencies.size() - 1)) {
+            *perSiteOut << frequencies[freqIndex++] << ",";
+        }
+        *perSiteOut << frequencies[freqIndex];
         *perSiteOut << "\t" << siteMetrics.minorAlleleFrequency() << endl;
+
 
         sampleMetrics.processEntry(entry,siteMetrics);
 
