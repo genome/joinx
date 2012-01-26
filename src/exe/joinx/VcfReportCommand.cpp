@@ -94,7 +94,17 @@ void VcfReportCommand::exec() {
         }
         *perSiteOut << *(altIter);
         //transition status per allele will go next and then number of transitions at site and number of transversions at site
-        *perSiteOut << "\tNA\tNA\tNA";
+        *perSiteOut << "\t";
+        std::vector<bool> transitionStatus = siteMetrics.transitionStatusByAlt();
+        uint32_t transitionIdx = 0;
+        uint32_t totalTransitionAlleles = 0;
+        while(transitionIdx < (transitionStatus.size() - 1)) {
+            totalTransitionAlleles +=  transitionStatus[transitionIdx];
+            *perSiteOut << transitionStatus[transitionIdx++] << ",";
+        }
+        totalTransitionAlleles += transitionStatus[transitionIdx];
+        *perSiteOut << transitionStatus[transitionIdx] << "\t" << totalTransitionAlleles << "\t" << transitionStatus.size() - totalTransitionAlleles;
+
 
         //next novelness will go followed by number novel, number known
         *perSiteOut << "\tNA\tNA\tNA";
