@@ -30,11 +30,13 @@ public:
     const std::map<Vcf::GenotypeCall const,uint32_t>& genotypeDistribution() const;
     const std::vector<uint32_t>& allelicDistribution() const;
     const std::vector<uint32_t>& allelicDistributionBySample() const;
+    const std::vector<bool>& transitionStatusByAlt() const;
     
     bool singleton(const Vcf::GenotypeCall* geno) const;
 
 protected:
     uint32_t _maxGtIdx;
+    std::vector<bool> _transitionByAlt;
     MutationSpectrum _mutationSpectrum;
     MutationSpectrum _singletonMutationSpectrum;
     std::map<Vcf::GenotypeCall const,uint32_t> _genotypeDistribution;

@@ -94,6 +94,9 @@ void EntryMetrics::calculateAllelicDistributionBySample() {
 
 
 void EntryMetrics::calculateMutationSpectrum(Vcf::Entry& entry) {
+
+    _transitionByAlt.resize(_maxGtIdx);
+    
     locale loc;
     std::string ref(entry.ref());
 
@@ -125,6 +128,14 @@ void EntryMetrics::calculateMutationSpectrum(Vcf::Entry& entry) {
                 else {
                     _mutationSpectrum(ref[0],variant[0]) += (*geno).second;
                 }
+                //enter into by Allele array
+                if( (ref[0] == 'A' && variant[0] == 'G') || (ref[0] == 'C' && variant[0] == 'T')) {
+                    //it's a transition
+                    _transitionByAlt[*i-1] = true;
+                }
+                else {
+                    _transitionByAlt[*i-1] = false;
+                }
             }
         }
     }
@@ -152,6 +163,10 @@ const std::vector<double> EntryMetrics::alleleFrequencies() const {
     else {
         throw runtime_error("Unable to calculate minorAlleleFrequency if the allelic distribution is empty");
     }
+}
+
+const std::vector<bool>& EntryMetrics::transitionStatusByAlt() const {
+    return _transitionByAlt;
 }
 
 void EntryMetrics::processEntry(Vcf::Entry& entry) {
