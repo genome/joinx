@@ -93,11 +93,37 @@ void VcfReportCommand::exec() {
             *perSiteOut << *(altIter++) << ",";
         }
         *perSiteOut << *(altIter);
+        //transition status per allele will go next and then number of transitions at site and number of transversions at site
+        *perSiteOut << "\tNA\tNA\tNA";
 
-        map<const Vcf::GenotypeCall*, uint32_t>  distribution = siteMetrics.genotypeDistribution();
-        for( auto i = distribution.begin(); i != distribution.end(); ++i) {
-            *perSiteOut << "\t" << (*i).first->string() << "\t" << (*i).second;
+        //next novelness will go followed by number novel, number known
+        *perSiteOut << "\tNA\tNA\tNA";
+
+        //next genotype distribution
+        //FIXME this will likely only work as expected if our genotypes are unphased and always diploid.
+        std::vector<uint32_t> allelesBySample = siteMetrics.allelicDistributionBySample();
+        map<const Vcf::GenotypeCall, uint32_t>  distribution = siteMetrics.genotypeDistribution();
+
+        *perSiteOut << "\t";
+        for(uint32_t index1 = 0; index1 < allelesBySample.size(); ++index1) {
+            for(uint32_t index2 = 0; index2 <= index1; ++index2) {
+                stringstream unphasedGenotype;
+                unphasedGenotype << index2 << "/" << index1;
+                Vcf::GenotypeCall gt(unphasedGenotype.str());        
+                //*perSiteOut << gt.string() << ":";
+                *perSiteOut << distribution[gt];
+                //FIXME this is undoubtedly bad
+                if( (index1 + 1) < allelesBySample.size() || index2 < index1 ) {
+                    *perSiteOut << ","; 
+                }
+            }
         }
+
+        //this hits up the allele distribution from above. We grabbed it there so we could know how many alts there were.
+        for(uint32_t i = 0; i < allelesBySample.size(); ++i) {
+            *perSiteOut << "\t" << allelesBySample[i];
+        }
+        
         std::vector<uint32_t> alleles = siteMetrics.allelicDistribution();
 
         for(uint32_t i = 0; i < alleles.size(); ++i) {
