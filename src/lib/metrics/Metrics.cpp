@@ -140,6 +140,20 @@ double EntryMetrics::minorAlleleFrequency() const {
     }
 }
 
+const std::vector<double> EntryMetrics::alleleFrequencies() const {
+    if(!_allelicDistribution.empty()) {
+        uint32_t totalAlleles = accumulate(_allelicDistribution.begin(), _allelicDistribution.end(), 0);
+        std::vector<double> frequencies;
+        for(auto allele = _allelicDistribution.begin(); allele != _allelicDistribution.end(); ++allele) {
+            frequencies.push_back((double) *allele / totalAlleles);
+        }
+        return frequencies;
+    }
+    else {
+        throw runtime_error("Unable to calculate minorAlleleFrequency if the allelic distribution is empty");
+    }
+}
+
 void EntryMetrics::processEntry(Vcf::Entry& entry) {
     calculateGenotypeDistribution(entry);
     calculateAllelicDistribution();

@@ -23,6 +23,7 @@ public:
     void calculateAllelicDistributionBySample();
     void calculateMutationSpectrum(Vcf::Entry& entry);
     double minorAlleleFrequency() const;
+    const std::vector<double> alleleFrequencies() const;
 
     const MutationSpectrum& mutationSpectrum() const;
     const MutationSpectrum& singletonMutationSpectrum() const;
