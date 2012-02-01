@@ -59,7 +59,7 @@ void EntryMetrics::calculateGenotypeDistribution(Vcf::Entry& entry) {
         }
         else {
             ++_genotypeDistribution[gt]; //probably ok since should use default contructor of new element before adding 1;
-            _maxGtIdx = std::max(_maxGtIdx, *gt.indexSet().rbegin());
+            _maxGtIdx = entry.alt().size(); //std::max(_maxGtIdx, *gt.indexSet().rbegin());
         }
     }
 }
