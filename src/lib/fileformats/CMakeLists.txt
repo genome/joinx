@@ -22,6 +22,7 @@ set(SOURCES
     Variant.hpp
     VcfReader.cpp
     VcfReader.hpp
+    vcf/AlleleMerger.hpp
     vcf/Builder.cpp
     vcf/Builder.hpp
     vcf/Compare.cpp
