@@ -77,6 +77,8 @@ void VcfReportCommand::exec() {
     VcfReader::ptr reader = openVcf(*instream);
     Vcf::Entry entry;
     Metrics::SampleMetrics sampleMetrics(reader->header().sampleCount());
+
+    *perSiteOut << "Chrom\tPos\tRef\tAlt\tByAltTransition\tTotalTransitions\tTotalTransversions\tByAltNovel\tTotalNovel\tTotalKnown\tGenotypeDist\tAlleleDistBySample\tAlleleDist\tByAltAlleleFreq\tMAF\n"; 
     while (reader->next(entry)) {
         Metrics::EntryMetrics siteMetrics;
         if(entry.failedFilters().size() != 1 || entry.failedFilters().find("PASS") == entry.failedFilters().end())
