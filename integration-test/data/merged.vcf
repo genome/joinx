@@ -20,7 +20,7 @@
 ##SAMPLE=<ID=other_dude,Build_ID=1234,Description="TGI build_id to sample map">
 ##fileDate=20111229
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S1	S2	S3	S4
-1	866511	.	C	A,C	.	.	CALLER=Samtools	GT	0/1	0/0	0/1	0/2
-2	866511	.	C	A,C	.	.	CALLER=Samtools	GT	.	.	1/1	.
-3	866511	.	C	A,C	.	.	CALLER=Samtools	GT	0/0	0/0	0/0	0/0
-4	866511	.	C	A,C	.	.	CALLER=Samtools	GT	0/1	1/1	1/1	0/2
+1	866511	.	C	A,G	.	.	CALLER=Samtools	GT	0/1	0/0	0/1	0/2
+2	866511	.	C	A,G	.	.	CALLER=Samtools	GT	.	.	1/1	.
+3	866511	.	C	A,G	.	.	CALLER=Samtools	GT	0/0	0/0	0/0	0/0
+4	866511	.	C	A,G	.	.	CALLER=Samtools	GT	0/1	1/1	1/1	0/2

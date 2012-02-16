@@ -18,7 +18,7 @@
 ##FORMAT=<ID=FET,Number=1,Type=String,Description="P-value from Fisher's Exact Test">
 ##FORMAT=<ID=FT,Number=.,Type=String,Description="P-value from Fisher's Exact Test">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S4
-1	866511	.	C	C	.	.	DP=3;CALLER=Samtools	GT	0/1
-2	866511	.	C	C	.	.	DP=3;CALLER=Samtools	GT	.
-3	866511	.	C	C	.	.	DP=3;CALLER=Samtools	GT	0/0
-4	866511	.	C	C	.	.	DP=3;CALLER=Samtools	GT	0/1
+1	866511	.	C	G	.	.	DP=3;CALLER=Samtools	GT	0/1
+2	866511	.	C	G	.	.	DP=3;CALLER=Samtools	GT	.
+3	866511	.	C	G	.	.	DP=3;CALLER=Samtools	GT	0/0
+4	866511	.	C	G	.	.	DP=3;CALLER=Samtools	GT	0/1
