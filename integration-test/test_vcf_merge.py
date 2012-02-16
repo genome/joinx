@@ -7,7 +7,6 @@ class TestVcfMerge(IntegrationTest, unittest.TestCase):
 
     def test_vcf_merge(self):
         input_files = sorted(self.inputFiles("merge-[0-9].vcf"))
-        print "INPUTS:", input_files
         expected_file = self.inputFiles("merged.vcf")[0]
         output_file = self.tempFile("output.vcf")
 
