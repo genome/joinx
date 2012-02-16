@@ -46,6 +46,10 @@ public:
     static FieldName fieldFromString(const char* name);
     static void parseLine(const Header* hdr, std::string& s, Entry& e);
     static void parseLineAndReheader(const Header* hdr, const Header* newH, std::string& s, Entry& e);
+    static bool posLess(Entry const& a, Entry const& b);
+    static bool refStopLess(Entry const& a, Entry const& b);
+    static bool chromEq(const std::string& chrom, Entry const& b);
+
 
     // member functions
     Entry();
@@ -115,6 +119,8 @@ public:
     bool operator<(const Entry& rhs) const;
 
     void swap(Entry& other);
+
+    bool canMergeWith(Entry const& other) const;
 
 protected:
     const Header* _header;

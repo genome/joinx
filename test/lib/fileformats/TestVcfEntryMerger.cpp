@@ -114,6 +114,13 @@ public:
 
         _defaultMs.reset(new MergeStrategy(&_mergedHeader));
     }
+
+    Entry makeEntry(string chrom, int64_t pos, string const& ref, string const& alt) {
+        stringstream ss;
+        ss << chrom << "\t" << pos << "\t.\t" << ref << "\t" << alt << "\t.\t.\t.";
+        return Entry(&_mergedHeader, ss.str());
+    }
+
     Header _mergedHeader;
     vector<Entry> _snvs;
     vector<Entry> _indels;
@@ -273,4 +280,21 @@ TEST_F(TestVcfEntryMerger, Builder) {
         "21\t14370\tid1\tT\tC\t29\tPASS\tVC=Samtools\tDP\t.\t.\t2\t.\t.\t.",
         v[1].toString()
         );
+}
+
+TEST_F(TestVcfEntryMerger, insertion) {
+    vector<Entry> ents;
+    // the next 3 are equivalent
+    ents.push_back(makeEntry("1", 39, "T", "TCG"));
+    ents.push_back(makeEntry("1", 40, "C", "CGC"));
+    ents.push_back(makeEntry("1", 41, "G", "GCG"));
+    ents.push_back(makeEntry("1", 41, "G", "C"));
+    ents.push_back(makeEntry("1", 41, "GGG", "C"));
+
+    for (auto i = ents.begin(); i != ents.end(); ++i) {
+        cout << i->start() << "-" << i->stop() << ": " << *i << "\n";
+        if (i > ents.begin()) {
+            cout << ", can merge with prev: " << i->canMergeWith(*(i-1)) << "\n";
+        }
+    }
 }

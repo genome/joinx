@@ -10,6 +10,7 @@
 
 #include <boost/format.hpp>
 #include <algorithm>
+#include <cstring>
 #include <iterator>
 
 using boost::format;
@@ -17,65 +18,32 @@ using namespace std;
 
 BEGIN_NAMESPACE(Vcf)
 
-namespace {
-    bool referenceSizeLessThan(const Entry& a, const Entry& b) {
-        return a.ref().size() < b.ref().size();
-    }
-}
-
-size_t EntryMerger::addAllele(const string& allele) {
-    auto inserted = _alleleMap.insert(make_pair(allele, _alleleIdx));
-    if (inserted.second)
-        ++_alleleIdx;
-    return inserted.first->second;
-}
-
-EntryMerger::EntryMerger(const MergeStrategy& mergeStrategy, const Header* mergedHeader, const Entry* begin, const Entry* end)
-    : _mergeStrategy(mergeStrategy)
+EntryMerger::EntryMerger(
+        MergeStrategy const& mergeStrategy,
+        Header const* mergedHeader,
+        Entry const* begin,
+        Entry const* end
+        )
+    : _alleleMerger(begin, end)
+    , _mergeStrategy(mergeStrategy)
     , _mergedHeader(mergedHeader)
     , _begin(begin)
     , _end(end)
-    , _refEntry(max_element(begin, end, referenceSizeLessThan))
     , _qual(Entry::MISSING_QUALITY)
-    , _alleleIdx(0)
 {
-    _newGTIndices.resize(_end - _begin);
-
     if (end-begin == 1)
         _qual = begin->qual();
 
     for (const Entry* e = begin; e != end; ++e) {
-        size_t idx = e-begin;
-
-        if (e > begin && (e->chrom() != begin->chrom() || e->pos() != begin->pos())) {
+        if (e > begin && !e->canMergeWith(*(e-1))) {
             throw runtime_error(
-                str(format("Attempted to merge VCF entries with different position:\n%1%\nand\n%2%")
-                    %begin->toString() %e->toString()));
-        }
-
-        string::size_type refLen = e->ref().size();
-        if (e->ref().compare(0, refLen, ref(), 0, refLen) != 0) {
-            throw runtime_error(str(format(
-                "Attempted to merge VCF entries with incompatible ref entries:\n%1%\nand\n%2%")
-                %_refEntry->toString() %e->toString()));
+                str(format("Attempted to merge VCF entries with non-overlapping position:\n%1%\nand\n%2%")
+                    %(e-1)->toString() %e->toString()));
         }
 
         // merge identifiers
         const set<string>& idents = e->identifiers();
         copy(idents.begin(), idents.end(), inserter(_identifiers, _identifiers.begin()));
-
-        // Merge alleles
-        const vector<string>& alleles = e->alt();
-        for (auto alt = alleles.begin(); alt != alleles.end(); ++alt) {
-            if (refLen != ref().size()) {
-                string allele = *alt;
-                allele += ref().substr(refLen);
-                _newGTIndices[idx].push_back(addAllele(allele));
-            } else {
-                _newGTIndices[idx].push_back(addAllele(*alt));
-            }
-
-        }
 
         // Merge filters
         const set<string>& filters = e->failedFilters();
@@ -116,7 +84,7 @@ set<string>& EntryMerger::identifiers() {
 }
 
 const string& EntryMerger::ref() const {
-    return _refEntry->ref();
+    return _alleleMerger.ref();
 }
 
 set<string>& EntryMerger::failedFilters() {
@@ -147,9 +115,7 @@ void EntryMerger::setAltAndGenotypeData(
         SampleData& sampleData) const
 {
     // set alt alleles
-    alt.resize(_alleleMap.size());
-    for (auto i = _alleleMap.begin(); i != _alleleMap.end(); ++i)
-        alt[i->second] = i->first;
+    alt = _alleleMerger.mergedAlt();
 
     // build list of all format fields
     SampleData::FormatType format;
@@ -189,10 +155,10 @@ void EntryMerger::setAltAndGenotypeData(
                 // TODO: try to eliminate double map lookup here
                 auto inserted = sdMap.insert(make_pair(mergedIdx, vector<CustomValue>()));
                 if (inserted.second || inserted.first->second.empty()) {
-                    inserted.first->second = genotypeFormatter.process(format, e, sampleIdx, _newGTIndices[idx]);
+                    inserted.first->second = genotypeFormatter.process(format, e, sampleIdx, _alleleMerger.newGt()[idx]);
                 } else if (_mergeStrategy.mergeSamples()) {
                     bool fromPrimaryStream = e->header().sourceIndex() == _mergeStrategy.primarySampleStreamIndex();
-                    genotypeFormatter.merge(fromPrimaryStream, inserted.first->second, format, e, sampleIdx, _newGTIndices[idx]);
+                    genotypeFormatter.merge(fromPrimaryStream, inserted.first->second, format, e, sampleIdx, _alleleMerger.newGt()[idx]);
                 } else {
                     throw runtime_error("Unable to merge conflicting sample data.");
                 }

@@ -26,6 +26,7 @@ protected:
 protected:
     std::vector<std::string> _filenames;
     std::string _outputFile;
+    std::string _fastaFile;
     std::string _mergeStrategyFile;
     StreamHandler _streams;
     bool _clearFilters;

@@ -4,6 +4,8 @@
 #include "GenotypeFormatter.hpp" // TODO: move DisjointAllelesException out of this header
 #include "Header.hpp"
 
+#include <algorithm>
+#include <functional>
 #include <iostream>
 #ifdef DEBUG_VCF_MERGE
 # include <iterator>
@@ -12,10 +14,15 @@
 #include <utility>
 
 using namespace std;
+using namespace std::placeholders;
 
 BEGIN_NAMESPACE(Vcf)
 
-Builder::Builder(const MergeStrategy& mergeStrategy, Header* header, OutputFunc out)
+Builder::Builder(
+        const MergeStrategy& mergeStrategy,
+        Header* header,
+        OutputFunc out
+        )
     : _mergeStrategy(mergeStrategy)
     , _header(header)
     , _out(out)
@@ -28,7 +35,9 @@ Builder::~Builder() {
 
 void Builder::operator()(const Entry& e) {
     e.header();
-    if (_entries.empty() || canMerge(e, _entries[0])) {
+    if (_entries.empty()
+        || any_of(_entries.begin(), _entries.end(), bind(&canMerge, e, _1)))
+    {
         _entries.push_back(e);
         return;
     }
@@ -39,7 +48,9 @@ void Builder::operator()(const Entry& e) {
 
 void Builder::operator()(Entry&& e) {
     e.header();
-    if (_entries.empty() || canMerge(e, _entries[0])) {
+    if (_entries.empty() 
+        || any_of(_entries.begin(), _entries.end(), bind(&canMerge, e, _1)))
+    {
         _entries.push_back(std::move(e));
         return;
     }
@@ -112,7 +123,7 @@ void Builder::flush() {
 }
 
 bool Builder::canMerge(const Entry& a, const Entry& b) {
-    return a.chrom() == b.chrom() && a.pos() == b.pos();
+    return a.canMergeWith(b);
 }
 
 END_NAMESPACE(Vcf)

@@ -1,4 +1,5 @@
 #include "fileformats/vcf/AlleleMerger.hpp"
+#include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/InputStream.hpp"
 
@@ -36,35 +37,6 @@ Indel2         CTCGCGG
 
 */
 
-namespace {
-    // Mock reference sequence that acts like a fasta reader
-    // initialize with the sequence to return as well as its
-    // position (seqid, pos).
-    class MockRef {
-    public:
-        MockRef(string const& ref, string const& seqid, int64_t pos)
-            : _ref(ref)
-            , _seqid(seqid)
-            , _pos(pos)
-        {
-        }
-
-        string sequence(string const& seqid, int32_t beg, int32_t end) {
-            if (_seqid != seqid)
-                throw runtime_error("wrong seqid");
-            if (beg < _pos || end > _pos+int32_t(_ref.size()-1))
-                throw runtime_error("seq out fo range");
-
-            return _ref.substr(beg-_pos, end-beg+1);
-        }
-
-    protected:
-        string _ref;
-        string _seqid;
-        int64_t _pos;
-    };
-}
-
 class TestVcfAlleleMerger : public ::testing::Test {
 protected:
     void SetUp() {
@@ -86,32 +58,23 @@ protected:
     Header _header;
 };
 
-TEST_F(TestVcfAlleleMerger, mockWorks) {
-    // mock reference sequence with CTCGG starting at 1:38
-    MockRef ref("CTCGG", "1", 38);
-
-    ASSERT_EQ("C", ref.sequence("1", 38, 38));
-    ASSERT_EQ("CT", ref.sequence("1", 38, 39));
-    ASSERT_EQ("GG", ref.sequence("1", 41, 42));
-}
-
 TEST_F(TestVcfAlleleMerger, insertion) {
-    // mock reference sequence with CTCGG starting at 1:38
-    MockRef ref("CTCGG", "1", 38);
+    // reference: CTCGG at 1,38
 
-    vector<Entry> entries;
+    vector<Entry> ents;
     // the next 3 are equivalent
-    entries.push_back(makeEntry("1", 39, "T", "TCG"));
-    entries.push_back(makeEntry("1", 40, "C", "CGC"));
-    entries.push_back(makeEntry("1", 41, "G", "GCG"));
+    ents.push_back(makeEntry("1", 39, "T", "TCG"));
+    ents.push_back(makeEntry("1", 40, "C", "CGC"));
+    ents.push_back(makeEntry("1", 41, "G", "GCG"));
     // this one is different
-    entries.push_back(makeEntry("1", 41, "G", "GTG"));
+    ents.push_back(makeEntry("1", 41, "G", "GTG"));
 
-    AlleleMerger<MockRef> am(ref, entries);
+    AlleleMerger am(ents);
 
     // yes, something was merged.
     ASSERT_TRUE(am.merged());
 
+    ASSERT_EQ("TCG", am.ref());
     // make sure the total # of (unique) alts is now 2
     ASSERT_EQ(2, am.mergedAlt().size());
     ASSERT_EQ("TCGCG", am.mergedAlt()[0]);
@@ -133,21 +96,18 @@ TEST_F(TestVcfAlleleMerger, insertion) {
 }
 
 TEST_F(TestVcfAlleleMerger, deletion) {
-    // mock reference sequence with CTCGG starting at 1:38
-    MockRef ref("CTGGG", "1", 38);
-
-    vector<Entry> entries;
+    vector<Entry> ents;
     // the next 3 are equivalent
-    entries.push_back(makeEntry("1", 39, "TG", "T"));
-    entries.push_back(makeEntry("1", 40, "GG", "G"));
-    entries.push_back(makeEntry("1", 41, "GG", "G"));
+    ents.push_back(makeEntry("1", 39, "TG", "T"));
+    ents.push_back(makeEntry("1", 40, "GG", "G"));
+    ents.push_back(makeEntry("1", 41, "GG", "G"));
 
-    AlleleMerger<MockRef> am(ref, entries);
+    AlleleMerger am(ents);
 
     // yes, something was merged.
     ASSERT_TRUE(am.merged());
 
-    // make sure the total # of (unique) alts is now 2
+    ASSERT_EQ("TGGG", am.ref());
     ASSERT_EQ(1, am.mergedAlt().size());
     ASSERT_EQ("TGG", am.mergedAlt()[0]);
 
@@ -158,21 +118,15 @@ TEST_F(TestVcfAlleleMerger, deletion) {
 }
 
 TEST_F(TestVcfAlleleMerger, snv) {
-    // mock reference sequence with CTCGG starting at 1:38
-    MockRef ref("CTGGG", "1", 38);
-
-    vector<Entry> entries;
+    vector<Entry> ents;
     // the next 3 are equivalent
-    entries.push_back(makeEntry("1", 39, "TGC", "TGC"));
-    entries.push_back(makeEntry("1", 40, "GG", "GC"));
-    entries.push_back(makeEntry("1", 41, "G", "C"));
+    ents.push_back(makeEntry("1", 39, "TGA", "TGC"));
+    ents.push_back(makeEntry("1", 40, "GA", "GC"));
+    ents.push_back(makeEntry("1", 41, "A", "C"));
 
-    AlleleMerger<MockRef> am(ref, entries);
-
-    // yes, something was merged.
+    AlleleMerger am(ents);
     ASSERT_TRUE(am.merged());
-
-    // make sure the total # of (unique) alts is now 2
+    ASSERT_EQ("TGA", am.ref());
     ASSERT_EQ(1, am.mergedAlt().size());
     ASSERT_EQ("TGC", am.mergedAlt()[0]);
 
@@ -183,15 +137,14 @@ TEST_F(TestVcfAlleleMerger, snv) {
 }
 
 TEST_F(TestVcfAlleleMerger, identical) {
-    MockRef ref("CTGGG", "1", 38);
+    vector<Entry> ents;
+    ents.push_back(makeEntry("1", 39, "T", "TG"));
+    ents.push_back(makeEntry("1", 39, "T", "TG"));
 
-    vector<Entry> entries;
-    // the next 3 are equivalent
-    entries.push_back(makeEntry("1", 39, "T", "TG"));
-    entries.push_back(makeEntry("1", 39, "T", "TG"));
+    AlleleMerger am(ents);
 
-    AlleleMerger<MockRef> am(ref, entries);
     ASSERT_TRUE(am.merged());
+    ASSERT_EQ("T", am.ref());
     ASSERT_EQ(1, am.mergedAlt().size());
     ASSERT_EQ("TG", am.mergedAlt()[0]);
 
@@ -201,25 +154,48 @@ TEST_F(TestVcfAlleleMerger, identical) {
 }
 
 TEST_F(TestVcfAlleleMerger, overlapButNoMerge) {
-    MockRef ref("CTGGG", "1", 38);
+    vector<Entry> ents;
+    ents.push_back(makeEntry("1", 39, "T", "TG"));
+    ents.push_back(makeEntry("1", 39, "T", "TC"));
 
-    vector<Entry> entries;
-    // the next 3 are equivalent
-    entries.push_back(makeEntry("1", 39, "T", "TG"));
-    entries.push_back(makeEntry("1", 39, "T", "TC"));
-
-    AlleleMerger<MockRef> am(ref, entries);
+    AlleleMerger am(ents);
     ASSERT_FALSE(am.merged());
 }
 
 TEST_F(TestVcfAlleleMerger, mismatchChrom) {
-    MockRef ref("CTGGG", "1", 38);
+    vector<Entry> ents;
+    ents.push_back(makeEntry("1", 39, "T", "TC"));
+    ents.push_back(makeEntry("2", 39, "T", "TC"));
 
-    vector<Entry> entries;
-    // the next 3 are equivalent
-    entries.push_back(makeEntry("1", 39, "T", "TC"));
-    entries.push_back(makeEntry("2", 39, "T", "TC"));
-
-    AlleleMerger<MockRef> am(ref, entries);
+    AlleleMerger am(ents);
     ASSERT_FALSE(am.merged());
+}
+
+TEST_F(TestVcfAlleleMerger, buildRefAdjacent) {
+    vector<Entry> ents;
+    ents.push_back(makeEntry("1", 10, "ACG", "A"));
+    ents.push_back(makeEntry("1", 13, "TGA", "T"));
+    ents.push_back(makeEntry("1", 16, "CGA", "C"));
+    string ref = AlleleMerger::buildRef(&*ents.begin(), &*ents.end());
+    ASSERT_EQ("ACGTGACGA", ref);
+}
+
+TEST_F(TestVcfAlleleMerger, buildRefOverlap) {
+    vector<Entry> ents;
+    ents.push_back(makeEntry("1", 10, "ACG", "A"));
+    ents.push_back(makeEntry("1", 12,   "GTA", "T"));
+    ents.push_back(makeEntry("1", 13,    "TAG", "C"));
+    string ref = AlleleMerger::buildRef(&*ents.begin(), &*ents.end());
+    ASSERT_EQ("ACGTAG", ref);
+}
+
+TEST_F(TestVcfAlleleMerger, buildRefDisjoint) {
+    // when there are gaps in the reference, an empty string should be returned
+    // since we cannot infer the sequence.
+    vector<Entry> ents;
+    ents.push_back(makeEntry("1", 10, "ACG", "A"));
+    ents.push_back(makeEntry("1", 14, "TGA", "T"));
+    ents.push_back(makeEntry("1", 17, "CGA", "C"));
+    string ref = AlleleMerger::buildRef(&*ents.begin(), &*ents.end());
+    ASSERT_EQ("", ref);
 }

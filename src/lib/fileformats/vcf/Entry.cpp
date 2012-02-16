@@ -46,6 +46,18 @@ namespace {
 
 const double Entry::MISSING_QUALITY = numeric_limits<double>::min();
 
+bool Entry::posLess(Entry const& a, Entry const& b) {
+    return a.pos() < b.pos();
+}
+
+bool Entry::refStopLess(Entry const& a, Entry const& b) {
+    return a.refStop() < b.refStop();
+}
+
+bool Entry::chromEq(const std::string& chrom, Entry const& b) {
+    return chrom == b.chrom();
+}
+
 void Entry::parseLine(const Header* hdr, std::string& s, Entry& e) {
     e.parse(hdr, s);
 }
@@ -84,7 +96,7 @@ Entry::Entry(Entry const& e) throw ()
     , _chrom(e._chrom)
     , _pos(e._pos)
     , _identifiers(e._identifiers)
-    , _ref(e._ref)    
+    , _ref(e._ref)
     , _alt(e._alt)
     , _qual(e._qual)
     , _failedFilters(e._failedFilters)
@@ -102,7 +114,7 @@ Entry::Entry(Entry&& e) throw ()
     , _chrom(std::move(e._chrom))
     , _pos(e._pos)
     , _identifiers(std::move(e._identifiers))
-    , _ref(std::move(e._ref))    
+    , _ref(std::move(e._ref))
     , _alt(std::move(e._alt))
     , _qual(e._qual)
     , _failedFilters(std::move(e._failedFilters))
@@ -358,8 +370,15 @@ const SampleData& Entry::sampleData() const {
 }
 
 void Entry::setPositions() {
-    _start = _stop = _pos;
+    _start = numeric_limits<int64_t>::max();
+    _stop = 0;
     for (uint32_t idx = 0; idx < _alt.size(); ++idx) {
+        if (_ref == _alt[idx]) {
+            throw runtime_error(str(format(
+                "Nonsense variant: identical to reference in %1%"
+                ) % toString() ));
+        }
+
         string::size_type prefix = commonPrefix(_ref, _alt[idx]);
         int64_t start = _pos - 1 + prefix;
         int64_t stop;
@@ -386,6 +405,24 @@ int64_t Entry::start() const {
 
 int64_t Entry::stop() const {
     return _stop;
+}
+
+bool Entry::canMergeWith(Entry const& other) const {
+    int rv = strverscmp(chrom().c_str(), other.chrom().c_str());
+    if (rv != 0)
+        return false;
+
+    // to handle identical and adjacent insertions
+    if (start() == stop() && other.start() == other.stop() 
+        && (other.start() - start() <= 1))
+    {
+        return true;
+    }
+
+    if (stop() <= other.start() || other.stop() <= start())
+        return false;
+
+    return true;
 }
 
 END_NAMESPACE(Vcf)

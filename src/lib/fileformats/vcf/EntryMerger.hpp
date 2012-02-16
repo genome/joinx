@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AlleleMerger.hpp"
 #include "common/namespaces.hpp"
 
 #include <cstdint>
@@ -20,14 +21,17 @@ class SampleData;
 class EntryMerger {
 public:
     typedef std::map<std::string, CustomValue> CustomValueMap;
-    typedef std::map<std::string, uint32_t> AlleleMap;
-    EntryMerger(const MergeStrategy& mergeStrategy, const Header* mergedHeader, const Entry* begin, const Entry* end);
 
-    const std::string& chrom() const;
+    EntryMerger(
+        MergeStrategy const& mergeStrategy,
+        Header const* mergedHeader,
+        Entry const* begin,
+        Entry const* end);
+
+    std::string const& chrom() const;
     uint64_t pos() const;
     std::set<std::string>& identifiers();
-    const std::string& ref() const;
-    const AlleleMap& alleleMap() const;
+    std::string const& ref() const;
     std::set<std::string>& failedFilters();
     double qual() const;
     void setInfo(CustomValueMap& info) const;
@@ -39,20 +43,16 @@ protected:
     size_t addAllele(const std::string& allele);
 
 protected:
-    const MergeStrategy& _mergeStrategy;
-    const Header* _mergedHeader;
-    const Entry* _begin;
-    const Entry* _end;
-    const Entry* _refEntry;
+    AlleleMerger _alleleMerger;
+    MergeStrategy const& _mergeStrategy;
+    Header const* _mergedHeader;
+    Entry const* _begin;
+    Entry const* _end;
     double _qual;
     std::set<std::string> _identifiers;
-    AlleleMap _alleleMap;
-    AlleleMap::size_type _alleleIdx;
     std::set<std::string> _filters;
     std::set<std::string> _sampleNames;
     std::set<std::string> _info;
-
-    std::vector< std::vector< size_t > > _newGTIndices;
 };
 
 END_NAMESPACE(Vcf)

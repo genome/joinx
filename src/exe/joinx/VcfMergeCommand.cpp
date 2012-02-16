@@ -1,5 +1,6 @@
 #include "VcfMergeCommand.hpp"
 
+#include "fileformats/FastaReader.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/OutputWriter.hpp"
 #include "fileformats/TypedStream.hpp"

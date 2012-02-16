@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/namespaces.hpp"
+#include "fileformats/FastaReader.hpp"
 
 #include <functional>
 #include <vector>
@@ -15,7 +16,11 @@ class MergeStrategy;
 class Builder {
 public:
     typedef std::function<void(const Entry&)> OutputFunc;
-    Builder(const MergeStrategy& mergeStrategy, Header* header, OutputFunc out);
+    Builder(
+        const MergeStrategy& mergeStrategy,
+        Header* header,
+        OutputFunc out
+        );
     ~Builder();
 
     void operator()(const Entry& e);
