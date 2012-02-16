@@ -26,7 +26,7 @@ set(CPACK_DEBIAN_PACKAGE_PROVIDES "joinx")
 set(CPACK_DEBIAN_PACKAGE_SECTION science)
 set(CPACK_DEBIAN_PACKAGE_PRIORITY optional)
 set(CPACK_DEBIAN_PACKAGE_REPLACES "snvcmp1.0, snvcmp2.0")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11), libgcc1 (>= 1:4.4.3), libstdc++6 (>= 4.4.3-4), zlib1g, libboost-filesystem1.40.0, libboost-program-options1.40.0, libboost-system1.40.0")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11), libgcc1 (>= 1:4.4.3), libstdc++6 (>= 4.4.3-4), zlib1g, libboost-filesystem1.40.0, libboost-program-options1.40.0, libboost-system1.40.0, libboost-iostreams1.40.0")
 
 if (CMAKE_BUILD_TYPE MATCHES package)
     set(CPACK_GENERATOR "DEB")

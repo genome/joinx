@@ -88,6 +88,9 @@ public:
     void setPositions();
     int64_t start() const;
     int64_t stop() const;
+    int64_t refStop() const {
+        return _pos + ref().size() - 1;
+    }
     int64_t length() const { return stop() - start(); }
 
     // -1 if not found

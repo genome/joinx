@@ -151,7 +151,6 @@ void EntryMerger::setAltAndGenotypeData(
     for (auto i = _alleleMap.begin(); i != _alleleMap.end(); ++i)
         alt[i->second] = i->first;
 
-
     // build list of all format fields
     SampleData::FormatType format;
     GenotypeFormatter genotypeFormatter(_mergedHeader, alt);

@@ -44,8 +44,8 @@ Variant::Type Variant::inferType() const {
 }
 
 Variant::Variant() : _type(INVALID) {
-    _allSequences.push_back(Sequence("-"));
-    _allSequences.push_back(Sequence("-"));
+    _allSequences.push_back(Sequence("*"));
+    _allSequences.push_back(Sequence("*"));
 }
 
 Variant::Variant(
@@ -62,10 +62,8 @@ Variant::Variant(
     , _quality(quality)
     , _depth(depth)
 {
-    if (!ref.empty() || ref != "-")
-        _allSequences.push_back(ref);
-    if (!alt.empty() || alt != "-")
-        _allSequences.push_back(alt);
+    _allSequences.push_back(ref.empty() ? "*" : ref);
+    _allSequences.push_back(alt.empty() ? "*" : alt);
 
     _type = inferType();
 }
@@ -82,12 +80,14 @@ Variant::Variant(const Bed& bed)
         while (!tokenizer.eof()) {
             string tok;
             tokenizer.extract(tok);
+            if (tok == "0" || tok == "-")
+                tok = "*";
             _allSequences.push_back(tok);
         }
     }
 
     while (_allSequences.size() < 2)
-        _allSequences.push_back(Sequence("-"));
+        _allSequences.push_back(Sequence("*"));
 
     if (bed.extraFields().size() >= 2) {
         if (bed.extraFields()[1] == "-") {

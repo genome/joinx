@@ -161,6 +161,8 @@ void VcfAnnotateCommand::exec() {
     Vcf::Header& annoHeader = annoReader.header();
     Vcf::Header& header = vcfReader.header();
 
+    header.add(str(format("##annotation=%s,") %_annoFile));
+
     postProcessArguments(header, annoHeader);
 
     Writer writer(*out);
