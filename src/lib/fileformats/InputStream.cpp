@@ -66,14 +66,16 @@ bool InputStream::getline(string& line) {
     }
 
     // read until we get a line that isn't blank.
-    while (std::getline(_in, line) && line.empty())
+    while (!_in.eof() && std::getline(_in, line) && line.empty())
         ++_lineNum;
-    ++_lineNum;
 
-    if (!_peekBuf.empty()) {
-        line = _peekBuf + line;
-        _peekBuf.clear();
-    }
+/*
+    if (_in.eof() && line.size() == 1 && line[0] == 0)
+        line.clear();
+    else 
+*/
+        ++_lineNum;
+
 
     if (_caching && _in) {
         _cache.push_back(line);
@@ -88,8 +90,10 @@ char InputStream::peek() const {
         return (*_cacheIter)[0];
 
     char c(0);
-    if (boost::iostreams::read(_in, &c, 1))
+    streamsize n;
+    if ((n = boost::iostreams::read(_in, &c, 1)) > 0) {
         boost::iostreams::putback(_in, c);
+    }
 
     return c;
 }
