@@ -4,6 +4,7 @@ set(TEST_LIBS fileformats ${Boost_LIBRARIES})
 include_directories(${GTEST_INCLUDE_DIRS})
 
 def_test(Bed)
+def_test(Fasta)
 def_test(InferFileType)
 def_test(InputStream)
 def_test(StreamFactory)

@@ -7,6 +7,8 @@ set(SOURCES
     Bed.hpp
     BedReader.cpp
     BedReader.hpp
+    Fasta.cpp
+    Fasta.hpp
     FastaReader.cpp
     FastaReader.hpp
     InferFileType.cpp
