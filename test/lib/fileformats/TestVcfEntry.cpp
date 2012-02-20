@@ -91,6 +91,12 @@ protected:
         }
     }
 
+    Entry makeEntry(string chrom, int64_t pos, string const& ref, string const& alt) {
+        stringstream ss;
+        ss << chrom << "\t" << pos << "\t.\t" << ref << "\t" << alt << "\t.\t.\t.";
+        return Entry(&_header, ss.str());
+    }
+
     Header _header;
     vector<Entry> v;
 };
@@ -331,4 +337,11 @@ TEST_F(TestVcfEntry, move) {
     ASSERT_EQ(addrSampleValues, &*e2.sampleData().begin());
     ASSERT_EQ(origStart, e2.start());
     ASSERT_EQ(origStop, e2.stop());
+}
+
+TEST_F(TestVcfEntry, testNoAlts) {
+    Entry e(&_header, "20\t14370\tid1\tT\t.\t29\tPASS\t.\t.\t");
+    ASSERT_EQ(0, e.alt().size());
+    ASSERT_EQ(14369, e.start());
+    ASSERT_EQ(14370, e.stop());
 }
