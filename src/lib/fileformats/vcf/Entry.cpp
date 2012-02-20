@@ -370,6 +370,12 @@ const SampleData& Entry::sampleData() const {
 }
 
 void Entry::setPositions() {
+    if (_alt.empty()) {
+        _start = _pos - 1;
+        _stop = _pos;
+        return;
+    }
+
     _start = numeric_limits<int64_t>::max();
     _stop = 0;
     for (uint32_t idx = 0; idx < _alt.size(); ++idx) {

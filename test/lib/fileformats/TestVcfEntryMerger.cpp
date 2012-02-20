@@ -5,8 +5,10 @@
 #include "fileformats/vcf/Header.hpp"
 
 #include <gtest/gtest.h>
+#include <algorithm>
 #include <cassert>
 #include <functional>
+#include <iterator>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -284,7 +286,7 @@ TEST_F(TestVcfEntryMerger, Builder) {
 
 TEST_F(TestVcfEntryMerger, insertion) {
     vector<Entry> ents;
-    // the next 3 are equivalent
+
     ents.push_back(makeEntry("1", 39, "T", "TCG"));
     ents.push_back(makeEntry("1", 40, "C", "CGC"));
     ents.push_back(makeEntry("1", 41, "G", "GCG"));
@@ -297,4 +299,21 @@ TEST_F(TestVcfEntryMerger, insertion) {
             cout << ", can merge with prev: " << i->canMergeWith(*(i-1)) << "\n";
         }
     }
+}
+
+TEST_F(TestVcfEntryMerger, nullAlt) {
+    vector<Entry> v;
+    Builder builder(*_defaultMs, &_mergedHeader, bind(&push_back, ref(v), _1));
+    string t1="20\t14370\tid1\tT\tG\t.\tPASS\tVC=Samtools\tDP\t1";
+    string t2="20\t14370\tid1\tT\t.\t29\tPASS\tVC=Samtools\tDP\t2";
+    Entry entries[2]; 
+    Entry::parseLine(&_headers[0], t1, entries[0]);
+    Entry::parseLine(&_headers[1], t2, entries[1]);
+    builder(*entries);
+    builder(*(entries+1));
+    builder.flush();
+
+
+    ASSERT_EQ(1, v.size());
+    ASSERT_EQ(&_mergedHeader, &v[0].header());
 }

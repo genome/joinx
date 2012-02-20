@@ -32,6 +32,7 @@ void AlleleMerger::init(Entry const* beg, Entry const* end) {
     _ref = buildRef(beg, end);
     if (_ref.empty())
         return;
+    _merged = true;
 
     _newGt.resize(end-beg);
 
@@ -59,8 +60,6 @@ void AlleleMerger::init(Entry const* beg, Entry const* end) {
     _mergedAlt.resize(_alleleMap.size());
     for (auto i = _alleleMap.begin(); i != _alleleMap.end(); ++i)
         _mergedAlt[i->second] = i->first;
-
-    _merged = _mergedAlt.size() < inputAlts;
 }
 
 string AlleleMerger::buildRef(Entry const* beg, Entry const* end) {

@@ -3,12 +3,15 @@
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/InputStream.hpp"
 
+#include <gtest/gtest.h>
+#include <algorithm>
 #include <functional>
+#include <iostream>
+#include <iterator>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <gtest/gtest.h>
 
 using namespace Vcf;
 using namespace std::placeholders;
@@ -159,7 +162,13 @@ TEST_F(TestVcfAlleleMerger, overlapButNoMerge) {
     ents.push_back(makeEntry("1", 39, "T", "TC"));
 
     AlleleMerger am(ents);
-    ASSERT_FALSE(am.merged());
+    ASSERT_TRUE(am.merged());
+    ASSERT_EQ("T", am.ref());
+    ASSERT_EQ(2, am.mergedAlt().size());
+    ASSERT_EQ("TG", am.mergedAlt()[0]);
+    ASSERT_EQ("TC", am.mergedAlt()[1]);
+    ASSERT_EQ(0, am.newGt()[0][0]);
+    ASSERT_EQ(1, am.newGt()[1][0]);
 }
 
 TEST_F(TestVcfAlleleMerger, mismatchChrom) {
@@ -198,4 +207,19 @@ TEST_F(TestVcfAlleleMerger, buildRefDisjoint) {
     ents.push_back(makeEntry("1", 17, "CGA", "C"));
     string ref = AlleleMerger::buildRef(&*ents.begin(), &*ents.end());
     ASSERT_EQ("", ref);
+}
+
+TEST_F(TestVcfAlleleMerger, nullAlt) {
+    vector<Entry> ents;
+    ents.push_back(makeEntry("1", 10, "A", "T"));
+    ents.push_back(makeEntry("1", 10, "A", "G"));
+    ents.push_back(makeEntry("1", 10, "A", "."));
+
+    AlleleMerger am(ents);
+    ASSERT_TRUE(am.merged());    
+    ASSERT_EQ(2, am.mergedAlt().size());
+    ASSERT_EQ(3, am.newGt().size());
+    ASSERT_EQ(0, am.newGt()[0][0]);
+    ASSERT_EQ(1, am.newGt()[1][0]);
+    ASSERT_TRUE(am.newGt()[2].empty());
 }
