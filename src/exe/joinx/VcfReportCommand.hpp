@@ -4,6 +4,7 @@
 #include "fileformats/StreamHandler.hpp"
 
 #include <string>
+#include <vector>
 
 class VcfReportCommand : public CommandBase {
 public:
@@ -26,5 +27,6 @@ protected:
     std::string _infile;
     std::string _perSampleFile;
     std::string _perSiteFile;
+    std::vector<std::string> _infoFields;
     StreamHandler _streams;
 };
