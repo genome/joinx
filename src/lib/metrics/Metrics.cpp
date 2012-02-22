@@ -159,7 +159,8 @@ void EntryMetrics::calculateMutationSpectrum(Vcf::Entry& entry) {
 void EntryMetrics::identifyNovelAlleles(Vcf::Entry& entry, std::vector<std::string>& novelInfoFields) {
     //this will populate the novelty of each alt allele in _novelByAllele
     uint32_t numAlts = (uint32_t) entry.alt().size();
-    _novelByAlt.resize(numAlts); //make space for alt novel status
+    _novelByAlt.resize(numAlts,true); //make space for alt novel status
+
     for (auto i = novelInfoFields.begin(); i != novelInfoFields.end(); ++i) {
         //for each database of variants, use to determine if an alt has been seen
         const Vcf::CustomValue* database = entry.info(*i);  //search for tag
@@ -168,7 +169,7 @@ void EntryMetrics::identifyNovelAlleles(Vcf::Entry& entry, std::vector<std::stri
             if(database->size() == numAlts) {
                 //we know we have the same number of values as alts
                 for(Vcf::CustomValue::SizeType j = 0; j != _novelByAlt.size(); ++j) {
-                    _novelByAlt[j] = _novelByAlt[j] || !(*(database->get<bool>(j))); //if either is true it is novel. Not sure if this will actually work.
+                    _novelByAlt[j] = _novelByAlt[j] && database->getAny(j)->empty(); //if either is true it is novel. Not sure if this will actually work.
                 }
             }
             else {
