@@ -22,6 +22,8 @@ class Header;
 
 class Entry {
 public:
+    friend class AltNormalizer;
+
     enum FieldName {
         CHROM,
         POS,
@@ -119,8 +121,6 @@ public:
     bool operator<(const Entry& rhs) const;
 
     void swap(Entry& other);
-
-    bool canMergeWith(Entry const& other) const;
 
 protected:
     const Header* _header;

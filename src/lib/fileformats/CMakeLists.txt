@@ -26,6 +26,8 @@ set(SOURCES
     VcfReader.hpp
     vcf/AlleleMerger.cpp
     vcf/AlleleMerger.hpp
+    vcf/AltNormalizer.cpp
+    vcf/AltNormalizer.hpp
     vcf/Builder.cpp
     vcf/Builder.hpp
     vcf/Compare.cpp

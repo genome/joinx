@@ -208,7 +208,11 @@ Fasta::~Fasta() {
     // types in the header.
 }
 
-std::string Fasta::sequence(std::string const& seq, size_t pos, size_t len) {
+std::string const& Fasta::name() const {
+    return _name;
+}
+
+std::string Fasta::sequence(std::string const& seq, size_t pos, size_t len) const {
     if (pos == 0) {
         throw runtime_error("Fasta::sequence expects one based coordinates.");
     }
@@ -219,7 +223,7 @@ std::string Fasta::sequence(std::string const& seq, size_t pos, size_t len) {
             "Sequence '%1%' not found in fasta '%2%'") %seq %_name));
     }
 
-    if (pos+len - 1 > e->len) {
+    if (pos > e->len || pos+len - 1 > e->len) {
         throw runtime_error(str(format(
             "Request for %1%:%2%-%3% in %4%, but %1% has length %5%"
             ) %seq %pos %(pos+len) %_name %e->len));
@@ -243,4 +247,8 @@ std::string Fasta::sequence(std::string const& seq, size_t pos, size_t len) {
     }
     
     return rv;
+}
+
+char Fasta::sequence(std::string const& seq, size_t pos) const {
+    return sequence(seq, pos, 1)[0];
 }

@@ -22,20 +22,20 @@ AlleleMerger::AlleleMerger(std::vector<Entry> const& ents)
 }
 
 void AlleleMerger::init(Entry const* beg, Entry const* end) {
-    // make sure range is non-empty and all on the same chromosome
-    if (beg == end || !all_of(beg, end, bind(&Entry::chromEq, beg->chrom(), _1))) {
+    // make sure range is non-trivial and all on the same chromosome
+    if (end-beg < 2 || !all_of(beg, end, bind(&Entry::chromEq, beg->chrom(), _1))) {
         return;
     }
-
-    uint64_t start = min_element(beg, end, &Entry::posLess)->pos();
 
     _ref = buildRef(beg, end);
     if (_ref.empty())
         return;
     _merged = true;
 
+    _merged = true;
     _newGt.resize(end-beg);
 
+    uint64_t start = min_element(beg, end, &Entry::posLess)->pos();
     size_t inputAlts(0);
     for (auto e = beg; e != end; ++e) {
         inputAlts += e->alt().size();

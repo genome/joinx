@@ -22,11 +22,18 @@ class EntryMerger {
 public:
     typedef std::map<std::string, CustomValue> CustomValueMap;
 
+    static bool canMerge(Entry const& a, Entry const& b);
+
     EntryMerger(
         MergeStrategy const& mergeStrategy,
         Header const* mergedHeader,
         Entry const* begin,
         Entry const* end);
+
+    // was anything actually merged?
+    bool merged() const;
+    size_t entryCount() const;
+    Entry const* entries() const;
 
     std::string const& chrom() const;
     uint64_t pos() const;

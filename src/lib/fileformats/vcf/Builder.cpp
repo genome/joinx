@@ -36,7 +36,7 @@ Builder::~Builder() {
 void Builder::operator()(const Entry& e) {
     e.header();
     if (_entries.empty()
-        || any_of(_entries.begin(), _entries.end(), bind(&canMerge, e, _1)))
+        || any_of(_entries.begin(), _entries.end(), bind(&EntryMerger::canMerge, e, _1)))
     {
         _entries.push_back(e);
         return;
@@ -49,7 +49,7 @@ void Builder::operator()(const Entry& e) {
 void Builder::operator()(Entry&& e) {
     e.header();
     if (_entries.empty() 
-        || any_of(_entries.begin(), _entries.end(), bind(&canMerge, e, _1)))
+        || any_of(_entries.begin(), _entries.end(), bind(&EntryMerger::canMerge, e, _1)))
     {
         _entries.push_back(std::move(e));
         return;
@@ -59,9 +59,19 @@ void Builder::operator()(Entry&& e) {
     _entries.push_back(std::move(e));
 }
 
-void Builder::output(const Entry* begin, const Entry* end) const {
-    try {
+void Builder::output(Entry* begin, Entry* end) const {
+        try {
         EntryMerger merger(_mergeStrategy, _header, begin, end);
+        // no merging happened, output each entry individually
+        if (!merger.merged()) {
+            for (auto e = begin; e != end; ++e) {
+                e->reheader(_header);
+                _out(*e);
+            }
+            return;
+        }
+
+        // create and output the new merged entry
         Entry merged(std::move(merger));
         _out(merged);
     } catch (const DisjointGenotypesError& e) {
@@ -85,45 +95,13 @@ void Builder::output(const Entry* begin, const Entry* end) const {
             throw;
         }
     }
-
-#ifdef DEBUG_VCF_MERGE
-    if (merged.alt().size() > 1) {
-        cerr << "MERGED ALLELES (" << _entries[0].chrom() << ", " << _entries[0].pos() << "): ";
-        set<string> origAlleles;
-        for (auto i = begin; i != end; ++i) {
-            auto alts = i->alt();
-            for (auto alt = alts.begin(); alt != alts.end(); ++alt) {
-                origAlleles.insert(i->ref() + ":" + *alt);
-            }
-        }
-        for (auto i = origAlleles.begin(); i != origAlleles.end(); ++i) {
-            if (i != origAlleles.begin())
-                cerr << " + ";
-            cerr << *i;
-        }
-
-        cerr << " = " << merged.ref() << ":";
-        auto alts = merged.alt();
-        for (auto i = alts.begin(); i != alts.end(); ++i) {
-            if (i != alts.begin())
-                cerr << ",";
-            cerr << *i;
-        }
-        cerr << "\n";
-    }
-#endif // DEBUG_VCF_MERGE
 }
-
 
 void Builder::flush() {
     if (!_entries.empty()) {
         output(&*_entries.begin(), &*_entries.end());
         _entries.clear();
     }
-}
-
-bool Builder::canMerge(const Entry& a, const Entry& b) {
-    return a.canMergeWith(b);
 }
 
 END_NAMESPACE(Vcf)

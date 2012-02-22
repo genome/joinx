@@ -27,12 +27,9 @@ public:
     void operator()(Entry&& e);
     void flush();
 
-    static bool canMerge(const Entry& a, const Entry& b);
-
 protected:
     std::vector<Entry>::iterator partition();
-    bool canMergeWithMaxRef(const Entry& e) const;
-    void output(const Entry* begin, const Entry* end) const;
+    void output(Entry* begin, Entry* end) const;
 
 protected:
     const MergeStrategy& _mergeStrategy;

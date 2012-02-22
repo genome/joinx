@@ -49,4 +49,13 @@ TEST(Fasta, seq) {
     ASSERT_THROW(fa.sequence("3", 0, 1), runtime_error);
     ASSERT_THROW(fa.sequence("3", 5, 1), runtime_error);
     ASSERT_EQ("ACGT", fa.sequence("3", 1, 4));
+
+    ASSERT_EQ("T", fa.sequence("3", 4, 1));
+}
+
+TEST(Fasta, posOverflow) {
+    stringstream dat(goodData);
+    Fasta fa("test", goodData.c_str(), goodData.size());
+    ASSERT_THROW(fa.sequence("1", (uint64_t)-1, 10), runtime_error);
+    
 }

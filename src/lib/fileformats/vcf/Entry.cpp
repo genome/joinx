@@ -4,6 +4,7 @@
 #include "GenotypeFormatter.hpp"
 #include "Header.hpp"
 #include "MergeStrategy.hpp"
+#include "common/Sequence.hpp"
 
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
@@ -23,13 +24,6 @@ using namespace std;
 
 BEGIN_NAMESPACE(Vcf)
 namespace {
-    string::size_type commonPrefix(const string& a, const string& b) {
-        string::size_type p = 0;
-        while (p < a.size() && p < b.size() && a[p] == b[p])
-            ++p;
-        return p;
-    }
-
     const static char* entryFieldNames[] = {
         "chrom",
         "pos",
@@ -159,6 +153,19 @@ Entry::Entry(EntryMerger&& merger)
     , _start(0)
     , _stop(0)
 {
+    if (merger.entryCount() < 2) {
+        throw runtime_error(str(format(
+            "Logic error: attempted to merge a single entry: %1%"
+            ) %merger.entries()->toString()));
+    }
+    if (!merger.merged()) {
+        stringstream ss;
+        for (size_t i = 0; i < merger.entryCount(); ++i) {
+            ss << merger.entries()[i] << "\n";
+        }
+        throw runtime_error(str(format("Failed to merge entries:\n %1%") %ss.str()));
+    }
+
     merger.setInfo(_info);
     merger.setAltAndGenotypeData(_alt, _sampleData);
     setPositions();
@@ -385,7 +392,7 @@ void Entry::setPositions() {
                 ) % toString() ));
         }
 
-        string::size_type prefix = commonPrefix(_ref, _alt[idx]);
+        string::size_type prefix = Sequence::commonPrefix(_ref, _alt[idx]);
         int64_t start = _pos - 1 + prefix;
         int64_t stop;
         if (_alt[idx].size() == _ref.size()) {
@@ -411,24 +418,6 @@ int64_t Entry::start() const {
 
 int64_t Entry::stop() const {
     return _stop;
-}
-
-bool Entry::canMergeWith(Entry const& other) const {
-    int rv = strverscmp(chrom().c_str(), other.chrom().c_str());
-    if (rv != 0)
-        return false;
-
-    // to handle identical and adjacent insertions
-    if (start() == stop() && other.start() == other.stop() 
-        && (other.start() - start() <= 1))
-    {
-        return true;
-    }
-
-    if (stop() <= other.start() || other.stop() <= start())
-        return false;
-
-    return true;
 }
 
 END_NAMESPACE(Vcf)

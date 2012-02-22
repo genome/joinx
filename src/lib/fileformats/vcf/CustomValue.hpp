@@ -29,7 +29,7 @@ public:
     const ValueType* getAny(SizeType idx) const;
 
     template<typename T>
-    const T* get(SizeType idx) const;
+    const T* get(SizeType idx = 0) const;
 
     template<typename T>
     void set(SizeType idx, const T& value);

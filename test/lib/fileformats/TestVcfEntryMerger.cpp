@@ -1,4 +1,5 @@
 #include "fileformats/vcf/EntryMerger.hpp"
+#include "fileformats/vcf/AlleleMerger.hpp"
 #include "fileformats/vcf/Builder.hpp"
 #include "fileformats/vcf/MergeStrategy.hpp"
 #include "fileformats/vcf/Entry.hpp"
@@ -203,14 +204,15 @@ TEST_F(TestVcfEntryMerger, mergeWrongPos) {
 
     Entry wrongChrom(&_headers[2], "21\t14370\tid1\tG\tA\t29\t.\t.\t");
     e[1] = wrongChrom;
-    ASSERT_THROW(EntryMerger(*_defaultMs, &_mergedHeader, e, e+2), runtime_error);
+    EntryMerger merger2(*_defaultMs, &_mergedHeader, e, e+2);
+    ASSERT_FALSE(merger2.merged());
 }
 
 // Test merging when only 1 entry has a valid quality. The score should be preserved
 TEST_F(TestVcfEntryMerger, singleQual) {
     EntryMerger merger(*_defaultMs, &_mergedHeader, &*_snvs.begin(), &*(_snvs.begin()+1));
-    Entry e(std::move(merger));
-    ASSERT_EQ(29, e.qual());
+    ASSERT_FALSE(merger.merged());
+    ASSERT_THROW(Entry(std::move(merger)), runtime_error);
 }
 
 TEST_F(TestVcfEntryMerger, mergeAlleles) {
@@ -296,7 +298,7 @@ TEST_F(TestVcfEntryMerger, insertion) {
     for (auto i = ents.begin(); i != ents.end(); ++i) {
         cout << i->start() << "-" << i->stop() << ": " << *i << "\n";
         if (i > ents.begin()) {
-            cout << ", can merge with prev: " << i->canMergeWith(*(i-1)) << "\n";
+            cout << ", can merge with prev: " << EntryMerger::canMerge(*i, *(i-1)) << "\n";
         }
     }
 }
