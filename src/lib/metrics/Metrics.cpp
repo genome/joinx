@@ -73,7 +73,22 @@ bool EntryMetrics::singleton(const Vcf::GenotypeCall* geno) const {
     }
     return false;
 }
+/*
+bool EntryMetrics::novel(const Vcf::Entry& entry, const std::vector<std::string>& novelInfoFields, const Vcf::GenotypeCall* geno) {
+    // grab alt allele index(es)
+    // check to see if novel databases have seen them
+    // return depending on that
 
+    bool novel = true;
+    for( auto i = geno->indexSet().begin(); i != geno->indexSet().end(); ++i) {
+        if(*i != 0) {
+            for( auto j = novelInfoFields.begin(); j != novelInfoFields.end(); ++j) {
+                entry.getInfoField(*j)
+
+    }
+    return novel;
+}
+*/
 void EntryMetrics::calculateAllelicDistribution() {
     _allelicDistribution.resize(_maxGtIdx + 1);
     for( auto i = _genotypeDistribution.begin(); i != _genotypeDistribution.end(); ++i) {
@@ -141,6 +156,29 @@ void EntryMetrics::calculateMutationSpectrum(Vcf::Entry& entry) {
     }
 }
 
+void EntryMetrics::identifyNovelAlleles(Vcf::Entry& entry, std::vector<std::string>& novelInfoFields) {
+    //this will populate the novelty of each alt allele in _novelByAllele
+    uint32_t numAlts = (uint32_t) entry.alt().size();
+    _novelByAlt.resize(numAlts); //make space for alt novel status
+    for (auto i = novelInfoFields.begin(); i != novelInfoFields.end(); ++i) {
+        //for each database of variants, use to determine if an alt has been seen
+        const Vcf::CustomValue* database = entry.info(*i);  //search for tag
+        if(database) {
+            //if we find it check if it's per alt or a flag. Otherwise fail miserably.
+            if(database->size() == numAlts) {
+                //we know we have the same number of values as alts
+                for(Vcf::CustomValue::SizeType j = 0; j != _novelByAlt.size(); ++j) {
+                    _novelByAlt[j] = _novelByAlt[j] || !(*(database->get<bool>(j))); //if either is true it is novel. Not sure if this will actually work.
+                }
+            }
+            else {
+                //do nothing for now
+            }
+            
+        }
+    }
+}
+
 double EntryMetrics::minorAlleleFrequency() const {
     if(!_allelicDistribution.empty()) {
         uint32_t totalAlleles = accumulate(_allelicDistribution.begin(), _allelicDistribution.end(), 0);
@@ -169,7 +207,12 @@ const std::vector<bool>& EntryMetrics::transitionStatusByAlt() const {
     return _transitionByAlt;
 }
 
-void EntryMetrics::processEntry(Vcf::Entry& entry) {
+const std::vector<bool>& EntryMetrics::novelStatusByAlt() const {
+    return _novelByAlt;
+}
+
+void EntryMetrics::processEntry(Vcf::Entry& entry, std::vector<std::string>& novelInfoFields) {
+    identifyNovelAlleles(entry, novelInfoFields);
     calculateGenotypeDistribution(entry);
     calculateAllelicDistribution();
     calculateAllelicDistributionBySample();
