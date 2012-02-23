@@ -47,6 +47,7 @@ void VcfReportCommand::parseArguments(int argc, char** argv) {
         ("input-file,i", po::value<string>(&_infile), "input file (empty or - means stdin, which is the default)")
         ("per-sample-file,S", po::value<string>(&_perSampleFile), "per sample report output file")
         ("per-site-file,s", po::value<string>(&_perSiteFile), "per site report output file")
+        ("info-fields-from-db,I", po::value<vector<string>>(&_infoFields), "info fields to use for annotation (default: all)")
         ;
     po::positional_options_description posOpts;
     posOpts.add("input-file", -1);
@@ -86,7 +87,7 @@ void VcfReportCommand::exec() {
         totalSites++;
         if(!entry.sampleData().hasGenotypeData())
             continue;
-        siteMetrics.processEntry(entry);
+        siteMetrics.processEntry(entry,_infoFields);
 
         //output per-site metrics
         *perSiteOut << entry.chrom() << "\t" << entry.pos() << "\t" << entry.ref() << "\t";
@@ -109,7 +110,16 @@ void VcfReportCommand::exec() {
 
 
         //next novelness will go followed by number novel, number known
-        *perSiteOut << "\tNA\tNA\tNA";
+        *perSiteOut << "\t";
+        std::vector<bool> novelStatus = siteMetrics.novelStatusByAlt();
+        uint32_t novelIdx = 0;
+        uint32_t totalNovelAlleles = 0;
+        while(novelIdx < (novelStatus.size() - 1)) {
+            totalNovelAlleles +=  novelStatus[novelIdx];
+            *perSiteOut << novelStatus[novelIdx++] << ",";
+        }
+        totalNovelAlleles += novelStatus[novelIdx];
+        *perSiteOut << novelStatus[novelIdx] << "\t" << totalNovelAlleles << "\t" << novelStatus.size() - totalNovelAlleles;
 
         //next genotype distribution
         //FIXME this will likely only work as expected if our genotypes are unphased and always diploid.
