@@ -49,7 +49,6 @@ public:
     static void parseLine(const Header* hdr, std::string& s, Entry& e);
     static void parseLineAndReheader(const Header* hdr, const Header* newH, std::string& s, Entry& e);
     static bool posLess(Entry const& a, Entry const& b);
-    static bool refStopLess(Entry const& a, Entry const& b);
     static bool chromEq(const std::string& chrom, Entry const& b);
 
 
@@ -91,12 +90,8 @@ public:
     const SampleData& sampleData() const;
     SampleData& sampleData();
 
-    void setPositions();
     int64_t start() const;
     int64_t stop() const;
-    int64_t refStop() const {
-        return _pos + ref().size() - 1;
-    }
     int64_t length() const { return stop() - start(); }
 
     // -1 if not found
@@ -135,9 +130,6 @@ protected:
     std::string _sampleString;
     mutable bool _parsedSamples;
     mutable SampleData _sampleData;
-
-    int64_t _start;
-    int64_t _stop;
 };
 
 inline bool Entry::operator<(const Entry& rhs) const {

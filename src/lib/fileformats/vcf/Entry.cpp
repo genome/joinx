@@ -44,10 +44,6 @@ bool Entry::posLess(Entry const& a, Entry const& b) {
     return a.pos() < b.pos();
 }
 
-bool Entry::refStopLess(Entry const& a, Entry const& b) {
-    return a.refStop() < b.refStop();
-}
-
 bool Entry::chromEq(const std::string& chrom, Entry const& b) {
     return chrom == b.chrom();
 }
@@ -80,8 +76,6 @@ Entry::Entry()
     , _pos(0)
     , _qual(MISSING_QUALITY)
     , _parsedSamples(false)
-    , _start(0)
-    , _stop(0)
 {
 }
 
@@ -98,8 +92,6 @@ Entry::Entry(Entry const& e) throw ()
     , _sampleString(e._sampleString)
     , _parsedSamples(e._parsedSamples)
     , _sampleData(e._sampleData)
-    , _start(e._start)
-    , _stop(e._stop)
 {
 }
 
@@ -116,8 +108,6 @@ Entry::Entry(Entry&& e) throw ()
     , _sampleString(std::move(e._sampleString))
     , _parsedSamples(e._parsedSamples)
     , _sampleData(std::move(e._sampleData))
-    , _start(e._start)
-    , _stop(e._stop)
 {
 }
 
@@ -126,8 +116,6 @@ Entry::Entry(const Header* h)
     , _pos(0)
     , _qual(MISSING_QUALITY)
     , _parsedSamples(false)
-    , _start(0)
-    , _stop(0)
 {
 }
 
@@ -135,8 +123,6 @@ Entry::Entry(const Header* h, const string& s)
     : _header(h)
     , _qual(MISSING_QUALITY)
     , _parsedSamples(false)
-    , _start(0)
-    , _stop(0)
 {
     parse(h, s);
 }
@@ -150,8 +136,6 @@ Entry::Entry(EntryMerger&& merger)
     , _qual(merger.qual())
     , _failedFilters(std::move(merger.failedFilters()))
     , _parsedSamples(true)
-    , _start(0)
-    , _stop(0)
 {
     if (merger.entryCount() < 2) {
         throw runtime_error(str(format(
@@ -168,7 +152,6 @@ Entry::Entry(EntryMerger&& merger)
 
     merger.setInfo(_info);
     merger.setAltAndGenotypeData(_alt, _sampleData);
-    setPositions();
 }
 
 void Entry::reheader(const Header* newHeader) {
@@ -277,7 +260,6 @@ void Entry::parse(const Header* h, const string& s) {
 
     tok.remaining(_sampleString);
     _parsedSamples = false;
-    setPositions();
 }
 
 void Entry::addIdentifier(const std::string& id) {
@@ -331,7 +313,6 @@ void Entry::swap(Entry& other) {
     std::swap(_header, other._header);
     std::swap(_parsedSamples, other._parsedSamples);
     _sampleString.swap(other._sampleString);
-    setPositions();
 }
 
 int32_t Entry::altIdx(const string& alt) const {
@@ -376,48 +357,12 @@ const SampleData& Entry::sampleData() const {
     return _sampleData;
 }
 
-void Entry::setPositions() {
-    if (_alt.empty()) {
-        _start = _pos - 1;
-        _stop = _pos;
-        return;
-    }
-
-    _start = numeric_limits<int64_t>::max();
-    _stop = 0;
-    for (uint32_t idx = 0; idx < _alt.size(); ++idx) {
-        if (_ref == _alt[idx]) {
-            throw runtime_error(str(format(
-                "Nonsense variant: identical to reference in %1%"
-                ) % toString() ));
-        }
-
-        string::size_type prefix = Sequence::commonPrefix(_ref, _alt[idx]);
-        int64_t start = _pos - 1 + prefix;
-        int64_t stop;
-        if (_alt[idx].size() == _ref.size()) {
-            stop = start + _alt[idx].size() - prefix;
-        } else {
-            // VCF prepends 1 base to indels
-            if (_alt[idx].size() < _ref.size()) { // deletion
-                stop = start + _ref.size();
-            } else if (_alt[idx].size() > _ref.size()) { // insertion
-                ++start;
-                stop = start;
-            } else // let's see if this ever happens!
-                throw runtime_error(str(format("Unknown variant type, allele %1%: %2%") %idx %toString()));
-        }
-        _start = min(_start, start);
-        _stop = max(_stop, stop);
-    }
-}
-
 int64_t Entry::start() const {
-    return _start;
+    return _pos-1;
 }
 
 int64_t Entry::stop() const {
-    return _stop;
+    return _pos-1 + _ref.size();
 }
 
 END_NAMESPACE(Vcf)
