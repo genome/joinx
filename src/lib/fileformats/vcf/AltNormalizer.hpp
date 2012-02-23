@@ -28,14 +28,14 @@ public:
     };
 
 
-    AltNormalizer(RefSeq const* ref);
+    AltNormalizer(RefSeq const& ref);
 
     void normalize(Entry& e);
     RefEdit moveInsertion(Entry& e, size_t idx) const;
     RefEdit moveDeletion(Entry& e, size_t idx) const;
 
 protected:
-    RefSeq const* _ref;
+    RefSeq const& _ref;
 };
 
 END_NAMESPACE(Vcf)

@@ -50,7 +50,7 @@ TEST_F(TestVcfAltNormalizer, insertion) {
     string ref = _ref.sequence("1", 11, 3);
     ASSERT_EQ("GCG", ref);
     Entry e = makeEntry("1", 11, ref, "GCGCG");
-    AltNormalizer n(&_ref);
+    AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
@@ -65,7 +65,7 @@ TEST_F(TestVcfAltNormalizer, insertionWithSubstitution) {
     string ref = _ref.sequence("1", 11, 3);
     ASSERT_EQ("GCG", ref);
     Entry e = makeEntry("1", 11, ref, "GAGCG");
-    AltNormalizer n(&_ref);
+    AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
@@ -80,7 +80,7 @@ TEST_F(TestVcfAltNormalizer, deletion) {
     string ref = _ref.sequence("1", 11, 3);
     ASSERT_EQ("GCG", ref);
     Entry e = makeEntry("1", 11, ref, "G");
-    AltNormalizer n(&_ref);
+    AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
@@ -95,7 +95,7 @@ TEST_F(TestVcfAltNormalizer, deletionWithSubstitution) {
     string ref = _ref.sequence("1", 9, 5);
     ASSERT_EQ("GCGCG", ref);
     Entry e = makeEntry("1", 9, ref, "GAG");
-    AltNormalizer n(&_ref);
+    AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
@@ -110,7 +110,7 @@ TEST_F(TestVcfAltNormalizer, testSubstitution) {
     string ref = _ref.sequence("1", 9, 1);
     ASSERT_EQ("G", ref);
     Entry e = makeEntry("1", 9, ref, "C");
-    AltNormalizer n(&_ref);
+    AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
@@ -125,7 +125,7 @@ TEST_F(TestVcfAltNormalizer, testSubstitutionWithPadding) {
     string ref = _ref.sequence("1", 9, 5);
     ASSERT_EQ("GCGCG", ref);
     Entry e = makeEntry("1", 9, ref, "GCGCA");
-    AltNormalizer n(&_ref);
+    AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
@@ -141,7 +141,7 @@ TEST_F(TestVcfAltNormalizer, insertionAndDeletion) {
     string ref = _ref.sequence("1", 11, 3);
     ASSERT_EQ("GCG", ref);
     Entry e = makeEntry("1", 11, ref, "GCGCG,GC");
-    AltNormalizer n(&_ref);
+    AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";

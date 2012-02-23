@@ -11,6 +11,7 @@
 #include "VcfFilterCommand.hpp"
 #include "VcfSiteFilterCommand.hpp"
 #include "VcfMergeCommand.hpp"
+#include "VcfNormalizeIndelsCommand.hpp"
 #include "VcfReportCommand.hpp"
 
 #include "common/ProgramVersion.hpp"
@@ -36,6 +37,7 @@ JoinX::JoinX(int argc, char** argv)
     registerSubCommand(VcfFilterCommand::ptr(new VcfFilterCommand));
     registerSubCommand(VcfSiteFilterCommand::ptr(new VcfSiteFilterCommand));
     registerSubCommand(VcfMergeCommand::ptr(new VcfMergeCommand));
+    registerSubCommand(VcfNormalizeIndelsCommand::ptr(new VcfNormalizeIndelsCommand));
     registerSubCommand(VcfReportCommand::ptr(new VcfReportCommand));
 
     stringstream cmdHelp;
