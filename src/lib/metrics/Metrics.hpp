@@ -62,6 +62,8 @@ public:
     uint32_t numVeryRareVariants(uint32_t index) const;
     uint32_t numRareVariants(uint32_t index) const;
     uint32_t numCommonVariants(uint32_t index) const;
+    uint32_t numKnownVariants(uint32_t index) const;
+    uint32_t numNovelVariants(uint32_t index) const;
     MutationSpectrum const& mutationSpectrum(uint32_t index) const;
 
 protected:
@@ -77,7 +79,8 @@ protected:
     std::vector<uint32_t> _perSampleVeryRareVariants;
     std::vector<uint32_t> _perSampleRareVariants;
     std::vector<uint32_t> _perSampleCommonVariants;
-    std::vector<uint32_t> _perSampleDbSnp;
+    std::vector<uint32_t> _perSampleKnownVariants;
+    std::vector<uint32_t> _perSampleNovelVariants;
     std::vector<MutationSpectrum> _perSampleMutationSpectrum;
 };
 

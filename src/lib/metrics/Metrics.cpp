@@ -174,6 +174,8 @@ void EntryMetrics::identifyNovelAlleles(Vcf::Entry& entry, std::vector<std::stri
             }
             else {
                 //do nothing for now
+                //could have been that the person did not specify perAlt
+                //What do we do then?
             }
             
         }
@@ -252,7 +254,8 @@ SampleMetrics::SampleMetrics(size_t sampleCount)
     , _perSampleVeryRareVariants(sampleCount, 0)
     , _perSampleRareVariants(sampleCount, 0)
     , _perSampleCommonVariants(sampleCount, 0)
-    , _perSampleDbSnp(sampleCount, 0)
+    , _perSampleKnownVariants(sampleCount, 0)
+    , _perSampleNovelVariants(sampleCount, 0)  
     , _perSampleMutationSpectrum(sampleCount)
 {
 }
@@ -347,6 +350,19 @@ void SampleMetrics::processEntry(Vcf::Entry& e, EntryMetrics& m) {
                     _perSampleMutationSpectrum[sampleIdx](ref[0], variant[0]) += 1;
                 }
             }
+
+            //determine if novel which is by allele
+            std::vector<bool> novelByAlt = m.novelStatusByAlt();
+            for(auto j = gt.indexSet().begin(); j != gt.indexSet().end(); ++j) {
+                if(*j == 0)
+                    continue;
+                if(novelByAlt[*j]) {
+                    ++_perSampleNovelVariants[sampleIdx];
+                }
+                else {
+                    ++_perSampleKnownVariants[sampleIdx];
+                }
+            }
         }
     }
 }
@@ -382,6 +398,12 @@ uint32_t SampleMetrics::numRareVariants(uint32_t index) const {
 }
 uint32_t SampleMetrics::numCommonVariants(uint32_t index) const {
     return _perSampleCommonVariants[index];
+}
+uint32_t SampleMetrics::numKnownVariants(uint32_t index) const {
+    return _perSampleKnownVariants[index];
+}
+uint32_t SampleMetrics::numNovelVariants(uint32_t index) const {
+    return _perSampleNovelVariants[index];
 }
 
 MutationSpectrum const& SampleMetrics::mutationSpectrum(uint32_t index) const {
