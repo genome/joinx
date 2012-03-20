@@ -47,7 +47,7 @@ void VcfReportCommand::parseArguments(int argc, char** argv) {
         ("input-file,i", po::value<string>(&_infile), "input file (empty or - means stdin, which is the default)")
         ("per-sample-file,S", po::value<string>(&_perSampleFile), "per sample report output file")
         ("per-site-file,s", po::value<string>(&_perSiteFile), "per site report output file")
-        ("info-fields-from-db,I", po::value<vector<string>>(&_infoFields), "info fields to use for annotation (default: all)")
+        ("info-fields-from-db,I", po::value<vector<string>>(&_infoFields), "info fields to use for determining if a variant is known (default: none)")
         ;
     po::positional_options_description posOpts;
     posOpts.add("input-file", -1);
@@ -184,7 +184,7 @@ void VcfReportCommand::exec() {
         // how many samples have a non-reference genotype?
         //cout << samplesWithNonRefGenotypes(entry) << "\n";
     }
-    *perSampleOut << "SampleName\tTotalSites\tRef\tHet\tHom\tFilt\tMissing\tnonDiploid\tSingleton\tVeryRare\tRare\tCommon\tTransitions\tTransversions\tTransition:Transversion" << endl;
+    *perSampleOut << "SampleName\tTotalSites\tRef\tHet\tHom\tFilt\tMissing\tnonDiploid\tKnown\tNovel\tPercKnown\tSingleton\tVeryRare\tRare\tCommon\tTransitions\tTransversions\tTransition:Transversion" << endl;
     for(uint32_t i = 0; i < entry.header().sampleCount(); ++i) {
         *perSampleOut << entry.header().sampleNames()[i];
         *perSampleOut << "\t" << totalSites;
@@ -194,6 +194,16 @@ void VcfReportCommand::exec() {
         *perSampleOut << "\t" << sampleMetrics.numFilteredCalls(i);
         *perSampleOut << "\t" << sampleMetrics.numMissingCalls(i);
         *perSampleOut << "\t" << sampleMetrics.numNonDiploidCalls(i);
+        *perSampleOut << "\t" << sampleMetrics.numKnownVariants(i);
+        *perSampleOut << "\t" << sampleMetrics.numNovelVariants(i);
+        double fracKnown = (double) sampleMetrics.numKnownVariants(i) / (double)(sampleMetrics.numKnownVariants(i) + sampleMetrics.numNovelVariants(i));
+        if(fracKnown != std::numeric_limits<double>::infinity()) {
+            *perSampleOut << "\t" << fracKnown * 100 ;
+        }
+        else {
+            *perSampleOut << "\tNA";
+        }
+
         *perSampleOut << "\t" << sampleMetrics.numSingletonVariants(i);
         *perSampleOut << "\t" << sampleMetrics.numVeryRareVariants(i);
         *perSampleOut << "\t" << sampleMetrics.numRareVariants(i);
