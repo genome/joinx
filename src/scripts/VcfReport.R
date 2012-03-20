@@ -84,3 +84,74 @@ per_site.total_ts_tv=function(x) {
     }
     list(transitions = transition, transversions = transversion, weightedTs = wts, weightedTv = wtv, unweighted_ts_tv_ratio = transition/transversion, weighted_ts_tv_ratio = wts/wtv);
 }
+
+per_site.total_known=function(x) {
+    novel = 0;
+    known = 0;
+    wnovel = 0;
+    wknown = 0;
+    for(i in 1:nrow(x)) {
+        alts = unlist(strsplit(as.character(x[i,]$Alt),","));
+        novelStatus = as.numeric(unlist(strsplit(as.character(x[i,]$ByAltNovel),",")));
+        sampleCount = as.numeric(unlist(strsplit(as.character(x[i,]$AlleleDistBySample),",")));
+        #alleleCount = as.numeric(unlist(strsplit(as.character(x[i,]$AlleleDist),",")));
+        for(a in 1:length(alts)) {
+            if(novelStatus[a] && sampleCount[a+1]) {
+                novel = novel + 1;
+                wnovel = wnovel + sampleCount[a+1]; 
+            }
+            else {
+                if(!novelStatus[a] && sampleCount[a+1]) {
+                    known = known + 1;
+                    wknown = wknown + sampleCount[a+1];
+                }
+            }
+        }
+    }
+    list(Novel = novel, Known = known, weightedNovel = wnovel, weightedKnown = wknown, unweighted_known_pct = known/(known+novel)*100, weighted_known_pct = wknown/(wknown+wnovel)*100);
+}
+
+callset_metrics=function(per_site, per_sample) {
+    total_sites = nrow(per_site);   #sites total
+    tstv = per_site.total_ts_tv(per_site); #tstv
+    known = per_site.total_known(per_site);
+    sample_number = nrow(per_sample);
+    mean_variant = mean(per_sample$Het+per_sample$Hom);
+    mean_variant_sd = sd(per_sample$Het+per_sample$Hom);
+    mean_known_pct = mean(per_sample$PercKnown);
+    mean_known_pct_sd = sd(per_sample$PercKnown);
+    mean_filtered = mean(per_sample$Filt);
+    mean_filtered_sd = sd(per_sample$Filt);
+    mean_missing = mean(per_sample$Missing);
+    mean_missing_sd = sd(per_sample$Missing);
+    mean_singleton = mean(per_sample$Singleton);
+    mean_singleton_sd = sd(per_sample$Singleton);
+    mean_sample_tstv = mean(per_sample$Transition.Transversion);
+    mean_sample_tstv_sd = sd(per_sample$Transition.Transversion);
+
+    #output a bunch of stuff here
+    report = data.frame();
+    report = rbind(report,"Number of Samples"=list(value=sample_number))
+    report = rbind(report,"Total Segregating Sites"=list(value=total_sites))
+    report = rbind(report,"Call Set Ts:Tv Ratio"=list(value=tstv$unweighted_ts_tv_ratio))
+    report = rbind(report,"Call Set Known Percentage"=list(value=known$unweighted_known_pct))
+    report = rbind(report,"Call Set Known Percentage by Sample Genotype"=list(value=known$weighted_known_pct))
+    report = rbind(report,"Mean variants per sample"=list(value=mean_variant))
+    report = rbind(report,"Standard deviation of variants per sample"=list(value=mean_variant_sd))
+    report = rbind(report,"Filtered variants per sample"=list(value=mean_filtered))
+    report = rbind(report,"Standard deviation of filtered variants per sample"=list(value=mean_filtered_sd))
+    report = rbind(report,"Mean missing genotypes per sample"=list(value=mean_missing))
+    report = rbind(report,"Standard deviation of missing genotypes per sample"=list(value=mean_missing_sd))
+    report = rbind(report,"Mean singletons per sample"=list(value=mean_singleton))
+    report = rbind(report,"Standard deviation of singletons per sample"=list(value=mean_singleton_sd))
+    report = rbind(report,"Mean Ts:Tv per sample"=list(value=mean_sample_tstv))
+    report = rbind(report,"Standard deviation of Ts:Tv per sample"=list(value=mean_sample_tstv_sd))
+    report = rbind(report,"Mean Percent Known variants per sample"=list(value=mean_known_pct))
+    report = rbind(report,"Standard deviation of Percent Known per sample"=list(value=mean_known_pct_sd))
+
+    invisible(format(report,scientific=F,digits=2,drop0trailing=T));
+}
+
+
+
+
