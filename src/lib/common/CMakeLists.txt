@@ -8,7 +8,7 @@ set(SOURCES
     Iub.hpp
     MutationSpectrum.cpp
     MutationSpectrum.hpp
-    ProgramVersion.hpp
+    ProgramDetails.hpp
     Region.cpp
     Region.hpp
     Sequence.cpp

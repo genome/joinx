@@ -14,7 +14,7 @@
 #include "VcfNormalizeIndelsCommand.hpp"
 #include "VcfReportCommand.hpp"
 
-#include "common/ProgramVersion.hpp"
+#include "common/ProgramDetails.hpp"
 
 #include <boost/format.hpp>
 #include <sstream>

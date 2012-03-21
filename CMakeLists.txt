@@ -6,7 +6,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     message("No CMAKE_INSTALL_PREFIX specified, defaulting to /usr")
     set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "joinx install prefix" FORCE)
 endif()
-message("Install path: ${CMAKE_INSTALL_PREFIX}")
+
 
 if(DEFINED JOINX_DEBUG_VCF_MERGE)
     message("Vcf merge debugging output enabled")
@@ -17,6 +17,11 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/build-common/cmake")
 include(TestHelper)
 include(VersionHelper)
 include(ProjectHelper)
+set(INSTALL_SHARE_PATH "share/joinx${EXE_VERSION_SUFFIX}")
+set(INSTALL_DOC_PATH share/doc/joinx${EXE_VERSION_SUFFIX})
+message("Install path: ${CMAKE_INSTALL_PREFIX}")
+message("Share path: ${INSTALL_SHARE_PATH}")
+message("Doc path: ${INSTALL_DOC_PATH}")
 
 configure_file(version/version.h.in version/version.h @ONLY)
 include_directories(${PROJECT_BINARY_DIR}/version)
@@ -64,6 +69,8 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 add_projects(src/lib)
 add_projects(src/exe)
 
+# install scripts
+add_subdirectory(src/scripts)
 # integration testing
 add_subdirectory(integration-test)
 

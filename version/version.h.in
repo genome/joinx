@@ -7,6 +7,9 @@ extern "C" {
 const static char* __g_prog_version = "@FULL_VERSION@";
 const static char* __g_commit_hash = "@COMMIT_HASH@";
 const static char* __g_build_type = "@CMAKE_BUILD_TYPE@";
+const static char* __g_install_prefix = "@CMAKE_INSTALL_PREFIX@";
+const static char* __g_share_path =
+    "@CMAKE_INSTALL_PREFIX@/@INSTALL_SHARE_PATH@";
 
 #ifdef __cplusplus
 }
