@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-print "ENV OMG: ", os.getenv("PYTHONPATH")
 
 from integrationtest import IntegrationTest, main
 import unittest
