@@ -6,9 +6,10 @@ read.per_sample_file=function(filename) {
 per_sample.rare_mutation_boxplot=function(x) {
     library(ggplot2);
     #this refactors for nice boxplots
-    melt(x[,c(1,9,10,11)])->melted;
+    #be careful here as it doesn't use the headers
+    melt(x[,c("SampleName","Singleton","VeryRare","Rare")])->melted;
 
-    ggplot(melted, aes(x=variable,y=value)) + geom_boxplot() + xlab("Minor Allele Frequency Class") + ylab("Number") + opts(title = "Minor Allele Frequency Classes By Sample")
+    print(ggplot(melted, aes(x=variable,y=value)) + geom_boxplot() + xlab("Minor Allele Frequency Class") + ylab("Number") + opts(title = "Minor Allele Frequency Classes By Sample"));
 }
 
 per_sample.genotype_class_fraction_boxplot=function(x) {
@@ -16,9 +17,10 @@ per_sample.genotype_class_fraction_boxplot=function(x) {
     #this refactors for nice boxplots
     ratio_call = x[,c(4,5,6,7)]/x$TotalSites;
     ratio_call = cbind(x$SampleName,ratio_call);
+    names(ratio_call) = c("SampleName","Heterozygous","Homozygous","Filtered","Missing");
     melt(ratio_call)->melted;
 
-    ggplot(melted, aes(x=variable,y=value)) + geom_boxplot() + xlab("Genotype Class") + ylab("Frequency") + opts(title = "Genotype Classes By Sample");
+    print(ggplot(melted, aes(x=variable,y=value)) + geom_boxplot() + xlab("Genotype Class") + ylab("Frequency") + opts(title = "Genotype Classes By Sample"));
 }
 
 per_sample.genotype_class_count_boxplot=function(x) {
@@ -28,17 +30,17 @@ per_sample.genotype_class_count_boxplot=function(x) {
     names(temp)=c("SampleName","Heterozygous","Homozygous","Filtered","Missing");
     melt(temp)->melted;
 
-    ggplot(melted, aes(x=variable,y=value)) + geom_boxplot() + xlab("Genotype Class") + ylab("Number of Calls") + opts(title = "Genotype Classes By Sample");
+    print(ggplot(melted, aes(x=variable,y=value)) + geom_boxplot() + xlab("Genotype Class") + ylab("Number of Calls") + opts(title = "Genotype Classes By Sample"));
 }
 
 per_sample.ts_tv_histogram=function(x) {
     library(ggplot2);
-    ggplot(x, aes(x=Transition.Transversion)) + geom_histogram() + xlab("Ts:Tv Ratio") + ylab("Number") + opts(title = "Ts:Tv Ratio By Sample") + geom_vline(xintercept=mean(x$Transition.Transversion),colour="red") + annotate("text",x=mean(x$Transition.Transversion),y=0,hjust=1.01,vjust=1.01,colour="red",label=paste("Mean Ts:Tv=",round(mean(x$Transition.Transversion),2)),size=4);
+    print(ggplot(x, aes(x=Transition.Transversion)) + geom_histogram() + xlab("Ts:Tv Ratio") + ylab("Number") + opts(title = "Ts:Tv Ratio By Sample") + geom_vline(xintercept=mean(x$Transition.Transversion),colour="red") + annotate("text",x=mean(x$Transition.Transversion),y=0,hjust=1.01,vjust=1.01,colour="red",label=paste("Mean Ts:Tv=",round(mean(x$Transition.Transversion),2)),size=4));
 }
 
 per_sample.known_histogram=function(x) {
     library(ggplot2);
-    ggplot(x, aes(x=PercKnown)) + geom_histogram() + xlab("Percentage of Known Variants") + ylab("Number") + opts(title = "Percentage of Known Variants By Sample") + geom_vline(xintercept=mean(x$PercKnown),colour="red") + annotate("text",x=mean(x$PercKnown),y=0,hjust=1.01,vjust=1.01,colour="red",label=paste("Mean Percentage Known Variants=",round(mean(x$PercKnown),2)),size=4);
+    print(ggplot(x, aes(x=PercKnown)) + geom_histogram() + xlab("Percentage of Known Variants") + ylab("Number") + opts(title = "Percentage of Known Variants By Sample") + geom_vline(xintercept=mean(x$PercKnown),colour="red") + annotate("text",x=mean(x$PercKnown),y=0,hjust=1.01,vjust=1.01,colour="red",label=paste("Mean Percentage Known Variants=",round(mean(x$PercKnown),2)),size=4));
 }
 
 read.per_site_file=function(filename) {
@@ -48,15 +50,15 @@ read.per_site_file=function(filename) {
 
 per_site.maf_histogram=function(x) {
     library(ggplot2);
-    ggplot(x, aes(x=MAF)) + geom_histogram(binwidth=0.005) + xlab("Minimum MAF (>0)") + ylab("Number") +  opts(title = "Minor Allele Frequency Distribution");
+    print(ggplot(x, aes(x=MAF)) + geom_histogram(binwidth=0.005) + xlab("Minimum MAF (>0)") + ylab("Number") +  opts(title = "Minor Allele Frequency Distribution"));
 }
 
 per_site.maf_frequency_histogram=function(x) {
-    ggplot(x, aes(x=MAF,y = ..count../sum(..count..))) + geom_histogram(binwidth=0.005) + xlab("Minor Allele Frequency") + ylab("Frequency") + opts(title = "Minor Allele Frequency Distribution")
+    print(ggplot(x, aes(x=MAF,y = ..count../sum(..count..))) + geom_histogram(binwidth=0.005) + xlab("Minor Allele Frequency") + ylab("Frequency") + opts(title = "Minor Allele Frequency Distribution"));
 }
 
 per_site.maf_scatter=function(x) {
-    ggplot(x, aes(x=c(1:nrow(x)),y=MAF)) + geom_point() + xlab("Minor Allele Frequency") + ylab("number") + opts(title = "Minor Allele Frequency Distribution")
+    print(ggplot(x, aes(x=c(1:nrow(x)),y=MAF)) + geom_point() + xlab("Minor Allele Frequency") + ylab("number") + opts(title = "Minor Allele Frequency Distribution"));
 }
 
 per_site.total_ts_tv=function(x) {
@@ -112,6 +114,7 @@ per_site.total_known=function(x) {
 }
 
 callset_metrics=function(per_site, per_sample) {
+    #this whole thing would probably be more efficient in C++ as part of the report program...
     total_sites = nrow(per_site);   #sites total
     tstv = per_site.total_ts_tv(per_site); #tstv
     known = per_site.total_known(per_site);
@@ -149,7 +152,41 @@ callset_metrics=function(per_site, per_sample) {
     report = rbind(report,"Mean Percent Known variants per sample"=list(value=mean_known_pct))
     report = rbind(report,"Standard deviation of Percent Known per sample"=list(value=mean_known_pct_sd))
 
-    invisible(format(report,scientific=F,digits=2,drop0trailing=T));
+    invisible(format(report,scientific=F,digits=2,drop0trailing=T,trim=T));
+}
+
+write_image=function(image_type="pdf", file_basename, draw_func, func_args=...) {
+    image_name = paste(file_basename,image_type,sep=".");
+    if(image_type == "pdf") {
+        pdf(file=image_name,height=6.5,width=9);  #1 inch margins on a default PP slide
+    }
+    else if(image_type == "png") {
+        png(file=image_name,width=9,height=6.5,units="in",res=300);   #1 inch margins on a default PP slide. High quality resolution.
+    }
+    else {
+        stop("Unrecognized image type");
+    }
+    print(dev.cur());
+    draw_func(func_args);
+    dev.off();
+}
+
+write_reports=function(per_site_file="per_site_report.txt",per_sample_file="per_sample_report.txt",image_type="pdf",callset_file="callset_metrics.txt") {
+    library(ggplot2);
+    read.per_site_file(per_site_file)->per_site;
+    read.per_sample_file(per_sample_file)->per_sample;
+    #per sample call set graphs
+    write_image(image_type=image_type,file_basename="PerSampleTsTv",draw_func=per_sample.ts_tv_histogram,per_sample);
+    write_image(image_type=image_type,file_basename="PerSampleRareMutation",draw_func=per_sample.rare_mutation_boxplot,per_sample);
+    write_image(image_type=image_type,file_basename="PerSampleGenotypeClassFraction",draw_func=per_sample.genotype_class_fraction_boxplot,per_sample);
+    write_image(image_type=image_type,file_basename="PerSampleGenotypeClassCount",draw_func=per_sample.genotype_class_count_boxplot,per_sample);
+    write_image(image_type=image_type,file_basename="PerSampleKnown",draw_func=per_sample.known_histogram,per_sample);
+    #per site call set graphs
+    write_image(image_type=image_type,file_basename="PerSiteMafCount",draw_func=per_site.maf_histogram,per_site);
+    write_image(image_type=image_type,file_basename="PerSiteMafFrequency",draw_func=per_site.maf_frequency_histogram,per_site);
+    
+    metrics = callset_metrics(per_site, per_sample);
+    write.table(metrics,file=callset_file,sep="\t",quote=F,col.names=F);
 }
 
 
