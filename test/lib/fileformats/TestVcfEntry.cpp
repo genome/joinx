@@ -63,8 +63,6 @@ namespace {
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tEXTRA\tNA00003\tNA00002\tNA00001\n"
         );
 
-
-
     string vcfLines =
         "20\t14370\trs6054257\tG\tA\t29\t.\tAF=0.5;DB;DP=14;H2;NS=3\tGT:GQ:DP:HQ\t0|0:48:1:51,51\t1|0:48:8:51,51\t1/1:43:5:.,.\n"
         "20\t17330\t.\tT\tA\t3\tq10\tAF=0.017;DP=11;NS=3\tGT:GQ:DP:HQ:FT\t0|0:49:3:58,50:.\t0|1:3:5:65,3:PASS\t.\n"
@@ -339,9 +337,11 @@ TEST_F(TestVcfEntry, move) {
     ASSERT_EQ(origStop, e2.stop());
 }
 
-TEST_F(TestVcfEntry, testNoAlts) {
-    Entry e(&_header, "20\t14370\tid1\tT\t.\t29\tPASS\t.\t.\t");
-    ASSERT_EQ(0, e.alt().size());
-    ASSERT_EQ(14369, e.start());
-    ASSERT_EQ(14370, e.stop());
+TEST_F(TestVcfEntry, moreSamplesThanHeader) {
+    Entry e(&_header, "20\t14370\tid1\tT\tC\t29\tPASS\t.\tGT\t0/1\t0/1\t0/1\t0/1");
+    ASSERT_THROW(e.sampleData(), runtime_error);
+    // we're allowing trailing tabs
+    e = Entry(&_header, "20\t14370\tid1\tT\tC\t29\tPASS\t.\tGT\t0/1\t0/1\t0/1\t");
+    ASSERT_NO_THROW(e.sampleData());
+    ASSERT_EQ(3, e.sampleData().samplesWithData());
 }

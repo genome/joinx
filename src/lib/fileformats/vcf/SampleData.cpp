@@ -68,6 +68,11 @@ SampleData::SampleData(Header const* h, std::string const& raw)
     uint32_t sampleIdx(0);
     while (tok.extract(&beg, &end)) {
         vector<string> data;
+
+        // allow trailing tabs because our data has some :/
+        if (tok.eof() && end-beg == 0)
+            break;
+
         if (end-beg != 1 || *beg != '.') {
             Tokenizer<char>::split(beg, end, ':', back_inserter(data));
 
@@ -81,6 +86,9 @@ SampleData::SampleData(Header const* h, std::string const& raw)
             }
         }
         ++sampleIdx;
+    }
+    if (sampleIdx > _header->sampleNames().size()) {
+        throw runtime_error(str(boost::format("More samples than described in VCF header (%1% vs %2%).") %sampleIdx %_header->sampleNames().size()));
     }
 }
 
