@@ -6,7 +6,7 @@ if(${CMAKE_SIZEOF_VOID_P} MATCHES 8)
     set(ARCH "x86_64")
 endif ()
 
-set(DEFAULT_ETC_ALTERNATIVES_PRIORITY 15)
+set(DEFAULT_ETC_ALTERNATIVES_PRIORITY 16)
 
 # The format of the description field is a short summary line followed by a
 # longer paragraph indented by a single space on each line
