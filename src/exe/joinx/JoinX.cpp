@@ -3,6 +3,7 @@
 #include "CreateContigsCommand.hpp"
 #include "GenerateCommand.hpp"
 #include "IntersectCommand.hpp"
+#include "RefStatsCommand.hpp"
 #include "RemapCigarCommand.hpp"
 #include "SnvConcordanceByQualityCommand.hpp"
 #include "SnvConcordanceCommand.hpp"
@@ -13,6 +14,7 @@
 #include "VcfMergeCommand.hpp"
 #include "VcfNormalizeIndelsCommand.hpp"
 #include "VcfReportCommand.hpp"
+#include "Wig2BedCommand.hpp"
 
 #include "common/ProgramDetails.hpp"
 
@@ -29,6 +31,7 @@ JoinX::JoinX(int argc, char** argv)
     registerSubCommand(CreateContigsCommand::ptr(new CreateContigsCommand));
     registerSubCommand(GenerateCommand::ptr(new GenerateCommand));
     registerSubCommand(IntersectCommand::ptr(new IntersectCommand));
+    registerSubCommand(RefStatsCommand::ptr(new RefStatsCommand));
     registerSubCommand(RemapCigarCommand::ptr(new RemapCigarCommand));
     registerSubCommand(SnvConcordanceByQualityCommand::ptr(new SnvConcordanceByQualityCommand));
     registerSubCommand(SnvConcordanceCommand::ptr(new SnvConcordanceCommand));
@@ -39,6 +42,7 @@ JoinX::JoinX(int argc, char** argv)
     registerSubCommand(VcfMergeCommand::ptr(new VcfMergeCommand));
     registerSubCommand(VcfNormalizeIndelsCommand::ptr(new VcfNormalizeIndelsCommand));
     registerSubCommand(VcfReportCommand::ptr(new VcfReportCommand));
+    registerSubCommand(Wig2BedCommand::ptr(new Wig2BedCommand));
 
     stringstream cmdHelp;
     cmdHelp << "Valid subcommands:" << endl << endl;

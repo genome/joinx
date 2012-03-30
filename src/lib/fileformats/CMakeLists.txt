@@ -24,6 +24,8 @@ set(SOURCES
     Variant.hpp
     VcfReader.cpp
     VcfReader.hpp
+    WiggleReader.cpp
+    WiggleReader.hpp
     vcf/AlleleMerger.cpp
     vcf/AlleleMerger.hpp
     vcf/AltNormalizer.cpp

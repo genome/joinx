@@ -20,6 +20,7 @@ public:
 
     ~Fasta();
 
+    size_t seqlen(std::string const& seq) const;
     char sequence(std::string const& seq, size_t pos) const;
     std::string sequence(std::string const& seq, size_t pos, size_t len) const;
 

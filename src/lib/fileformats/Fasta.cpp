@@ -212,6 +212,15 @@ std::string const& Fasta::name() const {
     return _name;
 }
 
+size_t Fasta::seqlen(std::string const& seq) const {
+    Index::Entry const* e = _index->entry(seq);
+    if (e) {
+        return e->len;
+    }    
+
+    return 0;
+}
+
 std::string Fasta::sequence(std::string const& seq, size_t pos, size_t len) const {
     if (pos == 0) {
         throw runtime_error("Fasta::sequence expects one based coordinates.");
@@ -236,7 +245,6 @@ std::string Fasta::sequence(std::string const& seq, size_t pos, size_t len) cons
     size_t lineStart = e->offset + skipLines*e->lineLength;
     size_t skipBases = pos - skipLines*e->lineBasesLength;
     string rv;
-    auto out = rv.begin();
     while (len) {
         size_t start = lineStart+skipBases;
         size_t thisLen = min(len, e->lineBasesLength-skipBases);

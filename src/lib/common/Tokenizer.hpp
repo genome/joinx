@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream>
+#include "JxString.hpp"
 
 #include <boost/format.hpp>
 #include <algorithm>
@@ -43,6 +43,19 @@ public:
         rewind();
     }
 
+    Tokenizer(JxString const& s, DelimType const& delim = '\t')
+        : _sbeg(s.begin())
+        , _send(s.end())
+        , _totalLen(s.size())
+        , _delim(delim)
+        , _pos(0)
+        , _end(0)
+        , _eofCalls(0) // to support the last field being empty, see eof()
+        , _lastDelim(0)
+    {
+        rewind();
+    }
+
     bool nextTokenMatches(std::string const& value) const {
         return _end-_pos == value.size()
             && strncmp(_sbeg+_pos, value.data(), value.size()) == 0;
@@ -50,6 +63,15 @@ public:
 
     template<typename T>
     bool extract(T& value);
+
+    bool extract(JxString& s) {
+        char const* beg;
+        char const* end;
+        bool rv = _extract(&beg, &end);
+        if (rv)
+            s.assign(beg, end);
+        return rv;
+    }
 
     bool extract(char const** beg, char const** end) {
         return _extract(beg, end);
@@ -77,7 +99,7 @@ public:
     // returns # of tokens actually skipped
     uint32_t advance(uint32_t count);
     void rewind();
-    bool eof();
+    bool eof() const;
     const char& lastDelim() { return _lastDelim; }
 
 protected:
@@ -198,7 +220,7 @@ inline void Tokenizer<DelimType>::rewind() {
 }
 
 template<>
-inline bool Tokenizer<char>::eof() {
+inline bool Tokenizer<char>::eof() const {
     // in order to handle the last field being empty, we don't want to
     // just look at _pos == _totalLen. instead, we need to check if the
     // last char in the string is the delim, and if so, return an empty
@@ -218,7 +240,7 @@ inline bool Tokenizer<char>::eof() {
 }
 
 template<>
-inline bool Tokenizer<std::string>::eof() {
+inline bool Tokenizer<std::string>::eof() const {
     // in order to handle the last field being empty, we don't want to
     // just look at _pos == _totalLen. instead, we need to check if the
     // last char in the string is the delim, and if so, return an empty

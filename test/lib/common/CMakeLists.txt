@@ -5,6 +5,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 def_test(CigarString)
 def_test(Iub)
+def_test(JxString)
 def_test(MutationSpectrum)
 def_test(Region)
 def_test(Sequence)

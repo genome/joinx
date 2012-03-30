@@ -16,6 +16,8 @@ set(SOURCES
     IntersectCommand.hpp
     JoinX.cpp
     JoinX.hpp
+    RefStatsCommand.cpp
+    RefStatsCommand.hpp
     RemapCigarCommand.cpp
     RemapCigarCommand.hpp
     SnvConcordanceByQualityCommand.cpp
@@ -36,6 +38,8 @@ set(SOURCES
     VcfNormalizeIndelsCommand.hpp
     VcfReportCommand.cpp
     VcfReportCommand.hpp
+    Wig2BedCommand.cpp
+    Wig2BedCommand.hpp
     main.cpp
 )
 
