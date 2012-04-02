@@ -16,7 +16,7 @@ public:
 
     std::string name() const { return "ref-stats"; }
     std::string description() const {
-        return "compare the reference column in a bed file against a fasta";
+        return "compute statistics (#A/T bases, #C/G, #CpG bases) in regions taken from a .bed file";
     }
 
     void exec();

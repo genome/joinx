@@ -55,7 +55,7 @@ void RefStatsCommand::parseArguments(int argc, char** argv) {
         throw runtime_error(ss.str());
     }
 
-    if (!vm.count("ref-bases"))
+    if (vm.count("ref-bases"))
         _refBases = true;
 
     if (!vm.count("bed")) {
@@ -126,7 +126,11 @@ void RefStatsCommand::exec() {
 
     Bed entry;
     string referenceBases;
-    *out << "#chr\tstart\tstop\t#a/t\t#c/g\t#cpg\tref\n";
+    *out << "#chr\tstart\tstop\t#a/t\t#c/g\t#cpg";
+    if (_refBases)
+        *out << "\tref";
+    *out << "\n";
+
     while (bedReader.next(entry)) {
         try {
             char prevBase(0);
@@ -145,8 +149,10 @@ void RefStatsCommand::exec() {
             *out << entry << "\t"
                 << rs.at << "\t"
                 << rs.cg << "\t"
-                << rs.cpg << "\t"
-                << ref << "\n";
+                << rs.cpg;
+            if (_refBases)
+                *out  << "\t" << ref;
+            *out << "\n";
         } catch (const exception& e) {
             cerr << entry << "\tERROR: " << e.what() << "\n";
         }
