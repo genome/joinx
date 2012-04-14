@@ -69,7 +69,8 @@ public:
         }
     }
 
-    static vector<ColumnBase*> parse(const std::string& fmt, std::ostream& s) {
+    template<typename OutContainer>
+    static void parse(const std::string& fmt, std::ostream& s, OutContainer& out) {
         unsigned which = 0;
 
         if (fmt.empty())
@@ -87,12 +88,11 @@ public:
         string remainder(&fmt[1]);
         Tokenizer<string> t(remainder, ",-");
         unsigned field, rangeEnd;
-        vector<ColumnBase*> rv;
         while (t.extract(field)) {
             switch (t.lastDelim()) {
                 case '\0':
                 case ',':
-                    rv.push_back(new Column(s, which, field));
+                    out.emplace_back(new Column(s, which, field));
                     break;
 
                 case '-':
@@ -101,12 +101,10 @@ public:
                             "Invalid format string component %1%") %fmt));
 
                     while (field <= rangeEnd)
-                        rv.push_back(new Column(s, which, field++));
+                        out.emplace_back(new Column(s, which, field++));
                     break;
             }
         }
-
-        return rv;
     }
 
     void output(const Bed& a, const Bed& b) {
@@ -164,21 +162,18 @@ Formatter::Formatter(const std::string& formatString, std::ostream& s)
                 %formatString));
 
         if (token == "I") {
-            _columns.push_back(new IntersectionColumns(s));
+            _columns.emplace_back(new IntersectionColumns(s));
         } else if (token == "A") {
-            _columns.push_back(new CompleteColumn(s, 0));
+            _columns.emplace_back(new CompleteColumn(s, 0));
         } else if (token == "B") {
-            _columns.push_back(new CompleteColumn(s, 1));
+            _columns.emplace_back(new CompleteColumn(s, 1));
         } else {
-            vector<ColumnBase*> v(Column::parse(token, s));
-            _columns.insert(_columns.end(), v.begin(), v.end());
+            Column::parse(token, s, _columns);
         }
     }
 }
 
 Formatter::~Formatter() {
-    for (auto i = _columns.begin(); i != _columns.end(); ++i)
-        delete *i;
 }
 
 void Formatter::output(const Bed& a, const Bed& b) {

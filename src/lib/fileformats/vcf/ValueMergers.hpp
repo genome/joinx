@@ -20,6 +20,7 @@ namespace ValueMergers {
     /// These are useful for doing things like merging INFO, FILTER, or FORMAT
     /// records in vcf files.
     struct Base {
+        typedef std::shared_ptr<const Base> const_ptr;
         typedef std::function<const CustomValue*(const Entry*)> FetchFunc;
         virtual ~Base() {};
         /// the name of the merger. this is used when specifying merge
@@ -54,22 +55,20 @@ namespace ValueMergers {
         /// Retrieve a pointer to the instance of this class
         static const Registry* getInstance();
 
-        ~Registry();
-
         /// Retrieve a pointer to the the merger named by name
         /// \param name the name of the merger to retrieve
         /// \exception runtime_error thrown when the specified merger is unknown
-        const Base* getMerger(const std::string& name) const;
+        Base const* getMerger(std::string const& name) const;
     protected:
         /// used internally to build the list of all mergers
-        void registerMerger(const Base* merger);
+        void registerMerger(Base::const_ptr const& merger);
         /// protected constructor, no outside instantiation allowed!
         Registry();
     protected:
         /// holds a pointer to the singleton instance of this class
         static std::unique_ptr<Registry> _instance;
         /// a map of the available mergers, keyed by name
-        std::map<std::string, const Base*> _mergers;
+        std::map<std::string, Base::const_ptr> _mergers;
     };
 
     /// Value Merger which uses the value from the first entry, ignoring the rest

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -20,7 +21,7 @@ public:
 
 protected:
     std::string _formatString;
-    std::vector<ColumnBase*> _columns;
+    std::vector<std::unique_ptr<ColumnBase>> _columns;
     std::ostream& _s;
 };
 

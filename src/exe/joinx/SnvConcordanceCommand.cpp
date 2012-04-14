@@ -28,7 +28,8 @@ CommandBase::ptr SnvConcordanceCommand::create(int argc, char** argv) {
 }
 
 SnvConcordanceCommand::SnvConcordanceCommand()
-    : _useDepth(false)
+    : _outputFile("-")
+    , _useDepth(false)
 {
 }
 
@@ -79,104 +80,38 @@ void SnvConcordanceCommand::parseArguments(int argc, char** argv) {
     }
 }
 
-void SnvConcordanceCommand::setupStreams(Streams& s) const {
-    unsigned cinReferences = 0;
-    unsigned coutReferences = 0;
-
-    fstream* fs;
-
-    if (_fileA != "-") {
-        s.inA = fs = new fstream(_fileA.c_str(), ios::in);
-        if (!*s.inA)
-            throw runtime_error("Failed to open input file '" + _fileA + "'");
-        s.cleanup.push_back(fs);
-    } else {
-        s.inA = &cin;
-        ++cinReferences;
-    }
-
-    if (_fileB != "-") {
-        s.inB = fs = new fstream(_fileB.c_str(), ios::in);
-        if (!*s.inB)
-            throw runtime_error("Failed to open input file '" + _fileB + "'");
-        s.cleanup.push_back(fs);
-    } else {
-        s.inB = &cin;
-        ++cinReferences;
-    }
-
-    if (cinReferences > 1)
-        throw runtime_error("Multiple input streams from stdin specified. Abort.");
-
-    if (!_hitsFile.empty() && _hitsFile != "-") {
-        s.outHit = fs = new fstream(_hitsFile.c_str(), ios::out);
-        if (!*s.outHit)
-            throw runtime_error("Failed to open output file '" + _hitsFile + "'");
-        s.cleanup.push_back(fs);
-    } else if (_hitsFile == "-") {
-        s.outHit = &cout;
-        ++coutReferences;
-    }
-
-    if (!_outputFile.empty() && _outputFile != "-") {
-        s.out = fs = new fstream(_outputFile.c_str(), ios::out);
-        if (!*s.out)
-            throw runtime_error("Failed to open output file '" + _outputFile + "'");
-        s.cleanup.push_back(fs);
-    } else {
-        s.out = &cout;
-        ++coutReferences;
-    }
-
-    if (!_missFileA.empty() && _missFileA != "-") {
-        s.outMissA = fs = new fstream(_missFileA.c_str(), ios::out);
-        if (!*s.outMissA)
-            throw runtime_error("failed to open output file '" + _missFileA + "'");
-        s.cleanup.push_back(fs);
-    } else if (!_missFileA.empty()) {
-        s.outMissA = &cout;
-        ++coutReferences;
-    }
-
-    if (!_missFileB.empty() && _missFileB != "-") {
-        s.outMissB = fs = new fstream(_missFileB.c_str(), ios::out);
-        if (!*s.outMissB)
-            throw runtime_error("failed to open output file '" + _missFileB + "'");
-        s.cleanup.push_back(fs);
-    } else if (!_missFileB.empty()) {
-        s.outMissB = &cout;
-        ++coutReferences;
-    }
-
-    if (coutReferences > 1)
-        throw runtime_error("Multiple output streams to stdout specified. Abort.");
-}
-
 namespace {
     class Collector {
     public:
-        Collector(SnvConcordance& concordance, SnvConcordanceCommand::Streams& s)
+        Collector(
+                SnvConcordance& concordance,
+                ostream* outHit,
+                ostream* outMissA,
+                ostream* outMissB
+                )
             : _concordance(concordance)
-            , _s(s)
+            , _outHit(outHit)
+            , _outMissA(outMissA)
+            , _outMissB(outMissB)
         {
         }
 
     bool hit(const Bed& a, const Bed& b) {
-        if (_s.outHit)
-            *_s.outHit << a << "\t" << b << endl;
+        if (_outHit)
+            *_outHit << a << "\t" << b << endl;
 
         return _concordance.hit(a, b);
     }
 
     void missA(const Bed& a) {
-        if (_s.outMissA)
-            *_s.outMissA << a << "\n";;
+        if (_outMissA)
+            *_outMissA << a << "\n";;
         _concordance.missA(a);
     }
 
     void missB(const Bed& b) {
-        if (_s.outMissB)
-            *_s.outMissB << b << "\n";
+        if (_outMissB)
+            *_outMissB << b << "\n";
         _concordance.missB(b);
     }
 
@@ -191,7 +126,9 @@ namespace {
 
     protected:
         SnvConcordance& _concordance;
-        SnvConcordanceCommand::Streams& _s;
+        ostream* _outHit;
+        ostream* _outMissA;
+        ostream* _outMissB;
     };
 }
 
@@ -200,21 +137,35 @@ void SnvConcordanceCommand::exec() {
         throw runtime_error("Input files have the same name, '" + _fileA + "', not good.");
     }
 
-    Streams s;
-    setupStreams(s);
+    InputStream::ptr inA(_streams.wrap<istream, InputStream>(_fileA));
+    InputStream::ptr inB(_streams.wrap<istream, InputStream>(_fileB));
 
-    InputStream inA(_fileA, *s.inA);
-    InputStream inB(_fileB, *s.inB);
+    ostream* out = _streams.get<ostream>(_outputFile);
+    ostream* outHit(0);
+    ostream* outMissA(0);
+    ostream* outMissB(0);
+
+    if (!_hitsFile.empty())
+        outHit = _streams.get<ostream>(_hitsFile);
+    if (!_missFileA.empty())
+        outMissA = _streams.get<ostream>(_missFileA);
+    if (!_missFileB.empty())
+        outMissB = _streams.get<ostream>(_missFileB);
+
+    if (_streams.cinReferences() > 1)
+        throw runtime_error("Multiple input streams from stdin specified. Abort.");
+
+
     typedef function<void(const BedHeader*, string&, Bed&)> Extractor;
     Extractor extractor = bind(&Bed::parseLine, _1, _2, _3, -1);
     typedef TypedStream<Bed, Extractor> BedReader;
-    BedReader fa(extractor, inA);
-    BedReader fb(extractor, inB);
+    BedReader fa(extractor, *inA);
+    BedReader fb(extractor, *inB);
 
     SnvConcordance::DepthOrQual depthOrQual = _useDepth ? SnvConcordance::DEPTH : SnvConcordance::QUAL;
     SnvConcordance concordance(depthOrQual);
-    Collector c(concordance, s);
+    Collector c(concordance, outHit, outMissA, outMissB);
     IntersectFull<BedReader,BedReader,Collector> intersector(fa, fb, c);
     intersector.execute();
-    concordance.reportText(*s.out);
+    concordance.reportText(*out);
 }

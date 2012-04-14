@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CommandBase.hpp"
+#include "fileformats/StreamHandler.hpp"
 
 #include <fstream>
 #include <string>
@@ -20,37 +21,8 @@ public:
 
     void exec();
 
-
-public:
-    struct Streams {
-        Streams()
-            : inA(NULL)
-            , inB(NULL)
-            , out(NULL)
-            , outHit(NULL)
-            , outMissA(NULL)
-            , outMissB(NULL)
-        {}
-
-        ~Streams() {
-            for (unsigned i = 0; i < cleanup.size(); ++i)
-                delete cleanup[i];
-        }
-
-        std::istream* inA;
-        std::istream* inB;
-        std::ostream* out;
-        std::ostream* outHit;
-        std::ostream* outMissA;
-        std::ostream* outMissB;
-
-        std::vector<std::fstream*> cleanup;
-    };
-
-
 protected:
     void parseArguments(int argc, char** argv);
-    void setupStreams(Streams& s) const;
 
 protected:
     std::string _fileA;
@@ -60,4 +32,5 @@ protected:
     std::string _outputFile;
     std::string _hitsFile;
     bool _useDepth;
+    StreamHandler _streams;
 };

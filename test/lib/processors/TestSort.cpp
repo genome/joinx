@@ -38,7 +38,6 @@ protected:
     typedef Sort<BedReader, BedOpenerType, Collector<Bed> > SortType;
 
     TestSort()
-        : _rawStreams(NULL)
     {}
 
     string chromName(int chrom) {
@@ -66,30 +65,30 @@ protected:
         random_shuffle(_shuffledBeds.begin(), _shuffledBeds.end());
 
         const int nStreams = 10;
-        _rawStreams = new stringstream[nStreams];
+        for (int i = 0; i < nStreams; ++i)
+            _rawStreams.emplace_back(new stringstream);
+
         auto iter = _shuffledBeds.begin();
         while (iter != _shuffledBeds.end()) {
             for (int i = 0; i < nStreams && iter != _shuffledBeds.end(); ++i) {
-                _rawStreams[i] << *iter++ << "\n";
+                *_rawStreams[i] << *iter++ << "\n";
             }
         }
 
         for (int i = 0; i < nStreams; ++i) {
-            _inputStreams.push_back(InputStream::ptr(new InputStream("test", _rawStreams[i])));
+            _inputStreams.push_back(InputStream::ptr(new InputStream("test", *_rawStreams[i])));
             _bedReaders.push_back(openBed(*_inputStreams.back(), 0));
         }
     }
 
     void TearDown() {
-        delete[] _rawStreams;
-        _rawStreams = NULL;
     }
 
     vector<Bed> _expectedBeds;
     vector<Bed> _shuffledBeds;
     stringstream _expectedStr;
 
-    stringstream* _rawStreams;
+    vector<unique_ptr<stringstream>> _rawStreams;
     vector<InputStream::ptr> _inputStreams;
     vector<BedReader::ptr> _bedReaders;
 };

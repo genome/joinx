@@ -76,7 +76,6 @@ void MergeStrategy::setMerger(const std::string& id, const std::string& mergerNa
     const ValueMergers::Base* merger = _registry->getMerger(mergerName);
     auto inserted = _info.insert(make_pair(id, merger));
     if (!inserted.second) {
-        delete inserted.first->second;
         inserted.first->second = merger;
     }
 }

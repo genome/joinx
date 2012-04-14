@@ -18,28 +18,23 @@ namespace ValueMergers {
 std::unique_ptr<Registry> Registry::_instance;
 
 Registry::Registry() {
-    registerMerger(new EnforceEquality);
-    registerMerger(new Ignore);
-    registerMerger(new Sum);
-    registerMerger(new UniqueConcat);
+    registerMerger(Base::const_ptr(new EnforceEquality));
+    registerMerger(Base::const_ptr(new Ignore));
+    registerMerger(Base::const_ptr(new Sum));
+    registerMerger(Base::const_ptr(new UniqueConcat));
 }
 
-Registry::~Registry() {
-    for (auto i = _mergers.begin(); i != _mergers.end(); ++i)
-        delete i->second;
-}
-
-void Registry::registerMerger(const Base* merger) {
+void Registry::registerMerger(Base::const_ptr const& merger) {
     auto inserted = _mergers.insert(make_pair(merger->name(), merger));
     if (!inserted.second)
         throw runtime_error(str(format("Attempted to register duplicate value merger '%1%'") %merger->name()));
 }
 
-const Base* Registry::getMerger(const std::string& name) const {
+Base const* Registry::getMerger(const std::string& name) const {
     auto iter = _mergers.find(name);
     if (iter == _mergers.end())
         throw runtime_error(str(format("Unknown value merger '%1%'") %name));
-    return iter->second;
+    return iter->second.get();
 }
 
 const Registry* Registry::getInstance() {
