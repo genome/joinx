@@ -227,7 +227,7 @@ CigarString CigarString::subset(uint32_t offset, uint32_t len) const {
         return rv;
 
     uint32_t diff = currPos - offset;
-    Op first = { diff, _ops[startIdx].type };
+    Op first(diff, _ops[startIdx].type);
     rv.push_back(first);
     ++startIdx;
     len -= diff;
