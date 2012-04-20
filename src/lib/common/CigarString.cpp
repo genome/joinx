@@ -85,7 +85,7 @@ CigarString CigarString::merge(CigarString a, CigarString b, uint32_t pos) {
         case SEQ_MATCH:
         case MATCH: {
             uint32_t len = min(a[0].length, b[0].length);
-            Op op = { len, a[0].type };
+            Op op(len, a[0].type);
             rv.push_back(op);
             a.pop_front(len);
             if (op.type != DEL)
@@ -95,8 +95,7 @@ CigarString CigarString::merge(CigarString a, CigarString b, uint32_t pos) {
 
         case SEQ_MISMATCH: {
             uint32_t len = min(a[0].length, b[0].length);
-            Op op = { len, SEQ_MISMATCH };
-            rv.push_back(op);
+            rv.push_back(Op(len, SEQ_MISMATCH));
             a.pop_front(len);
             b.pop_front(len);
             }
@@ -104,8 +103,7 @@ CigarString CigarString::merge(CigarString a, CigarString b, uint32_t pos) {
 
 
         case INS: {
-            Op op = { b[0].length, INS };
-            rv.push_back(op);
+            rv.push_back(Op(b[0].length, INS));
             b.pop_front(b[0].length);
             }
             break;
