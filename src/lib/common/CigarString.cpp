@@ -149,7 +149,7 @@ void CigarString::parse(const string& data) {
     while (t.extract(length)) {
         if (t.lastDelim() == '\0')
             break;
-        Op op = { length, translate(t.lastDelim()) };
+        Op op(length, translate(t.lastDelim()));
         if (op.type != BAD)
             push_back(op);
     }
@@ -238,7 +238,7 @@ CigarString CigarString::subset(uint32_t offset, uint32_t len) const {
             case SEQ_MATCH:
             case SEQ_MISMATCH: {
                 uint32_t amt = min(_ops[i].length, len);
-                Op op = { amt, _ops[i].type };
+                Op op(amt, _ops[i].type);
                 rv.push_back(op);
                 len -= amt;
                 } break;
