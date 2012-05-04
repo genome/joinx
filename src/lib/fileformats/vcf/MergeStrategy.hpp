@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <map>
 #include <string>
+#include <vector>
 
 class InputStream;
 
@@ -15,6 +16,7 @@ class CustomType;
 class CustomValue;
 class Entry;
 class Header;
+class ConsensusFilter;
 
 /// A class for specifying how to merge Vcf::CustomValue data types 
 /// from multiple Vcf::Entry records.
@@ -33,7 +35,7 @@ public:
 
     /// Create a new empty merge strategy for the given header
     /// \param header a merged vcf header
-    explicit MergeStrategy(const Header* header);
+    MergeStrategy(const Header* header, ConsensusFilter const* cnsFilt = 0);
 
     /// Retrieve the ValueMerger object responsible for merging the named info field.
     /// \param id names an info field
@@ -69,6 +71,8 @@ public:
     void primarySampleStreamIndex(uint32_t value);
     uint32_t primarySampleStreamIndex() const;
 
+    ConsensusFilter const* consensusFilter() const;
+
 protected:
     /// The merged Vcf header for the final output file
     const Header* _header;
@@ -81,6 +85,8 @@ protected:
     bool _clearFilters;
     bool _mergeSamples;
     uint32_t _primarySampleStreamIndex;
+
+    ConsensusFilter const* _cnsFilt;
 };
 
 END_NAMESPACE(Vcf)

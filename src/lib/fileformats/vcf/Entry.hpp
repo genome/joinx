@@ -76,6 +76,7 @@ public:
     }
 
     void addFilter(const std::string& filterName);
+    void clearFilters();
 
     const std::string& chrom() const { return _chrom; }
     const uint64_t& pos() const { return _pos; }

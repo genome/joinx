@@ -31,4 +31,7 @@ protected:
     StreamHandler _streams;
     bool _clearFilters;
     bool _mergeSamples;
+    double _consensusPercent;
+    std::string _consensusFilter;
+    std::string _consensusFilterDesc;
 };

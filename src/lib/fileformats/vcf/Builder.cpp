@@ -1,8 +1,10 @@
 #include "Builder.hpp"
+#include "ConsensusFilter.hpp"
 #include "Entry.hpp"
 #include "EntryMerger.hpp"
 #include "GenotypeFormatter.hpp" // TODO: move DisjointAllelesException out of this header
 #include "Header.hpp"
+#include "MergeStrategy.hpp"
 
 #include <algorithm>
 #include <functional>
@@ -59,21 +61,35 @@ void Builder::operator()(Entry&& e) {
     _entries.push_back(std::move(e));
 }
 
+void Builder::writeMergedEntry(Entry& e) const {
+    if (_mergeStrategy.clearFilters())
+        e.clearFilters();
+    _out(e);
+}
+
 void Builder::output(Entry* begin, Entry* end) const {
-        try {
+    auto cnsFilt = _mergeStrategy.consensusFilter();
+    try {
         EntryMerger merger(_mergeStrategy, _header, begin, end);
         // no merging happened, output each entry individually
         if (!merger.merged()) {
             for (auto e = begin; e != end; ++e) {
+                if (cnsFilt)
+                    cnsFilt->apply(*e, 0);
+
                 e->reheader(_header);
-                _out(*e);
+                writeMergedEntry(*e);
             }
             return;
         }
 
         // create and output the new merged entry
-        Entry merged(std::move(merger));
-        _out(merged);
+        //Entry merged(std::move(merger));
+        Entry merged(merger);
+        if (cnsFilt)
+            cnsFilt->apply(merged, &merger.sampleCounts());
+
+        writeMergedEntry(merged);
     } catch (const DisjointGenotypesError& e) {
         // TODO: real logging
         cerr << e.what() << "\nEntries:\n";
@@ -89,7 +105,9 @@ void Builder::output(Entry* begin, Entry* end) const {
             cerr << "Going with entry #" << int(chosen-begin)+1 << ".\n";
             EntryMerger merger(_mergeStrategy, _header, chosen, chosen+1);
             Entry merged(std::move(merger));
-            _out(merged);
+            if (cnsFilt)
+                cnsFilt->apply(merged, 0);
+            writeMergedEntry(merged);
         } else {
             cerr << "More than 2 entries, abort.\n";
             throw;

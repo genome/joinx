@@ -31,6 +31,8 @@ protected:
     std::vector<Entry>::iterator partition();
     void output(Entry* begin, Entry* end) const;
 
+    void writeMergedEntry(Entry& e) const;
+
 protected:
     const MergeStrategy& _mergeStrategy;
     Header* _header;

@@ -34,6 +34,8 @@ set(SOURCES
     vcf/Builder.hpp
     vcf/Compare.cpp
     vcf/Compare.hpp
+    vcf/ConsensusFilter.cpp
+    vcf/ConsensusFilter.hpp
     vcf/CustomType.cpp
     vcf/CustomType.hpp
     vcf/CustomValue.cpp

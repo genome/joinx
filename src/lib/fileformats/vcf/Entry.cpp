@@ -137,11 +137,13 @@ Entry::Entry(EntryMerger&& merger)
     , _failedFilters(std::move(merger.failedFilters()))
     , _parsedSamples(true)
 {
+/*
     if (merger.entryCount() < 2) {
         throw runtime_error(str(format(
             "Logic error: attempted to merge a single entry: %1%"
             ) %merger.entries()->toString()));
     }
+*/
     if (!merger.merged()) {
         stringstream ss;
         for (size_t i = 0; i < merger.entryCount(); ++i) {
@@ -279,6 +281,10 @@ void Entry::addFilter(const std::string& filterName) {
     }
 
     _failedFilters.insert(filterName);
+}
+
+void Entry::clearFilters() {
+    _failedFilters.clear();
 }
 
 string Entry::toString() const {

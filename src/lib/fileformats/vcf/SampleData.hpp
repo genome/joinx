@@ -33,6 +33,7 @@ public:
 
     void clear();
     void swap(SampleData& other);
+    void addFilter(uint32_t idx, std::string const& filterName);
 
     FormatType const& format() const;
     iterator begin();

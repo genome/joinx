@@ -80,11 +80,19 @@ void Header::add(const string& line) {
 }
 
 void Header::addFilter(const string& id, const string& desc) {
+    if (_filters.find(id) != _filters.end())
+        throw runtime_error(str(format(
+            "Attempted to add duplicate filter '%1%' to vcf header."
+            ) %id));
     add(str(format("##FILTER=<ID=%1%,Description=\"%2%\">") %id %desc));
 }
 
 void Header::addInfoType(CustomType const& type) {
     add(str(format("##INFO=<%1%>") %type.toString()));
+}
+
+void Header::addFormatType(CustomType const& type) {
+    add(str(format("##FORMAT=<%1%>") %type.toString()));
 }
 
 
@@ -129,14 +137,21 @@ void Header::assertValid() const {
 
 void Header::merge(const Header& other, bool allowDuplicateSamples) {
     for (auto iter = other._sampleNames.begin(); iter != other._sampleNames.end(); ++iter) {
-        if (find(_sampleNames.begin(), _sampleNames.end(), *iter) != _sampleNames.end()) {
-            if (allowDuplicateSamples)
-                continue;
-            
-            throw runtime_error(str(format("Error merging VCF headers, sample name conflict: %1%") %*iter));
+        auto exists = find(_sampleNames.begin(), _sampleNames.end(), *iter);
+        size_t idx;
+        if (exists != _sampleNames.end()) {
+            if (!allowDuplicateSamples)
+                throw runtime_error(str(format("Error merging VCF headers, sample name conflict: %1%") %*iter));
+            idx = distance(_sampleNames.begin(), exists);
+        } else {
+            _sampleNames.push_back(*iter);
+            idx = _sampleNames.size()-1;
         }
-        _sampleNames.push_back(*iter);
+        if (idx >= _sampleSourceCounts.size())
+            _sampleSourceCounts.resize(idx+1);
+        ++_sampleSourceCounts[idx];
     }
+
 
     for (auto iter = other._metaInfoLines.begin(); iter != other._metaInfoLines.end(); ++iter) {
         // we already have that exact line
@@ -200,6 +215,9 @@ const std::vector<std::string>& Header::sampleNames() const {
     return _sampleNames;
 }
 
+std::vector<size_t> const& Header::sampleSourceCounts() const {
+    return _sampleSourceCounts;
+}
 
 END_NAMESPACE(Vcf)
 

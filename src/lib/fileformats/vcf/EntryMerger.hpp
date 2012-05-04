@@ -46,6 +46,10 @@ public:
 
     const Header* mergedHeader() const;
 
+    // The number of times each sample was seen while merging.
+    // Used for consensus filtering.
+    std::vector<size_t> const& sampleCounts() const;
+
 protected:
     size_t addAllele(const std::string& allele);
 
@@ -60,6 +64,7 @@ protected:
     std::set<std::string> _filters;
     std::set<std::string> _sampleNames;
     std::set<std::string> _info;
+    mutable std::vector<size_t> _sampleCounts;
 };
 
 END_NAMESPACE(Vcf)

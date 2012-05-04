@@ -1,9 +1,12 @@
 #include "VcfMergeCommand.hpp"
 
+#include "common/Tokenizer.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/OutputWriter.hpp"
 #include "fileformats/TypedStream.hpp"
 #include "fileformats/vcf/Builder.hpp"
+#include "fileformats/vcf/ConsensusFilter.hpp"
+#include "fileformats/vcf/CustomType.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/vcf/MergeStrategy.hpp"
@@ -13,12 +16,14 @@
 #include <boost/program_options.hpp>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <stdexcept>
 
 namespace po = boost::program_options;
 using boost::format;
 using namespace std;
 using namespace std::placeholders;
+using Vcf::CustomType;
 
 CommandBase::ptr VcfMergeCommand::create(int argc, char** argv) {
     std::shared_ptr<VcfMergeCommand> app(new VcfMergeCommand);
@@ -30,10 +35,12 @@ VcfMergeCommand::VcfMergeCommand()
     : _outputFile("-")
     , _clearFilters(false)
     , _mergeSamples(false)
+    , _consensusPercent(0.0)
 {
 }
 
 void VcfMergeCommand::parseArguments(int argc, char** argv) {
+    string consensusOpts;
     po::options_description opts("Available Options");
     opts.add_options()
         ("help,h", "this message")
@@ -41,7 +48,10 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
         ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
         ("merge-strategy-file,M", po::value<string>(&_mergeStrategyFile), "merge strategy file for info fields (see man page for format)")
         ("clear-filters,c", "When set, merged entries will have FILTER data stripped out")
-        ("merge-samples,s", "allow input files with overlapping samples")
+        ("merge-samples,s", "Allow input files with overlapping samples")
+        ("require-consensus,R", po::value<string>(&consensusOpts),
+            "When merging samples, require a certain percentage of them to agree, filtering sites that fail. "
+            "The format is -R percent,filterName,filterDescription")
         ;
     po::positional_options_description posOpts;
     posOpts.add("input-file", -1);
@@ -54,6 +64,25 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
         vm
     );
     po::notify(vm);
+
+    if (!consensusOpts.empty()) {
+        bool failed = true;
+        Tokenizer<char> tok(consensusOpts, ',');
+        if (tok.extract(_consensusPercent) && tok.extract(_consensusFilter)) {
+            tok.remaining(_consensusFilterDesc);
+            if (_consensusPercent >= 0 && _consensusPercent <= 1
+                && !_consensusFilter.empty() && !_consensusFilterDesc.empty())
+            {
+                failed = false;
+            }
+        }
+        if (failed)
+            throw runtime_error(str(format(
+                "Invalid value for -R: '%1%'. "
+                "Expected ratio,filtername,filterdesc with ratio in [0,1], "
+                "e.g., '0.5,CNS,Sample consensus filter.'")
+                %consensusOpts));
+    }
 
     if (vm.count("help")) {
         stringstream ss;
@@ -98,7 +127,17 @@ void VcfMergeCommand::exec() {
     }
 
     WriterType writer(*out);
-    Vcf::MergeStrategy mergeStrategy(&mergedHeader);
+    unique_ptr<Vcf::ConsensusFilter> cnsFilt;
+    if (_consensusPercent > 0) {
+        mergedHeader.addFilter(_consensusFilter, _consensusFilterDesc);
+        if (mergedHeader.formatType("FT") == NULL) {
+            CustomType FT("FT", CustomType::FIXED_SIZE, 1, CustomType::STRING, "Sample filter status");
+            mergedHeader.addFormatType(FT);
+        }
+        cnsFilt.reset(new Vcf::ConsensusFilter(_consensusPercent, _consensusFilter, &mergedHeader));
+    }
+
+    Vcf::MergeStrategy mergeStrategy(&mergedHeader, cnsFilt.get());
     if (!_mergeStrategyFile.empty()) {
         InputStream::ptr msFile(_streams.wrap<istream, InputStream>(_mergeStrategyFile));
         mergeStrategy.parse(*msFile);

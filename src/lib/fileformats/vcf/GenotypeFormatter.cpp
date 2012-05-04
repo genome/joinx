@@ -67,17 +67,28 @@ void GenotypeFormatter::merge(
         if (fields[i]->id() == "GT") {
             assert(i == 0);
             string newGt = renumberGT(e, sampleIdx, alleleIndices);
-            if (!previousValues[0].empty()) {
+            if (!previousValues[0].empty() && !overridePreviousValues) {
                 if (areGenotypesDisjoint(previousValues[0].toString(), newGt)) {
                     throw DisjointGenotypesError(
                         str(format("Incompatible genotypes while merging sample data: '%1%' and '%2%'")
                         %previousValues[0].toString() %newGt));
                 }
-                if (overridePreviousValues)
-                    previousValues[i] = CustomValue(type, newGt);
             } else {
                 previousValues[i] = CustomValue(type, newGt);
             }
+        } else if (fields[i]->id() == "FT") {
+            set<string> filters;
+            for (size_t j = 0; j < previousValues[j].size(); ++j)
+                filters.insert(previousValues[i].getString(j));
+            copy(e->failedFilters().begin(), e->failedFilters().end(), inserter(filters, filters.begin()));
+            if (filters.size() > 1)
+                filters.erase("PASS");
+
+            string filt(".");
+            if (!filters.empty())
+                filt = *filters.begin();
+                
+            previousValues[i] = CustomValue(type, filt);
         } else {
             const CustomValue* v = e->sampleData().get(sampleIdx, fields[i]->id());
             if (v && !v->empty() && (overridePreviousValues || previousValues[i].empty())) {

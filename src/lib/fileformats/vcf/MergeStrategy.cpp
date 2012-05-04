@@ -34,13 +34,14 @@ void MergeStrategy::parse(InputStream& s) {
     }
 }
 
-MergeStrategy::MergeStrategy(const Header* header)
+MergeStrategy::MergeStrategy(const Header* header, ConsensusFilter const* cnsFilt)
     : _header(header)
     , _default(0)
     , _registry(ValueMergers::Registry::getInstance())
     , _clearFilters(false)
     , _mergeSamples(false)
     , _primarySampleStreamIndex(0)
+    , _cnsFilt(cnsFilt)
 {
     _default = _registry->getMerger("ignore");
 }
@@ -107,6 +108,10 @@ CustomValue MergeStrategy::mergeInfo(const string& which, const Entry* begin, co
 
     const ValueMergers::Base* merger = infoMerger(which);
     return (*merger)(type, fetch, begin, end);
+}
+
+ConsensusFilter const* MergeStrategy::consensusFilter() const {
+    return _cnsFilt;
 }
 
 END_NAMESPACE(Vcf)

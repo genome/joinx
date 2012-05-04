@@ -133,6 +133,35 @@ void SampleData::swap(SampleData& other) {
     _values.swap(other._values);
 }
 
+void SampleData::addFilter(uint32_t idx, std::string const& filterName) {
+    auto sampleIter = _values.find(idx);
+    if (sampleIter == _values.end()) {
+        cerr << "Warning: attempted to filter nonexistant sample\n";
+        return;
+    }
+
+    CustomType const* FT = _header->formatType("FT");
+    if (FT == NULL) {
+        throw runtime_error(
+            str(boost::format("Attempted to filter sample %1% with filter %2%, but "
+                "no FT FORMAT tag appears in header") %idx %filterName));
+    }
+
+    auto ftIter = find_if(_format.begin(), _format.end(), bind(&customTypeIdMatches, "FT", _1));
+    size_t ftIdx(0);
+    if (ftIter == _format.end()) {
+        _format.push_back(FT);
+        ftIdx = _format.size()-1;
+    } else {
+        ftIdx = ftIter - _format.begin();
+    }
+
+    if (sampleIter->second.size() <= ftIdx) {
+        sampleIter->second.resize(ftIdx+1);
+    }
+    sampleIter->second[ftIdx] = CustomValue(FT, filterName);
+}
+
 SampleData::FormatType const& SampleData::format() const {
     return _format;
 }

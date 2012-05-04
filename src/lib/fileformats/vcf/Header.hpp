@@ -32,6 +32,7 @@ public:
     void add(std::string const& line);
     void addFilter(std::string const& name, std::string const& desc);
     void addInfoType(CustomType const& type);
+    void addFormatType(CustomType const& type);
     void merge(const Header& other, bool allowDuplicateSamples = false);
     bool empty() const;
 
@@ -56,6 +57,8 @@ public:
     // will throw if the header is invalid
     void assertValid() const;
 
+    std::vector<size_t> const& sampleSourceCounts() const;
+
 protected:
     void parseHeaderLine(std::string const& line);
 
@@ -68,6 +71,8 @@ protected:
     std::vector<std::string> _sampleNames;
     bool _headerSeen;
     uint32_t _sourceIndex;
+
+    std::vector<size_t> _sampleSourceCounts;
 };
 
 END_NAMESPACE(Vcf)

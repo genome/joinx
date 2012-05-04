@@ -1,5 +1,6 @@
 #include "EntryMerger.hpp"
 
+#include "ConsensusFilter.hpp"
 #include "CustomType.hpp"
 #include "CustomValue.hpp"
 #include "Entry.hpp"
@@ -48,6 +49,7 @@ EntryMerger::EntryMerger(
     , _begin(begin)
     , _end(end)
     , _qual(Entry::MISSING_QUALITY)
+    , _sampleCounts(_mergedHeader->sampleCount(), 0ul)
 {
     if (!_alleleMerger.merged())
         return;
@@ -189,15 +191,17 @@ void EntryMerger::setAltAndGenotypeData(
                 auto inserted = sdMap.insert(make_pair(mergedIdx, vector<CustomValue>()));
                 if (inserted.second || inserted.first->second.empty()) {
                     inserted.first->second = genotypeFormatter.process(format, e, sampleIdx, _alleleMerger.newGt()[idx]);
+                    ++_sampleCounts[mergedIdx];
                 } else if (_mergeStrategy.mergeSamples()) {
                     bool fromPrimaryStream = e->header().sourceIndex() == _mergeStrategy.primarySampleStreamIndex();
                     genotypeFormatter.merge(fromPrimaryStream, inserted.first->second, format, e, sampleIdx, _alleleMerger.newGt()[idx]);
+                    ++_sampleCounts[mergedIdx];
                 } else {
                     throw runtime_error("Unable to merge conflicting sample data.");
                 }
             }
         } catch (const DisjointGenotypesError&) {
-            throw;
+            //throw;
         } catch (const exception& ex) {
             throw runtime_error(str(boost::format(
                 "Failed while merging genotype data for entry:\n%1%\nError: %2%")
@@ -210,6 +214,10 @@ void EntryMerger::setAltAndGenotypeData(
 
 const Header* EntryMerger::mergedHeader() const {
     return _mergedHeader;
+}
+
+std::vector<size_t> const& EntryMerger::sampleCounts() const {
+    return _sampleCounts;
 }
 
 END_NAMESPACE(Vcf)
