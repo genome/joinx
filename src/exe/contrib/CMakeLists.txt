@@ -10,6 +10,3 @@ set(EXAMPLE_EXECUTABLE_NAME vcf-example)
 add_executable(${EXAMPLE_EXECUTABLE_NAME} ${SOURCES_EXAMPLE})
 target_link_libraries(${EXAMPLE_EXECUTABLE_NAME} processors fileformats ${Boost_LIBRARIES})
 set_target_properties(${EXAMPLE_EXECUTABLE_NAME} PROPERTIES PACKAGE_OUTPUT_NAME ${EXAMPLE_EXECUTABLE_NAME}${EXE_VERSION_SUFFIX})
-
-add_executable(make_contigs MakeContigs.cpp)
-target_link_libraries(make_contigs fileformats)
