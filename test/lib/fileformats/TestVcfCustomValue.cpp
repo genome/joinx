@@ -121,10 +121,12 @@ TEST(VcfCustomValue, fixedIntFromString) {
     ASSERT_THROW(CustomValue(&fixedInt, "1.2"), runtime_error);
     ASSERT_THROW(CustomValue(&fixedInt, "pig"), runtime_error);
     ASSERT_THROW(CustomValue(&fixedInt, "c"), runtime_error);
-    ASSERT_THROW(CustomValue(&fixedInt, ""), runtime_error);
+    ASSERT_NO_THROW(CustomValue(&fixedInt, ""));
     ASSERT_NO_THROW(CustomValue(&fixedInt, "."));
     CustomValue empty(&fixedInt, ".");
     ASSERT_TRUE(empty.empty());
+    CustomValue empty2(&fixedInt, "");
+    ASSERT_TRUE(empty2.empty());
 }
 
 TEST(VcfCustomValue, varFloat) {
@@ -137,10 +139,12 @@ TEST(VcfCustomValue, varFloat) {
     ASSERT_TRUE((resultInt = value.get<double>(2))); ASSERT_EQ(5, *resultInt);
     ASSERT_THROW(CustomValue(&varFloat, "pig"), runtime_error);
     ASSERT_THROW(CustomValue(&varFloat, "c"), runtime_error);
-    ASSERT_THROW(CustomValue(&varFloat, ""), runtime_error);
+    ASSERT_NO_THROW(CustomValue(&varFloat, ""));
     ASSERT_NO_THROW(CustomValue(&varFloat, "."));
     CustomValue empty(&varFloat, ".");
     ASSERT_TRUE(empty.empty());
+    CustomValue empty2(&varFloat, "");
+    ASSERT_TRUE(empty2.empty());
 }
 
 TEST(VcfCustomValue, fixedStringFromString) {
@@ -154,6 +158,9 @@ TEST(VcfCustomValue, fixedStringFromString) {
     ASSERT_NO_THROW(CustomValue(&fixedString, "."));
     CustomValue empty(&fixedString, ".");
     ASSERT_TRUE(empty.empty());
+    CustomValue empty2(&fixedString, "");
+    ASSERT_TRUE(empty2.empty());
+
 }
 
 TEST(VcfCustomValue, fixedCharFromString) {
@@ -171,6 +178,9 @@ TEST(VcfCustomValue, fixedCharFromString) {
     ASSERT_NO_THROW(CustomValue(&fixedChar, "."));
     CustomValue empty(&fixedChar, ".");
     ASSERT_TRUE(empty.empty());
+    CustomValue empty2(&fixedChar, "");
+    ASSERT_TRUE(empty2.empty());
+
 }
 //
 // CustomType alleleFlag("AF", CustomType::PER_ALLELE, 0, CustomType::FLAG, "allele filtered?");

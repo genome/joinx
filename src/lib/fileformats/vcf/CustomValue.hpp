@@ -63,8 +63,10 @@ protected:
 
     template<typename T>
     bool set(const std::string& value) {
-        if (value.empty())
-            return false;
+        if (value.empty()) {
+            _values.clear();
+            return true;
+        }
 
         type().typecheck<T>();
         uint32_t nItems = std::count_if(value.begin(), value.end(),
