@@ -1,7 +1,7 @@
 #include "CreateContigsCommand.hpp"
 
 #include "fileformats/Bed.hpp"
-#include "fileformats/FastaReader.hpp"
+#include "fileformats/Fasta.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/TypedStream.hpp"
 #include "processors/RemapContig.hpp"
@@ -92,7 +92,7 @@ void CreateContigsCommand::parseArguments(int argc, char** argv) {
 }
 
 void CreateContigsCommand::exec() {
-    FastaReader ref(_referenceFasta);
+    Fasta ref(_referenceFasta);
     ostream *output = _streams.get<ostream>(_outputFile);
 
     InputStream::ptr inStream(_streams.wrap<istream, InputStream>(_variantsFile));
@@ -102,7 +102,7 @@ void CreateContigsCommand::exec() {
     Extractor extractor = bind(&Bed::parseLine, _1, _2, _3, 2);
     BedReader reader(extractor, *inStream);
     RemapContigFastaWriter writer(*output);
-    RemapContigGenerator<FastaReader, RemapContigFastaWriter> generator(ref, _flankSize, writer);
+    RemapContigGenerator<Fasta, RemapContigFastaWriter> generator(ref, _flankSize, writer);
     Bed b;
     while (reader.next(b)) {
         Variant v(b);

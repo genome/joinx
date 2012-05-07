@@ -182,7 +182,12 @@ Fasta::Fasta(
 Fasta::Fasta(std::string const& path)
     : _name(path)
 {
-    _f.reset(new boost::iostreams::mapped_file_source(path));
+    try {
+        _f.reset(new boost::iostreams::mapped_file_source(path));
+    } catch (exception const& e) {
+        throw runtime_error(str(format("Failed to memory map fasta '%1%': %2%") %path %e.what()));
+    }
+
     _data = _f->data();
     _len = _f->size();
 
@@ -233,7 +238,7 @@ std::string Fasta::sequence(std::string const& seq, size_t pos, size_t len) cons
     }
 
     if (pos > e->len || pos+len - 1 > e->len) {
-        throw runtime_error(str(format(
+        throw length_error(str(format(
             "Request for %1%:%2%-%3% in %4%, but %1% has length %5%"
             ) %seq %pos %(pos+len) %_name %e->len));
     }

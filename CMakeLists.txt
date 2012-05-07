@@ -45,9 +45,6 @@ include_directories(${ZLIB_INCLUDE_DIRS})
 find_package(Boost 1.40.0 COMPONENTS program_options filesystem system iostreams REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-find_package(Samtools 0.1.6 REQUIRED)
-include_directories(${Samtools_INCLUDE_DIRS})
-
 # make sure to pick up headers from library dirs
 include_directories("src/lib")
 

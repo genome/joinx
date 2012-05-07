@@ -23,7 +23,7 @@ class TestCreateContigs(IntegrationTest, unittest.TestCase):
         params.extend(input_files)
         rv, err = self.execute(params)
         self.assertEqual(1, rv)
-        self.assertTrue("Failed to load fasta file: boof.fa" in err, "value was %s" %err)
+        self.assertTrue("Failed to memory map fasta 'boof.fa'" in err, "value was %s" %err)
 
     def test_bed_not_found(self):
         input_files = self.inputFiles("small.fa")

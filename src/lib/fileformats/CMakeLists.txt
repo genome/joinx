@@ -9,8 +9,6 @@ set(SOURCES
     BedReader.hpp
     Fasta.cpp
     Fasta.hpp
-    FastaReader.cpp
-    FastaReader.hpp
     InferFileType.cpp
     InferFileType.hpp
     InputStream.cpp
@@ -63,4 +61,4 @@ set(SOURCES
 )
 
 add_library(fileformats ${SOURCES})
-target_link_libraries(fileformats common ${Samtools_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(fileformats common ${Boost_LIBRARIES})

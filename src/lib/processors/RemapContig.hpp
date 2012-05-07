@@ -84,11 +84,10 @@ public:
         int32_t start = v.start() > _flankSize ? v.start() - _flankSize : 0;
         int32_t stop = v.stop() + _flankSize;
 
-        string preFlank;
+        string preFlank = _refSeq.sequence(v.chrom(), start+1, v.start()-start);
         string postFlank;
-        _refSeq.sequence(v.chrom(), start, v.start(), preFlank);
         try {
-            stop = _refSeq.sequence(v.chrom(), v.stop(), stop, postFlank);
+            postFlank = _refSeq.sequence(v.chrom(), v.stop()+1, _flankSize);
         } catch (std::length_error&) {
             stop = v.stop();
         }

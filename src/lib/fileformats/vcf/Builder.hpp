@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/namespaces.hpp"
-#include "fileformats/FastaReader.hpp"
 
 #include <functional>
 #include <vector>

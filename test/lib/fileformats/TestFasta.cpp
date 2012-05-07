@@ -47,7 +47,7 @@ TEST(Fasta, seq) {
     ASSERT_EQ("GTGT", fa.sequence("2", 294, 4));
 
     ASSERT_THROW(fa.sequence("3", 0, 1), runtime_error);
-    ASSERT_THROW(fa.sequence("3", 5, 1), runtime_error);
+    ASSERT_THROW(fa.sequence("3", 5, 1), length_error);
     ASSERT_EQ("ACGT", fa.sequence("3", 1, 4));
 
     ASSERT_EQ("T", fa.sequence("3", 4, 1));
@@ -56,6 +56,6 @@ TEST(Fasta, seq) {
 TEST(Fasta, posOverflow) {
     stringstream dat(goodData);
     Fasta fa("test", goodData.c_str(), goodData.size());
-    ASSERT_THROW(fa.sequence("1", (uint64_t)-1, 10), runtime_error);
+    ASSERT_THROW(fa.sequence("1", (uint64_t)-1, 10), length_error);
     
 }
