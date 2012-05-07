@@ -18,4 +18,4 @@ set(SOURCES
 )
 
 add_library(processors ${SOURCES})
-target_link_libraries(processors common fileformats ${Boost_LIBRARIES})
+target_link_libraries(processors common fileformats ${Boost_LIBRARIES} ${BZIP2_LIBRARIES})

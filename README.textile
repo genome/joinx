@@ -15,7 +15,7 @@ Building requires:
 * cmake 2.8+
 * boost 1.40+
 * gtest (google unit testing framework, optional for unit tests)
-* samtools
+* zlib/bzip2 development files (headers, libraries)
 
 Integration tests require:
 * Python
