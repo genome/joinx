@@ -124,10 +124,10 @@ void CustomValue::setNumAlts(uint32_t n) {
 
 std::string CustomValue::getString(SizeType idx) const {
     type().validateIndex(idx);
-    stringstream ss;
-    if (_values[idx].empty())
+    if (idx >= _values.size() || _values[idx].empty())
         return ".";
 
+    stringstream ss;
     switch (type().type()) {
         case CustomType::INTEGER:
              ss << *get<int64_t>(idx);
