@@ -356,7 +356,7 @@ void SampleMetrics::processEntry(Vcf::Entry& e, EntryMetrics& m) {
             for(auto j = gt.indexSet().begin(); j != gt.indexSet().end(); ++j) {
                 if(*j == 0)
                     continue;
-                if(novelByAlt[*j]) {
+                if(novelByAlt[*j - 1]) {    //need to subtract one because reference is not an Alt
                     ++_perSampleNovelVariants[sampleIdx];
                 }
                 else {
