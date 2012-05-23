@@ -30,7 +30,6 @@ void AlleleMerger::init(Entry const* beg, Entry const* end) {
     _ref = buildRef(beg, end);
     if (_ref.empty())
         return;
-    _merged = true;
 
     _merged = true;
     _newGt.resize(end-beg);
