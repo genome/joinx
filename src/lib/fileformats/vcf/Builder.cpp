@@ -2,7 +2,7 @@
 #include "ConsensusFilter.hpp"
 #include "Entry.hpp"
 #include "EntryMerger.hpp"
-#include "GenotypeFormatter.hpp" // TODO: move DisjointAllelesException out of this header
+#include "GenotypeMerger.hpp" // TODO: move DisjointAllelesException out of this header
 #include "Header.hpp"
 #include "MergeStrategy.hpp"
 

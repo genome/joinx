@@ -1,6 +1,6 @@
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
-#include "fileformats/vcf/GenotypeFormatter.hpp"
+#include "fileformats/vcf/GenotypeMerger.hpp"
 
 #include "fileformats/InputStream.hpp"
 
@@ -50,7 +50,7 @@ namespace {
 
 }
 
-class TestVcfGenotypeFormatter : public ::testing::Test {
+class TestVcfGenotypeMerger : public ::testing::Test {
 protected:
     void SetUp() {
         stringstream hdrss(headerText);
@@ -69,7 +69,7 @@ protected:
     vector<Entry> v;
 };
 
-TEST_F(TestVcfGenotypeFormatter, renumberGT) {
+TEST_F(TestVcfGenotypeMerger, renumberGT) {
     // the entry only has A, we're pretending like we've merged and now have C and A
     vector<string> altAlleles;
     altAlleles.push_back("C");
@@ -79,7 +79,7 @@ TEST_F(TestVcfGenotypeFormatter, renumberGT) {
     altAlleleIndices.push_back(1); // C becomes 1
     altAlleleIndices.push_back(2); // A becomes 2
 
-    GenotypeFormatter fmt(&_header, altAlleles);
+    GenotypeMerger fmt(&_header, altAlleles);
     // The GT for sample 2 (index 1) was 1|0, referring to A|G.
     // It should get updated to 2|0 since we put C in front of A in the
     // alt allele array.
@@ -89,20 +89,20 @@ TEST_F(TestVcfGenotypeFormatter, renumberGT) {
     ASSERT_EQ(".", fmt.renumberGT(&v[0], 2, altAlleleIndices));
 }
 
-TEST_F(TestVcfGenotypeFormatter, areGenotypesDisjoint) {
-    ASSERT_TRUE(GenotypeFormatter::areGenotypesDisjoint("0|0", "2|2"));
-    ASSERT_TRUE(GenotypeFormatter::areGenotypesDisjoint("0|1", "2|2"));
-    ASSERT_TRUE(GenotypeFormatter::areGenotypesDisjoint("1|0", "2|2"));
-    ASSERT_TRUE(GenotypeFormatter::areGenotypesDisjoint("1|1", "2|2"));
-    ASSERT_TRUE(GenotypeFormatter::areGenotypesDisjoint("0|0|1", "2|2"));
+TEST_F(TestVcfGenotypeMerger, areGenotypesDisjoint) {
+    ASSERT_TRUE(GenotypeMerger::areGenotypesDisjoint("0|0", "2|2"));
+    ASSERT_TRUE(GenotypeMerger::areGenotypesDisjoint("0|1", "2|2"));
+    ASSERT_TRUE(GenotypeMerger::areGenotypesDisjoint("1|0", "2|2"));
+    ASSERT_TRUE(GenotypeMerger::areGenotypesDisjoint("1|1", "2|2"));
+    ASSERT_TRUE(GenotypeMerger::areGenotypesDisjoint("0|0|1", "2|2"));
 
-    ASSERT_FALSE(GenotypeFormatter::areGenotypesDisjoint("1|2", "2|2"));
-    ASSERT_FALSE(GenotypeFormatter::areGenotypesDisjoint("2|1", "2|2"));
-    ASSERT_FALSE(GenotypeFormatter::areGenotypesDisjoint("2|2", "2|2"));
-    ASSERT_FALSE(GenotypeFormatter::areGenotypesDisjoint("0|0|1", "2|2|2|0"));
+    ASSERT_FALSE(GenotypeMerger::areGenotypesDisjoint("1|2", "2|2"));
+    ASSERT_FALSE(GenotypeMerger::areGenotypesDisjoint("2|1", "2|2"));
+    ASSERT_FALSE(GenotypeMerger::areGenotypesDisjoint("2|2", "2|2"));
+    ASSERT_FALSE(GenotypeMerger::areGenotypesDisjoint("0|0|1", "2|2|2|0"));
 }
 
-TEST_F(TestVcfGenotypeFormatter, mergeIncompatibleGenotypes) {
+TEST_F(TestVcfGenotypeMerger, mergeIncompatibleGenotypes) {
     vector<string> altAlleles;
     altAlleles.push_back("A");
     string mergeLines[] = {
@@ -119,7 +119,7 @@ TEST_F(TestVcfGenotypeFormatter, mergeIncompatibleGenotypes) {
     Entry::parseLine(&_header, mergeLines[0], primary);
     Entry::parseLine(&_header, mergeLines[1], secondary);
 
-    GenotypeFormatter fmt(&_header, altAlleles);
+    GenotypeMerger fmt(&_header, altAlleles);
     vector<CustomValue> previousValues = *primary.sampleData().get(0);
     ASSERT_THROW(
         fmt.merge(false, previousValues, secondary.sampleData().format(), &secondary, 0, altAlleleIndices),
@@ -127,7 +127,7 @@ TEST_F(TestVcfGenotypeFormatter, mergeIncompatibleGenotypes) {
         );
 }
 
-TEST_F(TestVcfGenotypeFormatter, merge) {
+TEST_F(TestVcfGenotypeMerger, merge) {
     vector<string> altAlleles;
     altAlleles.push_back("A");
     string mergeLines[] = {
@@ -143,7 +143,7 @@ TEST_F(TestVcfGenotypeFormatter, merge) {
     Entry::parseLine(&_header, mergeLines[0], primary);
     Entry::parseLine(&_header, mergeLines[1], secondary);
 
-    GenotypeFormatter fmt(&_header, altAlleles);
+    GenotypeMerger fmt(&_header, altAlleles);
     vector<CustomValue> previousValues = *primary.sampleData().get(0);
     fmt.merge(
         false, // do not override values that are already set

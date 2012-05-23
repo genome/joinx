@@ -22,9 +22,9 @@ public:
     {}
 };
 
-class GenotypeFormatter {
+class GenotypeMerger {
 public:
-    GenotypeFormatter(const Header* header, const std::vector<std::string>& alleles);
+    GenotypeMerger(const Header* header, const std::vector<std::string>& alleles);
 
     std::vector<CustomValue> process(
         const std::vector<CustomType const*>& fields,

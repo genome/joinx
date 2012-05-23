@@ -1,7 +1,6 @@
 #include "Entry.hpp"
 #include "EntryMerger.hpp"
 #include "CustomValue.hpp"
-#include "GenotypeFormatter.hpp"
 #include "Header.hpp"
 #include "MergeStrategy.hpp"
 #include "common/Sequence.hpp"

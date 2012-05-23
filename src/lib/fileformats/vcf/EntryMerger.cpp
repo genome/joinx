@@ -4,7 +4,7 @@
 #include "CustomType.hpp"
 #include "CustomValue.hpp"
 #include "Entry.hpp"
-#include "GenotypeFormatter.hpp"
+#include "GenotypeMerger.hpp"
 #include "Header.hpp"
 #include "MergeStrategy.hpp"
 #include "SampleData.hpp"
@@ -154,12 +154,15 @@ void EntryMerger::setAltAndGenotypeData(
 
     // build list of all format fields
     SampleData::FormatType format;
-    GenotypeFormatter genotypeFormatter(_mergedHeader, alt);
-    set<string> seen;
+    GenotypeMerger genotypeFormatter(_mergedHeader, alt);
+    set<string> seen; // keep track of what fields we have already seen
     for (const Entry* e = _begin; e != _end; ++e) {
         const vector<CustomType const*>& gtFormat = e->sampleData().format();
         for (auto i = gtFormat.begin(); i != gtFormat.end(); ++i) {
+            // check if we have already seen this field.
             auto inserted = seen.insert((*i)->id());
+
+            // if it was inserted, then it is new
             if (inserted.second) {
                 // GT field must always come first as per VCF4.1 spec
                 if ((*i)->id() == "GT" && !format.empty()) {
@@ -187,15 +190,16 @@ void EntryMerger::setAltAndGenotypeData(
                 uint32_t mergedIdx = _mergedHeader->sampleIndex(sampleName);
                 size_t idx = e - _begin;
 
-                // TODO: try to eliminate double map lookup here
                 auto inserted = sdMap.insert(make_pair(mergedIdx, vector<CustomValue>()));
                 if (inserted.second || inserted.first->second.empty()) {
                     inserted.first->second = genotypeFormatter.process(format, e, sampleIdx, _alleleMerger.newGt()[idx]);
-                    ++_sampleCounts[mergedIdx];
+                    if (!e->sampleData().isSampleFiltered(sampleIdx))
+                        ++_sampleCounts[mergedIdx];
                 } else if (_mergeStrategy.mergeSamples()) {
                     bool fromPrimaryStream = e->header().sourceIndex() == _mergeStrategy.primarySampleStreamIndex();
                     genotypeFormatter.merge(fromPrimaryStream, inserted.first->second, format, e, sampleIdx, _alleleMerger.newGt()[idx]);
-                    ++_sampleCounts[mergedIdx];
+                    if (!e->sampleData().isSampleFiltered(sampleIdx))
+                        ++_sampleCounts[mergedIdx];
                 } else {
                     throw runtime_error("Unable to merge conflicting sample data.");
                 }

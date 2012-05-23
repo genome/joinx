@@ -44,8 +44,8 @@ set(SOURCES
     vcf/EntryMerger.hpp
     vcf/GenotypeCall.cpp
     vcf/GenotypeCall.hpp
-    vcf/GenotypeFormatter.cpp
-    vcf/GenotypeFormatter.hpp
+    vcf/GenotypeMerger.cpp
+    vcf/GenotypeMerger.hpp
     vcf/Header.cpp
     vcf/Header.hpp
     vcf/Map.cpp

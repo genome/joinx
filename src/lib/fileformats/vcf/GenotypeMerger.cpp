@@ -1,4 +1,4 @@
-#include "GenotypeFormatter.hpp"
+#include "GenotypeMerger.hpp"
 
 #include "Entry.hpp"
 #include "GenotypeCall.hpp"
@@ -18,13 +18,13 @@ using namespace std;
 
 BEGIN_NAMESPACE(Vcf)
 
-GenotypeFormatter::GenotypeFormatter(const Header* header, const vector<string>& alleles)
+GenotypeMerger::GenotypeMerger(const Header* header, const vector<string>& alleles)
     : _header(header)
     , _alleles(alleles)
 {
 }
 
-vector<CustomValue> GenotypeFormatter::process(
+vector<CustomValue> GenotypeMerger::process(
     const std::vector<CustomType const*>& fields,
     const Entry* e,
     uint32_t sampleIdx,
@@ -49,7 +49,7 @@ vector<CustomValue> GenotypeFormatter::process(
     return rv;
 }
 
-void GenotypeFormatter::merge(
+void GenotypeMerger::merge(
     bool overridePreviousValues,
     vector<CustomValue>& previousValues,
     const std::vector<CustomType const*>& fields,
@@ -80,7 +80,11 @@ void GenotypeFormatter::merge(
             set<string> filters;
             for (size_t j = 0; j < previousValues[j].size(); ++j)
                 filters.insert(previousValues[i].getString(j));
-            copy(e->failedFilters().begin(), e->failedFilters().end(), inserter(filters, filters.begin()));
+
+            string fname;
+            if (e->sampleData().isSampleFiltered(sampleIdx, &fname))
+                filters.insert(fname);
+
             if (filters.size() > 1)
                 filters.erase("PASS");
 
@@ -98,7 +102,7 @@ void GenotypeFormatter::merge(
     }
 }
 
-string GenotypeFormatter::renumberGT(
+string GenotypeMerger::renumberGT(
     const Entry* e,
     uint32_t sampleIdx,
     const std::vector<size_t>& alleleIndices
@@ -131,7 +135,7 @@ string GenotypeFormatter::renumberGT(
     return newGT.str();
 }
 
-bool GenotypeFormatter::areGenotypesDisjoint(const std::string& str1, const std::string& str2) {
+bool GenotypeMerger::areGenotypesDisjoint(const std::string& str1, const std::string& str2) {
     set<uint32_t> values;
     GenotypeCall gt1(str1);
     GenotypeCall gt2(str2);
