@@ -33,7 +33,7 @@ public:
 
     void clear();
     void swap(SampleData& other);
-    void addFilter(uint32_t idx, std::string const& filterName);
+    void addFilter(uint32_t sampleIdx, std::string const& filterName);
 
     FormatType const& format() const;
     iterator begin();
@@ -52,6 +52,7 @@ public:
     GenotypeCall const& genotype(uint32_t sampleIdx) const;
 
     uint32_t samplesWithData() const;
+    bool isSampleFiltered(uint32_t idx, std::string* filterName = 0) const;
     int32_t samplesFailedFilter() const;
     int32_t samplesEvaluatedByFilter() const;
     void removeLowDepthGenotypes(uint32_t lowDepth);

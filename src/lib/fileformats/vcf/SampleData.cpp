@@ -133,8 +133,8 @@ void SampleData::swap(SampleData& other) {
     _values.swap(other._values);
 }
 
-void SampleData::addFilter(uint32_t idx, std::string const& filterName) {
-    auto sampleIter = _values.find(idx);
+void SampleData::addFilter(uint32_t sampleIdx, std::string const& filterName) {
+    auto sampleIter = _values.find(sampleIdx);
     if (sampleIter == _values.end()) {
         cerr << "Warning: attempted to filter nonexistant sample\n";
         return;
@@ -144,7 +144,7 @@ void SampleData::addFilter(uint32_t idx, std::string const& filterName) {
     if (FT == NULL) {
         throw runtime_error(
             str(boost::format("Attempted to filter sample %1% with filter %2%, but "
-                "no FT FORMAT tag appears in header") %idx %filterName));
+                "no FT FORMAT tag appears in header") %sampleIdx %filterName));
     }
 
     auto ftIter = find_if(_format.begin(), _format.end(), bind(&customTypeIdMatches, "FT", _1));
@@ -239,6 +239,23 @@ uint32_t SampleData::samplesWithData() const {
         if (!i->second.empty())
             ++rv;
     return rv;
+}
+
+bool SampleData::isSampleFiltered(uint32_t idx, std::string* filterName) const {
+    filterName = 0;
+    CustomValue const* ft = get(idx, "FT");
+    if (!ft || ft->empty())
+        return false;
+
+    for (size_t i = 0; i < ft->size(); ++i) {
+        string const& f = ft->getString(i);
+        if (!f.empty() && f != "." && f != "PASS") {
+            if (filterName)
+                *filterName = f;
+            return true;
+        }
+    }
+    return false;
 }
 
 int32_t SampleData::samplesFailedFilter() const {
