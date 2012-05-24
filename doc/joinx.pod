@@ -284,6 +284,24 @@ CALLER=uniq-concat
 -c, --clear-filters
     When set, merged entries will have FILTER data stripped out
 
+-P, --sample-priority <o|u|f> (default=o)
+    Set the sample priority when merging samples (-s). When multiple
+    files have data for the same sample at the same site, the source
+    with the highest priority is chosen. The valid values, o, u, and f
+    are short for order, unfiltered, and filtered. Prioritization by
+    order grants files listed earlier on the command line a higher
+    priority, while unfiltered and filtered rank sources first by
+    filter status, and then by order.
+
+-R, --require-consensus "ratio,FilterName,Filter description"
+    When merging samples, require a certain degree of consensus among
+    the sample sources, filtering sites that fail with FilterName
+    (which will be added to the vcf header if needed). So for example:
+        -R "1.0,ConsensusFilter,Sample consensus filter"
+    means that for any given sample/site, if all files containing the
+    sample do not agree, then the ConsensusFilter will be applied to
+    the sample/site.
+
 =head1 AUTHOR
 
 Joinx was written by Travis Abbott <tabbott@genome.wustl.edu>, and is maintained

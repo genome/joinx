@@ -34,7 +34,7 @@ VcfMergeCommand::VcfMergeCommand()
     : _outputFile("-")
     , _clearFilters(false)
     , _mergeSamples(false)
-    , _consensusPercent(0.0)
+    , _consensusRatio(0.0)
     , _samplePriority(Vcf::MergeStrategy::eORDER)
 {
 }
@@ -51,8 +51,8 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
         ("merge-samples,s", "Allow input files with overlapping samples")
         ("sample-priority,P", po::value<string>(&_samplePrioStr), "sample priority (o=Order, u=Unfiltered, f=Filtered)")
         ("require-consensus,R", po::value<string>(&consensusOpts),
-            "When merging samples, require a certain percentage of them to agree, filtering sites that fail. "
-            "The format is -R percent,filterName,filterDescription")
+            "When merging samples, require a certain ratio of them to agree, filtering sites that fail. "
+            "The format is -R ratio,filterName,filterDescription")
         ;
     po::positional_options_description posOpts;
     posOpts.add("input-file", -1);
@@ -69,9 +69,9 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
     if (!consensusOpts.empty()) {
         bool failed = true;
         Tokenizer<char> tok(consensusOpts, ',');
-        if (tok.extract(_consensusPercent) && tok.extract(_consensusFilter)) {
+        if (tok.extract(_consensusRatio) && tok.extract(_consensusFilter)) {
             tok.remaining(_consensusFilterDesc);
-            if (_consensusPercent >= 0 && _consensusPercent <= 1
+            if (_consensusRatio >= 0 && _consensusRatio <= 1
                 && !_consensusFilter.empty() && !_consensusFilterDesc.empty())
             {
                 failed = false;
@@ -144,13 +144,13 @@ void VcfMergeCommand::exec() {
 
     WriterType writer(*out);
     unique_ptr<Vcf::ConsensusFilter> cnsFilt;
-    if (_consensusPercent > 0) {
+    if (_consensusRatio > 0) {
         mergedHeader.addFilter(_consensusFilter, _consensusFilterDesc);
         if (mergedHeader.formatType("FT") == NULL) {
             CustomType FT("FT", CustomType::FIXED_SIZE, 1, CustomType::STRING, "Sample filter status");
             mergedHeader.addFormatType(FT);
         }
-        cnsFilt.reset(new Vcf::ConsensusFilter(_consensusPercent, _consensusFilter, &mergedHeader));
+        cnsFilt.reset(new Vcf::ConsensusFilter(_consensusRatio, _consensusFilter, &mergedHeader));
     }
 
     Vcf::MergeStrategy mergeStrategy(&mergedHeader, _samplePriority, cnsFilt.get());
