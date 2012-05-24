@@ -85,7 +85,7 @@ void Builder::output(Entry* begin, Entry* end) const {
 
         // create and output the new merged entry
         //Entry merged(std::move(merger));
-        Entry merged(merger);
+        Entry merged(std::move(merger));
         if (cnsFilt)
             cnsFilt->apply(merged, &merger.sampleCounts());
 
