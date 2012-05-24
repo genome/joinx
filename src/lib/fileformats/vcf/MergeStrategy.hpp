@@ -25,6 +25,12 @@ class ConsensusFilter;
 /// or parsed from an input stream (MergeStrategy::parse(header, instream)).
 class MergeStrategy {
 public:
+    enum SamplePriority {
+        eORDER,
+        eUNFILTERED,
+        eFILTERED
+    };
+
     /// Parse a merge strategy from the input given stream. Call this on an existing
     /// MergeStrategy instance to add the strategies specified in the stream to the
     /// plan.
@@ -35,7 +41,11 @@ public:
 
     /// Create a new empty merge strategy for the given header
     /// \param header a merged vcf header
-    MergeStrategy(const Header* header, ConsensusFilter const* cnsFilt = 0);
+    /// \param samplePriority type of samples to prefer
+    MergeStrategy(
+        const Header* header,
+        SamplePriority samplePriority = eORDER,
+        ConsensusFilter const* cnsFilt = 0);
 
     /// Retrieve the ValueMerger object responsible for merging the named info field.
     /// \param id names an info field
@@ -73,6 +83,9 @@ public:
 
     ConsensusFilter const* consensusFilter() const;
 
+    // \return the sample priority method, (order, unfiltered, or filtered)
+    SamplePriority samplePriority() const;
+
 protected:
     /// The merged Vcf header for the final output file
     const Header* _header;
@@ -87,6 +100,7 @@ protected:
     uint32_t _primarySampleStreamIndex;
 
     ConsensusFilter const* _cnsFilt;
+    SamplePriority _samplePriority;
 };
 
 END_NAMESPACE(Vcf)

@@ -76,23 +76,6 @@ void GenotypeMerger::merge(
             } else {
                 previousValues[i] = CustomValue(type, newGt);
             }
-        } else if (fields[i]->id() == "FT") {
-            set<string> filters;
-            for (size_t j = 0; j < previousValues[j].size(); ++j)
-                filters.insert(previousValues[i].getString(j));
-
-            string fname;
-            if (e->sampleData().isSampleFiltered(sampleIdx, &fname))
-                filters.insert(fname);
-
-            if (filters.size() > 1)
-                filters.erase("PASS");
-
-            string filt(".");
-            if (!filters.empty())
-                filt = *filters.begin();
-                
-            previousValues[i] = CustomValue(type, filt);
         } else {
             const CustomValue* v = e->sampleData().get(sampleIdx, fields[i]->id());
             if (v && !v->empty() && (overridePreviousValues || previousValues[i].empty())) {

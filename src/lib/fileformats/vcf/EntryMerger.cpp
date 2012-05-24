@@ -175,7 +175,54 @@ void EntryMerger::setAltAndGenotypeData(
         }
     }
 
+    // build a set of all sample indices with data across all entries
+    std::set<uint32_t> sampleIndices;
+    for (const Entry* e = _begin; e != _end; ++e) {
+        SampleData const& samples = e->sampleData();
+        for (auto i = samples.begin(); i != samples.end(); ++i)
+            sampleIndices.insert(i->first);
+    }
+
     SampleData::MapType sdMap;
+    // for each sample index where at least one entry has data...
+    for (auto si = sampleIndices.begin(); si != sampleIndices.end(); ++si) {
+        uint32_t sampleIdx = *si;
+        int primaryEntryIdx = getPrimaryEntryIdx(sampleIdx);
+
+        for (Entry const* e = _begin; e != _end; ++e) {
+            bool overridePreviousData = (e-_begin) == primaryEntryIdx;
+            SampleData const& samples = e->sampleData();
+            try {
+                vector<CustomValue> const* values = samples.get(sampleIdx);
+                if (!values || values->empty())
+                    continue;
+
+                const string& sampleName = e->header().sampleNames()[sampleIdx];
+                uint32_t mergedIdx = _mergedHeader->sampleIndex(sampleName);
+                size_t idx = e - _begin;
+
+                auto inserted = sdMap.insert(make_pair(mergedIdx, vector<CustomValue>()));
+                if (inserted.second || inserted.first->second.empty()) {
+                    inserted.first->second = genotypeFormatter.process(format, e, sampleIdx, _alleleMerger.newGt()[idx]);
+                    if (!e->sampleData().isSampleFiltered(sampleIdx))
+                        ++_sampleCounts[mergedIdx];
+                } else if (_mergeStrategy.mergeSamples()) {
+                    genotypeFormatter.merge(overridePreviousData, inserted.first->second, format, e, sampleIdx, _alleleMerger.newGt()[idx]);
+                    if (!e->sampleData().isSampleFiltered(sampleIdx))
+                        ++_sampleCounts[mergedIdx];
+                } else {
+                    throw runtime_error("Unable to merge conflicting sample data.");
+                }
+            } catch (const DisjointGenotypesError&) {
+                // don't do anything for now
+            } catch (...) {
+                throw;
+            }
+        }
+    }
+
+
+#if 0
     for (const Entry* e = _begin; e != _end; ++e) {
         SampleData const& samples = e->sampleData();
         try {
@@ -212,8 +259,36 @@ void EntryMerger::setAltAndGenotypeData(
                 %e->toString() %ex.what()));
         }
     }
+#endif
 
     sampleData = SampleData(_mergedHeader, std::move(format), std::move(sdMap));
+}
+
+int EntryMerger::getPrimaryEntryIdx(size_t sampleIdx) const {
+    int idx = 0;
+    int first = -1;
+    MergeStrategy::SamplePriority prio = _mergeStrategy.samplePriority();
+    for (Entry const* e = _begin; e != _end; ++e, ++idx) {
+        auto sd = e->sampleData();
+        auto values = sd.get(sampleIdx);
+
+        // skip entries with no data for this sample
+        if (!values || values->empty())
+            continue;
+
+        if (first == -1)
+            first = idx;
+
+        bool filtered = sd.isSampleFiltered(sampleIdx);
+        if (prio == MergeStrategy::eORDER)
+            return idx;
+        else if (prio == MergeStrategy::eUNFILTERED && !filtered)
+            return idx;
+        else if (prio == MergeStrategy::eFILTERED && filtered)
+            return idx;
+    }
+
+    return first;
 }
 
 const Header* EntryMerger::mergedHeader() const {

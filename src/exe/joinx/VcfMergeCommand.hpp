@@ -2,6 +2,7 @@
 
 #include "CommandBase.hpp"
 #include "fileformats/StreamHandler.hpp"
+#include "fileformats/vcf/MergeStrategy.hpp"
 
 #include <cstdint>
 #include <string>
@@ -34,4 +35,7 @@ protected:
     double _consensusPercent;
     std::string _consensusFilter;
     std::string _consensusFilterDesc;
+
+    std::string _samplePrioStr;
+    Vcf::MergeStrategy::SamplePriority _samplePriority;
 };

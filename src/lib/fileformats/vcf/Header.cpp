@@ -115,8 +115,15 @@ void Header::parseHeaderLine(const std::string& line) {
             throw runtime_error(str(format("Malformed header line: %1%\nExpected token: %2%") %line %expected));
     }
 
-    while (t.extract(tok))
+    set<string> seenNames;
+    while (t.extract(tok)) {
+        auto inserted = seenNames.insert(tok);
+        if (!inserted.second)
+            throw runtime_error(str(format(
+                "Duplicate sample name in vcf header: %1%"
+                ) %tok));
         _sampleNames.push_back(tok);
+    }
 }
 
 inline std::string Header::headerLine() const {

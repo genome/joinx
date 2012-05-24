@@ -9,7 +9,6 @@
 #include "fileformats/vcf/CustomType.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
-#include "fileformats/vcf/MergeStrategy.hpp"
 #include "processors/MergeSorted.hpp"
 
 #include <boost/format.hpp>
@@ -36,6 +35,7 @@ VcfMergeCommand::VcfMergeCommand()
     , _clearFilters(false)
     , _mergeSamples(false)
     , _consensusPercent(0.0)
+    , _samplePriority(Vcf::MergeStrategy::eORDER)
 {
 }
 
@@ -49,6 +49,7 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
         ("merge-strategy-file,M", po::value<string>(&_mergeStrategyFile), "merge strategy file for info fields (see man page for format)")
         ("clear-filters,c", "When set, merged entries will have FILTER data stripped out")
         ("merge-samples,s", "Allow input files with overlapping samples")
+        ("sample-priority,P", po::value<string>(&_samplePrioStr), "sample priority (o=Order, u=Unfiltered, f=Filtered)")
         ("require-consensus,R", po::value<string>(&consensusOpts),
             "When merging samples, require a certain percentage of them to agree, filtering sites that fail. "
             "The format is -R percent,filterName,filterDescription")
@@ -98,6 +99,21 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
 
     if (vm.count("merge-samples"))
         _mergeSamples = true;
+
+    if (!_samplePrioStr.empty()) {
+        if (_samplePrioStr == "o") {
+            _samplePriority = Vcf::MergeStrategy::eORDER;
+        } else if (_samplePrioStr == "u") {
+            _samplePriority = Vcf::MergeStrategy::eUNFILTERED;
+        } else if (_samplePrioStr == "f") {
+            _samplePriority = Vcf::MergeStrategy::eFILTERED;
+        } else {
+            throw runtime_error(str(format(
+                "Unexpected value for --sample-priority/-P: '%1%'.\n"
+                "Expected one of o, u, f (for order, unfiltered, filtered)."
+                ) %_samplePrioStr));
+        }
+    }
 }
 
 namespace {
@@ -137,7 +153,7 @@ void VcfMergeCommand::exec() {
         cnsFilt.reset(new Vcf::ConsensusFilter(_consensusPercent, _consensusFilter, &mergedHeader));
     }
 
-    Vcf::MergeStrategy mergeStrategy(&mergedHeader, cnsFilt.get());
+    Vcf::MergeStrategy mergeStrategy(&mergedHeader, _samplePriority, cnsFilt.get());
     if (!_mergeStrategyFile.empty()) {
         InputStream::ptr msFile(_streams.wrap<istream, InputStream>(_mergeStrategyFile));
         mergeStrategy.parse(*msFile);

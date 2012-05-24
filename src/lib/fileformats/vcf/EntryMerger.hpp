@@ -53,6 +53,7 @@ public:
 
 protected:
     size_t addAllele(const std::string& allele);
+    int getPrimaryEntryIdx(size_t sampleIdx) const;
 
 protected:
     AlleleMerger _alleleMerger;

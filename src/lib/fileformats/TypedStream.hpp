@@ -51,7 +51,14 @@ public:
         , _cached(false)
         , _cachedRv(false)
     {
-        _header = HeaderType::fromStream(_in);
+        using boost::format;
+        try {
+            _header = HeaderType::fromStream(_in);
+        } catch (std::exception const& e) {
+            throw std::runtime_error(str(format(
+                "Error while parsing header of %1%:\n%2%"
+                ) %in.name() %e.what()));
+        }
     }
 
     virtual ~TypedStream() {}
