@@ -221,46 +221,6 @@ void EntryMerger::setAltAndGenotypeData(
         }
     }
 
-
-#if 0
-    for (const Entry* e = _begin; e != _end; ++e) {
-        SampleData const& samples = e->sampleData();
-        try {
-            for (auto i = samples.begin(); i != samples.end(); ++i) {
-                auto const& sampleIdx = i->first;
-                vector<CustomValue> const& values = i->second;
-
-                if (values.empty())
-                    continue;
-
-                const string& sampleName = e->header().sampleNames()[sampleIdx];
-                uint32_t mergedIdx = _mergedHeader->sampleIndex(sampleName);
-                size_t idx = e - _begin;
-
-                auto inserted = sdMap.insert(make_pair(mergedIdx, vector<CustomValue>()));
-                if (inserted.second || inserted.first->second.empty()) {
-                    inserted.first->second = genotypeFormatter.process(format, e, sampleIdx, _alleleMerger.newGt()[idx]);
-                    if (!e->sampleData().isSampleFiltered(sampleIdx))
-                        ++_sampleCounts[mergedIdx];
-                } else if (_mergeStrategy.mergeSamples()) {
-                    bool fromPrimaryStream = e->header().sourceIndex() == _mergeStrategy.primarySampleStreamIndex();
-                    genotypeFormatter.merge(fromPrimaryStream, inserted.first->second, format, e, sampleIdx, _alleleMerger.newGt()[idx]);
-                    if (!e->sampleData().isSampleFiltered(sampleIdx))
-                        ++_sampleCounts[mergedIdx];
-                } else {
-                    throw runtime_error("Unable to merge conflicting sample data.");
-                }
-            }
-        } catch (const DisjointGenotypesError&) {
-            //throw;
-        } catch (const exception& ex) {
-            throw runtime_error(str(boost::format(
-                "Failed while merging genotype data for entry:\n%1%\nError: %2%")
-                %e->toString() %ex.what()));
-        }
-    }
-#endif
-
     sampleData = SampleData(_mergedHeader, std::move(format), std::move(sdMap));
 }
 
