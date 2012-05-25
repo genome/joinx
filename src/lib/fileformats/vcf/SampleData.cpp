@@ -10,6 +10,9 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <iterator>
+#include <set>
+#include <sstream>
 #include <utility>
 
 using boost::format;
@@ -159,7 +162,22 @@ void SampleData::addFilter(uint32_t sampleIdx, std::string const& filterName) {
     if (sampleIter->second.size() <= ftIdx) {
         sampleIter->second.resize(ftIdx+1);
     }
-    sampleIter->second[ftIdx] = CustomValue(FT, filterName);
+    auto& prev = sampleIter->second[ftIdx];
+    set<string> filters;
+    if (!prev.empty())
+        Tokenizer<char>::split(prev.toString(), ';', inserter(filters, filters.begin()));
+
+    filters.erase(".");
+    filters.erase("PASS");
+    filters.insert(filterName);
+    stringstream ss;
+    for (auto i = filters.begin(); i != filters.end(); ++i) {
+        if (i != filters.begin())
+            ss << ";";
+        ss << *i;
+    }
+
+    sampleIter->second[ftIdx] = CustomValue(FT, ss.str());
 }
 
 SampleData::FormatType const& SampleData::format() const {
