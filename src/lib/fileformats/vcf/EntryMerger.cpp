@@ -32,20 +32,25 @@ namespace {
         if (currBest == NULL)
             return true;
 
-        uint32_t esrc = e->header().sourceIndex(); // src index of e
+        uint32_t nsrc = e->header().sourceIndex(); // src index of new entry
         uint32_t csrc = currBest->header().sourceIndex(); // src index of curr
-        if (prio == MergeStrategy::eORDER)
-            return esrc < csrc;
 
-        // is e filtered?
-        bool ef = e->sampleData().isSampleFiltered(sampleIdx);
+        // is new entry filtered?
+        bool nf = e->sampleData().isSampleFiltered(sampleIdx);
         // is currBest filtered?
         bool cf = currBest->sampleData().isSampleFiltered(sampleIdx);
 
+
+        // if we only care about order or the new entry and the current best have the
+        // same filter status sort by order
+        if (prio == MergeStrategy::eORDER || nf == cf)
+            return nsrc < csrc;
+
+        // at this point, we know nf != cf
         if (prio == MergeStrategy::eFILTERED)
-            return (ef && !cf) || (esrc < csrc);
+            return nf;
         else if (prio == MergeStrategy::eUNFILTERED)
-            return (ef && !cf) || (esrc < csrc);
+            return !nf;
         else
             throw logic_error(str(format(
                 "Programming error at %1%:%2%: didn't understand sample priority: %3%"
