@@ -18,6 +18,7 @@ set(SOURCES
     Sequence.hpp
     TempFile.cpp
     TempFile.hpp
+    Timer.hpp
     Tokenizer.hpp
     namespaces.hpp
 )

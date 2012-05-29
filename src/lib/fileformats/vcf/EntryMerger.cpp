@@ -12,12 +12,46 @@
 #include <boost/format.hpp>
 #include <algorithm>
 #include <cstring>
+#include <functional>
 #include <iterator>
+#include <stdexcept>
 
 using boost::format;
 using namespace std;
+using namespace std::placeholders;
 
 BEGIN_NAMESPACE(Vcf)
+
+namespace {
+    bool isBetter(
+        Entry const* e,
+        Entry const* currBest,
+        size_t sampleIdx,
+        MergeStrategy::SamplePriority prio)
+    {
+        if (currBest == NULL)
+            return true;
+
+        uint32_t esrc = e->header().sourceIndex(); // src index of e
+        uint32_t csrc = currBest->header().sourceIndex(); // src index of curr
+        if (prio == MergeStrategy::eORDER)
+            return esrc < csrc;
+
+        // is e filtered?
+        bool ef = e->sampleData().isSampleFiltered(sampleIdx);
+        // is currBest filtered?
+        bool cf = currBest->sampleData().isSampleFiltered(sampleIdx);
+
+        if (prio == MergeStrategy::eFILTERED)
+            return (ef && !cf) || (esrc < csrc);
+        else if (prio == MergeStrategy::eUNFILTERED)
+            return (ef && !cf) || (esrc < csrc);
+        else
+            throw logic_error(str(format(
+                "Programming error at %1%:%2%: didn't understand sample priority: %3%"
+                ) %__FILE__ %__LINE__ %int(prio)));
+    }
+}
 
 bool EntryMerger::canMerge(Entry const& a, Entry const& b) {
     int rv = strverscmp(a.chrom().c_str(), b.chrom().c_str());
@@ -225,30 +259,17 @@ void EntryMerger::setAltAndGenotypeData(
 }
 
 int EntryMerger::getPrimaryEntryIdx(size_t sampleIdx) const {
-    int idx = 0;
-    int first = -1;
-    MergeStrategy::SamplePriority prio = _mergeStrategy.samplePriority();
-    for (Entry const* e = _begin; e != _end; ++e, ++idx) {
-        auto sd = e->sampleData();
-        auto values = sd.get(sampleIdx);
-
-        // skip entries with no data for this sample
-        if (!values || values->empty())
-            continue;
-
-        if (first == -1)
-            first = idx;
-
-        bool filtered = sd.isSampleFiltered(sampleIdx);
-        if (prio == MergeStrategy::eORDER)
-            return idx;
-        else if (prio == MergeStrategy::eUNFILTERED && !filtered)
-            return idx;
-        else if (prio == MergeStrategy::eFILTERED && filtered)
-            return idx;
+    Entry const* best = _begin;
+    auto prio = _mergeStrategy.samplePriority();
+    for (Entry const* e = _begin+1; e != _end; ++e) {
+        if (isBetter(e, best, sampleIdx, prio))
+            best = e;
     }
 
-    return first;
+    if (best == _end)
+        return 0;
+    else
+        return best - _begin;
 }
 
 const Header* EntryMerger::mergedHeader() const {

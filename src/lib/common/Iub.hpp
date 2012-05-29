@@ -10,10 +10,8 @@ namespace {
     const int ALLELE_T = 8;
 }
 
-inline const char* translateIub(const std::string& base) {
-    assert(base.size() == 1);
-
-    switch (base[0]) {
+inline const char* translateIub(char const base) {
+    switch (base) {
         case 'A': return "A"; break;
         case 'C': return "C"; break;
         case 'G': return "G"; break;
@@ -33,9 +31,14 @@ inline const char* translateIub(const std::string& base) {
     }
 }
 
-inline unsigned alleles2bin(const char* alleles) {
+inline const char* translateIub(std::string const& base) {
+    assert(base.size() == 1);
+    return translateIub(base[0]);
+}
+
+inline unsigned alleles2bin(char const* alleles, int len = -1) {
     unsigned rv = 0;
-    while (*alleles) {
+    while (*alleles && len != 0) {
         switch(*alleles++) {
             case 'A': rv |= ALLELE_A; break;
             case 'C': rv |= ALLELE_C; break;
@@ -43,6 +46,7 @@ inline unsigned alleles2bin(const char* alleles) {
             case 'T': rv |= ALLELE_T; break;
             default: break;
         }
+        --len;
     }
     return rv;
 }
