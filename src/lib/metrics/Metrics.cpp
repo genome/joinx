@@ -30,23 +30,14 @@ EntryMetrics::EntryMetrics()
 void EntryMetrics::calculateGenotypeDistribution(Vcf::Entry& entry) {
     // convenience
     auto const& sd = entry.sampleData();
-    auto const& fmt = sd.format();
-
-    uint64_t offset = distance(fmt.begin(), find_if(fmt.begin(), fmt.end(), bind(&customTypeIdMatches, "FT", _1)));
-    if (offset == fmt.size()) {
-        cerr << "No FT tag for call " << entry.chrom() << "\t" << entry.pos() << endl;
-    }
 
     for (auto i = sd.begin(); i != sd.end(); ++i) {
         auto const& sampleIdx = i->first;
-        auto const& values = i->second;
-        if (values.size() > offset) {
-            const std::string *filter(values[offset].get<std::string>(0));
-            if (filter != 0 && *filter != "PASS")
-                continue;
-        }
 
-        //if no FT then we assume all have passed :-(
+        // skip filtered samples
+        if (sd.isSampleFiltered(sampleIdx))
+            continue;
+
         Vcf::GenotypeCall const& gt = entry.sampleData().genotype(sampleIdx);
         if(gt.size() == 0) {
             continue;
@@ -91,9 +82,10 @@ bool EntryMetrics::novel(const Vcf::Entry& entry, const std::vector<std::string>
 */
 void EntryMetrics::calculateAllelicDistribution() {
     _allelicDistribution.resize(_maxGtIdx + 1);
-    for( auto i = _genotypeDistribution.begin(); i != _genotypeDistribution.end(); ++i) {
-        for(auto j = (i->first).begin(); j != (i->first).end(); ++j) {
-            _allelicDistribution[(*j)] += (*i).second;
+    auto const& gtd = _genotypeDistribution;
+    for( auto i = gtd.begin(); i != gtd.end(); ++i) {
+        for(auto j = i->first.begin(); j != i->first.end(); ++j) {
+            _allelicDistribution[*j] += i->second;
         }
     }
 }
@@ -102,7 +94,7 @@ void EntryMetrics::calculateAllelicDistributionBySample() {
     _allelicDistributionBySample.resize(_maxGtIdx + 1);
     for( auto geno = _genotypeDistribution.begin(); geno != _genotypeDistribution.end(); ++geno) {
         for(auto i = (geno->first).indexSet().begin(); i != (geno->first).indexSet().end(); ++i) {
-            _allelicDistributionBySample[(*i)] += (*geno).second;
+            _allelicDistributionBySample[*i] += geno->second;
         }
     }
 }
@@ -137,11 +129,11 @@ void EntryMetrics::calculateMutationSpectrum(Vcf::Entry& entry) {
                 if(complement) {
                     variant = Sequence::reverseComplement(variant);
                 }
-                if(singleton(&(*geno).first)) {
-                    _singletonMutationSpectrum(ref[0],variant[0]) += (*geno).second;
+                if(singleton(&geno->first)) {
+                    _singletonMutationSpectrum(ref[0],variant[0]) += geno->second;
                 }
                 else {
-                    _mutationSpectrum(ref[0],variant[0]) += (*geno).second;
+                    _mutationSpectrum(ref[0],variant[0]) += geno->second;
                 }
                 //enter into by Allele array
                 if( (ref[0] == 'A' && variant[0] == 'G') || (ref[0] == 'C' && variant[0] == 'T')) {
@@ -158,7 +150,7 @@ void EntryMetrics::calculateMutationSpectrum(Vcf::Entry& entry) {
 
 void EntryMetrics::identifyNovelAlleles(Vcf::Entry& entry, std::vector<std::string>& novelInfoFields) {
     //this will populate the novelty of each alt allele in _novelByAllele
-    uint32_t numAlts = (uint32_t) entry.alt().size();
+    uint32_t numAlts = uint32_t(entry.alt().size());
     _novelByAlt.resize(numAlts,true); //make space for alt novel status
 
     for (auto i = novelInfoFields.begin(); i != novelInfoFields.end(); ++i) {

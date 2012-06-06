@@ -3,9 +3,10 @@
 #include "common/namespaces.hpp"
 
 #include <cstdint>
+#include <ostream>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 
 BEGIN_NAMESPACE(Vcf)
 
@@ -49,3 +50,5 @@ protected:
 };
 
 END_NAMESPACE(Vcf)
+
+std::ostream& operator<<(std::ostream& s, Vcf::GenotypeCall const& gt);

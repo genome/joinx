@@ -30,7 +30,10 @@ public:
     const MutationSpectrum& singletonMutationSpectrum() const;
     const std::map<Vcf::GenotypeCall const,uint32_t>& genotypeDistribution() const;
     const std::vector<uint32_t>& allelicDistribution() const;
+
+    // answers "how many samples had each allele"
     const std::vector<uint32_t>& allelicDistributionBySample() const;
+
     const std::vector<bool>& transitionStatusByAlt() const;
     const std::vector<bool>& novelStatusByAlt() const;
     

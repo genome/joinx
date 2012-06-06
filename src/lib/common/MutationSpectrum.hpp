@@ -1,7 +1,8 @@
 #pragma once
 
-#include <cstdint>
 #include <array>
+#include <cstdint>
+#include <ostream>
 
 // class to keep track of what SNVs have been seen.
 // implemented using binary alleles (A=0, C=1, G=2, T=3) and a 4x4.
@@ -24,3 +25,5 @@ protected:
 protected:
     std::array<uint64_t, 16> _mtx;
 };
+
+std::ostream& operator<<(std::ostream& s, MutationSpectrum const& ms);

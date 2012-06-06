@@ -7,6 +7,7 @@
 using boost::format;
 
 namespace {
+    const static std::string bases = "ACGT";
     int const _indexTable[256] = {
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -63,4 +64,16 @@ int MutationSpectrum::index(uint8_t from, uint8_t to) const {
     if (fromIdx < 0 || toIdx < 0)
         throw std::runtime_error(str(format("Invalid alleles for mutation spectrum: %1%->%2%") %from %to));
     return fromIdx*4+toIdx;
+}
+
+std::ostream& operator<<(std::ostream& s, MutationSpectrum const& ms) {
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            int n = ms(bases[i], bases[j]);
+            if (n) {
+                s << bases[i] << "->" << bases[j] << ": " << n << "\n";
+            }
+        }
+    }
+    return s;
 }

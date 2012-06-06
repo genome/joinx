@@ -1,4 +1,4 @@
-#include "GenotypeCall.hpp" 
+#include "GenotypeCall.hpp"
 
 #include "common/Tokenizer.hpp"
 
@@ -29,7 +29,6 @@ GenotypeCall::GenotypeCall(const std::string& call)
             _indices.push_back(idx);
             _indexSet.insert(idx);
         }
-            
     }
 }
 
@@ -58,7 +57,7 @@ bool GenotypeCall::heterozygous() const {
 }
 
 bool GenotypeCall::homozygous() const {
-    return diploid() && _indexSet.size() == 1;   //if only one unique allele then homozygous  
+    return diploid() && _indexSet.size() == 1;   //if only one unique allele then homozygous
 }
 
 bool GenotypeCall::diploid() const {
@@ -70,7 +69,7 @@ bool GenotypeCall::reference() const {
 }
 
 const uint32_t& GenotypeCall::operator[](size_type idx) const {
-    return _indices[idx];    
+    return _indices[idx];
 }
 
 const vector<uint32_t>& GenotypeCall::indices() const {
@@ -99,11 +98,43 @@ bool GenotypeCall::operator==(const GenotypeCall& rhs) const {
         return false;
     }
 }
+
 bool GenotypeCall::operator!=(const GenotypeCall& rhs) const {
     return !(*this == rhs);
 }
+
 bool GenotypeCall::operator<(const GenotypeCall& rhs) const {
-    return _string < rhs._string; //lame but fingers crossed
+    // we'll say phased is smaller than unphased
+    if (_phased != rhs._phased)
+        return _phased;
+
+    if (_indexSet.size() < rhs._indexSet.size())
+        return true;
+
+    if (_indexSet.size() > rhs._indexSet.size())
+        return false;
+
+    if (_phased) {
+        return _string < rhs._string;
+    }
+
+    if (!_indexSet.empty()) {
+        // indexSets are the same size
+        auto ia = _indexSet.begin();
+        auto ib = rhs._indexSet.begin();
+        while (ia != _indexSet.end() && ib != _indexSet.end()) {
+            if (*ia < *ib)
+                return true;
+            ++ia;
+            ++ib;
+        }
+    }
+    return false;
 }
 
 END_NAMESPACE(Vcf)
+
+std::ostream& operator<<(std::ostream& s, Vcf::GenotypeCall const& gt) {
+    s << gt.string();
+    return s;
+}
