@@ -126,7 +126,7 @@ described relative to a particular reference sequence.
 
 =head2 SYNOPSIS
 
-    joinx create-contigs [OPTIONS] -r ref.fasta -v variants.bed
+joinx create-contigs [OPTIONS] -r ref.fasta -v variants.bed
 
 =head2 DESCRIPTION
 
