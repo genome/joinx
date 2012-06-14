@@ -82,7 +82,7 @@ void VcfReportCommand::exec() {
     *perSiteOut << "Chrom\tPos\tRef\tAlt\tByAltTransition\tTotalTransitions\tTotalTransversions\tByAltNovel\tTotalNovel\tTotalKnown\tGenotypeDist\tAlleleDistBySample\tAlleleDist\tByAltAlleleFreq\tMAF\n"; 
     while (reader->next(entry)) {
         Metrics::EntryMetrics siteMetrics;
-        if(entry.failedFilters().size() != 1 || entry.failedFilters().find("PASS") == entry.failedFilters().end())
+        if(entry.failedFilters().size() >= 1 && entry.failedFilters().find("PASS") == entry.failedFilters().end())
             continue;
         totalSites++;
         if(!entry.sampleData().hasGenotypeData())
@@ -101,13 +101,19 @@ void VcfReportCommand::exec() {
         std::vector<bool> transitionStatus = siteMetrics.transitionStatusByAlt();
         uint32_t transitionIdx = 0;
         uint32_t totalTransitionAlleles = 0;
-        while(transitionIdx < (transitionStatus.size() - 1)) {
-            totalTransitionAlleles +=  transitionStatus[transitionIdx];
-            *perSiteOut << transitionStatus[transitionIdx++] << ",";
-        }
-        totalTransitionAlleles += transitionStatus[transitionIdx];
-        *perSiteOut << transitionStatus[transitionIdx] << "\t" << totalTransitionAlleles << "\t" << transitionStatus.size() - totalTransitionAlleles;
+        if(!transitionStatus.empty()) {
+            transitionStatus = siteMetrics.transitionStatusByAlt();
 
+            while(transitionIdx < (transitionStatus.size() - 1)) {
+                totalTransitionAlleles +=  transitionStatus[transitionIdx];
+                *perSiteOut << transitionStatus[transitionIdx++] << ",";
+            }
+            totalTransitionAlleles += transitionStatus[transitionIdx];
+            *perSiteOut << transitionStatus[transitionIdx] << "\t" << totalTransitionAlleles << "\t" << transitionStatus.size() - totalTransitionAlleles;
+        }
+        else {
+            *perSiteOut << "0\t" << totalTransitionAlleles << "\t" << transitionStatus.size() - totalTransitionAlleles;
+        }
 
         //next novelness will go followed by number novel, number known
         *perSiteOut << "\t";
