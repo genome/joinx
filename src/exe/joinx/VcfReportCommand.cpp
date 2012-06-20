@@ -81,13 +81,12 @@ void VcfReportCommand::exec() {
 
     *perSiteOut << "Chrom\tPos\tRef\tAlt\tByAltTransition\tTotalTransitions\tTotalTransversions\tByAltNovel\tTotalNovel\tTotalKnown\tGenotypeDist\tAlleleDistBySample\tAlleleDist\tByAltAlleleFreq\tMAF\n"; 
     while (reader->next(entry)) {
-        Metrics::EntryMetrics siteMetrics;
         if(entry.failedFilters().size() >= 1 && entry.failedFilters().find("PASS") == entry.failedFilters().end())
             continue;
         totalSites++;
         if(!entry.sampleData().hasGenotypeData())
             continue;
-        siteMetrics.processEntry(entry,_infoFields);
+        Metrics::EntryMetrics siteMetrics(entry,_infoFields);
 
         //output per-site metrics
         *perSiteOut << entry.chrom() << "\t" << entry.pos() << "\t" << entry.ref() << "\t";

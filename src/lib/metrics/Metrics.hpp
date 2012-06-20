@@ -16,13 +16,7 @@ BEGIN_NAMESPACE(Metrics)
 
 class EntryMetrics {
 public:
-    EntryMetrics();
-    void processEntry(Vcf::Entry& entry, std::vector<std::string>& novelInfoFields);
-    void calculateGenotypeDistribution(Vcf::Entry& entry);
-    void calculateAllelicDistribution();
-    void calculateAllelicDistributionBySample();
-    void calculateMutationSpectrum(Vcf::Entry& entry);
-    void identifyNovelAlleles(Vcf::Entry& entry, std::vector<std::string>& novelInfoFields);
+    EntryMetrics(Vcf::Entry const& entry, std::vector<std::string> const& novelInfoFields);
     double minorAlleleFrequency() const;
     const std::vector<double> alleleFrequencies() const;
 
@@ -41,6 +35,13 @@ public:
     //bool novel(const Vcf::Entry& entry, const std::vector<std::string>& novelInfoFields, const Vcf::GenotypeCall* geno);
 
 protected:
+    void calculateGenotypeDistribution();
+    void calculateAllelicDistribution();
+    void calculateAllelicDistributionBySample();
+    void calculateMutationSpectrum();
+    void identifyNovelAlleles();
+
+protected:
     uint32_t _maxGtIdx;
     std::vector<bool> _transitionByAlt;
     std::vector<bool> _novelByAlt;
@@ -49,6 +50,10 @@ protected:
     std::map<Vcf::GenotypeCall const,uint32_t> _genotypeDistribution;
     std::vector<uint32_t> _allelicDistribution;
     std::vector<uint32_t> _allelicDistributionBySample;
+
+
+    Vcf::Entry const& _entry;
+    std::vector<std::string> const& _novelInfoFields;
 };
 
 class SampleMetrics {

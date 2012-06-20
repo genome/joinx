@@ -22,14 +22,21 @@ bool customTypeIdMatches(string const& id, Vcf::CustomType const* type) {
 bool minorAlleleSort (int i,int j) { return (i != 0 && i<j); }
 }
 
-EntryMetrics::EntryMetrics()
+EntryMetrics::EntryMetrics(Vcf::Entry const& entry, std::vector<std::string> const& novelInfoFields)
     : _maxGtIdx(0)
+    , _entry(entry)
+    , _novelInfoFields(novelInfoFields)
 {
+    identifyNovelAlleles();
+    calculateGenotypeDistribution();
+    calculateAllelicDistribution();
+    calculateAllelicDistributionBySample();
+    calculateMutationSpectrum();
 }
 
-void EntryMetrics::calculateGenotypeDistribution(Vcf::Entry& entry) {
+void EntryMetrics::calculateGenotypeDistribution() {
     // convenience
-    auto const& sd = entry.sampleData();
+    auto const& sd = _entry.sampleData();
 
     for (auto i = sd.begin(); i != sd.end(); ++i) {
         auto const& sampleIdx = i->first;
@@ -38,19 +45,23 @@ void EntryMetrics::calculateGenotypeDistribution(Vcf::Entry& entry) {
         if (sd.isSampleFiltered(sampleIdx))
             continue;
 
-        Vcf::GenotypeCall const& gt = entry.sampleData().genotype(sampleIdx);
+        Vcf::GenotypeCall const& gt = sd.genotype(sampleIdx);
         if(gt.size() == 0) {
             continue;
         }
 
         if (!gt.diploid()) {
-            //anything but diploid is not supported until we understand a bit better how to represent them
-            cerr << "Non-diploid genotype for sample " << entry.header().sampleNames()[sampleIdx] << " skipped at position " << entry.chrom() << "\t" << entry.pos() << endl;
+            // anything but diploid is not supported until we understand a bit
+            // better how to represent them
+            cerr << "Non-diploid genotype for sample " <<
+                _entry.header().sampleNames()[sampleIdx]
+                << " skipped at position "
+                << _entry.chrom() << "\t" << _entry.pos() << endl;
             continue;
         }
         else {
-            ++_genotypeDistribution[gt]; //probably ok since should use default contructor of new element before adding 1;
-            _maxGtIdx = entry.alt().size(); //std::max(_maxGtIdx, *gt.indexSet().rbegin());
+            ++_genotypeDistribution[gt];
+            _maxGtIdx = _entry.alt().size(); //std::max(_maxGtIdx, *gt.indexSet().rbegin());
         }
     }
 }
@@ -64,6 +75,7 @@ bool EntryMetrics::singleton(const Vcf::GenotypeCall* geno) const {
     }
     return false;
 }
+
 /*
 bool EntryMetrics::novel(const Vcf::Entry& entry, const std::vector<std::string>& novelInfoFields, const Vcf::GenotypeCall* geno) {
     // grab alt allele index(es)
@@ -80,6 +92,7 @@ bool EntryMetrics::novel(const Vcf::Entry& entry, const std::vector<std::string>
     return novel;
 }
 */
+
 void EntryMetrics::calculateAllelicDistribution() {
     _allelicDistribution.resize(_maxGtIdx + 1);
     auto const& gtd = _genotypeDistribution;
@@ -100,17 +113,16 @@ void EntryMetrics::calculateAllelicDistributionBySample() {
 }
 
 
-void EntryMetrics::calculateMutationSpectrum(Vcf::Entry& entry) {
-
+void EntryMetrics::calculateMutationSpectrum() {
     _transitionByAlt.resize(_maxGtIdx);
     
     locale loc;
-    std::string ref(entry.ref());
+    std::string ref(_entry.ref());
 
     bool complement = false;
 
-    if(entry.ref().size() == 1) {
-        toupper(ref[0],loc);
+    if(ref.size() == 1) {
+        toupper(ref[0], loc);
 
         if(ref == "G" || ref == "T") {
             complement = true;
@@ -122,7 +134,7 @@ void EntryMetrics::calculateMutationSpectrum(Vcf::Entry& entry) {
                 if(*i == 0) //it's ref
                     continue;
 
-                std::string variant( entry.alt()[*i - 1] );
+                std::string variant( _entry.alt()[*i - 1] );
                 if (variant.size() != 1)
                     throw runtime_error(str(format("Invalid variant for ref entry %1%: %2%") %ref %variant));
                 toupper(variant[0],loc);
@@ -148,14 +160,14 @@ void EntryMetrics::calculateMutationSpectrum(Vcf::Entry& entry) {
     }
 }
 
-void EntryMetrics::identifyNovelAlleles(Vcf::Entry& entry, std::vector<std::string>& novelInfoFields) {
+void EntryMetrics::identifyNovelAlleles() {
     //this will populate the novelty of each alt allele in _novelByAllele
-    uint32_t numAlts = uint32_t(entry.alt().size());
+    uint32_t numAlts = uint32_t(_entry.alt().size());
     _novelByAlt.resize(numAlts,true); //make space for alt novel status
 
-    for (auto i = novelInfoFields.begin(); i != novelInfoFields.end(); ++i) {
+    for (auto i = _novelInfoFields.begin(); i != _novelInfoFields.end(); ++i) {
         //for each database of variants, use to determine if an alt has been seen
-        const Vcf::CustomValue* database = entry.info(*i);  //search for tag
+        const Vcf::CustomValue* database = _entry.info(*i);  //search for tag
         if(database) {
             //if we find it check if it's per alt or a flag. Otherwise fail miserably.
             if(database->size() == numAlts) {
@@ -169,7 +181,6 @@ void EntryMetrics::identifyNovelAlleles(Vcf::Entry& entry, std::vector<std::stri
                 //could have been that the person did not specify perAlt
                 //What do we do then?
             }
-            
         }
     }
 }
@@ -204,14 +215,6 @@ const std::vector<bool>& EntryMetrics::transitionStatusByAlt() const {
 
 const std::vector<bool>& EntryMetrics::novelStatusByAlt() const {
     return _novelByAlt;
-}
-
-void EntryMetrics::processEntry(Vcf::Entry& entry, std::vector<std::string>& novelInfoFields) {
-    identifyNovelAlleles(entry, novelInfoFields);
-    calculateGenotypeDistribution(entry);
-    calculateAllelicDistribution();
-    calculateAllelicDistributionBySample();
-    calculateMutationSpectrum(entry);
 }
 
 const MutationSpectrum& EntryMetrics::mutationSpectrum() const {

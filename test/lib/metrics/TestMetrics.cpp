@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -61,7 +62,7 @@ protected:
         _novelIndicators.push_back("DBSNP");
         _novelIndicators.push_back("TG");
         Vcf::Entry::parseLine(&_header, entry1String, _entry1);
-        _entry1Metrics.processEntry(_entry1, _novelIndicators);
+        _entry1Metrics.reset(new Metrics::EntryMetrics(_entry1, _novelIndicators));
     }
 
     Entry makeEntry(string chrom, int64_t pos, string const& ref, string const& alt) {
@@ -73,7 +74,7 @@ protected:
     Header _header;
     vector<string> _novelIndicators;
     Entry _entry1;
-    Metrics::EntryMetrics _entry1Metrics;
+    unique_ptr<Metrics::EntryMetrics> _entry1Metrics;
 };
 
 // Parameterized test fixture for mutation spectrum test of doom.
@@ -94,7 +95,7 @@ protected:
 // NOTE: // The expected values in most of these tests are based on
 // entry1String defined near the top of this module.
 TEST_F(TestMetrics, genotypeDistribution) {
-    auto dist = _entry1Metrics.genotypeDistribution();
+    auto dist = _entry1Metrics->genotypeDistribution();
 
     ASSERT_EQ(6, dist.size());
     ASSERT_EQ(1, dist[GenotypeCall("0/0")]);
@@ -124,7 +125,7 @@ TEST_F(TestMetrics, genotypeDistribution) {
 
 TEST_F(TestMetrics, allelicDistribution) {
     // REF = A, ALT = C,T
-    auto const& dist = _entry1Metrics.allelicDistribution();
+    auto const& dist = _entry1Metrics->allelicDistribution();
     ASSERT_EQ(3, dist.size());
 
     // How many times did we see the reference (GT 0)
@@ -136,7 +137,7 @@ TEST_F(TestMetrics, allelicDistribution) {
 }
 
 TEST_F(TestMetrics, allelicDistributionBySample) {
-    auto const& dist = _entry1Metrics.allelicDistributionBySample();
+    auto const& dist = _entry1Metrics->allelicDistributionBySample();
 
     ASSERT_EQ(3, dist.size());
 
@@ -153,7 +154,7 @@ TEST_F(TestMetrics, minorAlleleFrequency) {
     // we have diploid 10 samples with 1 filtered for 18 total alleles
     // the minor allele is 2, which shows up 5 times in the data.
     // (see the definition of entry1String)
-    ASSERT_NEAR(5.0/18.0, _entry1Metrics.minorAlleleFrequency(), 1e-14);
+    ASSERT_NEAR(5.0/18.0, _entry1Metrics->minorAlleleFrequency(), 1e-14);
 }
 
 // The next test probably warrants an explanation.
@@ -227,8 +228,7 @@ TEST_P(TestMetricsParamByRef, mutationSpectrum) {
             gts << "\t" << i << "/" << j << ":PASS";
             string entryString(line + gts.str());
             Entry entry(&_header, entryString);
-            Metrics::EntryMetrics metrics;
-            metrics.processEntry(entry, _novelIndicators);
+            Metrics::EntryMetrics metrics(entry, _novelIndicators);
             auto const& spectrum = metrics.mutationSpectrum();
             auto const& singletonSpectrum = metrics.singletonMutationSpectrum();
 
@@ -270,10 +270,8 @@ TEST_F(TestMetrics, identifyNovelAlleles) {
     Entry e1(&_header, line1);
     Entry e2(&_header, line2);
 
-    Metrics::EntryMetrics em1;
-    Metrics::EntryMetrics em2;
-    em1.processEntry(e1, _novelIndicators);
-    em2.processEntry(e2, _novelIndicators);
+    Metrics::EntryMetrics em1(e1, _novelIndicators);
+    Metrics::EntryMetrics em2(e2, _novelIndicators);
 
     auto const& novel1 = em1.novelStatusByAlt();
     auto const& novel2 = em2.novelStatusByAlt();
