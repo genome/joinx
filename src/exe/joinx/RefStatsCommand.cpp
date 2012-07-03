@@ -89,12 +89,12 @@ namespace {
         string::size_type start(0);
         string::size_type end(ref.size());
 
-        if (prevBase + ref[0] == 'C'+'G') {
+        if (prevBase == 'C' && ref[0] == 'G') {
             ++start;
             ++rv.cpg;
         }
 
-        if (nextBase + *ref.rbegin() == 'C'+'G') {
+        if (start < end && *ref.rbegin() == 'C' && nextBase == 'G') {
             --end;
             ++rv.cpg;
         }
@@ -102,13 +102,12 @@ namespace {
         for (string::size_type i = start; i < end; ++i) {
             if (ref[i] == 'A' || ref[i] == 'T') {
                 ++rv.at;
-            } else if (i < ref.size()-1 && ref[i] + ref[i+1] == 'C'+'G') {
-                ++rv.cpg;
+            } else if (i < end-1 && ref[i] == 'C' && ref[i+1] == 'G') {
+                rv.cpg += 2;
                 ++i;
             } else if (ref[i] == 'C' || ref[i] == 'G') {
                 ++rv.cg;
             }
-                
         }
         return rv;
     }
