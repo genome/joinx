@@ -97,10 +97,20 @@ EntryMerger::EntryMerger(
         _qual = begin->qual();
 
     for (const Entry* e = begin; e != end; ++e) {
-        if (e > begin && !canMerge(*e, *(e-1))) {
+        bool willMerge = e == begin;
+        for (const Entry* pe = begin; pe != e; ++pe) {
+            if (canMerge(*e, *pe)) {
+                willMerge = true;
+                break;
+            }
+        }
+        if (!willMerge) {
+            stringstream ss;
+            for (const Entry* ee = begin; ee != end; ++ee)
+                ss << *ee << "\n";
             throw runtime_error(
-                str(format("Attempted to merge VCF entries with non-overlapping position:\n%1%\nand\n%2%")
-                    %(e-1)->toString() %e->toString()));
+                str(format("Attempted to merge VCF entries with non-overlapping positions:\n%1%")
+                    %ss.str()));
         }
 
         // merge identifiers

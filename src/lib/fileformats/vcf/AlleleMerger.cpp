@@ -67,9 +67,11 @@ string AlleleMerger::buildRef(Entry const* beg, Entry const* end) {
     uint64_t pos = beg->pos() + ref.size();
 
     for (Entry const* e = beg+1; e != end; ++e) {
-        if (pos < e->pos()) {
+        if (pos < e->pos())
             return "";
-        }
+
+        if (e->pos() + e->ref().size() < pos)
+            continue;
 
         ptrdiff_t off = pos - e->pos();
         ref += e->ref().data() + off;
