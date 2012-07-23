@@ -125,6 +125,7 @@ public:
             return false;
 
         v = *_buf[0];
+        delete _buf[0];
         _buf.pop_front();
         return true;
     }
