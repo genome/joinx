@@ -42,6 +42,12 @@ protected:
         _header = Header::fromStream(in);
     }
 
+    Entry makeEntry(string chrom, int64_t pos, string const& ref, string const& alt) {
+        stringstream ss;
+        ss << chrom << "\t" << pos << "\t.\t" << ref << "\t" << alt << "\t.\t.\t.";
+        return Entry(&_header, ss.str());
+    }
+
     Header _header;
 };
 
@@ -93,6 +99,15 @@ TEST_F(TestVcfCompare, altIntersectIndel1) {
     string v2 = "1\t10\t.\tGAC\tG\t.\t.\t.\t.";
     Entry e1(&_header, v1);
     Entry e2(&_header, v2);
+    Compare::AltIntersect xsec;
+    auto result = xsec(e1, e2);
+    ASSERT_EQ(1, result.size());
+    ASSERT_TRUE(mapHasPair(result, 1, 0));
+}
+
+TEST_F(TestVcfCompare, equivalentRepresentation) {
+    Entry e1 = makeEntry("1", 10, "CCCC", "C,CCCCG");
+    Entry e2 = makeEntry("1", 13, "C", "CG");
     Compare::AltIntersect xsec;
     auto result = xsec(e1, e2);
     ASSERT_EQ(1, result.size());

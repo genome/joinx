@@ -1,10 +1,7 @@
 #include "Fasta.hpp"
 #include "InputStream.hpp"
 #include "common/Tokenizer.hpp"
-
-
-#include <iostream>
-
+#include "common/UnknownSequenceError.hpp"
 
 #include <boost/format.hpp>
 #include <algorithm>
@@ -233,7 +230,7 @@ std::string Fasta::sequence(std::string const& seq, size_t pos, size_t len) cons
 
     Index::Entry const* e = _index->entry(seq);
     if (!e) {
-        throw runtime_error(str(format(
+        throw UnknownSequenceError(str(format(
             "Sequence '%1%' not found in fasta '%2%'") %seq %_name));
     }
 

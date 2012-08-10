@@ -76,6 +76,21 @@ TEST_F(TestVcfAltNormalizer, insertionWithSubstitution) {
     ASSERT_EQ("GAGC", e.alt()[0]);
 }
 
+TEST_F(TestVcfAltNormalizer, immovableInsertion) {
+    string ref = _ref.sequence("1", 11, 3);
+    ASSERT_EQ("GCG", ref);
+    Entry e = makeEntry("1", 11, ref, "GAATT");
+    AltNormalizer n(_ref);
+    cout << "BEFORE: " << e << "\n";
+    n.normalize(e);
+    cout << " AFTER: " << e << "\n";
+
+    ASSERT_EQ(11, e.pos());
+    ASSERT_EQ("GCG", e.ref());
+    ASSERT_EQ(1, e.alt().size());
+    ASSERT_EQ("GAATT", e.alt()[0]);
+}
+
 TEST_F(TestVcfAltNormalizer, deletion) {
     string ref = _ref.sequence("1", 11, 3);
     ASSERT_EQ("GCG", ref);
@@ -104,6 +119,21 @@ TEST_F(TestVcfAltNormalizer, deletionWithSubstitution) {
     ASSERT_EQ("GCGC", e.ref());
     ASSERT_EQ(1, e.alt().size());
     ASSERT_EQ("GA", e.alt()[0]);
+}
+
+TEST_F(TestVcfAltNormalizer, immovableDeletion) {
+    string ref = _ref.sequence("1", 9, 5);
+    ASSERT_EQ("GCGCG", ref);
+    Entry e = makeEntry("1", 9, ref, "GAT");
+    AltNormalizer n(_ref);
+    cout << "BEFORE: " << e << "\n";
+    n.normalize(e);
+    cout << " AFTER: " << e << "\n";
+
+    ASSERT_EQ(9, e.pos());
+    ASSERT_EQ("GCGCG", e.ref());
+    ASSERT_EQ(1, e.alt().size());
+    ASSERT_EQ("GAT", e.alt()[0]);
 }
 
 TEST_F(TestVcfAltNormalizer, testSubstitution) {
@@ -145,4 +175,18 @@ TEST_F(TestVcfAltNormalizer, insertionAndDeletion) {
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
+}
+
+TEST_F(TestVcfAltNormalizer, messyInsertionAndDeletion) {
+    string refStr(">1\nTTTTTTTTTTTTTCCTCGCTCCC");
+    Fasta ref("test", refStr.data(), refStr.size());
+    Entry e = makeEntry("1", 22, "CC",  "C,CCTCGCTCCC");
+    AltNormalizer n(ref);
+    cout << "BEFORE: " << e << "\n";
+    n.normalize(e);
+    cout << " AFTER: " << e << "\n";
+    ASSERT_EQ(13, e.pos());
+    ASSERT_EQ("TCCTCGCTC", e.ref());
+    ASSERT_EQ("TCCTCGCT", e.alt()[0]);
+    ASSERT_EQ("TCCTCGCTCCCTCGCTC", e.alt()[1]);
 }

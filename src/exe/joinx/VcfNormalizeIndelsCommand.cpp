@@ -1,5 +1,6 @@
 #include "VcfNormalizeIndelsCommand.hpp"
 
+#include "common/UnknownSequenceError.hpp"
 #include "fileformats/Fasta.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/OutputWriter.hpp"
@@ -77,7 +78,13 @@ void VcfNormalizeIndelsCommand::exec() {
     Vcf::Entry e;
     Vcf::AltNormalizer norm(ref);
     while (in->next(e)) {
-        norm.normalize(e);
+        try {
+            norm.normalize(e);
+        } catch (UnknownSequenceError const& ex) {
+            // We couldn't get reference data for the sequence
+            cerr << "WARNING: at line " << in->lineNum() << " in file " << in->name()
+                << ": sequence " << e.chrom() << " not found in reference " << _fastaPath << "\n";
+        }
         *out << e << "\n";
     }
 }

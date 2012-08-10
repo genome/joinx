@@ -50,7 +50,6 @@ void AltNormalizer::normalize(Entry& e) {
         return;
 
     vector<RefEdit> shifts(e.alt().size());
-    string::size_type refLen = e.ref().size();
     size_t idx(0);
     uint64_t minRefPos = numeric_limits<uint64_t>::max();
     uint64_t maxRefPos = 0;
@@ -58,40 +57,53 @@ void AltNormalizer::normalize(Entry& e) {
         // for indels, we want 1 base of padding before the indel in the output
         string::size_type refPadding(1);
         // what do you look like, variant?
-        if (alt->size() < refLen) { // i look like a deletion
+        VariantType vt = variantType(e.ref(), *alt);
+        if (vt == DELETION) {
             shifts[idx] = moveDeletion(e, idx);
-        } else if (alt->size() > refLen) { // i look like an insertion
+        } else if (vt == INSERTION) {
             shifts[idx] = moveInsertion(e, idx);
-        } else { // i look like a substitution
+        } else if (vt == SUBSTITUTION) {
             refPadding = 0; // don't pad substitutions
             string::size_type prefix = Sequence::commonPrefix(e.ref(), *alt);
-            shifts[idx] = RefEdit(e.pos()+prefix, alt->size()-prefix, e.pos()+prefix, alt->substr(prefix));
+            shifts[idx] = RefEdit(e.pos()+prefix, alt->size()-prefix, e.pos()+prefix, alt->substr(prefix), vt);
+        } else {
+            throw runtime_error(
+                str(format("Unable to infer variant type for ref/alt combination %1%/%2% in entry:\n%3%")
+                %e.ref() %(*alt) %e.toString()));
         }
 
         uint64_t refPos = std::min(shifts[idx].lastRef, shifts[idx].pos - refPadding);
         uint64_t refLen = shifts[idx].lastRef - refPos + 1;
         minRefPos = min(refPos, minRefPos);
-        maxRefPos = max(refPos+refLen, maxRefPos);
-
-        string ref = _ref.sequence(e.chrom(), refPos, refLen);
-        string alt = ref;
-        if (refPos+refLen-1 >= shifts[idx].pos) {
-            string::size_type splicePos = refLen - (shifts[idx].lastRef - shifts[idx].pos + 1);
-            alt.replace(splicePos, shifts[idx].len, shifts[idx].bases);
-        } else
-            alt += shifts[idx].bases;
+        maxRefPos = max(refPos+refLen-1, maxRefPos);
     }
     e._pos = minRefPos;
-    e._ref = _ref.sequence(e.chrom(), minRefPos, maxRefPos-minRefPos);
+    e._ref = _ref.sequence(e.chrom(), minRefPos, maxRefPos-minRefPos+1);
     
     idx = 0;
     for (auto alt = e.alt().begin(); alt != e.alt().end(); ++alt, ++idx) {
-        e._alt[idx] = e._ref;
-        if (maxRefPos >= shifts[idx].pos) {
-            string::size_type splicePos = shifts[idx].pos - minRefPos;
-            e._alt[idx].replace(splicePos, shifts[idx].len, shifts[idx].bases);
-        } else
-            e._alt[idx] += shifts[idx].bases;
+        size_t padLen = shifts[idx].pos - minRefPos;
+        size_t remainingRef = e._ref.size() - padLen;
+
+        if (shifts[idx].lastRef >= shifts[idx].pos)
+            remainingRef -= shifts[idx].lastRef - shifts[idx].pos + 1;
+
+        if (remainingRef) {
+            if (shifts[idx].type != INSERTION) {
+                if (remainingRef < shifts[idx].len)
+                    remainingRef = 0;
+                else
+                    remainingRef -= shifts[idx].len;
+            }
+        }
+
+        string newAlt;
+        if (padLen)
+            newAlt = e._ref.substr(0, padLen);
+        newAlt.append(shifts[idx].bases);
+        if (remainingRef)
+            newAlt.append(e._ref.substr(e._ref.size()-remainingRef));
+        e._alt[idx].swap(newAlt);
     }
 }
 
@@ -125,16 +137,17 @@ AltNormalizer::RefEdit AltNormalizer::moveInsertion(Entry& e, size_t idx) const 
 
         insPos -= shift;
         if (shift)
-            std::rotate(ins.begin(), ins.end(), ins.end()-shift%ins.size());
+            std::rotate(ins.begin(), ins.end()-shift%ins.size(), ins.end());
 
         // we didn't shift all the way to the beginning of ref
         if (shift != ref.size())
-            return RefEdit(insPos, ins.size(), insPos-1, ins);
+            return RefEdit(insPos, ins.size(), insPos-1, ins, INSERTION);
 
-        string::size_type refLen = ref.size() * 2;
-        while (insPos-refLen > 1) {
-            if (refLen >= insPos)
-                refLen = insPos-1;
+        string::size_type refLen = alt.size() * 2;
+        if (refLen >= insPos)
+            refLen = insPos-1;
+
+        while (insPos-refLen >= 1) {
             string eref = _ref.sequence(e.chrom(), insPos-refLen, refLen);
             string::size_type thisShift = leftShift(
                 eref.rbegin(), eref.rend(),
@@ -143,14 +156,16 @@ AltNormalizer::RefEdit AltNormalizer::moveInsertion(Entry& e, size_t idx) const 
             shift += thisShift;
             insPos -= thisShift;
             if (thisShift)
-                std::rotate(ins.begin(), ins.end(), ins.end()-thisShift%ins.size());
+                std::rotate(ins.begin(), ins.end()-thisShift%ins.size(), ins.end());
             if (thisShift != refLen)
                 break;
             refLen *= 2;
+            if (refLen >= insPos)
+                refLen = insPos-1;
         }
 
-        return RefEdit(insPos, ins.size(), insPos-1, ins);
-    } else if (padEqual > 0) {
+        return RefEdit(insPos, ins.size(), insPos-1, ins, INSERTION);
+    } else {
         // there are substitutions in the pad, we cannot shift past them
 
         // see if there is any leading reference we can drop
@@ -159,20 +174,24 @@ AltNormalizer::RefEdit AltNormalizer::moveInsertion(Entry& e, size_t idx) const 
             alt.begin(), padLastFwd
             );
 
-        string::size_type shift = leftShift(padLastRev, padLastRev+padEqual, ins.rbegin(), ins.rend());
-        if (shift)
-            std::rotate(ins.begin(), ins.end(), ins.end()-shift%ins.size());
+        string::size_type shift(0);
+        if (padEqual > 0) {
+            shift = leftShift(padLastRev, padLastRev+padEqual, ins.rbegin(), ins.rend());
+            if (shift)
+                std::rotate(ins.begin(), ins.end()-shift%ins.size(), ins.end());
+        }
+
         string::size_type padLen = distance(alt.begin(), padLastFwd);
         string bases = alt.substr(firstVariantBase, padLen-shift-firstVariantBase);
         bases += ins;
         return RefEdit(
             e.pos()+firstVariantBase,
             alt.size() - shift,
-            e.pos()+firstVariantBase,
-            bases
+            e.pos()+padLen-shift-1,
+            bases,
+            INSERTION
             );
     }
-    return RefEdit(e.pos(), alt.size(), e.pos()+ref.size(), alt);
 }
 
 AltNormalizer::RefEdit AltNormalizer::moveDeletion(Entry& e, size_t idx) const {
@@ -202,16 +221,17 @@ AltNormalizer::RefEdit AltNormalizer::moveDeletion(Entry& e, size_t idx) const {
 
         delPos -= shift;
         if (shift)
-            std::rotate(del.begin(), del.end(), del.end()-shift%del.size());
+            std::rotate(del.begin(), del.end()-shift%del.size(), del.end());
 
         // we didn't shift all the way to the beginning of alt
         if (shift != alt.size())
-            return RefEdit(delPos, del.size(), delPos+del.size()-1, "");
+            return RefEdit(delPos, del.size(), delPos+del.size()-1, "", DELETION);
 
-        string::size_type refLen = ref.size() * 2;
-        while (delPos-refLen > 1) {
-            if (refLen >= delPos)
-                refLen = delPos-1;
+        string::size_type refLen = alt.size() * 2;
+        if (refLen >= delPos)
+            refLen = delPos-1;
+
+        while (delPos-refLen >= 1) {
             string eref = _ref.sequence(e.chrom(), delPos-refLen, refLen);
             string::size_type thisShift = leftShift(
                 eref.rbegin(), eref.rend(),
@@ -220,14 +240,16 @@ AltNormalizer::RefEdit AltNormalizer::moveDeletion(Entry& e, size_t idx) const {
             shift += thisShift;
             delPos -= thisShift;
             if (thisShift)
-                std::rotate(del.begin(), del.end(), del.end()-thisShift%del.size());
+                std::rotate(del.begin(), del.end()-thisShift%del.size(), del.end());
             if (thisShift != refLen)
                 break;
             refLen *= 2;
+            if (refLen >= delPos)
+                refLen = delPos-1;
         }
 
-        return RefEdit(delPos, del.size(), delPos+del.size()-1, "");
-    } else if (padEqual > 0) {
+        return RefEdit(delPos, del.size(), delPos+del.size()-1, "", DELETION);
+    } else {
         // there are substitutions in the pad, we cannot shift past them
 
         // see if there is any leading reference we can drop
@@ -236,19 +258,23 @@ AltNormalizer::RefEdit AltNormalizer::moveDeletion(Entry& e, size_t idx) const {
             alt.begin(), padLastFwd
             );
 
-        string::size_type shift = leftShift(padLastRev, padLastRev+padEqual, del.rbegin(), del.rend());
-        if (shift)
-            std::rotate(del.begin(), del.end(), del.end()-shift%del.size());
+        string::size_type shift(0);
+        if (padEqual > 0) {
+            shift = leftShift(padLastRev, padLastRev+padEqual, del.rbegin(), del.rend());
+            if (shift)
+                std::rotate(del.begin(), del.end()-shift%del.size(), del.end());
+        }
+
         string::size_type padLen = distance(alt.begin(), padLastFwd);
         string bases = alt.substr(firstVariantBase, padLen-shift-firstVariantBase);
         return RefEdit(
             e.pos()+firstVariantBase,
             bases.size() + del.size(),
-            e.pos()+firstVariantBase+del.size(),
-            bases
+            e.pos()+(padLen-shift-1)+del.size(),
+            bases,
+            DELETION
             );
     }
-    return RefEdit(e.pos(), alt.size(), e.pos()+ref.size(), alt);
 }
 
 END_NAMESPACE(Vcf)

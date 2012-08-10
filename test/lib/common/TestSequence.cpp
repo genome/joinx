@@ -31,3 +31,26 @@ TEST(Sequence, null) {
     Sequence dash("-");
     ASSERT_TRUE(dash.null());
 }
+
+TEST(Sequence, commonPrefixReverseIterators) {
+    string a("GCC");
+    string b("GA");
+    ASSERT_EQ(0, Sequence::commonPrefix(
+        a.rbegin(), a.rend(),
+        b.rbegin(), b.rend()
+    ));
+
+    a="GCC";
+    b="GAC";
+    ASSERT_EQ(1, Sequence::commonPrefix(
+        a.rbegin(), a.rend(),
+        b.rbegin(), b.rend()
+    ));
+
+    a="GCC";
+    b="GCC";
+    ASSERT_EQ(3, Sequence::commonPrefix(
+        a.rbegin(), a.rend(),
+        b.rbegin(), b.rend()
+    ));
+}

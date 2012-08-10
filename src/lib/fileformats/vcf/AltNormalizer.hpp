@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/VariantType.hpp"
 #include "common/namespaces.hpp"
 
 #include <cstdint>
@@ -17,14 +18,15 @@ public:
     struct RefEdit {
         RefEdit() : pos(0), len(0) {}
 
-        RefEdit(uint64_t pos, uint64_t len, uint64_t lastRef, std::string bases)
-            : pos(pos), len(len), lastRef(lastRef), bases(bases)
+        RefEdit(uint64_t pos, uint64_t len, uint64_t lastRef, std::string bases, VariantType type)
+            : pos(pos), len(len), lastRef(lastRef), bases(bases), type(type)
         {}
 
         uint64_t pos;
         uint64_t len;
         uint64_t lastRef;
         std::string bases;
+        VariantType type;
     };
 
 

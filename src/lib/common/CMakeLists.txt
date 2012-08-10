@@ -20,6 +20,7 @@ set(SOURCES
     TempFile.hpp
     Timer.hpp
     Tokenizer.hpp
+    VariantType.hpp
     namespaces.hpp
 )
 
