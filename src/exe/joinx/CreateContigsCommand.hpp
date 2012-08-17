@@ -25,7 +25,8 @@ protected:
 protected:
     std::string _referenceFasta;
     std::string _variantsFile;
-    std::string _outputFile;
+    std::string _outputFasta;
+    std::string _outputRemap;
     int _flankSize;
     int _minQuality;
     StreamHandler _streams;

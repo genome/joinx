@@ -40,7 +40,7 @@ protected:
 };
 
 // single alt cases
-TEST_F(TestVcfRawVariant, construct) {
+TEST_F(TestVcfRawVariant, singlealt) {
     Entry e = makeEntry("1", 10, "CCCC", 
         "C,"        // 1) 3bp deletion of CCC at position 11
         "CCCG,"     // 2) C/G snp at position 13
@@ -57,6 +57,28 @@ TEST_F(TestVcfRawVariant, construct) {
         RawVariant(12, "CC", "TG"),
         RawVariant(14, "", "G"),
         RawVariant(11, "", "G")
+    };
+    int nExpected = sizeof(expected) / sizeof(expected[0]);
+
+    vector<RawVariant> raw = RawVariant::processEntry(e);
+    ASSERT_EQ(nExpected, raw.size());
+    for (int i = 0; i < nExpected; ++i) {
+        ASSERT_EQ(expected[i].pos, raw[i].pos) << " at index " << i << " in\n" << e;
+        ASSERT_EQ(expected[i].ref, raw[i].ref) << " at index " << i << " in\n" << e;
+        ASSERT_EQ(expected[i].alt, raw[i].alt) << " at index " << i << " in\n" << e;
+    }
+}
+
+// double alt cases
+TEST_F(TestVcfRawVariant, doublealt) {
+    Entry e = makeEntry("1", 10, "CTA", 
+        "C,"
+        "CA"
+        );
+
+    RawVariant expected[] = {
+        RawVariant(11, "TA", ""),
+        RawVariant(11, "T", "")
     };
     int nExpected = sizeof(expected) / sizeof(expected[0]);
 

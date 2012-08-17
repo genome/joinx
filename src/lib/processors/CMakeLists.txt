@@ -15,6 +15,8 @@ set(SOURCES
     Sort.hpp
     SortBuffer.hpp
     TypeFilter.hpp
+    VariantContig.hpp
+    VariantContig.cpp
 )
 
 add_library(processors ${SOURCES})

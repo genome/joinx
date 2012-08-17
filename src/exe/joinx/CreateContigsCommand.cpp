@@ -1,10 +1,12 @@
 #include "CreateContigsCommand.hpp"
 
-#include "fileformats/Bed.hpp"
+#include "fileformats/VcfReader.hpp"
+#include "fileformats/vcf/Entry.hpp"
+#include "fileformats/vcf/RawVariant.hpp"
 #include "fileformats/Fasta.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/TypedStream.hpp"
-#include "processors/RemapContig.hpp"
+#include "processors/VariantContig.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
@@ -18,25 +20,8 @@ using namespace std;
 using namespace std::placeholders;
 namespace po = boost::program_options;
 
-namespace {
-    class RemapContigFastaWriter {
-    public:
-        RemapContigFastaWriter(ostream& out)
-            : _out(out)
-        {
-        }
-
-        void operator()(const RemapContig& ctg) {
-            _out << ">" << ctg.name() << "\n" << ctg.sequence() << "\n";
-        }
-
-    protected:
-        ostream& _out;
-    };
-}
-
 CreateContigsCommand::CreateContigsCommand()
-    : _outputFile("-")
+    : _outputFasta("-")
     , _flankSize(99)
     , _minQuality(0)
 {
@@ -54,7 +39,8 @@ void CreateContigsCommand::parseArguments(int argc, char** argv) {
         ("help,h", "this message")
         ("reference,r", po::value<string>(&_referenceFasta), "input reference sequence (FASTA format)")
         ("variants,v", po::value<string>(&_variantsFile), "input variants file (.bed format)")
-        ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
+        ("output-fasta", po::value<string>(&_outputFasta), "output fasta (empty or - means stdout, which is the default)")
+        ("output-remap", po::value<string>(&_outputRemap), "output remap")
         ("flank,f", po::value<int>(&_flankSize), "flank size on either end of the variant (default=99)")
         ("quality,q", po::value<int>(&_minQuality), "minimum quality cutoff for variants (default=0)")
     ;
@@ -89,25 +75,49 @@ void CreateContigsCommand::parseArguments(int argc, char** argv) {
         ss << "no variants specified!" << endl << endl << opts;
         throw runtime_error(ss.str());
     }
+
+    if (vm.count("output-fasta") != 1) {
+        throw runtime_error("specify --output-fasta= exactly once");
+    }
+
+    if (vm.count("output-remap") != 1) {
+        throw runtime_error("specify --output-remap= exactly once");
+    }
 }
 
 void CreateContigsCommand::exec() {
     Fasta ref(_referenceFasta);
-    ostream *output = _streams.get<ostream>(_outputFile);
+    ostream *output_fasta = _streams.get<ostream>(_outputFasta);
+    ostream *output_remap = _streams.get<ostream>(_outputRemap);
 
-    InputStream::ptr inStream(_streams.wrap<istream, InputStream>(_variantsFile));
-    // this stream will read 2 extra fields, ref/call and quality
-    typedef function<void(const BedHeader*, string&, Bed&)> Extractor;
-    typedef TypedStream<Bed, Extractor> BedReader;
-    Extractor extractor = bind(&Bed::parseLine, _1, _2, _3, 2);
-    BedReader reader(extractor, *inStream);
-    RemapContigFastaWriter writer(*output);
-    RemapContigGenerator<Fasta, RemapContigFastaWriter> generator(ref, _flankSize, writer);
-    Bed b;
-    while (reader.next(b)) {
-        Variant v(b);
-        if (v.quality() >= _minQuality)
-            generator.generate(v);
+    InputStream::ptr instream(_streams.wrap<istream, InputStream>(_variantsFile));
+
+    typedef function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
+    typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
+    typedef shared_ptr<ReaderType> ReaderPtr;
+
+    VcfExtractor extractor = bind(&Vcf::Entry::parseLine, _1, _2, _3);
+    ReaderType reader(extractor, *instream);
+    Vcf::Entry entry;
+    while (reader.next(entry)) {
+        vector<Vcf::RawVariant> variants = Vcf::RawVariant::processEntry(entry);
+        for (auto i = variants.begin(); i != variants.end(); ++i) {
+            if (entry.identifiers().empty()) {
+                continue;
+            }
+            size_t idx = distance(variants.begin(), i);
+            stringstream namestream;
+            namestream << *entry.identifiers().begin() << "_" << entry.pos() << "_" << idx;
+            VariantContig contig(*i, ref, _flankSize, entry.chrom());
+            string name = namestream.str();
+            *output_fasta << ">" << name << "\n"
+                << contig.sequence() << "\n";
+            *output_remap << ">" << name << "-"
+                << entry.chrom() << "|"
+                << contig.start() << "|"
+                << contig.stop() << "\n"
+                << contig.cigar() << "\n";
+        }
     }
 
 }
