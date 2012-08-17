@@ -1,4 +1,4 @@
-def_integration_test(joinx CreateContigs test_create_contigs.py)
+#def_integration_test(joinx CreateContigs test_create_contigs.py)
 def_integration_test(joinx Intersect test_intersect.py)
 def_integration_test(joinx SnvConcordance test_snv_concordance.py)
 def_integration_test(joinx Sort test_sort.py)
