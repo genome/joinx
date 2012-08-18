@@ -28,52 +28,62 @@ protected:
 
 TEST_F(TestVcfVariantContig, construct) {
     RawVariant raw(7, "T", "");
-    VariantContig variant(raw, _fa, 3, "1");
+    VariantContig contig(raw, _fa, 3, "1");
 
-    ASSERT_EQ("GGCAGG", variant.sequence());
-    ASSERT_EQ(4, variant.start());
-    ASSERT_EQ(10, variant.stop());
-    ASSERT_EQ("3M1D3M", variant.cigar());
+    ASSERT_EQ("GGCAGG", contig.sequence());
+    ASSERT_EQ(4, contig.start());
+    ASSERT_EQ(10, contig.stop());
+    ASSERT_EQ("3M1D3M", contig.cigar());
 }
 
 TEST_F(TestVcfVariantContig, frontEdge) {
     RawVariant raw(2, "A", "C");
-    VariantContig variant(raw, _fa, 3, "1");
+    VariantContig contig(raw, _fa, 3, "1");
 
-    ASSERT_EQ("ACTGG", variant.sequence());
-    ASSERT_EQ(1, variant.start());
-    ASSERT_EQ(5, variant.stop());
-    ASSERT_EQ("5M", variant.cigar());
+    ASSERT_EQ("ACTGG", contig.sequence());
+    ASSERT_EQ(1, contig.start());
+    ASSERT_EQ(5, contig.stop());
+    ASSERT_EQ("5M", contig.cigar());
 }
 
 TEST_F(TestVcfVariantContig, backEdge) {
     RawVariant raw(13, "C", "G");
-    VariantContig variant(raw, _fa, 3, "1");
+    VariantContig contig(raw, _fa, 3, "1");
 
-    ASSERT_EQ("GCTGC", variant.sequence());
-    ASSERT_EQ(10, variant.start());
-    ASSERT_EQ(14, variant.stop());
-    ASSERT_EQ("5M", variant.cigar());
+    ASSERT_EQ("GCTGC", contig.sequence());
+    ASSERT_EQ(10, contig.start());
+    ASSERT_EQ(14, contig.stop());
+    ASSERT_EQ("5M", contig.cigar());
 }
 
 TEST_F(TestVcfVariantContig, firstBase) {
     RawVariant raw(1, "A", "T");
-    VariantContig variant(raw, _fa, 3, "1");
+    VariantContig contig(raw, _fa, 3, "1");
 
-    ASSERT_EQ("TATG", variant.sequence());
-    ASSERT_EQ(1, variant.start());
-    ASSERT_EQ(4, variant.stop());
-    ASSERT_EQ("4M", variant.cigar());
+    ASSERT_EQ("TATG", contig.sequence());
+    ASSERT_EQ(1, contig.start());
+    ASSERT_EQ(4, contig.stop());
+    ASSERT_EQ("4M", contig.cigar());
 }
 
 TEST_F(TestVcfVariantContig, lastBase) {
     RawVariant raw(14, "C", "G");
-    VariantContig variant(raw, _fa, 3, "1");
+    VariantContig contig(raw, _fa, 3, "1");
 
-    ASSERT_EQ("CTCG", variant.sequence());
-    ASSERT_EQ(11, variant.start());
-    ASSERT_EQ(14, variant.stop());
-    ASSERT_EQ("4M", variant.cigar());
+    ASSERT_EQ("CTCG", contig.sequence());
+    ASSERT_EQ(11, contig.start());
+    ASSERT_EQ(14, contig.stop());
+    ASSERT_EQ("4M", contig.cigar());
+}
+
+TEST_F(TestVcfVariantContig, paddingAtFirstBase) {
+    RawVariant raw(3, "T", "C");
+    VariantContig contig(raw, _fa, 3, "1");
+
+    ASSERT_EQ("AACGGC", contig.sequence());
+    ASSERT_EQ(1, contig.start());
+    ASSERT_EQ(6, contig.stop());
+    ASSERT_EQ("6M", contig.cigar());
 }
 
 TEST_F(TestVcfVariantContig, unknownSequence) {

@@ -13,8 +13,8 @@ VariantContig::VariantContig(
         )
 {
     uint64_t seqlen = ref.seqlen(seqname);
-    uint64_t preflank_len = var.pos < flank ? var.pos - 1 : flank;
-    _start = var.pos - preflank_len;
+    uint64_t preflank_len = var.pos <= flank ? var.pos - 1 : flank;
+    _start = std::max(1ul, var.pos - preflank_len);
     _stop = std::min(var.pos + var.ref.size() - 1 + flank, seqlen);
     uint64_t postflank_start = var.pos + var.ref.size();
     uint64_t postflank_len = _stop - postflank_start + 1;
