@@ -1,20 +1,13 @@
-#include "fileformats/vcf/RawVariant.hpp"
 #include "processors/VariantContig.hpp"
-#include "fileformats/vcf/Entry.hpp"
-#include "fileformats/vcf/Header.hpp"
-#include "fileformats/InputStream.hpp"
-#include "common/VariantType.hpp"
-#include "fileformats/Fasta.hpp"
 
-#include <functional>
-#include <sstream>
-#include <stdexcept>
+#include "common/UnknownSequenceError.hpp"
+#include "fileformats/Fasta.hpp"
+#include "fileformats/vcf/RawVariant.hpp"
+
 #include <string>
-#include <vector>
 #include <gtest/gtest.h>
 
 using namespace Vcf;
-using namespace std::placeholders;
 using namespace std;
 
 class TestVcfVariantContig : public ::testing::Test {
@@ -43,3 +36,28 @@ TEST_F(TestVcfVariantContig, construct) {
     ASSERT_EQ("3M1D3M", variant.cigar());
 }
 
+TEST_F(TestVcfVariantContig, frontEdge) {
+    RawVariant raw(2, "A", "C");
+    VariantContig variant(raw, _fa, 3, "1");
+
+    ASSERT_EQ("ACTGG", variant.sequence());
+    ASSERT_EQ(1, variant.start());
+    ASSERT_EQ(5, variant.stop());
+    ASSERT_EQ("5M", variant.cigar());
+}
+
+TEST_F(TestVcfVariantContig, backEdge) {
+    RawVariant raw(13, "C", "G");
+    VariantContig variant(raw, _fa, 3, "1");
+
+    ASSERT_EQ("GCTGC", variant.sequence());
+    ASSERT_EQ(10, variant.start());
+    ASSERT_EQ(14, variant.stop());
+    ASSERT_EQ("5M", variant.cigar());
+}
+
+TEST_F(TestVcfVariantContig, unknownSequence) {
+    RawVariant raw(13, "C", "G");
+    ASSERT_THROW(VariantContig(raw, _fa, 3, "2"),
+        UnknownSequenceError);
+}
