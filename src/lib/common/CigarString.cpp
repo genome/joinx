@@ -168,6 +168,10 @@ void CigarString::push_back(const Op& op) {
         _ops.push_back(op);
 }
 
+void CigarString::push_back(uint32_t len, CigarOpType op) {
+    push_back(CigarString::Op(len, op));
+}
+
 void CigarString::concatenate(const CigarString& s) {
     for (auto i = s._ops.begin(); i != s._ops.end(); ++i)
         push_back(*i);

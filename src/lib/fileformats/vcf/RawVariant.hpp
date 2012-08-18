@@ -3,7 +3,6 @@
 #include "Entry.hpp"
 
 #include "common/Sequence.hpp"
-#include "common/VariantType.hpp"
 #include "common/namespaces.hpp"
 
 #include <vector>

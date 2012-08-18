@@ -1,11 +1,12 @@
 #include "CreateContigsCommand.hpp"
 
-#include "fileformats/VcfReader.hpp"
-#include "fileformats/vcf/Entry.hpp"
-#include "fileformats/vcf/RawVariant.hpp"
+#include "common/UnknownSequenceError.hpp"
 #include "fileformats/Fasta.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/TypedStream.hpp"
+#include "fileformats/VcfReader.hpp"
+#include "fileformats/vcf/Entry.hpp"
+#include "fileformats/vcf/RawVariant.hpp"
 #include "processors/VariantContig.hpp"
 
 #include <boost/format.hpp>
@@ -39,8 +40,8 @@ void CreateContigsCommand::parseArguments(int argc, char** argv) {
         ("help,h", "this message")
         ("reference,r", po::value<string>(&_referenceFasta), "input reference sequence (FASTA format)")
         ("variants,v", po::value<string>(&_variantsFile), "input variants file (.bed format)")
-        ("output-fasta", po::value<string>(&_outputFasta), "output fasta (empty or - means stdout, which is the default)")
-        ("output-remap", po::value<string>(&_outputRemap), "output remap")
+        ("output-fasta,o", po::value<string>(&_outputFasta), "output fasta (empty or - means stdout, which is the default)")
+        ("output-remap,R", po::value<string>(&_outputRemap), "output remap")
         ("flank,f", po::value<int>(&_flankSize), "flank size on either end of the variant (default=99)")
         ("quality,q", po::value<int>(&_minQuality), "minimum quality cutoff for variants (default=0)")
     ;
@@ -87,8 +88,8 @@ void CreateContigsCommand::parseArguments(int argc, char** argv) {
 
 void CreateContigsCommand::exec() {
     Fasta ref(_referenceFasta);
-    ostream *output_fasta = _streams.get<ostream>(_outputFasta);
-    ostream *output_remap = _streams.get<ostream>(_outputRemap);
+    ostream *outputFasta = _streams.get<ostream>(_outputFasta);
+    ostream *outputRemap = _streams.get<ostream>(_outputRemap);
 
     InputStream::ptr instream(_streams.wrap<istream, InputStream>(_variantsFile));
 
@@ -108,15 +109,19 @@ void CreateContigsCommand::exec() {
             size_t idx = distance(variants.begin(), i);
             stringstream namestream;
             namestream << *entry.identifiers().begin() << "_" << entry.pos() << "_" << idx;
-            VariantContig contig(*i, ref, _flankSize, entry.chrom());
-            string name = namestream.str();
-            *output_fasta << ">" << name << "\n"
-                << contig.sequence() << "\n";
-            *output_remap << ">" << name << "-"
-                << entry.chrom() << "|"
-                << contig.start() << "|"
-                << contig.stop() << "\n"
-                << contig.cigar() << "\n";
+            try {
+                VariantContig contig(*i, ref, _flankSize, entry.chrom());
+                string name = namestream.str();
+                *outputFasta << ">" << name << "\n" << contig.sequence() << "\n";
+                *outputRemap << ">" << name << "-"
+                    << entry.chrom() << "|"
+                    << contig.start() << "|"
+                    << contig.stop() << "\n"
+                    << contig.cigar() << "\n";
+            } catch (UnknownSequenceError& e) {
+                cerr << "WARNING: at line " << reader.name() << ":" << reader.lineNum() << ": "
+                    << e.what() << "\n";
+            }
         }
     }
 

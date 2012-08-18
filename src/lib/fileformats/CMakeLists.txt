@@ -62,4 +62,4 @@ set(SOURCES
 )
 
 add_library(fileformats ${SOURCES})
-target_link_libraries(fileformats common ${Boost_LIBRARIES} ${BZIP2_LIBRARIES})
+target_link_libraries(fileformats common ${Boost_LIBRARIES} ${BZIP2_LIBRARIES} ${ZLIB_LIBRARIES})

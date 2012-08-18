@@ -1,13 +1,20 @@
 #pragma once
+
+#include "common/CigarString.hpp"
+#include "fileformats/vcf/RawVariant.hpp"
+
 #include <cstdint>
 #include <string>
-#include "fileformats/vcf/RawVariant.hpp"
 
 class Fasta;
 
 class VariantContig {
 public:
-    VariantContig(Vcf::RawVariant const& rawvariant, Fasta& reference, int flank, std::string const& seqname);
+    VariantContig(
+        Vcf::RawVariant const& var,
+        Fasta& ref,
+        int flank,
+        std::string const& seqname);
     
     std::string sequence() const;
     std::string cigar() const;
@@ -16,7 +23,23 @@ public:
     
 protected:
     std::string _sequence;
-    std::string _cigar;
+    CigarString _cigar;
     int64_t _start;
     int64_t _stop;
 };
+
+inline std::string VariantContig::sequence() const {
+    return _sequence;
+}
+
+inline std::string VariantContig::cigar() const {
+    return _cigar;
+}
+
+inline int64_t VariantContig::start() const {
+    return _start;
+}
+
+inline int64_t VariantContig::stop() const { 
+    return _stop;
+}

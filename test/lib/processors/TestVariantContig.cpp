@@ -56,6 +56,26 @@ TEST_F(TestVcfVariantContig, backEdge) {
     ASSERT_EQ("5M", variant.cigar());
 }
 
+TEST_F(TestVcfVariantContig, firstBase) {
+    RawVariant raw(1, "A", "T");
+    VariantContig variant(raw, _fa, 3, "1");
+
+    ASSERT_EQ("TATG", variant.sequence());
+    ASSERT_EQ(1, variant.start());
+    ASSERT_EQ(4, variant.stop());
+    ASSERT_EQ("4M", variant.cigar());
+}
+
+TEST_F(TestVcfVariantContig, lastBase) {
+    RawVariant raw(14, "C", "G");
+    VariantContig variant(raw, _fa, 3, "1");
+
+    ASSERT_EQ("CTCG", variant.sequence());
+    ASSERT_EQ(11, variant.start());
+    ASSERT_EQ(14, variant.stop());
+    ASSERT_EQ("4M", variant.cigar());
+}
+
 TEST_F(TestVcfVariantContig, unknownSequence) {
     RawVariant raw(13, "C", "G");
     ASSERT_THROW(VariantContig(raw, _fa, 3, "2"),

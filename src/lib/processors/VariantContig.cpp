@@ -1,56 +1,42 @@
 #include "VariantContig.hpp"
 #include "fileformats/Fasta.hpp"
-#include <sstream>
 #include <algorithm>
 
 using namespace std;
 using Vcf::RawVariant;
 
-VariantContig::VariantContig(RawVariant const& rawvariant, Fasta& reference, int flank, std::string const& seqname) {
-    int64_t seqlen = reference.seqlen(seqname);
-    int64_t preflank_len = rawvariant.pos < flank ? rawvariant.pos - 1 : flank;
-    int64_t postflank_start = rawvariant.pos + rawvariant.ref.size();
+VariantContig::VariantContig(
+        RawVariant const& var,
+        Fasta& ref,
+        int flank,
+        std::string const& seqname
+        )
+{
+    uint64_t seqlen = ref.seqlen(seqname);
+    uint64_t preflank_len = var.pos < flank ? var.pos - 1 : flank;
+    _start = var.pos - preflank_len;
+    _stop = std::min(var.pos + var.ref.size() - 1 + flank, seqlen);
+    uint64_t postflank_start = var.pos + var.ref.size();
+    uint64_t postflank_len = _stop - postflank_start + 1;
+    
+    // build sequence
+    if (preflank_len)
+        _sequence = ref.sequence(seqname, _start, preflank_len); // left flank
+    _sequence += var.alt;
+    if (postflank_start <= seqlen && postflank_len)
+        _sequence += ref.sequence(seqname, postflank_start, postflank_len); // right flank
+    
+    // build cigar
+    if (preflank_len)
+        _cigar.push_back(preflank_len, MATCH);
 
-    _start = rawvariant.pos - preflank_len;
-    _stop = rawvariant.pos + rawvariant.ref.size() - 1 + flank;
-    if (_stop > seqlen) {
-        _stop = seqlen;
-    }
+    if (var.ref.size() > var.alt.size())
+        _cigar.push_back(var.ref.size() - var.alt.size(), DEL);
+    else if (var.ref.size() < var.alt.size())
+        _cigar.push_back(var.alt.size() - var.ref.size(), INS);
+    else
+        _cigar.push_back(var.alt.size(), MATCH);
 
-    int64_t postflank_len = _stop - postflank_start + 1;
-    
-    
-    _sequence = reference.sequence(seqname, _start, preflank_len); // left flank
-    _sequence += rawvariant.alt;
-    _sequence += reference.sequence(seqname, postflank_start, postflank_len); // right flank
-    
-    stringstream cigar;
-    
-    int64_t matchlen = preflank_len + std::min(rawvariant.ref.size(), rawvariant.alt.size());
-    
-    if (rawvariant.ref.size() > rawvariant.alt.size()) {
-        cigar << matchlen << "M"
-            << rawvariant.ref.size() - rawvariant.alt.size() << "D"
-            << postflank_len << "M";
-    } else if (rawvariant.ref.size() < rawvariant.alt.size()) {
-        cigar << matchlen << "M"
-            << rawvariant.alt.size() - rawvariant.ref.size() << "I"
-            << postflank_len << "M";
-    } else {
-        cigar << _stop - _start + 1 << "M";
-    }
-    _cigar = cigar.str();
-}
-
-std::string VariantContig::sequence() const {
-    return _sequence;
-}
-std::string VariantContig::cigar() const {
-    return _cigar;
-}
-int64_t VariantContig::start() const {
-    return _start;
-}
-int64_t VariantContig::stop() const { 
-    return _stop;
+    if (postflank_len)
+        _cigar.push_back(postflank_len, MATCH);
 }

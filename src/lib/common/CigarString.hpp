@@ -45,7 +45,7 @@ public:
     static CigarString merge(CigarString a, CigarString b, uint32_t pos);
 
     CigarString();
-    CigarString(const std::string& data);
+    explicit CigarString(const std::string& data);
 
     CigarString& operator=(const std::string& data);
 
@@ -55,6 +55,7 @@ public:
     void parse(const std::string& data);
     operator std::string() const;
     void push_back(const Op& op);
+    void push_back(uint32_t length, CigarOpType op);
     void concatenate(const CigarString& s);
     void pop_front(uint32_t n);
     const std::deque<Op> ops() const;
