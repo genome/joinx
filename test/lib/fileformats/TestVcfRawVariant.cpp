@@ -44,10 +44,10 @@ TEST_F(TestVcfRawVariant, singlealt) {
     Entry e = makeEntry("1", 10, "CCCC", 
         "C,"        // 1) 3bp deletion of CCC at position 11
         "CCCG,"     // 2) C/G snp at position 13
-        "CGCC,"      // 3) C/G snp at position 11
+        "CGCC,"     // 3) C/G snp at position 11
         "CCTG,"     // 4) CG/TG dnp at position 13
         "CCCCG,"    // 5) 1bp insertion of G at position 14
-        "CGCCC"    // 6) 1bp insertion of G at position 11
+        "CGCCC"     // 6) 1bp insertion of G at position 11
         );
 
     RawVariant expected[] = {
