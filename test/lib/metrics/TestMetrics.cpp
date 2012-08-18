@@ -281,8 +281,8 @@ TEST_F(TestMetrics, identifyNovelAlleles) {
     ASSERT_EQ(1, novel2.size());
 
     //                  membership: dbsnp 1kg
-    ASSERT_EQ(true, novel1[0]);  //     0 0
-    ASSERT_EQ(false, novel1[1]); //     0 1
-    ASSERT_EQ(false, novel1[2]); //     1 0
-    ASSERT_EQ(false, novel2[0]); //     1 1
+    ASSERT_TRUE(novel1[0]);  //     0 0
+    ASSERT_FALSE(novel1[1]); //     0 1
+    ASSERT_FALSE(novel1[2]); //     1 0
+    ASSERT_FALSE(novel2[0]); //     1 1
 }
