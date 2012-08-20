@@ -5,6 +5,7 @@
 #include "fileformats/InputStream.hpp"
 #include "fileformats/TypedStream.hpp"
 #include "fileformats/VcfReader.hpp"
+#include "fileformats/vcf/CustomValue.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/RawVariant.hpp"
 #include "processors/VariantContig.hpp"
@@ -39,7 +40,7 @@ void CreateContigsCommand::parseArguments(int argc, char** argv) {
     opts.add_options()
         ("help,h", "this message")
         ("reference,r", po::value<string>(&_referenceFasta), "input reference sequence (FASTA format)")
-        ("variants,v", po::value<string>(&_variantsFile), "input variants file (.bed format)")
+        ("variants,v", po::value<string>(&_variantsFile), "input variants file (.vcf format)")
         ("output-fasta,o", po::value<string>(&_outputFasta), "output fasta (empty or - means stdout, which is the default)")
         ("output-remap,R", po::value<string>(&_outputRemap), "output remap")
         ("flank,f", po::value<int>(&_flankSize), "flank size on either end of the variant (default=99)")
@@ -101,11 +102,11 @@ void CreateContigsCommand::exec() {
     ReaderType reader(extractor, *instream);
     Vcf::Entry entry;
     while (reader.next(entry)) {
+        if (entry.identifiers().empty())
+            continue;
+
         vector<Vcf::RawVariant> variants = Vcf::RawVariant::processEntry(entry);
         for (auto i = variants.begin(); i != variants.end(); ++i) {
-            if (entry.identifiers().empty()) {
-                continue;
-            }
             size_t idx = distance(variants.begin(), i);
             stringstream namestream;
             namestream << *entry.identifiers().begin() << "_" << entry.pos() << "_" << idx;
