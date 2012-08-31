@@ -28,7 +28,7 @@ class TestCreateContigs(IntegrationTest, unittest.TestCase):
         params.append("boof.fa")
         params.extend(input_files)
         rv, err = self.execute(params)
-        self.assertEqual(1, rv)
+        self.assertEqual(2, rv)
         self.assertTrue("Failed to memory map fasta 'boof.fa'" in err, "value was %s" %err)
 
     def test_vcf_not_found(self):
@@ -41,7 +41,7 @@ class TestCreateContigs(IntegrationTest, unittest.TestCase):
         params.extend(input_files)
         params.append("boof.vcf")
         rv, err = self.execute(params)
-        self.assertEqual(1, rv)
+        self.assertEqual(2, rv)
         self.assertTrue("Failed to open file boof.vcf" in err, "value was %s" %err)
 
 

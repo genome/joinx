@@ -7,6 +7,10 @@ set(SOURCES
     Bed.hpp
     BedReader.cpp
     BedReader.hpp
+    ChromPos.cpp
+    ChromPos.hpp
+    ChromPosReader.cpp
+    ChromPosReader.hpp
     Fasta.cpp
     Fasta.hpp
     InferFileType.cpp

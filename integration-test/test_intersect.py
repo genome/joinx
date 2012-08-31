@@ -89,7 +89,7 @@ class TestIntersect(IntegrationTest, unittest.TestCase):
 
     def test_file_not_found(self):
         rv, err = self.execute(["intersect", "qwert", "djfsoidjfdj"])
-        self.assertEqual(1, rv)
+        self.assertEqual(2, rv)
         self.assertEqual("Failed to open file qwert\n", err)
 
     def test_invalid_arguments(self):
@@ -101,7 +101,7 @@ class TestIntersect(IntegrationTest, unittest.TestCase):
         params = ["intersect"]
         params.extend(self.inputFiles("a.bed", "unsorted0.bed"))
         rv, err = self.execute(params)
-        self.assertEqual(1, rv)
+        self.assertEqual(3, rv)
         self.assertTrue(err.startswith("Unsorted data found in stream"))
 
     def test_output_format_extra_fields(self):

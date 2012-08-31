@@ -5,6 +5,7 @@ project(common)
 set(SOURCES
     CigarString.cpp
     CigarString.hpp
+    IOError.hpp
     Iub.hpp
     JxString.cpp
     JxString.hpp
@@ -20,6 +21,8 @@ set(SOURCES
     TempFile.hpp
     Timer.hpp
     Tokenizer.hpp
+    UnknownSequenceError.hpp
+    UnsortedDataError.hpp
     VariantType.hpp
     namespaces.hpp
 )

@@ -1,9 +1,10 @@
 #pragma once
 
+#include "common/UnsortedDataError.hpp"
+
 #include <boost/format.hpp>
 #include <cstring>
 #include <list>
-#include <stdexcept>
 
 // This class is capable of performing intersection as well as symmetric
 // difference.
@@ -116,11 +117,10 @@ public: // code
 
     template<typename T, typename S>
     bool advanceSorted(S& stream, T& value) {
-        using std::runtime_error;
         using boost::format;
         T* peek = NULL;
         if (stream.peek(&peek) && compare(*peek, value) == BEFORE)
-            throw runtime_error(str(format("Unsorted data found in stream %1%\n'%2%' follows '%3%'") %stream.name() %peek->toString() %value.toString()));
+            throw UnsortedDataError(str(format("Unsorted data found in stream %1%\n'%2%' follows '%3%'") %stream.name() %peek->toString() %value.toString()));
         return stream.next(value);
     }
 

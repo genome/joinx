@@ -1,5 +1,6 @@
 #include "Fasta.hpp"
 #include "InputStream.hpp"
+#include "common/IOError.hpp"
 #include "common/Tokenizer.hpp"
 #include "common/UnknownSequenceError.hpp"
 
@@ -182,7 +183,7 @@ Fasta::Fasta(std::string const& path)
     try {
         _f.reset(new boost::iostreams::mapped_file_source(path));
     } catch (exception const& e) {
-        throw runtime_error(str(format("Failed to memory map fasta '%1%': %2%") %path %e.what()));
+        throw IOError(str(format("Failed to memory map fasta '%1%': %2%") %path %e.what()));
     }
 
     _data = _f->data();
@@ -197,7 +198,7 @@ Fasta::Fasta(std::string const& path)
         _index = gen.generate();
         ofstream out(faiPath);
         if (!out) {
-            throw runtime_error(str(format(
+            throw IOError(str(format(
                 "Failed to save fasta index to %1%") %faiPath));
         }
         _index->save(out);

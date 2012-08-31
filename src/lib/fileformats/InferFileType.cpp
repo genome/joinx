@@ -1,6 +1,7 @@
 #include "InferFileType.hpp"
 
 #include "Bed.hpp"
+#include "ChromPos.hpp"
 #include "InputStream.hpp"
 #include "TypedStream.hpp"
 #include "vcf/Entry.hpp"
@@ -76,10 +77,16 @@ FileType inferFileType(InputStream& in) {
 
     typedef function<void(const BedHeader*, string&, Bed&)> BedExtractor;
     BedExtractor bedExtractor = bind(&Bed::parseLine, _1, _2, _3, -1);
+
+    typedef function<void(const ChromPosHeader*, string&, ChromPos&)> ChromPosExtractor;
+    ChromPosExtractor cpExtractor = bind(&ChromPos::parseLine, _1, _2, _3);
+
     if (testReader<Bed, BedExtractor>(in, bedExtractor)) {
         rv = BED;
     } else if (testVcf(in)) {
         rv = VCF;
+    } else if (testReader<ChromPos, ChromPosExtractor>(in, cpExtractor)) {
+        rv = CHROMPOS;
     } else if (testEmpty(in)) {
         rv = EMPTY;
     }

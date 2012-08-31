@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/UnsortedDataError.hpp"
+
 #include <boost/format.hpp>
 #include <cstring>
 #include <deque>
@@ -60,7 +62,7 @@ public:
         using boost::format;
         T* peek = NULL;
         if (stream.peek(&peek) && compare(*peek, value) == BEFORE)
-            throw runtime_error(str(format(
+            throw UnsortedDataError(str(format(
                 "Unsorted data found in stream %1%\n'%2%' follows '%3%'")
                 %stream.name() %peek->toString() %value.toString())
                 );

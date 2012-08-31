@@ -1,6 +1,8 @@
 #include "SortCommand.hpp"
 
+#include "common/IOError.hpp"
 #include "fileformats/BedReader.hpp"
+#include "fileformats/ChromPosReader.hpp"
 #include "fileformats/InferFileType.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/OutputWriter.hpp"
@@ -130,13 +132,33 @@ void SortCommand::exec() {
     FileType type = detectFormat(inputStreams);
     ostream* out = _streamHandler.get<ostream>(_outputFile);
     if (_streamHandler.cinReferences() > 1)
-        throw runtime_error("stdin listed more than once!");
+        throw IOError("stdin listed more than once!");
 
     // this happens when all input files are empty
     if (type == EMPTY)
         return;
 
-    if (type == BED) {
+
+    if (type == CHROMPOS) {
+        ChromPosOpenerType cpOpener = bind(&openChromPos, _1);
+        typedef OutputWriter<ChromPos> WriterType;
+        WriterType writer(*out);
+        vector<ChromPosReader::ptr> readers;
+        for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i)
+            readers.push_back(openChromPos(**i));
+        ChromPosHeader outputHeader;
+
+        Sort<ChromPosReader, ChromPosOpenerType, WriterType> sorter(
+            readers,
+            cpOpener,
+            writer,
+            outputHeader,
+            _maxInMem,
+            _stable,
+            compression
+        );
+        sorter.execute();
+    } else if (type == BED) {
         int extraFields = _unique ? 1 : 0;
         BedOpenerType bedOpener = bind(&openBed, _1, extraFields);
         typedef OutputWriter<Bed> WriterType;
