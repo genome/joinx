@@ -120,10 +120,10 @@ public:
 
 TEST_F(TestVcfMergeStrategy, parse) {
     stringstream ss(
-        "DP=sum\n"
-        "FET=ignore\n"
-        "FOO=uniq-concat\n"
-        "BAR=enforce-equal\n"
+        "info.DP=sum\n"
+        "info.FET=ignore\n"
+        "info.FOO=uniq-concat\n"
+        "info.BAR=enforce-equal\n"
         );
 
     InputStream in("test", ss);
@@ -146,11 +146,38 @@ TEST_F(TestVcfMergeStrategy, parse) {
     ASSERT_THROW(strategy.infoMerger("invalid"), runtime_error);
 }
 
-TEST_F(TestVcfMergeStrategy, parseInvalidInfoField) {
+TEST_F(TestVcfMergeStrategy, parseDefault) {
+    stringstream ss(
+        "default=first\n"
+        "info.DP=sum\n"
+        );
+
+    InputStream in("test", ss);
+    MergeStrategy strategy(&_mergedHeader);
+    ASSERT_NO_THROW(strategy.parse(in));
+    ValueMergers::Base const* merger(0);
+
+    ASSERT_TRUE((merger = strategy.defaultMerger()));
+    ASSERT_EQ("first", merger->name());
+    ASSERT_TRUE((merger = strategy.infoMerger("DP")));
+    ASSERT_EQ("sum", merger->name());
+}
+
+TEST_F(TestVcfMergeStrategy, parseMissingInfoTag) {
     stringstream ss(
         "DP=sum\n"
-        "FET=ignore\n"
-        "BADNAME=uniq-concat\n"
+        );
+
+    InputStream in("test", ss);
+    MergeStrategy strategy(&_mergedHeader);
+    ASSERT_THROW(strategy.parse(in), runtime_error);
+}
+
+TEST_F(TestVcfMergeStrategy, parseInvalidInfoField) {
+    stringstream ss(
+        "info.DP=sum\n"
+        "info.FET=ignore\n"
+        "info.BADNAME=uniq-concat\n"
         );
 
     InputStream in("test", ss);
@@ -160,10 +187,10 @@ TEST_F(TestVcfMergeStrategy, parseInvalidInfoField) {
 
 TEST_F(TestVcfMergeStrategy, parseInvalidMerger) {
     stringstream ss(
-        "DP=sum\n"
-        "FET=ignore\n"
-        "FOO=uniq-concat\n"
-        "BAR=something-bad\n"
+        "info.DP=sum\n"
+        "info.FET=ignore\n"
+        "info.FOO=uniq-concat\n"
+        "info.BAR=something-bad\n"
         );
 
     InputStream in("test", ss);

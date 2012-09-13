@@ -28,9 +28,26 @@ void MergeStrategy::parse(InputStream& s) {
         Tokenizer<char> t(line, '=');
         string key;
         string value;
+
         t.extract(key);
         t.extract(value);
-        setMerger(key, value);
+
+        if (key != "default") {
+            Tokenizer<char> dot(key, '.');
+            string prefix;
+            string field;
+            dot.extract(prefix);
+            if (!dot.extract(field) || prefix != "info") {
+                throw runtime_error(str(format(
+                    "Failed to parse merge strategy line %1%."
+                    ) %line));
+            }
+
+            setMerger(field, value);
+        } else {
+            setDefaultMerger(value);
+        }
+
     }
 }
 
@@ -47,7 +64,7 @@ MergeStrategy::MergeStrategy(
     , _cnsFilt(cnsFilt)
     , _samplePriority(samplePriority)
 {
-    _default = _registry->getMerger("ignore");
+    setDefaultMerger("ignore");
 }
 
 void MergeStrategy::clearFilters(bool value) {
@@ -74,6 +91,10 @@ uint32_t MergeStrategy::primarySampleStreamIndex() const {
     return _primarySampleStreamIndex;
 }
 
+
+void MergeStrategy::setDefaultMerger(const std::string& mergerName) {
+    _default = _registry->getMerger(mergerName);
+}
 void MergeStrategy::setMerger(const std::string& id, const std::string& mergerName) {
     if (_header->infoType(id) == NULL)
         throw runtime_error(str(format("Unknown datatype for info field '%1%'") %id));

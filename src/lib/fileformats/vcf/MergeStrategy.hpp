@@ -51,6 +51,9 @@ public:
     /// \param id names an info field
     /// \exception runtime_error if no action can be found to handle the field
     const ValueMergers::Base* infoMerger(const std::string& id) const;
+    const ValueMergers::Base* defaultMerger() const {
+        return _default;
+    }
 
     /// Merge the info field specified by 'which' in the given range of entries
     /// \param which the name of the info field to merge
@@ -66,6 +69,8 @@ public:
     /// \param the name of the action to set. actions are defined in ValueMergers.hpp.
     /// \exception runtime_error thrown if the action name is not known
     void setMerger(const std::string& id, const std::string& mergerName);
+
+    void setDefaultMerger(std::string const& mergerName);
 
     /// If set to true, clearFilters will strip all filter information from merged 
     /// entries.

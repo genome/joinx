@@ -18,6 +18,7 @@ namespace ValueMergers {
 std::unique_ptr<Registry> Registry::_instance;
 
 Registry::Registry() {
+    registerMerger(Base::const_ptr(new UseFirst));
     registerMerger(Base::const_ptr(new EnforceEquality));
     registerMerger(Base::const_ptr(new Ignore));
     registerMerger(Base::const_ptr(new Sum));

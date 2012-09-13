@@ -258,11 +258,13 @@ particular info fields. Valid actions are:
     sum (numeric fields only)
         sum the values for this field
 
-An example merge strategy that sums up DP (depth) values and concatenates
-information in a field called caller is:
+An example merge strategy that by default takes info fields from the
+first entry, sums up DP (depth) values, and concatenates information
+in a field called caller is:
 
-DP=sum
-CALLER=uniq-concat
+ default=first
+ info.DP=sum
+ info.CALLER=uniq-concat
 
 =head2 OPTIONS
 
