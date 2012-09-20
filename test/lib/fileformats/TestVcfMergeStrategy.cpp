@@ -173,18 +173,6 @@ TEST_F(TestVcfMergeStrategy, parseMissingInfoTag) {
     ASSERT_THROW(strategy.parse(in), runtime_error);
 }
 
-TEST_F(TestVcfMergeStrategy, parseInvalidInfoField) {
-    stringstream ss(
-        "info.DP=sum\n"
-        "info.FET=ignore\n"
-        "info.BADNAME=uniq-concat\n"
-        );
-
-    InputStream in("test", ss);
-    MergeStrategy strategy(&_mergedHeader);
-    ASSERT_THROW(strategy.parse(in), runtime_error);
-}
-
 TEST_F(TestVcfMergeStrategy, parseInvalidMerger) {
     stringstream ss(
         "info.DP=sum\n"

@@ -96,8 +96,12 @@ void MergeStrategy::setDefaultMerger(const std::string& mergerName) {
     _default = _registry->getMerger(mergerName);
 }
 void MergeStrategy::setMerger(const std::string& id, const std::string& mergerName) {
-    if (_header->infoType(id) == NULL)
-        throw runtime_error(str(format("Unknown datatype for info field '%1%'") %id));
+    if (_header->infoType(id) == NULL) {
+        cerr << str(format(
+            "Warning: info field '%1%' specified in merge strategy not found in header, ignoring.\n"
+            ) %id);
+        return;
+    }
 
     const ValueMergers::Base* merger = _registry->getMerger(mergerName);
     auto inserted = _info.insert(make_pair(id, merger));
@@ -116,10 +120,10 @@ const ValueMergers::Base* MergeStrategy::infoMerger(const string& which) const {
     auto iter = _info.find(which);
     if (iter != _info.end())
         return iter->second;
-    else if (type->numberType() == CustomType::VARIABLE_SIZE)
-        return _registry->getMerger("uniq-concat");
     else if (_default)
         return _default;
+    else if (type->numberType() == CustomType::VARIABLE_SIZE)
+        return _registry->getMerger("uniq-concat");
     else
         return _registry->getMerger("enforce-equal");
 }

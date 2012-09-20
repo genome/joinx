@@ -132,6 +132,9 @@ public:
 };
 
 TEST_F(TestVcfEntryMerger, merge) {
+    // We want to concatenate variant caller names
+    _defaultMs->setMerger("VC", "uniq-concat");
+
     EntryMerger merger(*_defaultMs, &_mergedHeader, &*_snvs.begin(), &*_snvs.end());
     ASSERT_EQ("20", merger.chrom());
     ASSERT_EQ(14370, merger.pos());
