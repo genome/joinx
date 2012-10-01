@@ -30,12 +30,15 @@ VariantContig::VariantContig(
     if (preflank_len)
         _cigar.push_back(preflank_len, MATCH);
 
-    if (var.ref.size() > var.alt.size())
-        _cigar.push_back(var.ref.size() - var.alt.size(), DEL);
-    else if (var.ref.size() < var.alt.size())
-        _cigar.push_back(var.alt.size() - var.ref.size(), INS);
-    else
+    if (var.ref.size() > var.alt.size()) {
         _cigar.push_back(var.alt.size(), MATCH);
+        _cigar.push_back(var.ref.size() - var.alt.size(), DEL);
+    } else if (var.ref.size() < var.alt.size()) {
+        _cigar.push_back(var.ref.size(), MATCH);
+        _cigar.push_back(var.alt.size() - var.ref.size(), INS);
+    } else {
+        _cigar.push_back(var.alt.size(), MATCH);
+    }
 
     if (postflank_len)
         _cigar.push_back(postflank_len, MATCH);

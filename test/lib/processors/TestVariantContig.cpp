@@ -13,7 +13,7 @@ using namespace std;
 class TestVcfVariantContig : public ::testing::Test {
 protected:
     TestVcfVariantContig() 
-        :_ref(">1\nAATGGCTAGGCTCC")
+        :_ref(">1\nAATGGCTAGGCTCC\n>2\nAAGGTTCCGACCTTGGAA\n>3\nAAGGTTCCGAGAGACCTTGGAA")
         ,_fa("test_fa", _ref.data(), _ref.size())
     {
     }
@@ -88,6 +88,26 @@ TEST_F(TestVcfVariantContig, paddingAtFirstBase) {
 
 TEST_F(TestVcfVariantContig, unknownSequence) {
     RawVariant raw(13, "C", "G");
-    ASSERT_THROW(VariantContig(raw, _fa, 3, "2"),
+    ASSERT_THROW(VariantContig(raw, _fa, 3, "x"),
         UnknownSequenceError);
+}
+
+TEST_F(TestVcfVariantContig, substPlusInsertion) {
+    RawVariant raw(9, "GA", "TGTGTGTG");
+    VariantContig contig(raw, _fa, 8, "2");
+
+    ASSERT_EQ("AAGGTTCCTGTGTGTGCCTTGGAA", contig.sequence());
+    ASSERT_EQ(1, contig.start());
+    ASSERT_EQ(18, contig.stop());
+    ASSERT_EQ("10M6I8M", contig.cigar());
+}
+
+TEST_F(TestVcfVariantContig, substPlusDeletion) {
+    RawVariant raw(9, "GAGAGA", "TG");
+    VariantContig contig(raw, _fa, 8, "3");
+
+    ASSERT_EQ("AAGGTTCCTGCCTTGGAA", contig.sequence());
+    ASSERT_EQ(1, contig.start());
+    ASSERT_EQ(22, contig.stop());
+    ASSERT_EQ("10M4D8M", contig.cigar());
 }
