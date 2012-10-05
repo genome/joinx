@@ -51,8 +51,35 @@ namespace {
         "2|1:PASS\t" // 1x
         "2/2:PASS\t" // 1x
 
-        // ,
-        // ENTRY 2
+        ,
+        // ENTRY 2 a simple insertion
+        "2\t3000\t.\tA\tAT\t.\t.\t.\tGT:FT\t"
+        "0/0:PASS\t"
+        "0/1:PASS\t"
+        "0/1:PASS\t"
+        "1/1:PASS\t"
+
+        "1/1:PASS\t"
+        "1/1:DIE\t"
+        "0/1:DIE\t"
+        "0/0:PASS\t"
+            
+        ,
+        // ENTRY 3 a simple deletion
+        "2\t3500\t.\tAGTA\tA\t.\t.\t.\tGT:FT\t"
+        "0/0:PASS\t"
+        "0/1:PASS\t"
+        "0/1:PASS\t"
+        "1/1:PASS\t"
+
+        "0/1:PASS\t"
+        "1/1:PASS\t"
+        "0/1:DIE\t"
+        "0/1:DIE\t"
+
+        //,
+        // ENTRY 4
+
     };
 }
 
@@ -145,6 +172,29 @@ TEST_F(TestMetrics, allelicDistribution) {
     ASSERT_EQ(5, dist[2]);
 }
 
+TEST_F(TestMetrics, allelicDistribution_insertion) {
+    // REF = A, ALT = AT
+    auto const& dist = _metrics[1]->allelicDistribution();
+    ASSERT_EQ(2, dist.size());
+
+    // How many times did we see the reference (GT 0)
+    ASSERT_EQ(6, dist[0]); // there were 5 but 1 was filtered
+    // How many times did we see AT (GT 1)
+    ASSERT_EQ(6, dist[1]);
+}
+
+TEST_F(TestMetrics, allelicDistribution_deletion) {
+    // REF = AGTA, ALT = A
+    auto const& dist = _metrics[2]->allelicDistribution();
+    ASSERT_EQ(2, dist.size());
+
+    // How many times did we see the reference (GT 0)
+    ASSERT_EQ(5, dist[0]); // there were 5 but 1 was filtered
+    // How many times did we see C (GT 1)
+    ASSERT_EQ(7, dist[1]);
+    // How many times did we see T (GT 2)
+}
+
 TEST_F(TestMetrics, allelicDistributionBySample) {
     auto const& dist = _metrics[0]->allelicDistributionBySample();
 
@@ -156,6 +206,30 @@ TEST_F(TestMetrics, allelicDistributionBySample) {
     ASSERT_EQ(5, dist[1]);
     // How many have a T (GT 2)
     ASSERT_EQ(4, dist[2]);
+
+}
+
+TEST_F(TestMetrics, allelicDistributionBySample_insertion) {
+    auto const& dist = _metrics[1]->allelicDistributionBySample();
+
+    ASSERT_EQ(2, dist.size());
+
+    // How many samples have an A (GT 0)
+    ASSERT_EQ(4, dist[0]); 
+    // How many have an AT (GT 1)
+    ASSERT_EQ(4, dist[1]);
+
+}
+
+TEST_F(TestMetrics, allelicDistributionBySample_deletion) {
+    auto const& dist = _metrics[2]->allelicDistributionBySample();
+
+    ASSERT_EQ(2, dist.size());
+
+    // How many samples have an AGTA (GT 0)
+    ASSERT_EQ(4, dist[0]);
+    // How many have an A (GT 1)
+    ASSERT_EQ(5, dist[1]);
 
 }
 
