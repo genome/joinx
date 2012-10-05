@@ -31,7 +31,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
 endif ()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "-Wall -ansi -pedantic -std=c++0x -Wnon-virtual-dtor")
+    set(CMAKE_CXX_FLAGS "-Wall -ansi -pedantic -std=c++0x -fPIC -Wnon-virtual-dtor")
 endif ()
 
 # on linux mint 12, libgtest requires pthreads, so link thread libraries
