@@ -21,7 +21,9 @@ class TestVcfMerge(IntegrationTest, unittest.TestCase):
         params.extend(input_files)
         rv, err = self.execute(params)
         self.assertEqual(0, rv)
-        self.assertEqual('', err)
+        # no assertIn in python 2.6 :(
+        self.assertTrue('Warning' in err)
+        self.assertTrue('NOTHOME' in err)
         self.assertFilesEqual(expected_file, output_file, filter_regex="##fileDate=")
 
 if __name__ == "__main__":
