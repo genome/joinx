@@ -34,7 +34,8 @@ namespace {
 
 
     // entry for testing per-entry metrics
-    string entry1String =
+    string entries[] = {
+        // ENTRY 1
         "1\t20\t.\tA\tC,T\t.\t.\t.\tGT:FT\t"
         // here come the genotypes
         "0/0:PASS\t" // 1x ref
@@ -49,7 +50,10 @@ namespace {
         "2/0:PASS\t"
         "2|1:PASS\t" // 1x
         "2/2:PASS\t" // 1x
-        ;
+
+        // ,
+        // ENTRY 2
+    };
 }
 
 // Test fixture for normal tests
@@ -61,8 +65,13 @@ protected:
         _header = Header::fromStream(in);
         _novelIndicators.push_back("DBSNP");
         _novelIndicators.push_back("TG");
-        Vcf::Entry::parseLine(&_header, entry1String, _entry1);
-        _entry1Metrics.reset(new Metrics::EntryMetrics(_entry1, _novelIndicators));
+        int n_entries = sizeof(entries)/sizeof(entries[0]);
+        for (int i = 0; i < n_entries; ++i) {
+            Entry e;
+            Vcf::Entry::parseLine(&_header, entries[i], e);
+            _entries.push_back(e);
+            _metrics.emplace_back(new Metrics::EntryMetrics(e, _novelIndicators));
+        }
     }
 
     Entry makeEntry(string chrom, int64_t pos, string const& ref, string const& alt) {
@@ -73,8 +82,8 @@ protected:
 
     Header _header;
     vector<string> _novelIndicators;
-    Entry _entry1;
-    unique_ptr<Metrics::EntryMetrics> _entry1Metrics;
+    vector<Entry> _entries;
+    vector<unique_ptr<Metrics::EntryMetrics>> _metrics;
 };
 
 // Parameterized test fixture for mutation spectrum test of doom.
@@ -92,10 +101,10 @@ protected:
     vector<string> _novelIndicators;
 };
 
-// NOTE: // The expected values in most of these tests are based on
-// entry1String defined near the top of this module.
+// NOTE: The expected values in most of these tests are based on
+// entry[0] defined near the top of this module.
 TEST_F(TestMetrics, genotypeDistribution) {
-    auto dist = _entry1Metrics->genotypeDistribution();
+    auto dist = _metrics[0]->genotypeDistribution();
 
     ASSERT_EQ(6, dist.size());
     ASSERT_EQ(1, dist[GenotypeCall("0/0")]);
@@ -125,7 +134,7 @@ TEST_F(TestMetrics, genotypeDistribution) {
 
 TEST_F(TestMetrics, allelicDistribution) {
     // REF = A, ALT = C,T
-    auto const& dist = _entry1Metrics->allelicDistribution();
+    auto const& dist = _metrics[0]->allelicDistribution();
     ASSERT_EQ(3, dist.size());
 
     // How many times did we see the reference (GT 0)
@@ -137,7 +146,7 @@ TEST_F(TestMetrics, allelicDistribution) {
 }
 
 TEST_F(TestMetrics, allelicDistributionBySample) {
-    auto const& dist = _entry1Metrics->allelicDistributionBySample();
+    auto const& dist = _metrics[0]->allelicDistributionBySample();
 
     ASSERT_EQ(3, dist.size());
 
@@ -153,8 +162,8 @@ TEST_F(TestMetrics, allelicDistributionBySample) {
 TEST_F(TestMetrics, minorAlleleFrequency) {
     // we have diploid 10 samples with 1 filtered for 18 total alleles
     // the minor allele is 2, which shows up 5 times in the data.
-    // (see the definition of entry1String)
-    ASSERT_NEAR(5.0/18.0, _entry1Metrics->minorAlleleFrequency(), 1e-14);
+    // (see the definition of entries[0])
+    ASSERT_NEAR(5.0/18.0, _metrics[0]->minorAlleleFrequency(), 1e-14);
 }
 
 // The next test probably warrants an explanation.
