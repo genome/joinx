@@ -370,6 +370,14 @@ int64_t Entry::stop() const {
     return _pos-1 + _ref.size();
 }
 
+std::vector<std::string> Entry::allelesForSample(size_t sampleIdx) const {
+    GenotypeCall const& call = sampleData().genotype(sampleIdx);
+    vector<string> rv;
+    for (auto i = call.begin(); i != call.end(); ++i)
+        rv.push_back(alt()[*i]);
+    return rv;
+}
+
 END_NAMESPACE(Vcf)
 
 ostream& operator<<(ostream& s, const Vcf::Entry& e) {

@@ -41,7 +41,7 @@ public:
     typedef std::map<std::string, CustomValue> CustomValueMap;
 
     // static data
-    const static double MISSING_QUALITY;
+    static const double MISSING_QUALITY;
 
     // static functions
     static const char* fieldToString(FieldName field);
@@ -99,6 +99,7 @@ public:
     int32_t altIdx(const std::string& alt) const;
 
     std::string toString() const;
+    std::vector<std::string> allelesForSample(size_t sampleIdx) const;
 
     template<typename T>
     void printList(std::ostream& s, const T& v, char delim = ';') const {
