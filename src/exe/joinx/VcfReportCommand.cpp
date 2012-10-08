@@ -79,7 +79,7 @@ void VcfReportCommand::exec() {
     Vcf::Entry entry;
     Metrics::SampleMetrics sampleMetrics(reader->header().sampleCount());
 
-    *perSiteOut << "Chrom\tPos\tRef\tAlt\tByAltTransition\tTotalTransitions\tTotalTransversions\tByAltNovel\tTotalNovel\tTotalKnown\tGenotypeDist\tAlleleDistBySample\tAlleleDist\tByAltAlleleFreq\tMAF\n"; 
+    *perSiteOut << "Chrom\tPos\tRef\tAlt\tTotalSamples\tNumberFiltered\tNumberMissing\tByAltTransition\tTotalTransitions\tTotalTransversions\tByAltNovel\tTotalNovel\tTotalKnown\tGenotypeDist\tAlleleDistBySample\tAlleleDist\tByAltAlleleFreq\tMAF\n"; 
     while (reader->next(entry)) {
         if(entry.failedFilters().size() >= 1 && entry.failedFilters().find("PASS") == entry.failedFilters().end())
             continue;
@@ -97,6 +97,12 @@ void VcfReportCommand::exec() {
         *perSiteOut << *(altIter);
         //transition status per allele will go next and then number of transitions at site and number of transversions at site
         *perSiteOut << "\t";
+
+        uint32_t nSamples = entry.sampleData().header().sampleCount();
+        *perSiteOut << nSamples << "\t";
+        *perSiteOut << entry.sampleData().samplesFailedFilter() << "\t";
+        *perSiteOut << nSamples - entry.sampleData().samplesWithData() << "\t";
+
         std::vector<bool> transitionStatus = siteMetrics.transitionStatusByAlt();
         uint32_t transitionIdx = 0;
         uint32_t totalTransitionAlleles = 0;
