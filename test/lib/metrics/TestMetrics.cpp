@@ -346,6 +346,15 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values("A", "C", "G", "T")
 );
 
+TEST_F(TestMetrics, mutationSpectrum_indel) {
+    auto const& spectrum = _metrics[1]->mutationSpectrum();
+    for(int i = 0; i < 4; ++i) {
+        for(int j =0; j < 4; ++j) {
+            EXPECT_EQ(0, spectrum("ACGT"[i],"ACGT"[j]));
+        }
+    }
+}
+
 TEST_F(TestMetrics, identifyNovelAlleles) {
     // need 2 entries to get all 4 cases
     string line1 = "1\t20\t.\tA\tC,G,T\t.\t.\tDBSNP=.,.,1;TG=.,1,.\tGT:FT";

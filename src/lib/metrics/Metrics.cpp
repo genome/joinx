@@ -136,7 +136,8 @@ void EntryMetrics::calculateMutationSpectrum() {
 
                 std::string variant( _entry.alt()[*i - 1] );
                 if (variant.size() != 1)
-                    throw runtime_error(str(format("Invalid variant for ref entry %1%: %2%") %ref %variant));
+                    //it's an indel and we want to skip it. Not freak out
+                    continue;
                 toupper(variant[0],loc);
                 if(complement) {
                     variant = Sequence::reverseComplement(variant);
