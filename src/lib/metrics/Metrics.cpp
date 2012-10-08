@@ -338,7 +338,8 @@ void SampleMetrics::processEntry(Vcf::Entry& e, EntryMetrics& m) {
                         continue;
                     std::string variant( e.alt()[*j - 1] );
                     if (variant.size() != 1)
-                        throw runtime_error(str(format("Invalid variant for ref entry %1%: %2%") %ref %variant));
+                        //throw runtime_error(str(format("Invalid variant for ref entry %1%: %2%") %ref %variant));
+                        continue;
                     toupper(variant[0],loc);
                     if(complement)
                         variant = Sequence::reverseComplement(variant);
