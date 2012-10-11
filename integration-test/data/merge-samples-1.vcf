@@ -1,11 +1,8 @@
 ##fileformat=VCFv4.1
 ##fileDate=20110913
-##SAMPLE=<ID=H_HY-01001,Build_ID=115057120,Description="TGI build_id to sample map">
-##source=Varscan
 ##reference=ftp://ftp.ncbi.nih.gov/genbank/genomes/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37/special_requests/GRCh37-lite.fa.gz
 ##phasing=none
 ##FILTER=<ID=PASS,Description="Passed all filters">
-##FILTER=<ID=FalseIndel,Description="FalseIndel">
 ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Read Depth">
 ##INFO=<ID=CALLER,Number=.,Type=String,Description="Variant caller">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
@@ -19,7 +16,7 @@
 ##FORMAT=<ID=FET,Number=1,Type=String,Description="P-value from Fisher's Exact Test">
 ##FORMAT=<ID=FT,Number=.,Type=String,Description="P-value from Fisher's Exact Test">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S1	S2	S3
-1	866511	.	C	A	.	.	DP=3;CALLER=Samtools	GT	0/1	0/0	0/1
-2	866511	.	C	A	.	.	DP=3;CALLER=Samtools	GT	.	.	1/1
-3	866511	.	C	A	.	.	DP=3;CALLER=Samtools	GT	0/0	0/0	0/0
-4	866511	.	C	A	.	.	DP=3;CALLER=Samtools	GT	0/1	1/1	1/1
+1	10	.	C	A,G	.	.	DP=3;CALLER=Samtools	GT	0/1	0/0	0/1
+2	10	.	C	A,G	.	.	DP=3;CALLER=Samtools	GT	0/2	.	1/1
+3	10	.	C	A,G	.	.	DP=3;CALLER=Samtools	GT	0/0	0/1	0/0
+4	10	.	C	A,G	.	.	DP=3;CALLER=Samtools	GT	0/1	1/1	1/2

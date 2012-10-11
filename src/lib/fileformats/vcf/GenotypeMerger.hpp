@@ -26,7 +26,8 @@ class GenotypeMerger {
 public:
     GenotypeMerger(const Header* header, const std::vector<std::string>& alleles);
 
-    std::vector<CustomValue> process(
+    void process(
+        std::vector<CustomValue>& rv,
         const std::vector<CustomType const*>& fields,
         const Entry* e,
         uint32_t sampleIdx,

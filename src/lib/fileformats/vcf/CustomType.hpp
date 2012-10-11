@@ -13,7 +13,7 @@ public:
     enum NumberType {
         FIXED_SIZE,
         PER_ALLELE,
-        PER_GENOME,
+        PER_GENOTYPE,
         VARIABLE_SIZE
     };
 

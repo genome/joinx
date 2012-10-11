@@ -226,6 +226,29 @@ std::vector<size_t> const& Header::sampleSourceCounts() const {
     return _sampleSourceCounts;
 }
 
+void Header::mirrorSample(std::string const& sampleName, std::string const& newName) {
+    auto newExists = find(_sampleNames.begin(), _sampleNames.end(), newName);
+    if (newExists != _sampleNames.end()) {
+        throw runtime_error(str(format(
+            "Attempted to mirror sample '%1%' as '%2%', but sample '%2%' already exists"
+            ) %sampleName %newName));
+    }
+
+    size_t targetIdx = sampleIndex(sampleName);
+    size_t newIdx = _sampleNames.size();
+    _sampleNames.push_back(newName);
+    auto inserted = _mirroredSamples.insert(make_pair(newIdx, targetIdx));
+    if (!inserted.second) {
+        throw runtime_error(str(format(
+            "Attempted to mirror sample %1% with name %2% which already exists!"
+            ) %sampleName %newName));
+    }
+}
+
+std::map<size_t, size_t> const& Header::mirroredSamples() const {
+    return _mirroredSamples;
+}
+
 END_NAMESPACE(Vcf)
 
 std::ostream& operator<<(std::ostream& s, const Vcf::Header& h) {

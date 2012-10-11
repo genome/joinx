@@ -59,6 +59,13 @@ public:
 
     std::vector<size_t> const& sampleSourceCounts() const;
 
+    // Sample mirroring effectively duplicates a given sample column giving it a
+    // new name. This is useful for joinx vcf-merge, which has an option to
+    // preserve the sample input columns in the output as well as producing the
+    // merged column.
+    void mirrorSample(std::string const& sampleName, std::string const& newName);
+    std::map<size_t, size_t> const& mirroredSamples() const;
+
 protected:
     void parseHeaderLine(std::string const& line);
 
@@ -73,6 +80,8 @@ protected:
     uint32_t _sourceIndex;
 
     std::vector<size_t> _sampleSourceCounts;
+
+    std::map<size_t, size_t> _mirroredSamples;
 };
 
 END_NAMESPACE(Vcf)

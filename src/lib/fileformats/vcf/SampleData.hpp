@@ -17,16 +17,20 @@ class Header;
 
 class SampleData {
 public:
-    typedef std::map<uint32_t, std::vector<CustomValue>> MapType;
+    typedef std::vector<CustomValue> ValueVector;
+    typedef std::map<uint32_t, ValueVector*> MapType;
     typedef std::vector<CustomType const*> FormatType;
     typedef MapType::iterator iterator;
     typedef MapType::const_iterator const_iterator;
 
     SampleData();
-    SampleData(SampleData const& other);
-    SampleData(SampleData&& other);
     SampleData(Header const* h, std::string const& raw);
     SampleData(Header const* h, FormatType&& fmt, MapType&& values);
+    SampleData(SampleData const& other);
+    SampleData(SampleData&& other);
+    SampleData& operator=(SampleData const&);
+
+    ~SampleData();
 
     Header const& header() const;
     void reheader(Header const* newHeader);

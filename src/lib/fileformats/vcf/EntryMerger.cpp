@@ -206,7 +206,7 @@ void EntryMerger::setAltAndGenotypeData(
     GenotypeMerger genotypeFormatter(_mergedHeader, alt);
     set<string> seen; // keep track of what fields we have already seen
     for (const Entry* e = _begin; e != _end; ++e) {
-        const vector<CustomType const*>& gtFormat = e->sampleData().format();
+        const SampleData::FormatType& gtFormat = e->sampleData().format();
         for (auto i = gtFormat.begin(); i != gtFormat.end(); ++i) {
             // check if we have already seen this field.
             auto inserted = seen.insert((*i)->id());
@@ -242,7 +242,7 @@ void EntryMerger::setAltAndGenotypeData(
             bool overridePreviousData = (e-_begin) == primaryEntryIdx;
             SampleData const& samples = e->sampleData();
             try {
-                vector<CustomValue> const* values = samples.get(sampleIdx);
+                SampleData::ValueVector const* values = samples.get(sampleIdx);
                 if (!values || values->empty())
                     continue;
 
@@ -250,13 +250,18 @@ void EntryMerger::setAltAndGenotypeData(
                 uint32_t mergedIdx = _mergedHeader->sampleIndex(sampleName);
                 size_t idx = e - _begin;
 
-                auto inserted = sdMap.insert(make_pair(mergedIdx, vector<CustomValue>()));
-                if (inserted.second || inserted.first->second.empty()) {
-                    inserted.first->second = genotypeFormatter.process(format, e, sampleIdx, _alleleMerger.newGt()[idx]);
+                auto inserted = sdMap.insert(make_pair(mergedIdx, reinterpret_cast<SampleData::ValueVector*>(0)));
+                // If there is no data for this sample yet
+                if (inserted.second || inserted.first->second == 0) {
+                    // create a new set of values and populate them with information from this sample
+                    inserted.first->second = new SampleData::ValueVector();
+                    genotypeFormatter.process(*inserted.first->second, format, e, sampleIdx, _alleleMerger.newGt()[idx]);
                     if (!e->sampleData().isSampleFiltered(sampleIdx))
                         ++_sampleCounts[mergedIdx];
+
                 } else if (_mergeStrategy.mergeSamples()) {
-                    genotypeFormatter.merge(overridePreviousData, inserted.first->second, format, e, sampleIdx, _alleleMerger.newGt()[idx]);
+                    // Data for this sample already exists and we are allowing merging to take place
+                    genotypeFormatter.merge(overridePreviousData, *inserted.first->second, format, e, sampleIdx, _alleleMerger.newGt()[idx]);
                     if (!e->sampleData().isSampleFiltered(sampleIdx))
                         ++_sampleCounts[mergedIdx];
                 } else {

@@ -24,14 +24,14 @@ GenotypeMerger::GenotypeMerger(const Header* header, const vector<string>& allel
 {
 }
 
-vector<CustomValue> GenotypeMerger::process(
+void GenotypeMerger::process(
+    vector<CustomValue>& rv,
     const std::vector<CustomType const*>& fields,
     const Entry* e,
     uint32_t sampleIdx,
     const std::vector<size_t>& alleleIndices
     ) const
 {
-    vector<CustomValue> rv;
     rv.reserve(fields.size());
     for (auto i = fields.begin(); i != fields.end(); ++i) {
         const CustomType* type = *i;
@@ -45,8 +45,6 @@ vector<CustomValue> GenotypeMerger::process(
             rv.push_back(v ? *v : CustomValue());
         }
     }
-
-    return rv;
 }
 
 void GenotypeMerger::merge(

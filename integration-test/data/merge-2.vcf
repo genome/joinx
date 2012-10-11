@@ -1,7 +1,5 @@
 ##fileformat=VCFv4.1
 ##fileDate=20110913
-##SAMPLE=<ID=other_dude,Build_ID=1234,Description="TGI build_id to sample map">
-##source=Varscan
 ##reference=ftp://ftp.ncbi.nih.gov/genbank/genomes/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37/special_requests/GRCh37-lite.fa.gz
 ##phasing=none
 ##FILTER=<ID=PASS,Description="Passed all filters">
@@ -18,7 +16,7 @@
 ##FORMAT=<ID=FET,Number=1,Type=String,Description="P-value from Fisher's Exact Test">
 ##FORMAT=<ID=FT,Number=.,Type=String,Description="P-value from Fisher's Exact Test">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S4
-1	866511	.	C	G	.	.	DP=3;CALLER=Samtools	GT	0/1
-2	866511	.	C	G	.	.	DP=3;CALLER=Samtools	GT	.
-3	866511	.	C	G	.	.	DP=3;CALLER=Samtools	GT	0/0
-4	866511	.	C	G	.	.	DP=3;CALLER=Samtools	GT	0/1
+1	10	.	C	G	.	.	DP=3;CALLER=Samtools	GT	0/1
+2	10	.	C	G	.	.	DP=3;CALLER=Samtools	GT	.
+3	10	.	C	G	.	.	DP=3;CALLER=Samtools	GT	0/0
+4	10	.	C	G	.	.	DP=3;CALLER=Samtools	GT	0/1

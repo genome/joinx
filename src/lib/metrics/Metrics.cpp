@@ -281,7 +281,9 @@ void SampleMetrics::processEntry(Vcf::Entry& e, EntryMetrics& m) {
 
     for (auto i = sd.begin(); i != sd.end(); ++i) {
         auto const& sampleIdx = i->first;
-        auto const& values = i->second;
+        if (i->second == 0)
+            continue;
+        auto const& values = *i->second;
 
         if (values.size() > offset) {
             const std::string *filter(values[offset].get<std::string>(0));

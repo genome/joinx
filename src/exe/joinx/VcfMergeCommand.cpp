@@ -45,6 +45,8 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
     opts.add_options()
         ("help,h", "this message")
         ("input-file,i", po::value< vector<string> >(&_filenames), "input file(s) (positional arguments work also)")
+        ("duplicate-samples,D", po::value< vector<string> >(&_dupSampleFilenames),
+            "input file(s) specified as file.vcf=tag. each sample in file.vcf will be duplicated with the name <sample_name>-tag")
         ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
         ("merge-strategy-file,M", po::value<string>(&_mergeStrategyFile), "merge strategy file for info fields (see man page for format)")
         ("clear-filters,c", "When set, merged entries will have FILTER data stripped out")
@@ -91,7 +93,7 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
         throw runtime_error(ss.str());
     }
 
-    if (!vm.count("input-file"))
+    if (!vm.count("input-file") && !vm.count("duplicate-samples"))
         _filenames.push_back("-");
 
     if (vm.count("clear-filters"))
@@ -116,12 +118,24 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
     }
 }
 
-namespace {
-
-}
-
 void VcfMergeCommand::exec() {
+
+    map<string,string> dupSampleMap;
+    for (auto iter = _dupSampleFilenames.begin(); iter != _dupSampleFilenames.end(); ++iter) {
+        string::size_type eq = iter->find_last_of("=");
+        if (eq == string::npos) {
+            throw runtime_error(str(format(
+                "Invalid value for -D option: %1%. expected <filename>.vcf=<sample suffix>"
+                ) %*iter));
+        }
+        string fn = iter->substr(0, eq);
+        string suffix = iter->substr(eq+1);
+        dupSampleMap[fn] = suffix;
+        _filenames.push_back(fn);
+    }
+
     vector<InputStream::ptr> inputStreams = _streams.wrap<istream, InputStream>(_filenames);
+
     ostream* out = _streams.get<ostream>(_outputFile);
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
@@ -138,6 +152,19 @@ void VcfMergeCommand::exec() {
     Vcf::Header mergedHeader;
     for (size_t i = 0; i < inputStreams.size(); ++i) {
         readers.push_back(ReaderPtr(new ReaderType(extractor, *inputStreams[i])));
+
+        // if sample duplication is enabled for this file
+        auto dupIter = dupSampleMap.find(inputStreams[i]->name());
+        if (dupIter != dupSampleMap.end()) {
+            auto& header = readers.back()->header();
+            vector<string> sampleNames = header.sampleNames();
+            size_t nSamples = sampleNames.size();
+            for (size_t sampleIdx = 0; sampleIdx < nSamples; ++sampleIdx) {
+                string newName = sampleNames[sampleIdx] + dupIter->second;
+                header.mirrorSample(sampleNames[sampleIdx], newName);
+            }
+        }
+
         mergedHeader.merge(readers.back()->header(), _mergeSamples);
         readers.back()->header().sourceIndex(headerIndex++);
     }
