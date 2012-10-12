@@ -46,6 +46,10 @@ public:
     int64_t length() const;
     const std::string& toString() const;
 
+    void start(std::string const& chrom);
+    void start(int64_t start);
+    void stop(int64_t stop);
+
     int cmp(const Bed& rhs) const;
     bool operator<(const Bed& rhs) const;
     bool operator==(const Bed& rhs) const;
@@ -93,5 +97,21 @@ inline bool Bed::operator==(const Bed& rhs) const {
 inline const Bed::ExtraFieldsType& Bed::extraFields() const {
     return _extraFields;
 }
+
+inline void Bed::start(std::string const& chrom) {
+    _chrom = chrom;
+    _line.clear();
+}
+
+inline void Bed::start(int64_t start) {
+    _start = start;
+    _line.clear();
+}
+
+inline void Bed::stop(int64_t stop) {
+    _stop = stop;
+    _line.clear();
+}
+
 
 std::ostream& operator<<(std::ostream& s, const Bed& bed);

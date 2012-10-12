@@ -1,4 +1,5 @@
 #include "JoinX.hpp"
+#include "BedMergeCommand.hpp"
 #include "CheckRefCommand.hpp"
 #include "CreateContigsCommand.hpp"
 #include "GenerateCommand.hpp"
@@ -27,6 +28,7 @@ using namespace std;
 
 JoinX::JoinX(int argc, char** argv)
 {
+    registerSubCommand(BedMergeCommand::ptr(new BedMergeCommand));
     registerSubCommand(CheckRefCommand::ptr(new CheckRefCommand));
     registerSubCommand(CreateContigsCommand::ptr(new CreateContigsCommand));
     registerSubCommand(GenerateCommand::ptr(new GenerateCommand));
