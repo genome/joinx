@@ -1,4 +1,5 @@
 #include "WiggleReader.hpp"
+#include "common/Tokenizer.hpp"
 
 #include <boost/format.hpp>
 #include <cstring>
@@ -8,51 +9,40 @@
 using boost::format;
 using namespace std;
 
-WiggleReader::WiggleReader(
-        std::string const& name,
-        char const* dat,
-        size_t len,
-        bool stripChr)
-    : _path(name)
-    , _stripChr(stripChr) 
-    , _posBeg(0)
-    , _pos(0)
-    , _step(0)
-    , _span(0)
-    , _tok(dat, dat+len, '\n')
-    , _lineNum(0)
-    , _ready(false)
-{
+namespace {
+    bool startsWith(std::string const& s, char const* value) {
+        size_t valLen = strlen(value);
+        return s.size() >= valLen && s.compare(0, valLen, value) == 0;
+    }
 }
 
-WiggleReader::WiggleReader(std::string const& path, bool stripChr)
-    : _path(path)
-    , _stripChr(stripChr) 
+WiggleReader::WiggleReader(InputStream& in, bool stripChr)
+    : _in(in)
+    , _stripChr(stripChr)
     , _posBeg(0)
     , _pos(0)
     , _step(0)
     , _span(0)
-    , _f(new boost::iostreams::mapped_file_source(path))
-    , _tok(_f->data(), _f->data() + _f->size(), '\n')
     , _lineNum(0)
     , _ready(false)
 {
 }
 
 bool WiggleReader::next(Bed& value) {
-    while (_tok.extract(_line)) {
-        ++_lineNum;
+    while (!_in.eof()) {
+        _in.getline(_line);
 
+        ++_lineNum;
         bool ret = false;
-        if (_line.startsWith("track")) {
+        if (startsWith(_line, "track")) {
             newTrack();
             if (_ready) {
                 getEntry(value);
                 ret = true;
             }
-        } else if (_line.startsWith("variableStep")) {
+        } else if (startsWith(_line, "variableStep")) {
             throw runtime_error(errorMessage("variableStep is unsupported"));
-        } else if (_line.startsWith("fixedStep")) {
+        } else if (startsWith(_line, "fixedStep")) {
             if (_ready) {
                 ret = true;
                 getEntry(value);
@@ -73,7 +63,7 @@ bool WiggleReader::next(Bed& value) {
         if (ret)
             return true;
     }
-    
+
     return false;
 }
 
@@ -91,7 +81,7 @@ void WiggleReader::getEntry(Bed& value) {
 }
 
 std::string WiggleReader::errorMessage(std::string const& msg) const {
-    return str(format("Error in %1% at line %2%: %3% -- %4%") %_path %_lineNum %_line %msg);
+    return str(format("Error in %1% at line %2%: %3% -- %4%") %_in.name() %_lineNum %_line %msg);
 }
 
 void WiggleReader::fixedStep() {
@@ -139,6 +129,6 @@ void WiggleReader::newTrack() {
 }
 
 bool WiggleReader::eof() const {
-    return _tok.eof();
+    return _in.eof();
 }
 

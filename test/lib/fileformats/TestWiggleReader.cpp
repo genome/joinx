@@ -1,13 +1,15 @@
 #include "fileformats/WiggleReader.hpp"
 
+#include <gtest/gtest.h>
+#include <memory>
+#include <sstream>
 #include <stdexcept>
 #include <string>
-#include <gtest/gtest.h>
 
 using namespace std;
 
 namespace {
-    string WIG =
+    string WIG(
         "track type=wiggle_0 name=SomaticCoverage viewLimits=0:1\n"
         "fixedStep chrom=chr1 start=99 step=1\n"
         "2\n"
@@ -31,20 +33,32 @@ namespace {
         "1\n"
         "1\n"
         "1\n"
+    )
     ;
 }
 
+class TestWiggleReader : public ::testing::Test {
+protected:
+    void SetUp() {
+        _ss.reset(new stringstream(WIG));
+        _in.reset(new InputStream("test", *_ss));
+    }
 
-TEST(WiggleReader, noStrip) {
-    WiggleReader wr("TEST", WIG.data(), WIG.size(), false);
+    unique_ptr<stringstream> _ss;
+    unique_ptr<InputStream> _in;
+};
+
+
+TEST_F(TestWiggleReader, noStrip) {
+    WiggleReader wr(*_in, false);
     Bed entry;
     // chr 1
     ASSERT_TRUE(wr.next(entry));
     ASSERT_EQ("chr1\t98\t99\t2", entry.toString());
 }
 
-TEST(WiggleReader, parse) {
-    WiggleReader wr("TEST", WIG.data(), WIG.size(), true);
+TEST_F(TestWiggleReader, parse) {
+    WiggleReader wr(*_in, true);
     Bed entry;
     // chr 1
     ASSERT_TRUE(wr.next(entry));

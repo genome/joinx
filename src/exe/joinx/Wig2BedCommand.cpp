@@ -71,7 +71,8 @@ void Wig2BedCommand::parseArguments(int argc, char** argv) {
 
 void Wig2BedCommand::exec() {
     ostream* out = _streams.get<ostream>(_outFile);
-    WiggleReader wr(_wigFile, _stripChr);
+    InputStream::ptr in = _streams.wrap<istream, InputStream>(_wigFile);
+    WiggleReader wr(*in, _stripChr);
     Bed bed;
     while (wr.next(bed)) {
         if (!_nonzero || (bed.extraFields().size() > 0

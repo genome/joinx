@@ -1,19 +1,13 @@
 #pragma once
 
 #include "Bed.hpp"
-#include "common/Tokenizer.hpp"
+#include "InputStream.hpp"
 
-#include <boost/iostreams/device/mapped_file.hpp>
 #include <string>
 
 class WiggleReader {
 public:
-    WiggleReader(std::string const& path, bool stripChr);
-    WiggleReader(
-        std::string const& name,
-        char const* dat,
-        size_t len,
-        bool stripChr);
+    WiggleReader(InputStream& in, bool stripChr);
 
     bool next(Bed& value);
     bool eof() const;
@@ -27,7 +21,7 @@ protected:
     std::string errorMessage(std::string const& msg) const;
 
 protected:
-    std::string _path;
+    InputStream& _in;
     bool _stripChr;
     std::string _chrom;
     size_t _posBeg;
@@ -35,11 +29,9 @@ protected:
     size_t _step;
     size_t _span;
 
-    JxString _line;
-    JxString _last;
+    std::string _line;
+    std::string _last;
 
-    std::unique_ptr<boost::iostreams::mapped_file_source> _f;
-    Tokenizer<char> _tok;
     size_t _lineNum;
     bool _ready;
 };
