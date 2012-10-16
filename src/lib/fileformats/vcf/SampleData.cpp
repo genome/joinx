@@ -11,6 +11,7 @@
 #include <functional>
 #include <iterator>
 #include <iterator>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <utility>
@@ -27,12 +28,12 @@ namespace {
 }
 
 SampleData& SampleData::operator=(SampleData const& other) {
+    freeValues();
     _header = other._header;
     _format = other._format;
     // deep copy values
-    for (auto i = other._values.begin(); i != other._values.end(); ++i) {
+    for (auto i = other._values.begin(); i != other._values.end(); ++i)
         _values.insert(_values.end(), make_pair(i->first, new ValueVector(*i->second)));
-    }    
     return *this;
 }
 
@@ -57,6 +58,15 @@ SampleData::SampleData(SampleData&& other)
 SampleData::SampleData(Header const* h, std::string const& raw)
     : _header(h)
 {
+    try {
+        parse(raw);
+    } catch (...) {
+        freeValues();
+        throw;
+    }
+}
+
+void SampleData::parse(std::string const& raw) {
     Tokenizer<char> tok(raw, '\t');
     char const* beg(0);
     char const* end(0);
@@ -91,12 +101,12 @@ SampleData::SampleData(Header const* h, std::string const& raw)
             if (data.size() > _format.size())
                 throw runtime_error("More per-sample values than described in format section");
 
-            ValueVector* values(new ValueVector);
+            unique_ptr<ValueVector> values(new ValueVector);
             values->resize(data.size());
             for (uint32_t i = 0; i < data.size(); ++i) {
                 (*values)[i] = CustomValue(_format[i], data[i]);
             }
-            _values.insert(make_pair(sampleIdx, values));
+            auto inserted = _values.insert(make_pair(sampleIdx, values.release()));
         }
         ++sampleIdx;
     }
@@ -128,6 +138,10 @@ SampleData::SampleData(Header const* h, FormatType&& fmt, MapType&& values)
 }
 
 SampleData::~SampleData() {
+    freeValues();
+}
+
+void SampleData::freeValues() {
     // Mirrored columns can lead to multiple copies of the same
     // pointer appearing in the _values map. We don't want to
     // delete them twice.
@@ -138,6 +152,7 @@ SampleData::~SampleData() {
             delete i->second;
         }
     }
+    _values.clear();
 }
 
 Header const& SampleData::header() const {
@@ -165,7 +180,7 @@ void SampleData::reheader(Header const* newHeader) {
 void SampleData::clear() {
     _header = 0;
     _format.clear();
-    _values.clear();
+    freeValues();
 }
 
 void SampleData::swap(SampleData& other) {

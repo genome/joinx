@@ -62,6 +62,10 @@ public:
     void removeLowDepthGenotypes(uint32_t lowDepth);
 
 protected:
+    void parse(std::string const& raw);
+    void freeValues();
+
+protected:
     Header const* _header;
     std::vector<CustomType const*> _format;
     MapType _values;

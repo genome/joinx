@@ -345,3 +345,10 @@ TEST_F(TestVcfEntry, moreSamplesThanHeader) {
     ASSERT_NO_THROW(e.sampleData());
     ASSERT_EQ(3, e.sampleData().samplesWithData());
 }
+
+TEST_F(TestVcfEntry, copy) {
+    Entry e1(v[0]);
+    string line = e1.toString();
+    Vcf::Entry::parseLine(&_header, line, e1);
+    ASSERT_EQ(e1.toString(), line);
+}
