@@ -30,3 +30,21 @@ TEST(TestJxString, construct) {
     ASSERT_EQ(0, s1.size());
     ASSERT_EQ("", s1);
 }
+
+TEST(TestJxString, startsWith) {
+    string _comment("#comment");
+    string _data("not a comment");
+    JxString comment(_comment.data());
+    JxString data(_data.data());
+    ASSERT_FALSE(data.startsWith("#"));
+    ASSERT_TRUE(comment.startsWith("#"));
+}
+
+TEST(TestJxString, equal) {
+    string _data("test");
+    JxString data(_data.data());
+    ASSERT_EQ(data, "test");
+    ASSERT_FALSE(data == "testf");
+    ASSERT_FALSE(data == "tesf");
+    ASSERT_FALSE(data == "tes");
+}

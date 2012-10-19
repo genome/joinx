@@ -7,7 +7,6 @@ set(SOURCES
     CigarString.hpp
     IOError.hpp
     Iub.hpp
-    JxString.cpp
     JxString.hpp
     MultiType.hpp
     MutationSpectrum.cpp

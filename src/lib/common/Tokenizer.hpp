@@ -9,6 +9,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 using namespace std;
 
@@ -92,7 +93,7 @@ public:
         while (ignoreFirst-- != 0 && t.extract(tmp));
 
         while (t.extract(tmp))
-            *v++=tmp;
+            *v++ = std::move(tmp);
     }
 
     template<typename IterType>
@@ -120,7 +121,7 @@ public:
         while (ignoreFirst-- != 0 && t.extract(tmp));
 
         while (t.extract(tmp))
-            *v++=tmp;
+            *v++ = std::move(tmp);
     }
 
 
