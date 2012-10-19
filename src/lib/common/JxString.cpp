@@ -28,11 +28,6 @@ JxString::JxString(char const* beg, char const* end)
     assert(_end >= beg);
 }
 
-JxString::operator std::string() const {
-    return std::string(_beg, _end);
-}
-
-
 JxString& JxString::operator=(JxString const& rhs) {
     assign(rhs._beg, rhs._end);
     return *this;
@@ -96,7 +91,7 @@ char const* JxString::end() const {
 
 std::ostream& operator<<(std::ostream& stream, JxString const& str) {
     using namespace std;
-    copy(str.begin(), str.begin()+str.size(), ostream_iterator<char>(stream));
+    stream.write(str.begin(), str.size());
     return stream;
 }
 

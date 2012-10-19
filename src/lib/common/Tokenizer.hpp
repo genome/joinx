@@ -79,23 +79,6 @@ public:
 
     template<typename IterType>
     static void split(
-        std::string const& s,
-        DelimType const& delim,
-        IterType v,
-        size_t ignoreFirst = 0 // ignore first n tokens
-        )
-    {
-        Tokenizer<DelimType> t(s, delim);
-        typename IterType::container_type::value_type tmp;
-
-        while (ignoreFirst-- != 0 && t.extract(tmp));
-
-        while (t.extract(tmp))
-            *v++=tmp;
-    }
-
-    template<typename IterType>
-    static void split(
         char const* beg,
         char const* end,
         DelimType const& delim,
@@ -111,6 +94,35 @@ public:
         while (t.extract(tmp))
             *v++=tmp;
     }
+
+    template<typename IterType>
+    static void split(
+        JxString const& s,
+        DelimType const& delim,
+        IterType v,
+        size_t ignoreFirst = 0 // ignore first n tokens
+        )
+    {
+        return split<IterType>(s.begin(), s.end(), delim, v, ignoreFirst);
+    }
+
+    template<typename IterType>
+    static void split(
+        std::string const& s,
+        DelimType const& delim,
+        IterType v,
+        size_t ignoreFirst = 0 // ignore first n tokens
+        )
+    {
+        Tokenizer<DelimType> t(s, delim);
+        typename IterType::container_type::value_type tmp;
+
+        while (ignoreFirst-- != 0 && t.extract(tmp));
+
+        while (t.extract(tmp))
+            *v++=tmp;
+    }
+
 
     void remaining(std::string& s);
 

@@ -9,7 +9,6 @@ public:
     JxString(char const* beg);
     JxString(char const* beg, char const* end);
 
-    operator std::string() const;
     JxString& operator=(JxString const& rhs);
     void clear();
 

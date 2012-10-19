@@ -223,3 +223,32 @@ TEST(Tokenizer, extractPointers) {
     t2.extract(&b, &e);
     ASSERT_EQ("33", string(b, e));
 }
+
+TEST(TestTokenizer, testJxString) {
+    string fromDbsnp(
+        "1\t13302\trs180734498\tC\tT\t.\t.\tRSPOS=13302;dbSNPBuildID=135;SSR=0;SAO=0;VP=050000000000000010000100;WGT=0;VC=SNV;KGPilot123\n"
+    );
+    string twice = fromDbsnp + fromDbsnp;
+    JxString jxs(twice.data());
+    Tokenizer<char> tok(jxs, '\n');
+    JxString line;
+    while (tok.extract(line)) {
+        vector<JxString> fields;
+        Tokenizer<char>::split(line, '\t', back_inserter(fields));
+        /*
+         *Tokenizer<char> t2(line, '\t');
+         *JxString fld;
+         *while (t2.extract(fld)) {
+         *    //cout << fld << "\t";
+         *    fields.push_back(fld);
+         *}
+         */
+
+        for (auto f = fields.begin(); f != fields.end(); ++f)
+            cout << *f << "\t";
+        cout << "\n";
+
+
+    }
+
+}
