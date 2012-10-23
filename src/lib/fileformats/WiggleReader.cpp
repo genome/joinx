@@ -1,4 +1,5 @@
 #include "WiggleReader.hpp"
+#include "common/StringView.hpp"
 #include "common/Tokenizer.hpp"
 
 #include <boost/format.hpp>
@@ -92,12 +93,12 @@ void WiggleReader::fixedStep() {
     _last.clear();
 
     Tokenizer<char> tok(_line, ' ');
-    JxString token;
+    StringView token;
     tok.extract(token); // strip off leading fixedStep
 
     while (tok.extract(token)) {
         // The tokens are key=value pairs.
-        JxString key;
+        StringView key;
         Tokenizer<char> kvtok(token, '=');
         if (!kvtok.extract(key))
             throw runtime_error(errorMessage("expected key=value pairs"));

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JxString.hpp"
+#include "StringView.hpp"
 
 #include <boost/format.hpp>
 #include <algorithm>
@@ -44,7 +44,7 @@ public:
         rewind();
     }
 
-    Tokenizer(JxString const& s, DelimType const& delim = '\t')
+    Tokenizer(StringView const& s, DelimType const& delim = '\t')
         : _sbeg(s.begin())
         , _send(s.end())
         , _totalLen(s.size())
@@ -65,7 +65,7 @@ public:
     template<typename T>
     bool extract(T& value);
 
-    bool extract(JxString& s) {
+    bool extract(StringView& s) {
         char const* beg;
         char const* end;
         bool rv = _extract(&beg, &end);
@@ -98,7 +98,7 @@ public:
 
     template<typename IterType>
     static void split(
-        JxString const& s,
+        StringView const& s,
         DelimType const& delim,
         IterType v,
         size_t ignoreFirst = 0 // ignore first n tokens

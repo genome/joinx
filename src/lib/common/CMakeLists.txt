@@ -7,7 +7,6 @@ set(SOURCES
     CigarString.hpp
     IOError.hpp
     Iub.hpp
-    JxString.hpp
     MultiType.hpp
     MutationSpectrum.cpp
     MutationSpectrum.hpp
@@ -16,6 +15,7 @@ set(SOURCES
     Region.hpp
     Sequence.cpp
     Sequence.hpp
+    StringView.hpp
     TempFile.cpp
     TempFile.hpp
     Timer.hpp

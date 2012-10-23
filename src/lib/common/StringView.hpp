@@ -5,13 +5,13 @@
 #include <ostream>
 #include <string>
 
-class JxString {
+class StringView {
 public:
-    JxString();
-    JxString(char const* beg);
-    JxString(char const* beg, char const* end);
+    StringView();
+    StringView(char const* beg);
+    StringView(char const* beg, char const* end);
 
-    JxString& operator=(JxString const& rhs);
+    StringView& operator=(StringView const& rhs);
     void clear();
 
 
@@ -23,7 +23,7 @@ public:
 
     bool startsWith(char const* s) const;
     bool startsWith(std::string const& s) const;
-    bool operator==(JxString const& rhs) const;
+    bool operator==(StringView const& rhs) const;
     bool operator==(std::string const& rhs) const;
     bool operator==(char const* rhs) const;
 
@@ -36,12 +36,12 @@ protected:
     size_t _size;
 };
 
-bool operator==(std::string const& lhs, JxString const& rhs);
-bool operator==(char const* lhs, JxString const& rhs);
-std::ostream& operator<<(std::ostream& stream, JxString const& str);
+bool operator==(std::string const& lhs, StringView const& rhs);
+bool operator==(char const* lhs, StringView const& rhs);
+std::ostream& operator<<(std::ostream& stream, StringView const& str);
 
 inline
-JxString::JxString()
+StringView::StringView()
     : _beg(0)
     , _end(0)
     , _size(0)
@@ -49,7 +49,7 @@ JxString::JxString()
 }
 
 inline
-JxString::JxString(char const* beg)
+StringView::StringView(char const* beg)
     : _beg(beg)
     , _size(strlen(beg))
 {
@@ -58,7 +58,7 @@ JxString::JxString(char const* beg)
 }
 
 inline
-JxString::JxString(char const* beg, char const* end)
+StringView::StringView(char const* beg, char const* end)
     : _beg(beg)
     , _end(end)
     , _size(end-beg)
@@ -67,47 +67,47 @@ JxString::JxString(char const* beg, char const* end)
 }
 
 inline
-JxString& JxString::operator=(JxString const& rhs) {
+StringView& StringView::operator=(StringView const& rhs) {
     assign(rhs._beg, rhs._end);
     return *this;
 }
 
 inline
-void JxString::clear() {
+void StringView::clear() {
     _beg = _end = 0;
     _size = 0;
 }
 
 inline
-void JxString::assign(char const* beg, char const* end) {
+void StringView::assign(char const* beg, char const* end) {
     _beg = beg;
     _end = end;
     _size = end-beg;
 }
 
 inline
-size_t JxString::size() const {
+size_t StringView::size() const {
     return _size;
 }
 
 inline
-bool JxString::empty() const {
+bool StringView::empty() const {
     return _size == 0;
 }
 
 inline
-char JxString::operator[](size_t idx) const {
+char StringView::operator[](size_t idx) const {
     assert(idx < _size);
     return _beg[idx];
 }
 
 inline
-bool JxString::startsWith(std::string const& s) const {
+bool StringView::startsWith(std::string const& s) const {
     return startsWith(s.data());
 }
 
 inline
-bool JxString::startsWith(char const* s) const {
+bool StringView::startsWith(char const* s) const {
     char const* p(_beg);
     while (p < _end && *s && *p++ == *s)
         ++s;
@@ -115,17 +115,17 @@ bool JxString::startsWith(char const* s) const {
 }
 
 inline
-bool JxString::operator==(JxString const& rhs) const {
+bool StringView::operator==(StringView const& rhs) const {
     return rhs.size() == _size && strncmp(_beg, rhs._beg, _size) == 0;
 }
 
 inline
-bool JxString::operator==(std::string const& rhs) const {
+bool StringView::operator==(std::string const& rhs) const {
     return rhs.size() == _size && rhs.compare(0, _size, _beg) == 0;
 }
 
 inline
-bool JxString::operator==(char const* rhs) const {
+bool StringView::operator==(char const* rhs) const {
     char const* p(_beg);
     while (p < _end && *rhs && *p++ == *rhs)
         ++rhs;
@@ -133,28 +133,28 @@ bool JxString::operator==(char const* rhs) const {
 }
 
 inline
-char const* JxString::begin() const {
+char const* StringView::begin() const {
     return _beg;
 }
 
 inline
-char const* JxString::end() const {
+char const* StringView::end() const {
     return _end;
 }
 
 inline
-std::ostream& operator<<(std::ostream& stream, JxString const& str) {
+std::ostream& operator<<(std::ostream& stream, StringView const& str) {
     using namespace std;
     stream.write(str.begin(), str.size());
     return stream;
 }
 
 inline
-bool operator==(std::string const& lhs, JxString const& rhs) {
+bool operator==(std::string const& lhs, StringView const& rhs) {
     return rhs == lhs;
 }
 
 inline
-bool operator==(char const* lhs, JxString const& rhs) {
+bool operator==(char const* lhs, StringView const& rhs) {
     return rhs == lhs;
 }

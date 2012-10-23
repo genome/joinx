@@ -1,4 +1,4 @@
-#include "common/JxString.hpp"
+#include "common/StringView.hpp"
 
 #include <gtest/gtest.h>
 #include <sstream>
@@ -7,9 +7,9 @@
 
 using namespace std;
 
-TEST(TestJxString, construct) {
+TEST(TestStringView, construct) {
     string input("testing this silly object");
-    JxString s1(input.data());
+    StringView s1(input.data());
     ASSERT_EQ(input.size(), s1.size());
     ASSERT_EQ(input, s1);
     ASSERT_EQ(input.data(), s1);
@@ -31,18 +31,18 @@ TEST(TestJxString, construct) {
     ASSERT_EQ("", s1);
 }
 
-TEST(TestJxString, startsWith) {
+TEST(TestStringView, startsWith) {
     string _comment("#comment");
     string _data("not a comment");
-    JxString comment(_comment.data());
-    JxString data(_data.data());
+    StringView comment(_comment.data());
+    StringView data(_data.data());
     ASSERT_FALSE(data.startsWith("#"));
     ASSERT_TRUE(comment.startsWith("#"));
 }
 
-TEST(TestJxString, equal) {
+TEST(TestStringView, equal) {
     string _data("test");
-    JxString data(_data.data());
+    StringView data(_data.data());
     ASSERT_EQ(data, "test");
     ASSERT_FALSE(data == "testf");
     ASSERT_FALSE(data == "tesf");
