@@ -5,6 +5,7 @@
 #include "fileformats/vcf/MergeStrategy.hpp"
 
 #include <cstdint>
+#include <map>
 #include <string>
 
 class VcfMergeCommand : public CommandBase {
@@ -36,6 +37,7 @@ protected:
     double _consensusRatio;
     std::string _consensusFilter;
     std::string _consensusFilterDesc;
+    std::map<std::string, size_t> _fileOrder;
 
     std::string _samplePrioStr;
     Vcf::MergeStrategy::SamplePriority _samplePriority;

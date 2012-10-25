@@ -179,7 +179,7 @@ void Header::merge(const Header& other, bool allowDuplicateSamples) {
 uint32_t Header::sampleIndex(const std::string& sampleName) const {
     auto iter = find(_sampleNames.begin(), _sampleNames.end(), sampleName);
     if (iter == _sampleNames.end())
-        throw runtime_error(str(format("Request for sample name '%1%' which does not exist in this VCF header") %sampleName));
+        throw SampleNotFoundError(str(format("Request for sample name '%1%' which does not exist in this VCF header") %sampleName));
     return distance(_sampleNames.begin(), iter);
 }
 

@@ -13,6 +13,14 @@
 
 BEGIN_NAMESPACE(Vcf)
 
+// FIXME: put in a separate file
+class SampleNotFoundError : public std::runtime_error {
+public:
+    SampleNotFoundError(const std::string& what)
+        : std::runtime_error(what)
+    {}
+};
+
 class Header {
 public:
     typedef std::pair<std::string, std::string> RawLine;

@@ -60,12 +60,13 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
     posOpts.add("input-file", -1);
 
     po::variables_map vm;
-    po::store(
+    auto parsedArgs =
         po::command_line_parser(argc, argv)
             .options(opts)
-            .positional(posOpts).run(),
-        vm
-    );
+            .positional(posOpts).run();
+
+    po::store(parsedArgs, vm);
+
     po::notify(vm);
 
     if (!consensusOpts.empty()) {
@@ -116,6 +117,26 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
                 ) %_samplePrioStr));
         }
     }
+
+    // recover input file ordering from the command line
+    set<string> allFilenames;
+    copy(_dupSampleFilenames.begin(), _dupSampleFilenames.end(), inserter(allFilenames, allFilenames.begin()));
+    copy(_filenames.begin(), _filenames.end(), inserter(allFilenames, allFilenames.begin()));
+
+    // FIXME: find a better way to recover the ordering of samples specified on the command line
+    size_t position = 0;
+    for (auto i = parsedArgs.options.begin(); i != parsedArgs.options.end(); ++i) {
+        if (i->string_key == "duplicate-samples" && i->value.size() == 1) {
+            string const& arg = i->value[0];
+            string::size_type eq = arg.find_last_of("=");
+            if (eq != string::npos) {
+                string fn = arg.substr(0, eq);
+                _fileOrder.insert(make_pair(fn, position++));
+            }
+        } else if (i->string_key == "input-file" && i->value.size() == 1) {
+            _fileOrder.insert(make_pair(i->value[0], position++));
+        }
+    }
 }
 
 void VcfMergeCommand::exec() {
@@ -147,7 +168,6 @@ void VcfMergeCommand::exec() {
 
     vector<ReaderPtr> readers;
     VcfExtractor extractor = bind(&Vcf::Entry::parseLine, _1, _2, _3);
-    uint32_t headerIndex(0);
 
     Vcf::Header mergedHeader;
     for (size_t i = 0; i < inputStreams.size(); ++i) {
@@ -166,7 +186,7 @@ void VcfMergeCommand::exec() {
         }
 
         mergedHeader.merge(readers.back()->header(), _mergeSamples);
-        readers.back()->header().sourceIndex(headerIndex++);
+        readers.back()->header().sourceIndex(_fileOrder[inputStreams[i]->name()]);
     }
 
     WriterType writer(*out);

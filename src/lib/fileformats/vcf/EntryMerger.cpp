@@ -24,21 +24,22 @@ BEGIN_NAMESPACE(Vcf)
 
 namespace {
     bool isBetter(
-        Entry const* e,
-        Entry const* currBest,
-        size_t sampleIdx,
+        Entry const* newEntry,
+        size_t newSampleIdx,
+        Entry const* bestEntry,
+        size_t bestSampleIdx,
         MergeStrategy::SamplePriority prio)
     {
-        if (currBest == NULL)
+        if (newEntry == NULL)
             return true;
 
-        uint32_t nsrc = e->header().sourceIndex(); // src index of new entry
-        uint32_t csrc = currBest->header().sourceIndex(); // src index of curr
+        uint32_t nsrc = newEntry->header().sourceIndex(); // src index of new entry
+        uint32_t csrc = bestEntry->header().sourceIndex(); // src index of curr
 
         // is new entry filtered?
-        bool nf = e->sampleData().isSampleFiltered(sampleIdx);
-        // is currBest filtered?
-        bool cf = currBest->sampleData().isSampleFiltered(sampleIdx);
+        bool nf = newEntry->sampleData().isSampleFiltered(newSampleIdx);
+        // is newEntry filtered?
+        bool cf = bestEntry->sampleData().isSampleFiltered(bestSampleIdx);
 
 
         // if we only care about order or the new entry and the current best have the
@@ -224,29 +225,21 @@ void EntryMerger::setAltAndGenotypeData(
         }
     }
 
-    // build a set of all sample indices with data across all entries
-    std::set<uint32_t> sampleIndices;
-    for (const Entry* e = _begin; e != _end; ++e) {
-        SampleData const& samples = e->sampleData();
-        for (auto i = samples.begin(); i != samples.end(); ++i)
-            sampleIndices.insert(i->first);
-    }
-
     SampleData::MapType sdMap;
     // for each sample index where at least one entry has data...
-    for (auto si = sampleIndices.begin(); si != sampleIndices.end(); ++si) {
-        uint32_t sampleIdx = *si;
-        int primaryEntryIdx = getPrimaryEntryIdx(sampleIdx);
-
-        for (Entry const* e = _begin; e != _end; ++e) {
+    for (Entry const* e = _begin; e != _end; ++e) {
+        SampleData const& samples = e->sampleData();
+        for (auto si = samples.begin(); si != samples.end(); ++si) {
+            uint32_t sampleIdx = si->first;
+            const string& sampleName = e->header().sampleNames()[sampleIdx];
+            int primaryEntryIdx = getPrimaryEntryIdx(sampleName);
             bool overridePreviousData = (e-_begin) == primaryEntryIdx;
-            SampleData const& samples = e->sampleData();
+
             try {
                 SampleData::ValueVector const* values = samples.get(sampleIdx);
                 if (!values || values->empty())
                     continue;
 
-                const string& sampleName = e->header().sampleNames()[sampleIdx];
                 uint32_t mergedIdx = _mergedHeader->sampleIndex(sampleName);
                 size_t idx = e - _begin;
 
@@ -278,12 +271,24 @@ void EntryMerger::setAltAndGenotypeData(
     sampleData = SampleData(_mergedHeader, std::move(format), std::move(sdMap));
 }
 
-int EntryMerger::getPrimaryEntryIdx(size_t sampleIdx) const {
-    Entry const* best = _begin;
+int EntryMerger::getPrimaryEntryIdx(std::string const& sampleName) const {
+    Entry const* best(0);
     auto prio = _mergeStrategy.samplePriority();
-    for (Entry const* e = _begin+1; e != _end; ++e) {
-        if (isBetter(e, best, sampleIdx, prio))
-            best = e;
+    int bestSampleIdx = -1;
+
+    for (Entry const* e = _begin; e != _end; ++e) {
+        try {
+            int newSampleIdx = e->header().sampleIndex(sampleName);
+            if (best == 0) {
+                bestSampleIdx = newSampleIdx;
+                best = e;
+            } else {
+                if (isBetter(e, newSampleIdx, best, bestSampleIdx, prio))
+                    best = e;
+            }
+        } catch (SampleNotFoundError const&) {
+            continue;
+        }
     }
 
     if (best == _end)
