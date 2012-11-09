@@ -47,7 +47,7 @@ include_directories(BZIP2_INCLUDE_DIR)
 add_definitions(${BZIP2_DEFINITIONS})
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.40.0 COMPONENTS program_options filesystem system iostreams REQUIRED)
+find_package(Boost 1.50.0 COMPONENTS program_options filesystem system iostreams REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # make sure to pick up headers from library dirs

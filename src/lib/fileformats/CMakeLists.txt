@@ -59,6 +59,8 @@ set(SOURCES
     vcf/RawVariant.hpp
     vcf/SampleData.cpp
     vcf/SampleData.hpp
+    vcf/SampleTag.cpp
+    vcf/SampleTag.hpp
     vcf/ValueMergers.cpp
     vcf/ValueMergers.hpp
     vcf/VariantAdaptor.cpp
