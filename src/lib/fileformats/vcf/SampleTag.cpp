@@ -19,27 +19,59 @@ using boost::format;
 
 namespace {
     template<typename Iterator>
-    struct SampleGrammar
+    struct SampleTagGrammar
         : public qi::grammar<Iterator, map<string, string>()>
     {
-        SampleGrammar(std::vector<std::string>& fieldOrder)
-            : SampleGrammar::base_type(start)
+        SampleTagGrammar(std::vector<std::string>& fieldOrder)
+            : SampleTagGrammar::base_type(start)
         {
+            // a key is one or more characters excluding a few that we don't
+            // really like (<>, i am looking at you).
             key = +(qi::char_ - qi::char_(" ,<>="));
 
+            // an escaped quote is the sequence \"
+            escapedQuote = qi::char_('\\') > qi::char_('"');
+
+            // a quoted string is a double quote followed by
+            // (zero or more escaped quotes or non-quote characters)
+            // followed by a closing double quote.
+            quotedString = 
+                qi::char_('"')
+                > *(escapedQuote | ~qi::char_('"'))
+                > qi::char_('"')
+            ;
+
+            // a value string is a quoted string, or a sequence of one or more
+            // any 'allowable' characters (double quotes, commas, spaces, <, or
+            // > need not apply).
             valueString = 
-                (qi::char_('"') > +(qi::char_ - '"') > qi::char_('"'))
+                quotedString
                 | +(qi::char_ - qi::char_("\", <>"))
                 ;
 
-            value =
-                valueString 
-                | (qi::char_('<')
-                    > -(valueString > *(qi::char_(',') > *valueString))
-                    > qi::char_('>'))
-                ;
+            // a value array is a comma separated list of zero or more value
+            // strings (this admits the possibility of the empty array <>).
+            // individual values in the array may not be empty, however, so
+            // <x,,y> is illegal (the thinking is that <x,.,y> should be used
+            // instead). placing a - before valueString below removes this
+            // condition.
+            valueArray = 
+                qi::char_('<')
+                > -(*valueString > *(qi::char_(',') > *valueString))
+                > qi::char_('>')
+            ;
 
+            // a value is either a value string or value array.
+            value = valueString | valueArray;
+
+            // a "pear" is a key optionally followed by =value. this admits
+            // the possibility of flags, e.g., 'id=a,foo,bar=x' where foo is
+            // a flag (key with no value).
             pear %=
+                // we attach an additional semantic action when keys are
+                // processed: we push them onto the fieldOrder vector so
+                // order can be preserved if we decide to print this thing
+                // out later.
                 key[ phx::push_back(phx::ref(fieldOrder), qi::_1) ]
                 > -('=' > value);
 
@@ -50,6 +82,9 @@ namespace {
         qi::rule<Iterator, std::pair<std::string, std::string>()> pear;
         qi::rule<Iterator, std::string()> key;
         qi::rule<Iterator, std::string()> valueString;
+        qi::rule<Iterator, std::string()> quotedString;
+        qi::rule<Iterator, std::string()> valueArray;
+        qi::rule<Iterator, char()> escapedQuote;
         qi::rule<Iterator, std::string()> value;
     };
 }
@@ -63,7 +98,7 @@ SampleTag::SampleTag(std::string const& raw) {
     typedef string::const_iterator It;
     It iter = raw.begin();
     It end = raw.end();
-    SampleGrammar<It> grammar(_fieldOrder);
+    SampleTagGrammar<It> grammar(_fieldOrder);
     bool rv = qi::parse(iter, end, grammar, _fields);
     bool done = iter == end;
     if (!rv || !done) {
@@ -87,6 +122,12 @@ void SampleTag::toStream(std::ostream& s) const {
     s << ">";
 }
 
+std::string SampleTag::toString() const {
+    stringstream ss;
+    ss << *this;
+    return ss.str();
+}
+
 void SampleTag::set(std::string const& name, std::string const& value) {
     auto inserted = _fields.insert(make_pair(name, value));
     if (inserted.second)
@@ -101,3 +142,9 @@ std::string const& SampleTag::id() const {
 }
 
 END_NAMESPACE(Vcf)
+
+std::ostream& operator<<(std::ostream& s, Vcf::SampleTag const& sampleTag) {
+    sampleTag.toStream(s);
+    return s;
+}
+

@@ -23,4 +23,11 @@ TEST(TestVcfSampleTag, parse) {
         st.toStream(cout);
         cout << "]\n---\n";
     }
+
+    // actual tests...
+    ASSERT_EQ(SampleTag("x=y").toString(), "##SAMPLE=<x=y>");
+    ASSERT_EQ(SampleTag("x=<1,2,3>").toString(), "##SAMPLE=<x=<1,2,3>>");
+    ASSERT_EQ(SampleTag("x=\"y\"").toString(), "##SAMPLE=<x=\"y\">");
+    ASSERT_EQ(SampleTag("x=<1,\"twenty point one\",four>").toString(),
+        "##SAMPLE=<x=<1,\"twenty point one\",four>>");
 }

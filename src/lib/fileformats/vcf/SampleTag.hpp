@@ -15,6 +15,7 @@ public:
     explicit SampleTag(std::string const& raw);
 
     void toStream(std::ostream& s) const;
+    std::string toString() const;
     void set(std::string const& name, std::string const& value);
     std::string const& id() const;
 
@@ -24,3 +25,5 @@ protected:
 };
 
 END_NAMESPACE(Vcf)
+
+std::ostream& operator<<(std::ostream& s, Vcf::SampleTag const& sampleTag);
