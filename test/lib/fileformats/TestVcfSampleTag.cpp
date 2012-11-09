@@ -25,9 +25,9 @@ TEST(TestVcfSampleTag, parse) {
     }
 
     // actual tests...
-    ASSERT_EQ(SampleTag("x=y").toString(), "##SAMPLE=<x=y>");
-    ASSERT_EQ(SampleTag("x=<1,2,3>").toString(), "##SAMPLE=<x=<1,2,3>>");
-    ASSERT_EQ(SampleTag("x=\"y\"").toString(), "##SAMPLE=<x=\"y\">");
-    ASSERT_EQ(SampleTag("x=<1,\"twenty point one\",four>").toString(),
-        "##SAMPLE=<x=<1,\"twenty point one\",four>>");
+    ASSERT_EQ("##SAMPLE=<x=y>", SampleTag("x=y").toString());
+    ASSERT_EQ("##SAMPLE=<x=<1,2,3>>", SampleTag("x=<1,2,3>").toString());
+    ASSERT_EQ("##SAMPLE=<x=\"y\">", SampleTag("x=\"y\"").toString());
+    ASSERT_EQ("##SAMPLE=<x=<1,\"twenty point one\",four>>",
+        SampleTag("x=<1,\"twenty point one\",four>").toString());
 }

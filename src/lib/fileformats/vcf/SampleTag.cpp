@@ -14,6 +14,8 @@ namespace phx = boost::phoenix;
 namespace spirit = boost::spirit;
 namespace karma = boost::spirit::karma;
 namespace qi = boost::spirit::qi;
+namespace ascii = boost::spirit::ascii;
+
 using namespace std;
 using boost::format;
 
@@ -26,18 +28,14 @@ namespace {
             : SampleTagGrammar::base_type(start)
         {
             // a key is one or more characters excluding a few that we don't
-            // really like (<>, i am looking at you).
+            // really like (<, >, i am looking at you).
             key = +(qi::char_ - qi::char_(" ,<>="));
 
-            // an escaped quote is the sequence \"
-            escapedQuote = qi::char_('\\') > qi::char_('"');
-
-            // a quoted string is a double quote followed by
-            // (zero or more escaped quotes or non-quote characters)
-            // followed by a closing double quote.
+            // a quoted string is a double quote followed by zero or more
+            // non-quote characters followed by a closing double quote.
             quotedString = 
                 qi::char_('"')
-                > *(escapedQuote | ~qi::char_('"'))
+                > *(~qi::char_('"'))
                 > qi::char_('"')
             ;
 
@@ -76,6 +74,16 @@ namespace {
                 > -('=' > value);
 
             start %= pear % ',';
+
+            qi::on_error<qi::fail> (
+                start,
+                std::cerr
+                    << phx::val("Parse error: expected ")
+                    << qi::_4
+                    << phx::val(" here: '")
+                    << phx::construct<std::string>(qi::_3, qi::_2)
+                    << phx::val("'\n")
+            );
         }
 
         qi::rule<Iterator, std::map<std::string, std::string>()> start;
@@ -84,7 +92,6 @@ namespace {
         qi::rule<Iterator, std::string()> valueString;
         qi::rule<Iterator, std::string()> quotedString;
         qi::rule<Iterator, std::string()> valueArray;
-        qi::rule<Iterator, char()> escapedQuote;
         qi::rule<Iterator, std::string()> value;
     };
 }
@@ -103,8 +110,9 @@ SampleTag::SampleTag(std::string const& raw) {
     bool done = iter == end;
     if (!rv || !done) {
         throw runtime_error(str(format(
-            "Failed to parse sample tag in vcf header: '%1%"
-            ) %raw));
+            "Failed to parse sample tag in vcf header: '%1%'\n"
+            "Got as far as: %2%"
+            ) %raw %toString()));
     }
 }
 
