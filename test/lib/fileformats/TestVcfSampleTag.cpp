@@ -8,26 +8,44 @@ using namespace Vcf;
 using namespace std;
 
 TEST(TestVcfSampleTag, parse) {
-    string tests[] = {
-        "ping=<x>",
-        "pong=<x,y,z>,frig=\"frog\"",
-        "pong=<z,y,x>",
-        "frog=hello",
-        "cheese=\"bucket\"",
-    };
-    int n = sizeof(tests)/sizeof(tests[0]);
-    for (int i = 0; i < n; ++i) {
-        cout << "String: '" << tests[i] << "'\n";
-        SampleTag st(tests[i]);
-        cout << "Got: [";
-        st.toStream(cout);
-        cout << "]\n---\n";
+    {
+        SampleTag st("ID=1,x=y");
+        ASSERT_EQ("##SAMPLE=<ID=1,x=y>", st.toString());
+        ASSERT_TRUE(st.get("x") != 0);
+        ASSERT_TRUE(st.get("y") == 0);
+        ASSERT_EQ("y", *st.get("x"));
+        ASSERT_EQ("1", st.id());
     }
 
-    // actual tests...
-    ASSERT_EQ("##SAMPLE=<x=y>", SampleTag("x=y").toString());
-    ASSERT_EQ("##SAMPLE=<x=<1,2,3>>", SampleTag("x=<1,2,3>").toString());
-    ASSERT_EQ("##SAMPLE=<x=\"y\">", SampleTag("x=\"y\"").toString());
-    ASSERT_EQ("##SAMPLE=<x=<1,\"twenty point one\",four>>",
-        SampleTag("x=<1,\"twenty point one\",four>").toString());
+    {
+        SampleTag st("ID=2,x=<1,2,3>");
+        ASSERT_EQ("##SAMPLE=<ID=2,x=<1,2,3>>", st.toString());
+        ASSERT_TRUE(st.get("x") != 0);
+        ASSERT_EQ("<1,2,3>", *st.get("x"));
+    }
+
+    {
+        SampleTag st("ID=3,x=\"y\"");
+        ASSERT_EQ("##SAMPLE=<ID=3,x=\"y\">", st.toString());
+        ASSERT_TRUE(st.get("x") != 0);
+        ASSERT_EQ("\"y\"", *st.get("x"));
+    }
+
+    {
+        SampleTag st("ID=4,x=<1,\"twenty point one\",four>");
+        ASSERT_EQ("##SAMPLE=<ID=4,x=<1,\"twenty point one\",four>>",
+            st.toString());
+        ASSERT_TRUE(st.get("x") != 0);
+        ASSERT_EQ("<1,\"twenty point one\",four>", *st.get("x"));
+
+    }
+
+    {
+        SampleTag st("ID=5,flag,x=2");
+        ASSERT_EQ("##SAMPLE=<ID=5,flag,x=2>", st.toString());
+        ASSERT_TRUE(st.get("x") != 0);
+        ASSERT_TRUE(*st.get("x") == "2");
+        ASSERT_TRUE(st.get("flag") != 0);
+        ASSERT_TRUE(st.get("flag")->empty());
+    }
 }

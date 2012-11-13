@@ -11,17 +11,22 @@ BEGIN_NAMESPACE(Vcf)
 
 class SampleTag {
 public:
+    typedef std::pair<std::string, std::string> PairType;
+    typedef std::vector<PairType> FieldsType;
+
     SampleTag();
     explicit SampleTag(std::string const& raw);
 
     void toStream(std::ostream& s) const;
     std::string toString() const;
     void set(std::string const& name, std::string const& value);
+    std::string const* get(std::string const& key) const;
     std::string const& id() const;
+    
 
 protected:
-    std::map<std::string, std::string> _fields;
-    std::vector<std::string> _fieldOrder;
+    FieldsType _fields;
+    std::map<std::string, size_t> _fieldIndex;
 };
 
 END_NAMESPACE(Vcf)

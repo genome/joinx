@@ -9,6 +9,7 @@
 #include "fileformats/vcf/CustomType.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
+#include "fileformats/vcf/SampleTag.hpp"
 #include "processors/MergeSorted.hpp"
 
 #include <boost/format.hpp>
@@ -180,8 +181,15 @@ void VcfMergeCommand::exec() {
             vector<string> sampleNames = header.sampleNames();
             size_t nSamples = sampleNames.size();
             for (size_t sampleIdx = 0; sampleIdx < nSamples; ++sampleIdx) {
-                string newName = sampleNames[sampleIdx] + dupIter->second;
-                header.mirrorSample(sampleNames[sampleIdx], newName);
+                string const& oldName = sampleNames[sampleIdx];
+                string newName = oldName + dupIter->second;
+                header.mirrorSample(oldName, newName);
+                Vcf::SampleTag const* oldTag = header.sampleTag(oldName);
+                if (oldTag) {
+                    Vcf::SampleTag newTag(*oldTag);
+                    newTag.set("ID", newName);
+                    header.addSampleTag(newTag);
+                }
             }
         }
 

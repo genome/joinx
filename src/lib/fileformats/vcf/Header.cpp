@@ -24,6 +24,14 @@ namespace {
 
     unsigned nExpectedHeaderFields = sizeof(expectedHeaderFields)/sizeof(expectedHeaderFields[0]);
 
+    template<typename MapType>
+    typename MapType::mapped_type const* mapGetPtr(MapType const& m, typename MapType::key_type const& key) {
+        auto iter = m.find(key);
+        if (iter == m.end())
+            return 0;
+        return &iter->second;
+    }
+
     struct MetaInfoFilter {
         MetaInfoFilter() {}
         explicit MetaInfoFilter(const string& s) {
@@ -59,18 +67,32 @@ void Header::add(const string& line) {
 
         if (p.first == "INFO") {
             CustomType t(p.second.substr(1, p.second.size()-2));
-            auto inserted = _infoTypes.insert(make_pair(t.id(), t));
+            auto inserted = _infoTypes.insert(
+                make_pair(t.id(), std::move(t))
+            );
             if (!inserted.second)
                 throw runtime_error(str(format("Duplicate value for INFO:%1%") %t.id()));
         } else if (p.first == "FORMAT") {
             CustomType t(p.second.substr(1, p.second.size()-2));
-            auto inserted = _formatTypes.insert(make_pair(t.id(), t));
+            auto inserted = _formatTypes.insert(
+                make_pair(t.id(), std::move(t))
+            );
             if (!inserted.second)
                 throw runtime_error(str(format("Duplicate value for FORMAT:%1%") %t.id()));
         } else if (p.first == "FILTER") {
             // TODO: care about duplicates?
             Map m(p.second.substr(1, p.second.size()-2));
-            _filters.insert(make_pair(m["ID"], m["Description"]));
+            _filters.insert(
+                make_pair(m["ID"], m["Description"])
+            );
+        } else if (p.first == "SAMPLE") {
+            SampleTag st(p.second.substr(1, p.second.size()-2));
+            auto inserted = _sampleTags.insert(
+                make_pair(st.id(), std::move(st))
+            );
+            if (!inserted.second)
+                throw runtime_error(str(format("Duplicate SAMPLE ID in vcf header: %1%") %st.toString()));
+
         }
 
         _metaInfoLines.push_back(p);
@@ -95,6 +117,9 @@ void Header::addFormatType(CustomType const& type) {
     add(str(format("##FORMAT=<%1%>") %type.toString()));
 }
 
+void Header::addSampleTag(SampleTag const& tag) {
+    add(tag.toString());
+}
 
 void Header::parseHeaderLine(const std::string& line) {
     if (_headerSeen)
@@ -187,38 +212,39 @@ bool Header::empty() const {
     return _metaInfoLines.empty();
 }
 
-const CustomType* Header::infoType(const std::string& id) const {
-    using namespace std;
-    auto iter = _infoTypes.find(id);
-    if (iter == _infoTypes.end())
-        return 0;
-    return &iter->second;
+CustomType const* Header::infoType(const std::string& id) const {
+    return mapGetPtr(_infoTypes, id);
 }
 
-const CustomType* Header::formatType(const std::string& id) const {
-    auto iter = _formatTypes.find(id);
-    if (iter == _formatTypes.end())
-        return 0;
-    return &iter->second;
+CustomType const* Header::formatType(const std::string& id) const {
+    return mapGetPtr(_formatTypes, id);
 }
 
-const std::map<std::string, CustomType>& Header::infoTypes() const {
+SampleTag const* Header::sampleTag(std::string const& id) const {
+    return mapGetPtr(_sampleTags, id);
+}
+
+std::map<std::string, CustomType> const& Header::infoTypes() const {
     return _infoTypes;
 }
 
-const std::map<std::string, CustomType>& Header::formatTypes() const {
+std::map<std::string, CustomType> const& Header::formatTypes() const {
     return _formatTypes;
 }
 
-const std::map<std::string, std::string>& Header::filters() const {
+std::map<std::string, std::string> const& Header::filters() const {
     return _filters;
 }
 
-const std::vector<Header::RawLine>& Header::metaInfoLines() const {
+std::map<std::string, SampleTag> const& Header::sampleTags() const {
+    return _sampleTags;
+}
+
+std::vector<Header::RawLine> const& Header::metaInfoLines() const {
     return _metaInfoLines;
 }
 
-const std::vector<std::string>& Header::sampleNames() const {
+std::vector<std::string> const& Header::sampleNames() const {
     return _sampleNames;
 }
 

@@ -1,13 +1,14 @@
 #include "SampleTag.hpp"
 
 #include <boost/format.hpp>
-#include <boost/spirit/home/phoenix/container.hpp>
 #include <boost/fusion/include/std_pair.hpp>
+#include <boost/spirit/home/phoenix/container.hpp>
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <iterator>
 #include <iostream>
 
 namespace phx = boost::phoenix;
@@ -19,12 +20,17 @@ namespace ascii = boost::spirit::ascii;
 using namespace std;
 using boost::format;
 
+BEGIN_NAMESPACE(Vcf)
+
 namespace {
     template<typename Iterator>
     struct SampleTagGrammar
-        : public qi::grammar<Iterator, map<string, string>()>
+        : public qi::grammar<Iterator, SampleTag::FieldsType()>
     {
-        SampleTagGrammar(std::vector<std::string>& fieldOrder)
+        typedef SampleTag::PairType PairType;
+        typedef SampleTag::FieldsType FieldsType;
+
+        SampleTagGrammar()
             : SampleTagGrammar::base_type(start)
         {
             // a key is one or more characters excluding a few that we don't
@@ -65,13 +71,7 @@ namespace {
             // a "pear" is a key optionally followed by =value. this admits
             // the possibility of flags, e.g., 'id=a,foo,bar=x' where foo is
             // a flag (key with no value).
-            pear %=
-                // we attach an additional semantic action when keys are
-                // processed: we push them onto the fieldOrder vector so
-                // order can be preserved if we decide to print this thing
-                // out later.
-                key[ phx::push_back(phx::ref(fieldOrder), qi::_1) ]
-                > -('=' > value);
+            pear %= key > -('=' > value);
 
             start %= pear % ',';
 
@@ -86,8 +86,8 @@ namespace {
             );
         }
 
-        qi::rule<Iterator, std::map<std::string, std::string>()> start;
-        qi::rule<Iterator, std::pair<std::string, std::string>()> pear;
+        qi::rule<Iterator, FieldsType()> start;
+        qi::rule<Iterator, PairType()> pear;
         qi::rule<Iterator, std::string()> key;
         qi::rule<Iterator, std::string()> valueString;
         qi::rule<Iterator, std::string()> quotedString;
@@ -96,8 +96,6 @@ namespace {
     };
 }
 
-BEGIN_NAMESPACE(Vcf)
-
 SampleTag::SampleTag() {
 }
 
@@ -105,7 +103,7 @@ SampleTag::SampleTag(std::string const& raw) {
     typedef string::const_iterator It;
     It iter = raw.begin();
     It end = raw.end();
-    SampleTagGrammar<It> grammar(_fieldOrder);
+    SampleTagGrammar<It> grammar;
     bool rv = qi::parse(iter, end, grammar, _fields);
     bool done = iter == end;
     if (!rv || !done) {
@@ -114,19 +112,22 @@ SampleTag::SampleTag(std::string const& raw) {
             "Got as far as: %2%"
             ) %raw %toString()));
     }
+    for (size_t i = 0; i < _fields.size(); ++i) {
+        _fieldIndex[_fields[i].first] = i;
+    }
 }
 
 void SampleTag::toStream(std::ostream& s) const {
     s << "##SAMPLE=<";
-    for (auto i = _fieldOrder.begin(); i != _fieldOrder.end(); ++i) {
-        if (i != _fieldOrder.begin())
-            s << ',';
-        s << *i;
-        auto iter = _fields.find(*i);
-        if (iter == _fields.end())
-            continue;
-        s << "=" << iter->second;
-    }
+    vector<int> n = {1,2,3};
+    karma::generate(
+        ostream_iterator<char>(s, ""),
+        (
+            +karma::char_  // key
+            << karma::repeat(0,1)["=" << +karma::char_] // optional =value
+        ) % ',',
+        _fields
+    );
     s << ">";
 }
 
@@ -137,16 +138,25 @@ std::string SampleTag::toString() const {
 }
 
 void SampleTag::set(std::string const& name, std::string const& value) {
-    auto inserted = _fields.insert(make_pair(name, value));
-    if (inserted.second)
-        _fieldOrder.push_back(name);
+    auto inserted = _fieldIndex.insert(make_pair(name, _fields.size()));
+    if (!inserted.second)
+        _fields[inserted.first->second].second = value;
+    else
+        _fields.push_back(make_pair(name, value));
 }
 
 std::string const& SampleTag::id() const {
-    auto iter = _fields.find("ID");
-    if (iter == _fields.end())
+    auto iter = _fieldIndex.find("ID");
+    if (iter == _fieldIndex.end())
         throw runtime_error("Sample tag with no ID!");
-    return iter->second;
+    return _fields[iter->second].second;
+}
+
+std::string const* SampleTag::get(std::string const& key) const {
+    auto iter = _fieldIndex.find(key);
+    if (iter == _fieldIndex.end())
+        return 0;
+    return &_fields[iter->second].second;
 }
 
 END_NAMESPACE(Vcf)

@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "CustomType.hpp"
+#include "SampleTag.hpp"
 #include "common/namespaces.hpp"
 
 BEGIN_NAMESPACE(Vcf)
@@ -41,17 +42,20 @@ public:
     void addFilter(std::string const& name, std::string const& desc);
     void addInfoType(CustomType const& type);
     void addFormatType(CustomType const& type);
+    void addSampleTag(SampleTag const& tag);
     void merge(const Header& other, bool allowDuplicateSamples = false);
     bool empty() const;
 
     const std::vector<RawLine>& metaInfoLines() const;
     std::string headerLine() const;
     // infoType/formatType return NULL for non-existing ids
-    const CustomType* infoType(std::string const& id) const;
-    const CustomType* formatType(std::string const& id) const;
+    CustomType const* infoType(std::string const& id) const;
+    CustomType const* formatType(std::string const& id) const;
+    SampleTag const* sampleTag(std::string const& id) const;
     std::map<std::string, CustomType> const& infoTypes() const;
     std::map<std::string, CustomType> const& formatTypes() const;
     std::map<std::string, std::string> const& filters() const;
+    std::map<std::string, SampleTag> const& sampleTags() const;
     std::vector<std::string> const& sampleNames() const;
 
     uint32_t sampleCount() const { return _sampleNames.size(); }
@@ -84,6 +88,7 @@ protected:
     std::map<std::string, std::string> _filters;
     std::vector<RawLine> _metaInfoLines;
     std::vector<std::string> _sampleNames;
+    std::map<std::string, SampleTag> _sampleTags;
     bool _headerSeen;
     uint32_t _sourceIndex;
 

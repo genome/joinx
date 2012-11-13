@@ -3,6 +3,9 @@
 ##reference=ftp://ftp.ncbi.nih.gov/genbank/genomes/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37/special_requests/GRCh37-lite.fa.gz
 ##phasing=none
 ##FILTER=<ID=PASS,Description="Passed all filters">
+##SAMPLE=<ID=S1,w=<1,2,3>,x=y,z="two words">
+##SAMPLE=<ID=S2,w=<2,3,4>,x=y,z="two words">
+##SAMPLE=<ID=S3,w=<3,4,5>,x=y,z="two words">
 ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Read Depth">
 ##INFO=<ID=CALLER,Number=.,Type=String,Description="Variant caller">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
