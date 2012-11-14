@@ -46,7 +46,7 @@ find_package(BZip2 REQUIRED)
 include_directories(BZIP2_INCLUDE_DIR)
 add_definitions(${BZIP2_DEFINITIONS})
 
-#set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_STATIC_LIBS ON)
 set(Boost_NO_SYSTEM_PATHS on)
 find_package(Boost 1.51 COMPONENTS program_options filesystem system iostreams REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
