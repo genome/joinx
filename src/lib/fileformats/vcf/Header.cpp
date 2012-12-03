@@ -70,15 +70,25 @@ void Header::add(const string& line) {
             auto inserted = _infoTypes.insert(
                 make_pair(t.id(), std::move(t))
             );
-            if (!inserted.second)
-                throw runtime_error(str(format("Duplicate value for INFO:%1%") %t.id()));
+            if (!inserted.second) {
+                if (t == inserted.first->second) {
+                    cerr << "Warning: detected duplicate (identical) INFO field in header: " << t.id() << "\n";
+                } else {
+                    throw runtime_error(str(format("Duplicate (non-identical) value for INFO:%1%") %t.id()));
+                }
+            }
         } else if (p.first == "FORMAT") {
             CustomType t(p.second.substr(1, p.second.size()-2));
             auto inserted = _formatTypes.insert(
                 make_pair(t.id(), std::move(t))
             );
-            if (!inserted.second)
-                throw runtime_error(str(format("Duplicate value for FORMAT:%1%") %t.id()));
+            if (!inserted.second) {
+                if (t == inserted.first->second) {
+                    cerr << "Warning: detected duplicate (identical) FORMAT field in header: " << t.id() << "\n";
+                } else {
+                    throw runtime_error(str(format("Duplicate (non-identical) value for FORMAT:%1%") %t.id()));
+                }
+            }
         } else if (p.first == "FILTER") {
             // TODO: care about duplicates?
             Map m(p.second.substr(1, p.second.size()-2));
