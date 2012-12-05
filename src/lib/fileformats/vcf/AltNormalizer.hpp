@@ -33,11 +33,18 @@ public:
     AltNormalizer(RefSeq const& ref);
 
     void normalize(Entry& e);
-    RefEdit moveInsertion(Entry& e, size_t idx) const;
-    RefEdit moveDeletion(Entry& e, size_t idx) const;
+
+protected:
+    size_t leftShift(
+        std::string::const_iterator varBegin,
+        std::string::const_iterator varEnd,
+        size_t varPos
+        );
 
 protected:
     RefSeq const& _ref;
+    std::string _seqName;
+    std::string _sequence;
 };
 
 END_NAMESPACE(Vcf)

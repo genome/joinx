@@ -27,7 +27,6 @@ namespace {
 }
 
 TEST(Fasta, seq) {
-    stringstream dat(goodData);
     Fasta fa("test", goodData.c_str(), goodData.size());
 
     ASSERT_EQ("CAGAGGTCCT", fa.sequence("1", 56, 10));
@@ -58,4 +57,11 @@ TEST(Fasta, posOverflow) {
     Fasta fa("test", goodData.c_str(), goodData.size());
     ASSERT_THROW(fa.sequence("1", (uint64_t)-1, 10), length_error);
     
+}
+
+TEST(Fasta, seq2) {
+    string dat(">1\nACGT");
+    Fasta fa("test", dat.data(), dat.size());
+    string seq = fa.sequence("1", 1, fa.seqlen("1"));
+    ASSERT_EQ("ACGT", seq);
 }

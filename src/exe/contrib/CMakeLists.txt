@@ -13,3 +13,6 @@ set_target_properties(${EXAMPLE_EXECUTABLE_NAME} PROPERTIES PACKAGE_OUTPUT_NAME 
 
 add_executable(mkcontigs MakeContigs.cpp)
 target_link_libraries(mkcontigs fileformats)
+
+add_executable(test-normalize-indels TestNormalizeIndels.cpp)
+target_link_libraries(test-normalize-indels fileformats)
