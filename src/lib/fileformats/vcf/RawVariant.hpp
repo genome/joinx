@@ -7,6 +7,9 @@
 
 #include <vector>
 #include <string>
+#include <utility>
+
+class Fasta;
 
 BEGIN_NAMESPACE(Vcf)
 
@@ -17,34 +20,12 @@ BEGIN_NAMESPACE(Vcf)
 // sequence anyway.
 class RawVariant {
 public:
+    static RawVariant None;
+
     static std::vector<RawVariant> processEntry(Entry const& e) {
-        using namespace std;
         vector<RawVariant> rv;
-        string const& ref = e.ref();
-        for (auto alt = e.alt().begin(); alt != e.alt().end(); ++alt) {
-            // find leading bases in the alt that match the reference
-            string::size_type varBegin = Sequence::commonPrefix(
-                ref.begin(), ref.end(),
-                alt->begin(), alt->end()
-            );
-
-            string::const_reverse_iterator revRefEnd(ref.begin()+varBegin);
-            string::const_reverse_iterator revAltEnd(alt->begin()+varBegin);
-
-            // find trailing bases in the alt that match the reference
-            string::size_type csuff = Sequence::commonPrefix(
-                ref.rbegin(), revRefEnd,
-                alt->rbegin(), revAltEnd
-            );
-            // what's left in the middle is the actual variant
-
-            string::size_type varEnd = alt->size() - csuff;
-            string::size_type refEnd = ref.size() - csuff;
-            int64_t pos = e.pos()+varBegin;
-            string bases = alt->substr(varBegin, varEnd-varBegin);
-            string newRef( ref.substr(varBegin, refEnd-varBegin) );
-            rv.emplace_back(pos, newRef, bases);
-        }
+        for (auto alt = e.alt().begin(); alt != e.alt().end(); ++alt)
+            rv.emplace_back(e.pos(), e.ref(), *alt);
         return rv;
     }
 
@@ -53,10 +34,23 @@ public:
         , ref(ref)
         , alt(alt)
     {
+        normalize();
+    }
+
+    RawVariant(int64_t pos, std::string&& ref, std::string&& alt)
+        : pos(pos)
+        , ref(ref)
+        , alt(alt)
+    {
+        normalize();
     }
 
     bool operator==(RawVariant const& rhs) const {
         return pos == rhs.pos && ref == rhs.ref && alt == rhs.alt;
+    }
+
+    bool operator!=(RawVariant const& rhs) const {
+        return !(*this == rhs);
     }
 
     bool operator<(RawVariant const& rhs) const {
@@ -69,6 +63,20 @@ public:
         if (alt < rhs.alt) return true;
         return false;
     }
+
+    int64_t lastRefPos() const {
+        return pos + ref.size() - 1;
+    }
+
+    int64_t lastAltPos() const {
+        return pos + alt.size() - 1;
+    }
+
+    std::pair<RawVariant, RawVariant> splitIndelWithSubstitution() const;
+    RawVariant mergeIndelWithSubstitution(std::pair<RawVariant, RawVariant> const& vars) const;
+
+protected:
+    void normalize();
 
 public:
     int64_t pos;

@@ -15,6 +15,12 @@ using namespace Vcf;
 using namespace std::placeholders;
 using namespace std;
 
+namespace {
+    ostream& operator<<(ostream& s, RawVariant const& rv) {
+        return s << rv.pos << " ref:" << rv.ref << ", alt:" << rv.alt;
+    }
+}
+
 class TestVcfRawVariant : public ::testing::Test {
 protected:
     TestVcfRawVariant() {
@@ -89,4 +95,59 @@ TEST_F(TestVcfRawVariant, doublealt) {
         ASSERT_EQ(expected[i].ref, raw[i].ref) << " at index " << i << " in\n" << e;
         ASSERT_EQ(expected[i].alt, raw[i].alt) << " at index " << i << " in\n" << e;
     }
+}
+
+TEST_F(TestVcfRawVariant, lastPos) {
+    RawVariant snv(10, "A", "C");
+    ASSERT_EQ(10, snv.lastRefPos());
+    ASSERT_EQ(10, snv.lastAltPos());
+
+    RawVariant ins(10, "A", "AC");
+    ASSERT_EQ(10, ins.lastRefPos());
+    ASSERT_EQ(11, ins.lastAltPos());
+
+    RawVariant del(10, "AC", "A");
+    ASSERT_EQ(11, del.lastRefPos());
+    ASSERT_EQ(10, del.lastAltPos());
+}
+
+TEST_F(TestVcfRawVariant, split_merge_IndelWithSubstitution_insertion) {
+    RawVariant var(10, "CAC", "TACGT");
+    pair<RawVariant, RawVariant> pear = var.splitIndelWithSubstitution();
+
+    ASSERT_EQ(RawVariant(10, "C", "T"), pear.first);
+    ASSERT_EQ(RawVariant(13, "", "GT"), pear.second);
+
+    RawVariant merged = var.mergeIndelWithSubstitution(pear);
+    ASSERT_EQ(var, merged);
+}
+
+TEST_F(TestVcfRawVariant, split_merge_IndelWithSubstitution_deletion) {
+    RawVariant var(10, "CACGT", "TAC");
+    pair<RawVariant, RawVariant> pear = var.splitIndelWithSubstitution();
+    ASSERT_EQ(RawVariant(10, "C", "T"), pear.first);
+    ASSERT_EQ(RawVariant(13, "GT", ""), pear.second);
+
+    RawVariant merged = var.mergeIndelWithSubstitution(pear);
+    ASSERT_EQ(var, merged);
+}
+
+TEST_F(TestVcfRawVariant, split_merge_IndelWithSubstitution_noIndel) {
+    RawVariant var(10, "TACG", "GACT");
+    ASSERT_EQ(10, var.pos);
+    ASSERT_EQ("TACG", var.ref);
+    ASSERT_EQ("GACT", var.alt);
+    pair<RawVariant, RawVariant> pear = var.splitIndelWithSubstitution();
+    ASSERT_EQ(var, pear.first);
+    ASSERT_EQ(RawVariant::None, pear.second);
+
+    RawVariant merged = var.mergeIndelWithSubstitution(pear);
+    ASSERT_EQ(var, merged);
+
+    pear = RawVariant::None.splitIndelWithSubstitution();
+    ASSERT_EQ(RawVariant::None, pear.first);
+    ASSERT_EQ(RawVariant::None, pear.second);
+
+    merged = var.mergeIndelWithSubstitution(pear);
+    ASSERT_EQ(RawVariant::None, merged);
 }

@@ -56,6 +56,7 @@ set(SOURCES
     vcf/Map.hpp
     vcf/MergeStrategy.cpp
     vcf/MergeStrategy.hpp
+    vcf/RawVariant.cpp
     vcf/RawVariant.hpp
     vcf/SampleData.cpp
     vcf/SampleData.hpp

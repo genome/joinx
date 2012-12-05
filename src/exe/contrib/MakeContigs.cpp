@@ -63,7 +63,7 @@ public:
 
         for (auto i = _regions.begin(); i != _regions.end(); ++i) {
             // start and stop for this entry
-            int64_t start = i->start();
+            int64_t start = i->start() + 1;
             int64_t stop = i->stop();
             // is this the last region in this transcript?
             bool last = (i == _regions.end() - 1); 
