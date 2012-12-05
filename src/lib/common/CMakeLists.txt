@@ -5,6 +5,7 @@ project(common)
 set(SOURCES
     CigarString.cpp
     CigarString.hpp
+    CyclicIterator.hpp
     IOError.hpp
     Iub.hpp
     MultiType.hpp
