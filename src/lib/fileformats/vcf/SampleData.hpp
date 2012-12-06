@@ -46,6 +46,7 @@ public:
     const_iterator end() const;
     MapType::size_type size() const;
     MapType::size_type count(uint32_t idx) const;
+    int formatKeyIndex(std::string const& key) const;
     
 
     CustomValue const* get(uint32_t sampleIdx, std::string const& key) const;
@@ -60,6 +61,8 @@ public:
     int32_t samplesFailedFilter() const;
     int32_t samplesEvaluatedByFilter() const;
     void removeLowDepthGenotypes(uint32_t lowDepth);
+
+    void renumberGT(std::map<size_t, size_t> const& altMap);
 
 protected:
     void parse(std::string const& raw);

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CustomValue.hpp"
-#include "GenotypeCall.hpp"
 #include "SampleData.hpp"
 #include "common/Tokenizer.hpp"
 #include "common/namespaces.hpp"
