@@ -1,9 +1,11 @@
 #include "VcfMergeCommand.hpp"
 
 #include "common/Tokenizer.hpp"
+#include "fileformats/Fasta.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/OutputWriter.hpp"
 #include "fileformats/TypedStream.hpp"
+#include "fileformats/vcf/AltNormalizer.hpp"
 #include "fileformats/vcf/Builder.hpp"
 #include "fileformats/vcf/ConsensusFilter.hpp"
 #include "fileformats/vcf/CustomType.hpp"
@@ -52,6 +54,7 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
         ("merge-strategy-file,M", po::value<string>(&_mergeStrategyFile), "merge strategy file for info fields (see man page for format)")
         ("clear-filters,c", "When set, merged entries will have FILTER data stripped out")
         ("merge-samples,s", "Allow input files with overlapping samples")
+        ("normalize-indels,N", po::value<string>(&_fastaFile), "Normalize indels using the given reference fasta (may cause output to become unsorted)")
         ("sample-priority,P", po::value<string>(&_samplePrioStr), "sample priority (o=Order, u=Unfiltered, f=Filtered)")
         ("require-consensus,R", po::value<string>(&consensusOpts),
             "When merging samples, require a certain ratio of them to agree, filtering sites that fail. "
@@ -140,7 +143,22 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
     }
 }
 
+namespace {
+    template<typename PrinterType, typename NormalizerType, typename EntryType>
+    void writeEntry(PrinterType& writer, NormalizerType& normalizer, EntryType& entry) {
+        if (normalizer)
+            normalizer->normalize(entry);
+        writer(entry);
+    }
+}
+
 void VcfMergeCommand::exec() {
+    unique_ptr<Vcf::AltNormalizer> normalizer;
+    unique_ptr<Fasta> ref;
+    if (!_fastaFile.empty()) {
+        ref.reset(new Fasta(_fastaFile));
+        normalizer.reset(new Vcf::AltNormalizer(*ref));
+    }
 
     map<string,string> dupSampleMap;
     for (auto iter = _dupSampleFilenames.begin(); iter != _dupSampleFilenames.end(); ++iter) {
@@ -165,7 +183,7 @@ void VcfMergeCommand::exec() {
     typedef function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
     typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
     typedef shared_ptr<ReaderType> ReaderPtr;
-    typedef OutputWriter<Vcf::Entry> WriterType;
+    typedef OutputWriter<Vcf::Entry> PrinterType;
 
     vector<ReaderPtr> readers;
     VcfExtractor extractor = bind(&Vcf::Entry::parseLine, _1, _2, _3);
@@ -197,7 +215,10 @@ void VcfMergeCommand::exec() {
         readers.back()->header().sourceIndex(_fileOrder[inputStreams[i]->name()]);
     }
 
-    WriterType writer(*out);
+    PrinterType printer(*out);
+    auto writer = std::bind(
+        &writeEntry<PrinterType, unique_ptr<Vcf::AltNormalizer>, Vcf::Entry>,
+        printer, std::ref(normalizer), _1);
     unique_ptr<Vcf::ConsensusFilter> cnsFilt;
     if (_consensusRatio > 0) {
         mergedHeader.addFilter(_consensusFilter, _consensusFilterDesc);
