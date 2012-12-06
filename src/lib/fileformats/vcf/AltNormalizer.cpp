@@ -108,11 +108,7 @@ void AltNormalizer::normalize(Entry& e) {
     e._alt.swap(newAlt);
 
     if (!altIndices.empty()) {
-        cerr << "Renumbering:\n\t" << origEntry << "\n";
-        for (auto i = altIndices.begin(); i != altIndices.end(); ++i)
-            cerr << "\t" << i->first << " => " << i->second << "\n";
-        e._sampleData.renumberGT(altIndices);
-        cerr << "\t" << e << "\n";
+        e.sampleData().renumberGT(altIndices);
     }
 
     if (haveIndel && minRefPos == 1) {
