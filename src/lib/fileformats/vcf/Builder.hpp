@@ -14,7 +14,7 @@ class MergeStrategy;
 
 class Builder {
 public:
-    typedef std::function<void(const Entry&)> OutputFunc;
+    typedef std::function<void(Entry&)> OutputFunc;
     Builder(
         const MergeStrategy& mergeStrategy,
         Header* header,

@@ -240,6 +240,13 @@ SampleData::FormatType const& SampleData::format() const {
     return _format;
 }
 
+int SampleData::formatKeyIndex(std::string const& key) const {
+    auto i = find_if(_format.begin(), _format.end(), bind(&customTypeIdMatches, key, _1));
+    if (i == _format.end())
+        return -1;
+    return distance(_format.begin(), i);
+}
+
 CustomValue const* SampleData::get(uint32_t sampleIdx, std::string const& key) const {
     ValueVector const* values = get(sampleIdx);
 
@@ -248,12 +255,11 @@ CustomValue const* SampleData::get(uint32_t sampleIdx, std::string const& key) c
         return 0;
 
     // no info for that format key
-    auto i = find_if(_format.begin(), _format.end(), bind(&customTypeIdMatches, key, _1));
-    if (i == _format.end())
+    int offset = formatKeyIndex(key);
+    if (offset == -1)
         return 0;
 
-    uint32_t offset = distance(_format.begin(), i);
-    if (offset >= values->size())
+    if (size_t(offset) >= values->size())
         return 0;
 
     return &(*values)[offset];
@@ -376,6 +382,37 @@ int32_t SampleData::samplesEvaluatedByFilter() const {
         }
     }
     return numEvaluatedByFilter;
+}
+
+void SampleData::renumberGT(std::map<size_t, size_t> const& altMap) {
+    int gtIdx = formatKeyIndex("GT");
+    if (gtIdx == -1)
+        return;
+
+    for (auto iter = _values.begin(); iter != _values.end(); ++iter) {
+        ValueVector& vals = *iter->second;
+        if (vals.size() <= size_t(gtIdx))
+            continue;
+        CustomValue& gt = vals[gtIdx];
+        string const* gtStr = gt.get<string>();
+        if (gtStr == 0)
+            continue;
+
+        GenotypeCall old(*gtStr);
+        char delim = old.phased() ? '|' : '/';
+        stringstream newss;
+        for (auto alt = old.begin(); alt != old.end(); ++alt) {
+            if (alt != old.begin())
+                newss << delim;
+            auto remapped = altMap.find(*alt);
+            if (remapped == altMap.end()) {
+                newss << *alt;
+            } else {
+                newss << remapped->second;
+            }
+        }
+        vals[gtIdx].set(0, newss.str());
+    }
 }
 
 void SampleData::removeLowDepthGenotypes(uint32_t lowDepth) {
