@@ -48,7 +48,7 @@ protected:
 TEST_F(TestVcfAltNormalizer, equivalentAlts) {
     string ref = _ref.sequence("1", 4, 6);
     ASSERT_EQ("CGCGCG", ref);
-    Entry e = makeEntry("1", 4, ref, "CGCG,CGCG", "0/1\t1/2");
+    Entry e = makeEntry("1", 4, ref, "CGCGCG,CGCG", "0/1\t1/2");
     AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
@@ -58,8 +58,8 @@ TEST_F(TestVcfAltNormalizer, equivalentAlts) {
     ASSERT_EQ("TCG", e.ref());
     ASSERT_EQ(1, e.alt().size());
     ASSERT_EQ("T", e.alt()[0]);
-    ASSERT_EQ("0/1", e.sampleData().genotype(0).string());
-    ASSERT_EQ("1/1", e.sampleData().genotype(1).string());
+    ASSERT_EQ("0/0", e.sampleData().genotype(0).string());
+    ASSERT_EQ("0/1", e.sampleData().genotype(1).string());
 }
 
 // single alt cases

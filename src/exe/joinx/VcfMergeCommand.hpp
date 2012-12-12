@@ -41,4 +41,5 @@ protected:
 
     std::string _samplePrioStr;
     Vcf::MergeStrategy::SamplePriority _samplePriority;
+    bool _exactPos;
 };

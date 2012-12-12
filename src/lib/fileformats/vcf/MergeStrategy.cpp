@@ -63,8 +63,30 @@ MergeStrategy::MergeStrategy(
     , _primarySampleStreamIndex(0)
     , _cnsFilt(cnsFilt)
     , _samplePriority(samplePriority)
+    , _exactPos(false)
 {
     setDefaultMerger("ignore");
+}
+
+bool MergeStrategy::canMerge(Entry const& a, Entry const& b) const {
+    int rv = strverscmp(a.chrom().c_str(), b.chrom().c_str());
+    if (rv != 0)
+        return false;
+
+    if (exactPos())
+        return a.pos() == b.pos();
+
+    // to handle identical and adjacent insertions
+    if (a.start() == a.stop() && b.start() == b.stop() 
+        && (b.start() - a.start() <= 1))
+    {
+        return true;
+    }
+
+    if (a.stop() <= b.start() || b.stop() <= a.start())
+        return false;
+
+    return true;
 }
 
 void MergeStrategy::clearFilters(bool value) {
@@ -145,6 +167,14 @@ ConsensusFilter const* MergeStrategy::consensusFilter() const {
 
 MergeStrategy::SamplePriority MergeStrategy::samplePriority() const {
     return _samplePriority;
+}
+
+void MergeStrategy::exactPos(bool value) {
+    _exactPos = value;
+}
+
+bool MergeStrategy::exactPos() const {
+    return _exactPos;
 }
 
 END_NAMESPACE(Vcf)
