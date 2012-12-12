@@ -82,7 +82,6 @@ namespace {
         "20\t14370\tid1\tTAC\tT\t29\tPASS\tVC=Samtools\tGT:GQ:DP:HQ\t0|1:48:1:51,51\t1|0:48:8:51,51",
         "20\t14370\tid1\tTACAG\tT\t.\tPASS\tVC=Samtools"
     };
-
 }
 
 class TestVcfEntryMerger : public ::testing::Test {
@@ -301,7 +300,7 @@ TEST_F(TestVcfEntryMerger, insertion) {
     for (auto i = ents.begin(); i != ents.end(); ++i) {
         cout << i->start() << "-" << i->stop() << ": " << *i << "\n";
         if (i > ents.begin()) {
-            cout << ", can merge with prev: " << EntryMerger::canMerge(*i, *(i-1)) << "\n";
+            cout << ", can merge with prev: " << _defaultMs->canMerge(*i, *(i-1)) << "\n";
         }
     }
 }

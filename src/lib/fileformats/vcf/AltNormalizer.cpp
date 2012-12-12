@@ -25,8 +25,6 @@ AltNormalizer::AltNormalizer(RefSeq const& ref)
 }
 
 void AltNormalizer::normalize(Entry& e) {
-    Entry origEntry(e);
-
     if (e.chrom() != _seqName) {
         _seqName = e.chrom();
         size_t len = _ref.seqlen(_seqName);
@@ -44,9 +42,13 @@ void AltNormalizer::normalize(Entry& e) {
         string::const_iterator varBegin;
         string::const_iterator varEnd;
 
+        // Skip silly alts that are actually the reference
+        if (altLen == 0 && refLen == 0)
+            continue;
+
         // Process pure indels only (alts with substitutions are normalized
         // by RawVariant already).
-        if ((altLen == 0 || refLen == 0) && (altLen != refLen)) {
+        if ((altLen == 0 || refLen == 0)) {
             haveIndel = true;
 
             // Make deletions look like insertions for uniform processing.
@@ -81,12 +83,15 @@ void AltNormalizer::normalize(Entry& e) {
 
     e._pos = minRefPos;
 
-    size_t idx(0);
+    // Make new alt array and mapping of old alt indices => new alt indices.
+    size_t origAltIdx(1);
+    size_t newAltIdx(1);
     map<string, size_t> seen;
     map<size_t, size_t> altIndices;
     vector<string> newAlt;
-    for (auto var = rawVariants.begin(); var != rawVariants.end(); ++var, ++idx) {
-        size_t altNumber = idx + 1;
+    seen[e.ref()] = 0;
+
+    for (auto var = rawVariants.begin(); var != rawVariants.end(); ++var, ++origAltIdx) {
         assert(uint64_t(var->pos) >= e.pos());
 
         int64_t headGap = var->pos - e.pos();
@@ -95,16 +100,18 @@ void AltNormalizer::normalize(Entry& e) {
         size_t lastRefIdx = var->pos - e.pos() + var->ref.size();
         if (lastRefIdx < e.ref().size())
             alt += e.ref().substr(lastRefIdx);
-        if (alt == e.ref()) {
-            altIndices[altNumber] = 0;
+
+        auto inserted = seen.insert(make_pair(alt, newAltIdx));
+        if (inserted.second) {
+            newAlt.push_back(alt);
+            if (newAltIdx != origAltIdx)
+                altIndices[origAltIdx] = newAltIdx;
+            ++newAltIdx;
         } else {
-            auto inserted = seen.insert(make_pair(alt, altNumber));
-            if (inserted.second)
-                newAlt.push_back(alt);
-            else
-                altIndices[altNumber] = inserted.first->second;
+            altIndices[origAltIdx] = inserted.first->second;
         }
     }
+
     e._alt.swap(newAlt);
 
     if (!altIndices.empty()) {
