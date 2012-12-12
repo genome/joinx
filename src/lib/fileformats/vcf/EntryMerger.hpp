@@ -22,9 +22,6 @@ class EntryMerger {
 public:
     typedef std::map<std::string, CustomValue> CustomValueMap;
 
-    // do these entries overlap? i.e., do we want to merge them?
-    static bool canMerge(Entry const& a, Entry const& b);
-
     EntryMerger(
         MergeStrategy const& mergeStrategy,
         Header const* mergedHeader,

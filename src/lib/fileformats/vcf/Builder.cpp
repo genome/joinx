@@ -38,7 +38,7 @@ Builder::~Builder() {
 void Builder::operator()(const Entry& e) {
     e.header();
     if (_entries.empty()
-        || any_of(_entries.begin(), _entries.end(), bind(&EntryMerger::canMerge, e, _1)))
+        || any_of(_entries.begin(), _entries.end(), bind(&MergeStrategy::canMerge, _mergeStrategy, e, _1)))
     {
         _entries.push_back(e);
         return;
@@ -51,7 +51,7 @@ void Builder::operator()(const Entry& e) {
 void Builder::operator()(Entry&& e) {
     e.header();
     if (_entries.empty() 
-        || any_of(_entries.begin(), _entries.end(), bind(&EntryMerger::canMerge, e, _1)))
+        || any_of(_entries.begin(), _entries.end(), bind(&MergeStrategy::canMerge, _mergeStrategy, e, _1)))
     {
         _entries.push_back(std::move(e));
         return;

@@ -31,6 +31,9 @@ public:
         eFILTERED
     };
 
+    // do these entries overlap? i.e., do we want to merge them?
+    bool canMerge(Entry const& a, Entry const& b) const;
+
     /// Parse a merge strategy from the input given stream. Call this on an existing
     /// MergeStrategy instance to add the strategies specified in the stream to the
     /// plan.
@@ -70,6 +73,7 @@ public:
     /// \exception runtime_error thrown if the action name is not known
     void setMerger(const std::string& id, const std::string& mergerName);
 
+    // Set the default merge action for info fields
     void setDefaultMerger(std::string const& mergerName);
 
     /// If set to true, clearFilters will strip all filter information from merged 
@@ -81,6 +85,8 @@ public:
     /// their filters stripped
     bool clearFilters() const;
 
+    void exactPos(bool value);
+    bool exactPos() const;
     void mergeSamples(bool value);
     bool mergeSamples() const;
     void primarySampleStreamIndex(uint32_t value);
@@ -106,6 +112,7 @@ protected:
 
     ConsensusFilter const* _cnsFilt;
     SamplePriority _samplePriority;
+    bool _exactPos;
 };
 
 END_NAMESPACE(Vcf)

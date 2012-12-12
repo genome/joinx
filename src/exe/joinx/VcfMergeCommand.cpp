@@ -39,6 +39,7 @@ VcfMergeCommand::VcfMergeCommand()
     , _mergeSamples(false)
     , _consensusRatio(0.0)
     , _samplePriority(Vcf::MergeStrategy::eORDER)
+    , _exactPos(false)
 {
 }
 
@@ -48,6 +49,7 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
     opts.add_options()
         ("help,h", "this message")
         ("input-file,i", po::value< vector<string> >(&_filenames), "input file(s) (positional arguments work also)")
+        ("exact-pos,e", "When set, only entries with exactly the same position are merged (as opposed to any who overlap)")
         ("duplicate-samples,D", po::value< vector<string> >(&_dupSampleFilenames),
             "input file(s) specified as file.vcf=tag. each sample in file.vcf will be duplicated with the name <sample_name>-tag")
         ("output-file,o", po::value<string>(&_outputFile), "output file (empty or - means stdout, which is the default)")
@@ -97,6 +99,8 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
         ss << opts;
         throw runtime_error(ss.str());
     }
+
+    _exactPos = vm.count("exact-pos") > 0;
 
     if (!vm.count("input-file") && !vm.count("duplicate-samples"))
         _filenames.push_back("-");
@@ -230,6 +234,8 @@ void VcfMergeCommand::exec() {
     }
 
     Vcf::MergeStrategy mergeStrategy(&mergedHeader, _samplePriority, cnsFilt.get());
+    mergeStrategy.exactPos(_exactPos);
+
     if (!_mergeStrategyFile.empty()) {
         InputStream::ptr msFile(_streams.wrap<istream, InputStream>(_mergeStrategyFile));
         mergeStrategy.parse(*msFile);

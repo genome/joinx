@@ -59,24 +59,6 @@ namespace {
     }
 }
 
-bool EntryMerger::canMerge(Entry const& a, Entry const& b) {
-    int rv = strverscmp(a.chrom().c_str(), b.chrom().c_str());
-    if (rv != 0)
-        return false;
-
-    // to handle identical and adjacent insertions
-    if (a.start() == a.stop() && b.start() == b.stop() 
-        && (b.start() - a.start() <= 1))
-    {
-        return true;
-    }
-
-    if (a.stop() <= b.start() || b.stop() <= a.start())
-        return false;
-
-    return true;
-}
-
 EntryMerger::EntryMerger(
         MergeStrategy const& mergeStrategy,
         Header const* mergedHeader,
@@ -100,7 +82,7 @@ EntryMerger::EntryMerger(
     for (const Entry* e = begin; e != end; ++e) {
         bool willMerge = e == begin;
         for (const Entry* pe = begin; pe != e; ++pe) {
-            if (canMerge(*e, *pe)) {
+            if (_mergeStrategy.canMerge(*e, *pe)) {
                 willMerge = true;
                 break;
             }
