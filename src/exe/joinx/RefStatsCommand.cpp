@@ -7,6 +7,8 @@
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
+#include <algorithm>
+#include <cctype>
 #include <functional>
 
 using boost::format;
@@ -136,15 +138,18 @@ void RefStatsCommand::exec() {
             char nextBase(0);
 
             if (entry.start() > 0)
-                prevBase = refSeq.sequence(entry.chrom(), entry.start());
+                prevBase = toupper(refSeq.sequence(entry.chrom(), entry.start()));
 
             if (size_t(entry.stop()) <= refSeq.seqlen(entry.chrom()))
-                nextBase = refSeq.sequence(entry.chrom(), entry.stop()+1);
+                nextBase = toupper(refSeq.sequence(entry.chrom(), entry.stop()+1));
 
             string ref = refSeq.sequence(entry.chrom(), entry.start()+1,
                 entry.stop()-entry.start());
 
-            rstats rs = getstats(ref, prevBase, nextBase);
+            string ucref(ref.size(), '\0');
+            transform(ref.begin(), ref.end(), ucref.begin(), ::toupper);
+
+            rstats rs = getstats(ucref, prevBase, nextBase);
             *out << entry << "\t"
                 << rs.at << "\t"
                 << rs.cg << "\t"
