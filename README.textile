@@ -12,8 +12,9 @@ h3. Setup repository
 h3. Install build dependencies
 
 Building requires:
+* gcc 4.4+
 * cmake 2.8+
-* boost 1.40+
+* boost 1.51+
 * gtest (google unit testing framework, optional for unit tests)
 * zlib/bzip2 development files (headers, libraries)
 
@@ -25,16 +26,22 @@ To install these on Ubuntu, try:
 
 p.  @sudo apt-get install cmake libboost-all-dev libgtest-dev libbam-dev@
 
-h3. Build and test
-* Joinx does not support in source builds. Create a new build directory, enter it, and run:
-@cmake /path/to/joinx/repo@
-@make@
-@ctest@ 
-* Binaries can be found in the bin/ subdirectory of your build directory
+h3. Build, test, and install
+
+Joinx does not support in source builds. Create a new build directory, enter it, and run:
+
+* @cmake /path/to/joinx/repo [opts]@
+** Some useful options to cmake are:
+*** -DBOOST_ROOT=/path/to/boost  if boost is installed somewhere other than the default location
+*** -DBoost_NO_SYSTEM_PATHS=on   to skip checking system default locations for boost headers and libs
+*** -DBoost_USE_STATIC_LIBS=on   to link boost statically
+*** -DCMAKE_INSTALL_PREFIX=/path change the installation location (default: /usr)
+* @make@
+* @ctest@ (to run unit tests)
+* @make install@
 
 Running ctest with run both unit and integration tests. you can run one or the other with
 @ctest -L <unit|integration>@
-By default, all integration tests run through valgrind. This can be disabled by setting the environment variable JXTEST_NO_VALGRIND.
 
 h2. LICENSE
 
