@@ -46,7 +46,7 @@ find_package(BZip2 REQUIRED)
 include_directories(BZIP2_INCLUDE_DIR)
 add_definitions(${BZIP2_DEFINITIONS})
 
-find_package(Boost 1.51 COMPONENTS program_options filesystem system iostreams REQUIRED)
+find_package(Boost 1.48 COMPONENTS program_options filesystem system iostreams REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 message("Boost include directory: ${Boost_INCLUDE_DIRS}")
 message("Boost libraries: ${Boost_LIBRARIES}")
