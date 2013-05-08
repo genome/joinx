@@ -14,7 +14,7 @@ h3. Install build dependencies
 Building requires:
 * gcc 4.4+
 * cmake 2.8+
-* boost 1.51+
+* boost 1.48+
 * gtest (google unit testing framework, optional for unit tests)
 * zlib/bzip2 development files (headers, libraries)
 
