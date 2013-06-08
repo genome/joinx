@@ -73,10 +73,10 @@ TEST(TestIntersectFull, intersectSelf) {
     intersector.execute();
 
     // each line hits twice each generating 8 total matches
-    ASSERT_EQ(8, rc.hitsA.size());
-    ASSERT_EQ(8, rc.hitsB.size());
-    ASSERT_EQ(0, rc.missesA.size());
-    ASSERT_EQ(0, rc.missesB.size());
+    ASSERT_EQ(8u, rc.hitsA.size());
+    ASSERT_EQ(8u, rc.hitsB.size());
+    ASSERT_EQ(0u, rc.missesA.size());
+    ASSERT_EQ(0u, rc.missesB.size());
 }
 
 TEST(TestIntersectFull, misses) {
@@ -91,10 +91,10 @@ TEST(TestIntersectFull, misses) {
     intersector.execute();
 
     // first 2 lines hit twice each, last 2 lines once each, total of 6 hits
-    ASSERT_EQ(6, rc.hitsA.size());
-    ASSERT_EQ(6, rc.hitsB.size());
-    ASSERT_EQ(0, rc.missesA.size());
-    ASSERT_EQ(1, rc.missesB.size());
+    ASSERT_EQ(6u, rc.hitsA.size());
+    ASSERT_EQ(6u, rc.hitsB.size());
+    ASSERT_EQ(0u, rc.missesA.size());
+    ASSERT_EQ(1u, rc.missesB.size());
 }
 
 TEST(TestIntersectFull, cacheCrash) {
@@ -109,8 +109,8 @@ TEST(TestIntersectFull, cacheCrash) {
     intersector.execute();
 
     // first 2 lines hit twice each, last 2 lines once each, total of 6 hits
-    ASSERT_EQ(4, rc.hitsA.size());
-    ASSERT_EQ(4, rc.hitsB.size());
-    ASSERT_EQ(1, rc.missesA.size());
-    ASSERT_EQ(1, rc.missesB.size());
+    ASSERT_EQ(4u, rc.hitsA.size());
+    ASSERT_EQ(4u, rc.hitsB.size());
+    ASSERT_EQ(1u, rc.missesA.size());
+    ASSERT_EQ(1u, rc.missesB.size());
 }

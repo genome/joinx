@@ -30,20 +30,20 @@ TEST(GenotypeCall, phased) {
     GenotypeCall gt("0|1");
     ASSERT_TRUE(gt.phased());
     ASSERT_FALSE(gt.empty());
-    ASSERT_EQ(2, gt.size());
-    ASSERT_EQ(2, distance(gt.begin(), gt.end()));
-    ASSERT_EQ(0, gt[0]);
-    ASSERT_EQ(1, gt[1]);
+    ASSERT_EQ(2u, gt.size());
+    ASSERT_EQ(2u, distance(gt.begin(), gt.end()));
+    ASSERT_EQ(0u, gt[0]);
+    ASSERT_EQ(1u, gt[1]);
 }
 
 TEST(GenotypeCall, unphased) {
     GenotypeCall gt("0/1/2/3");
     ASSERT_FALSE(gt.phased());
     ASSERT_FALSE(gt.empty());
-    ASSERT_EQ(4, gt.size());
-    ASSERT_EQ(4, distance(gt.begin(), gt.end()));
-    ASSERT_EQ(0, gt[0]);
-    ASSERT_EQ(1, gt[1]);
-    ASSERT_EQ(2, gt[2]);
-    ASSERT_EQ(3, gt[3]);
+    ASSERT_EQ(4u, gt.size());
+    ASSERT_EQ(4u, distance(gt.begin(), gt.end()));
+    ASSERT_EQ(0u, gt[0]);
+    ASSERT_EQ(1u, gt[1]);
+    ASSERT_EQ(2u, gt[2]);
+    ASSERT_EQ(3u, gt[3]);
 }

@@ -16,8 +16,8 @@ TEST(TestMutationSpectrum, spectrum) {
     spectrum('C', 'A') = 4;
     spectrum('C', 'G') = 5;
 
-    ASSERT_EQ(9, spectrum.transitions());
-    ASSERT_EQ(14, spectrum.transversions());
+    ASSERT_EQ(9u, spectrum.transitions());
+    ASSERT_EQ(14u, spectrum.transversions());
     ASSERT_NEAR(9.0/14.0, spectrum.transitionTransversionRatio(), 1e-14);
 }
 

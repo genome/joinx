@@ -136,8 +136,8 @@ TEST_F(TestVcfEntryMerger, merge) {
 
     EntryMerger merger(*_defaultMs, &_mergedHeader, &*_snvs.begin(), &*_snvs.end());
     ASSERT_EQ("20", merger.chrom());
-    ASSERT_EQ(14370, merger.pos());
-    ASSERT_EQ(3, merger.identifiers().size());
+    ASSERT_EQ(14370u, merger.pos());
+    ASSERT_EQ(3u, merger.identifiers().size());
     ASSERT_EQ("G", merger.ref());
     ASSERT_EQ(Entry::MISSING_QUALITY, merger.qual());
 
@@ -145,10 +145,10 @@ TEST_F(TestVcfEntryMerger, merge) {
 
     // check the simple fields: chrom, pos, etc.
     ASSERT_EQ("20", mergedEntry.chrom());
-    ASSERT_EQ(14370, mergedEntry.pos());
+    ASSERT_EQ(14370u, mergedEntry.pos());
 
     // make sure identifiers are merged properly without duplicates
-    ASSERT_EQ(3, mergedEntry.identifiers().size());
+    ASSERT_EQ(3u, mergedEntry.identifiers().size());
     auto iter = mergedEntry.identifiers().begin();
     ASSERT_EQ("id1", *iter++);
     ASSERT_EQ("id2", *iter++);
@@ -220,7 +220,7 @@ TEST_F(TestVcfEntryMerger, singleQual) {
 TEST_F(TestVcfEntryMerger, mergeAlleles) {
     EntryMerger merger(*_defaultMs, &_mergedHeader, &*_indels.begin(), &*_indels.end());
     Entry e(std::move(merger));
-    ASSERT_EQ(2, e.alt().size());
+    ASSERT_EQ(2u, e.alt().size());
     ASSERT_EQ("TAG", e.alt()[0]);
     ASSERT_EQ("T", e.alt()[1]);
 }
@@ -233,7 +233,7 @@ TEST_F(TestVcfEntryMerger, stripFilters) {
     Entry::parseLine(&_headers[1], t2, entries[1]);
     EntryMerger merger(*_defaultMs, &_mergedHeader, entries, entries+2);
     Entry merged(std::move(merger));
-    ASSERT_EQ(2, merged.failedFilters().size());
+    ASSERT_EQ(2u, merged.failedFilters().size());
 
     MergeStrategy ms2(*_defaultMs);
     ms2.clearFilters(true);
@@ -251,7 +251,7 @@ TEST_F(TestVcfEntryMerger, GTfieldAlwaysFirst) {
     Entry::parseLine(&_headers[1], t2, entries[1]);
     EntryMerger merger(*_defaultMs, &_mergedHeader, entries, entries+2);
     Entry merged(std::move(merger));
-    ASSERT_EQ(4, merged.sampleData().format().size());
+    ASSERT_EQ(4u, merged.sampleData().format().size());
     ASSERT_EQ("GT", merged.sampleData().format()[0]->id());
     ASSERT_EQ(Entry::MISSING_QUALITY, merged.qual());
 }
@@ -270,11 +270,11 @@ TEST_F(TestVcfEntryMerger, Builder) {
     builder(*(entries+1));
     builder.flush();
 
-    ASSERT_EQ(2, v.size());
+    ASSERT_EQ(2u, v.size());
     ASSERT_EQ(&_mergedHeader, &v[0].header());
     ASSERT_EQ(&_mergedHeader, &v[1].header());
-    ASSERT_EQ(1, v[0].sampleData().samplesWithData());
-    ASSERT_EQ(1, v[1].sampleData().samplesWithData());
+    ASSERT_EQ(1u, v[0].sampleData().samplesWithData());
+    ASSERT_EQ(1u, v[1].sampleData().samplesWithData());
     // Our test headers specified 3 samples each, so entry 1 should have
     // a sample in the first position, entry 2 should have one in the third.
     // FIXME the test entries seem to be supplying 6 samples not 3
@@ -318,6 +318,6 @@ TEST_F(TestVcfEntryMerger, nullAlt) {
     builder.flush();
 
 
-    ASSERT_EQ(1, v.size());
+    ASSERT_EQ(1u, v.size());
     ASSERT_EQ(&_mergedHeader, &v[0].header());
 }

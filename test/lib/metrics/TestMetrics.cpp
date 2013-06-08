@@ -133,103 +133,102 @@ protected:
 TEST_F(TestMetrics, genotypeDistribution) {
     auto dist = _metrics[0]->genotypeDistribution();
 
-    ASSERT_EQ(6, dist.size());
-    ASSERT_EQ(1, dist[GenotypeCall("0/0")]);
-    ASSERT_EQ(0, dist[GenotypeCall("0|0")]); // make sure phased doesn't match unphased
+    ASSERT_EQ(6u, dist.size());
+    ASSERT_EQ(1u, dist[GenotypeCall("0/0")]);
+    ASSERT_EQ(0u, dist[GenotypeCall("0|0")]); // make sure phased doesn't match unphased
 
-    ASSERT_EQ(3, dist[GenotypeCall("0/1")]);
-    ASSERT_EQ(3, dist[GenotypeCall("1/0")]);
-    ASSERT_EQ(0, dist[GenotypeCall("0|1")]);
-    ASSERT_EQ(0, dist[GenotypeCall("1|0")]);
+    ASSERT_EQ(3u, dist[GenotypeCall("0/1")]);
+    ASSERT_EQ(3u, dist[GenotypeCall("1/0")]);
+    ASSERT_EQ(0u, dist[GenotypeCall("0|1")]);
+    ASSERT_EQ(0u, dist[GenotypeCall("1|0")]);
 
-    ASSERT_EQ(1, dist[GenotypeCall("1/1")]);
-    ASSERT_EQ(0, dist[GenotypeCall("1|1")]);
+    ASSERT_EQ(1u, dist[GenotypeCall("1/1")]);
+    ASSERT_EQ(0u, dist[GenotypeCall("1|1")]);
 
-    ASSERT_EQ(2, dist[GenotypeCall("2/0")]);
-    ASSERT_EQ(2, dist[GenotypeCall("0/2")]);
-    ASSERT_EQ(0, dist[GenotypeCall("2|0")]);
-    ASSERT_EQ(0, dist[GenotypeCall("0|2")]);
+    ASSERT_EQ(2u, dist[GenotypeCall("2/0")]);
+    ASSERT_EQ(2u, dist[GenotypeCall("0/2")]);
+    ASSERT_EQ(0u, dist[GenotypeCall("2|0")]);
+    ASSERT_EQ(0u, dist[GenotypeCall("0|2")]);
 
-    ASSERT_EQ(0, dist[GenotypeCall("1|2")]); // ordering matters for phased
-    ASSERT_EQ(1, dist[GenotypeCall("2|1")]); // <-
-    ASSERT_EQ(0, dist[GenotypeCall("2/1")]); // make sure unphased doesn't match phased
-    ASSERT_EQ(0, dist[GenotypeCall("1/2")]);
+    ASSERT_EQ(0u, dist[GenotypeCall("1|2")]); // ordering matters for phased
+    ASSERT_EQ(1u, dist[GenotypeCall("2|1")]); // <-
+    ASSERT_EQ(0u, dist[GenotypeCall("2/1")]); // make sure unphased doesn't match phased
+    ASSERT_EQ(0u, dist[GenotypeCall("1/2")]);
 
-    ASSERT_EQ(1, dist[GenotypeCall("2/2")]);
-    ASSERT_EQ(0, dist[GenotypeCall("2|2")]);
+    ASSERT_EQ(1u, dist[GenotypeCall("2/2")]);
+    ASSERT_EQ(0u, dist[GenotypeCall("2|2")]);
 }
 
 TEST_F(TestMetrics, allelicDistribution) {
     // REF = A, ALT = C,T
     auto const& dist = _metrics[0]->allelicDistribution();
-    ASSERT_EQ(3, dist.size());
+    ASSERT_EQ(3u, dist.size());
 
     // How many times did we see the reference (GT 0)
-    ASSERT_EQ(7, dist[0]); // there were 8 but 1 was filtered
+    ASSERT_EQ(7u, dist[0]); // there were 8 but 1 was filtered
     // How many times did we see C (GT 1)
-    ASSERT_EQ(6, dist[1]);
+    ASSERT_EQ(6u, dist[1]);
     // How many times did we see T (GT 2)
-    ASSERT_EQ(5, dist[2]);
+    ASSERT_EQ(5u, dist[2]);
 }
 
 TEST_F(TestMetrics, allelicDistribution_insertion) {
     // REF = A, ALT = AT
     auto const& dist = _metrics[1]->allelicDistribution();
-    ASSERT_EQ(2, dist.size());
+    ASSERT_EQ(2u, dist.size());
 
     // How many times did we see the reference (GT 0)
-    ASSERT_EQ(6, dist[0]); // there were 5 but 1 was filtered
+    ASSERT_EQ(6u, dist[0]); // there were 5 but 1 was filtered
     // How many times did we see AT (GT 1)
-    ASSERT_EQ(6, dist[1]);
+    ASSERT_EQ(6u, dist[1]);
 }
 
 TEST_F(TestMetrics, allelicDistribution_deletion) {
     // REF = AGTA, ALT = A
     auto const& dist = _metrics[2]->allelicDistribution();
-    ASSERT_EQ(2, dist.size());
+    ASSERT_EQ(2u, dist.size());
 
     // How many times did we see the reference (GT 0)
-    ASSERT_EQ(5, dist[0]); // there were 5 but 1 was filtered
+    ASSERT_EQ(5u, dist[0]); // there were 5 but 1 was filtered
     // How many times did we see C (GT 1)
-    ASSERT_EQ(7, dist[1]);
+    ASSERT_EQ(7u, dist[1]);
     // How many times did we see T (GT 2)
 }
 
 TEST_F(TestMetrics, allelicDistributionBySample) {
     auto const& dist = _metrics[0]->allelicDistributionBySample();
 
-    ASSERT_EQ(3, dist.size());
+    ASSERT_EQ(3u, dist.size());
 
     // How many samples have an A (GT 0)
-    ASSERT_EQ(6, dist[0]); // there were 7 but 1 was filtered
+    ASSERT_EQ(6u, dist[0]); // there were 7 but 1 was filtered
     // How many have a C (GT 1)
-    ASSERT_EQ(5, dist[1]);
+    ASSERT_EQ(5u, dist[1]);
     // How many have a T (GT 2)
-    ASSERT_EQ(4, dist[2]);
-
+    ASSERT_EQ(4u, dist[2]);
 }
 
 TEST_F(TestMetrics, allelicDistributionBySample_insertion) {
     auto const& dist = _metrics[1]->allelicDistributionBySample();
 
-    ASSERT_EQ(2, dist.size());
+    ASSERT_EQ(2u, dist.size());
 
     // How many samples have an A (GT 0)
-    ASSERT_EQ(4, dist[0]); 
+    ASSERT_EQ(4u, dist[0]); 
     // How many have an AT (GT 1)
-    ASSERT_EQ(4, dist[1]);
+    ASSERT_EQ(4u, dist[1]);
 
 }
 
 TEST_F(TestMetrics, allelicDistributionBySample_deletion) {
     auto const& dist = _metrics[2]->allelicDistributionBySample();
 
-    ASSERT_EQ(2, dist.size());
+    ASSERT_EQ(2u, dist.size());
 
     // How many samples have an AGTA (GT 0)
-    ASSERT_EQ(4, dist[0]);
+    ASSERT_EQ(4u, dist[0]);
     // How many have an A (GT 1)
-    ASSERT_EQ(5, dist[1]);
+    ASSERT_EQ(5u, dist[1]);
 
 }
 
@@ -301,7 +300,7 @@ TEST_P(TestMetricsParamByRef, mutationSpectrum) {
 
     stringstream gts;
     // generate all 16 possible genotypes
-    int expected[4] = {0};
+    size_t expected[4] = {0};
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             ++expected[i];
@@ -320,14 +319,14 @@ TEST_P(TestMetricsParamByRef, mutationSpectrum) {
                     continue;
 
                 if (expected[k] == 1) {
-                    EXPECT_EQ(0, spectrum(ref, bases[k]))
+                    EXPECT_EQ(0u, spectrum(ref, bases[k]))
                         << "At i,j,k = " << i << ", " << j << ", " << k
                         << "\n" << spectrum;
-                    EXPECT_EQ(1, singletonSpectrum(ref, bases[k]))
+                    EXPECT_EQ(1u, singletonSpectrum(ref, bases[k]))
                         << "At i,j,k = " << i << ", " << j << ", " << k
                         << "\n" << singletonSpectrum;
                 } else {
-                    EXPECT_EQ(0, singletonSpectrum(ref, bases[k]))
+                    EXPECT_EQ(0u, singletonSpectrum(ref, bases[k]))
                         << "At i,j,k = " << i << ", " << j << ", " << k
                         << "\n" << singletonSpectrum;
                     EXPECT_EQ(expected[k], spectrum(ref, bases[k]))
@@ -350,7 +349,7 @@ TEST_F(TestMetrics, mutationSpectrum_indel) {
     auto const& spectrum = _metrics[1]->mutationSpectrum();
     for(int i = 0; i < 4; ++i) {
         for(int j =0; j < 4; ++j) {
-            EXPECT_EQ(0, spectrum("ACGT"[i],"ACGT"[j]));
+            EXPECT_EQ(0u, spectrum("ACGT"[i],"ACGT"[j]));
         }
     }
 }
@@ -369,8 +368,8 @@ TEST_F(TestMetrics, identifyNovelAlleles) {
     auto const& novel2 = em2.novelStatusByAlt();
 
     // did we get all 4 cases?
-    ASSERT_EQ(3, novel1.size());
-    ASSERT_EQ(1, novel2.size());
+    ASSERT_EQ(3u, novel1.size());
+    ASSERT_EQ(1u, novel2.size());
 
     //                  membership: dbsnp 1kg
     ASSERT_TRUE(novel1[0]);  //     0 0

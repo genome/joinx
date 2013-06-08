@@ -49,7 +49,7 @@ TEST(CigarString, fromString) {
         { 5, INS },
         { 99, MATCH },
     };
-    ASSERT_EQ(3, cs.ops().size());
+    ASSERT_EQ(3u, cs.ops().size());
     for (int i = 0; i < 3; ++i)
         ASSERT_EQ(expected[i], cs.ops()[i]) << "failed at i=" << i;
     ASSERT_EQ(str, string(cs));

@@ -78,7 +78,7 @@ TEST_F(TestVcfCompare, altIntersectSnv1) {
     Entry e2(&_header, v2);
     Compare::AltIntersect xsec;
     auto result = xsec(e1, e2);
-    ASSERT_EQ(1, result.size());
+    ASSERT_EQ(1u, result.size());
     ASSERT_TRUE(mapHasPair(result, 1, 0));
 }
 
@@ -89,7 +89,7 @@ TEST_F(TestVcfCompare, altIntersectSnv2) {
     Entry e2(&_header, v2);
     Compare::AltIntersect xsec;
     auto result = xsec(e1, e2);
-    ASSERT_EQ(2, result.size());
+    ASSERT_EQ(2u, result.size());
     ASSERT_TRUE(mapHasPair(result, 0, 1));
     ASSERT_TRUE(mapHasPair(result, 1, 0));
 }
@@ -101,7 +101,7 @@ TEST_F(TestVcfCompare, altIntersectIndel1) {
     Entry e2(&_header, v2);
     Compare::AltIntersect xsec;
     auto result = xsec(e1, e2);
-    ASSERT_EQ(1, result.size());
+    ASSERT_EQ(1u, result.size());
     ASSERT_TRUE(mapHasPair(result, 1, 0));
 }
 
@@ -110,6 +110,6 @@ TEST_F(TestVcfCompare, equivalentRepresentation) {
     Entry e2 = makeEntry("1", 13, "C", "CG");
     Compare::AltIntersect xsec;
     auto result = xsec(e1, e2);
-    ASSERT_EQ(1, result.size());
+    ASSERT_EQ(1u, result.size());
     ASSERT_TRUE(mapHasPair(result, 1, 0));
 }

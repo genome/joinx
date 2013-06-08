@@ -18,18 +18,18 @@ namespace {
 }
 
 TEST(TestSnvConcordance, overlap) {
-    ASSERT_EQ(0, SnvConcordance::overlap("A", "C"));
-    ASSERT_EQ(0, SnvConcordance::overlap("A", "G"));
-    ASSERT_EQ(0, SnvConcordance::overlap("A", "T"));
-    ASSERT_EQ(0, SnvConcordance::overlap("T", "A"));
-    ASSERT_EQ(1, SnvConcordance::overlap("A", "A"));
-    ASSERT_EQ(1, SnvConcordance::overlap("A", "AC"));
-    ASSERT_EQ(1, SnvConcordance::overlap("A", "ACGT"));
-    ASSERT_EQ(2, SnvConcordance::overlap("AG", "ACG"));
-    ASSERT_EQ(2, SnvConcordance::overlap("AT", "ACGT"));
-    ASSERT_EQ(2, SnvConcordance::overlap("AC", "ACGT"));
-    ASSERT_EQ(3, SnvConcordance::overlap("ACG", "ACGT"));
-    ASSERT_EQ(4, SnvConcordance::overlap("ACGT", "ACGT"));
+    ASSERT_EQ(0u, SnvConcordance::overlap("A", "C"));
+    ASSERT_EQ(0u, SnvConcordance::overlap("A", "G"));
+    ASSERT_EQ(0u, SnvConcordance::overlap("A", "T"));
+    ASSERT_EQ(0u, SnvConcordance::overlap("T", "A"));
+    ASSERT_EQ(1u, SnvConcordance::overlap("A", "A"));
+    ASSERT_EQ(1u, SnvConcordance::overlap("A", "AC"));
+    ASSERT_EQ(1u, SnvConcordance::overlap("A", "ACGT"));
+    ASSERT_EQ(2u, SnvConcordance::overlap("AG", "ACG"));
+    ASSERT_EQ(2u, SnvConcordance::overlap("AT", "ACGT"));
+    ASSERT_EQ(2u, SnvConcordance::overlap("AC", "ACGT"));
+    ASSERT_EQ(3u, SnvConcordance::overlap("ACG", "ACGT"));
+    ASSERT_EQ(4u, SnvConcordance::overlap("ACGT", "ACGT"));
 }
 
 TEST(TestSnvConcordance, describeSnv) {
@@ -38,37 +38,37 @@ TEST(TestSnvConcordance, describeSnv) {
     d = SnvConcordance::describeSnv("A", "N");
     ASSERT_EQ(AMBIGUOUS, d.type);
     ASSERT_EQ(HOMOZYGOUS, d.zygosity.type);
-    ASSERT_EQ(1, d.zygosity.alleleCount);
+    ASSERT_EQ(1u, d.zygosity.alleleCount);
     d = SnvConcordance::describeSnv("N", "N");
     ASSERT_EQ(AMBIGUOUS, d.type);
     ASSERT_EQ(HOMOZYGOUS, d.zygosity.type);
-    ASSERT_EQ(1, d.zygosity.alleleCount);
+    ASSERT_EQ(1u, d.zygosity.alleleCount);
     d = SnvConcordance::describeSnv("C", "C");
     ASSERT_EQ(REFERENCE, d.type);
     ASSERT_EQ(HOMOZYGOUS, d.zygosity.type);
-    ASSERT_EQ(1, d.zygosity.alleleCount);
+    ASSERT_EQ(1u, d.zygosity.alleleCount);
     d = SnvConcordance::describeSnv("C", "G");
     ASSERT_EQ(SNV, d.type);
     ASSERT_EQ(HOMOZYGOUS, d.zygosity.type);
-    ASSERT_EQ(1, d.zygosity.alleleCount);
+    ASSERT_EQ(1u, d.zygosity.alleleCount);
 
     d = SnvConcordance::describeSnv("C", "CG");
     ASSERT_EQ(SNV, d.type);
     ASSERT_EQ(HETEROZYGOUS, d.zygosity.type);
-    ASSERT_EQ(2, d.zygosity.alleleCount);
-    ASSERT_EQ(1, d.overlap);
+    ASSERT_EQ(2u, d.zygosity.alleleCount);
+    ASSERT_EQ(1u, d.overlap);
 
     d = SnvConcordance::describeSnv("C", "CGT");
     ASSERT_EQ(SNV, d.type);
     ASSERT_EQ(HETEROZYGOUS, d.zygosity.type);
-    ASSERT_EQ(3, d.zygosity.alleleCount);
-    ASSERT_EQ(1, d.overlap);
+    ASSERT_EQ(3u, d.zygosity.alleleCount);
+    ASSERT_EQ(1u, d.overlap);
 
     d = SnvConcordance::describeSnv("CG", "CGT");
     ASSERT_EQ(SNV, d.type);
     ASSERT_EQ(HETEROZYGOUS, d.zygosity.type);
-    ASSERT_EQ(3, d.zygosity.alleleCount);
-    ASSERT_EQ(2, d.overlap);
+    ASSERT_EQ(3u, d.zygosity.alleleCount);
+    ASSERT_EQ(2u, d.overlap);
 }
 
 TEST(TestSnvConcordance, snvDescription) {

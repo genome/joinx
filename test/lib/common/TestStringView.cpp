@@ -27,7 +27,7 @@ TEST(TestStringView, construct) {
 
     s1.clear();
     ASSERT_TRUE(s1.empty());
-    ASSERT_EQ(0, s1.size());
+    ASSERT_EQ(0u, s1.size());
     ASSERT_EQ("", s1);
 }
 

@@ -17,7 +17,7 @@ TEST(VcfCustomValue, scalarInt) {
 
     // set the first element
     value.set<int64_t>(0, 42);
-    ASSERT_EQ(1, value.size());
+    ASSERT_EQ(1u, value.size());
     ASSERT_FALSE(value.empty());
 
     const int64_t* result = 0;
@@ -62,7 +62,7 @@ TEST(VcfCustomValue, variableSizedListFloat) {
 
     // make sure set at an arbitrary index works, and updates size (var length)
     ASSERT_NO_THROW(value.set<double>(999, 0.789));
-    ASSERT_EQ(1000, value.size());
+    ASSERT_EQ(1000u, value.size());
     ASSERT_TRUE((result = value.get<double>(999)));
     ASSERT_EQ(0.789, *result);
 
