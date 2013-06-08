@@ -106,7 +106,7 @@ void SampleData::parse(std::string const& raw) {
             for (uint32_t i = 0; i < data.size(); ++i) {
                 (*values)[i] = CustomValue(_format[i], data[i]);
             }
-            auto inserted = _values.insert(make_pair(sampleIdx, values.release()));
+            _values.insert(make_pair(sampleIdx, values.release()));
         }
         ++sampleIdx;
     }

@@ -107,23 +107,23 @@ TEST_F(TestVcfEntry, parse) {
         ASSERT_EQ(line, i->toString());
     }
 
-    ASSERT_EQ(7, v.size());
+    ASSERT_EQ(7u, v.size());
     ASSERT_EQ("20", v[0].chrom());
-    ASSERT_EQ(14370, v[0].pos());
+    ASSERT_EQ(14370u, v[0].pos());
     ASSERT_EQ(14369, v[0].start());
     ASSERT_EQ(14370, v[0].stop());
     ASSERT_EQ("G", v[0].ref());
-    ASSERT_EQ(1, v[0].alt().size());
+    ASSERT_EQ(1u, v[0].alt().size());
     ASSERT_EQ("A", v[0].alt()[0]);
     ASSERT_EQ(29.0, v[0].qual());
     ASSERT_TRUE(v[0].failedFilters().empty());
-    ASSERT_EQ(5, v[0].info().size());
+    ASSERT_EQ(5u, v[0].info().size());
     Entry::CustomValueMap info = v[0].info();
     ASSERT_EQ("3", info["NS"].getString(0));
     ASSERT_EQ("14", info["DP"].getString(0));
     ASSERT_EQ("0.5", info["AF"].getString(0));
 
-    ASSERT_EQ(2, v[2].alt().size());
+    ASSERT_EQ(2u, v[2].alt().size());
     ASSERT_EQ("G", v[2].alt()[0]);
     ASSERT_EQ("T", v[2].alt()[1]);
 }
@@ -189,15 +189,15 @@ TEST_F(TestVcfEntry, samplesWithData) {
     Entry e(&_header,
         "22\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\t.\tGT\t.\t.\t0|1\n"
         );
-    ASSERT_EQ(1, e.sampleData().size());
-    ASSERT_EQ(1, e.sampleData().samplesWithData());
+    ASSERT_EQ(1u, e.sampleData().size());
+    ASSERT_EQ(1u, e.sampleData().samplesWithData());
 
-    ASSERT_EQ(3, v[0].sampleData().samplesWithData());
-    ASSERT_EQ(2, v[1].sampleData().samplesWithData());
-    ASSERT_EQ(3, v[2].sampleData().samplesWithData());
-    ASSERT_EQ(3, v[3].sampleData().samplesWithData());
-    ASSERT_EQ(3, v[4].sampleData().samplesWithData());
-    ASSERT_EQ(0, v[5].sampleData().samplesWithData());
+    ASSERT_EQ(3u, v[0].sampleData().samplesWithData());
+    ASSERT_EQ(2u, v[1].sampleData().samplesWithData());
+    ASSERT_EQ(3u, v[2].sampleData().samplesWithData());
+    ASSERT_EQ(3u, v[3].sampleData().samplesWithData());
+    ASSERT_EQ(3u, v[4].sampleData().samplesWithData());
+    ASSERT_EQ(0u, v[5].sampleData().samplesWithData());
 }
 
 TEST_F(TestVcfEntry, samplesEvaluatedByFilter) {
@@ -215,11 +215,11 @@ TEST_F(TestVcfEntry, samplesFailedFilter) {
 }
 
 TEST_F(TestVcfEntry, removeLowDepthGenotypes) {
-    ASSERT_EQ(3, v[4].sampleData().samplesWithData());
+    ASSERT_EQ(3u, v[4].sampleData().samplesWithData());
     v[4].sampleData().removeLowDepthGenotypes(2);
-    ASSERT_EQ(3, v[4].sampleData().samplesWithData());
+    ASSERT_EQ(3u, v[4].sampleData().samplesWithData());
     v[4].sampleData().removeLowDepthGenotypes(4);
-    ASSERT_EQ(1, v[4].sampleData().samplesWithData());
+    ASSERT_EQ(1u, v[4].sampleData().samplesWithData());
 }
 
 TEST_F(TestVcfEntry, reheader) {
@@ -228,18 +228,18 @@ TEST_F(TestVcfEntry, reheader) {
     Entry const& e = v[0];
     merged.merge(_header, true); // true to allow sample name overlaps
     SampleData origGT = e.sampleData();
-    ASSERT_EQ(3, origGT.size());
+    ASSERT_EQ(3u, origGT.size());
     ASSERT_EQ(&_header, &e.header());
     v[0].reheader(&merged);
     ASSERT_EQ(&merged, &e.header());
-    ASSERT_EQ(3, e.sampleData().size());
-    ASSERT_EQ(4, e.header().sampleCount());
-    
+    ASSERT_EQ(3u, e.sampleData().size());
+    ASSERT_EQ(4u, e.header().sampleCount());
+
     SampleData newGT = e.sampleData();
-    ASSERT_EQ(0, newGT.count(0));
-    ASSERT_EQ(1, newGT.count(1));
-    ASSERT_EQ(1, newGT.count(2));
-    ASSERT_EQ(1, newGT.count(3));
+    ASSERT_EQ(0u, newGT.count(0));
+    ASSERT_EQ(1u, newGT.count(1));
+    ASSERT_EQ(1u, newGT.count(2));
+    ASSERT_EQ(1u, newGT.count(3));
     ASSERT_TRUE(*origGT.get(2) == *newGT.get(1));
     ASSERT_TRUE(*origGT.get(1) == *newGT.get(2));
     ASSERT_TRUE(*origGT.get(0) == *newGT.get(3));
@@ -249,29 +249,29 @@ TEST_F(TestVcfEntry, genotypeForSample) {
     GenotypeCall gt;
 
     gt = v[0].sampleData().genotype(0);
-    ASSERT_EQ(2, gt.size());
-    ASSERT_EQ(0, gt[0]);
-    ASSERT_EQ(0, gt[1]);
+    ASSERT_EQ(2u, gt.size());
+    ASSERT_EQ(0u, gt[0]);
+    ASSERT_EQ(0u, gt[1]);
 
     gt = v[0].sampleData().genotype(1);
-    ASSERT_EQ(2, gt.size());
-    ASSERT_EQ(1, gt[0]);
-    ASSERT_EQ(0, gt[1]);
+    ASSERT_EQ(2u, gt.size());
+    ASSERT_EQ(1u, gt[0]);
+    ASSERT_EQ(0u, gt[1]);
 
     gt = v[0].sampleData().genotype(2);
-    ASSERT_EQ(2, gt.size());
-    ASSERT_EQ(1, gt[0]);
-    ASSERT_EQ(1, gt[1]);
+    ASSERT_EQ(2u, gt.size());
+    ASSERT_EQ(1u, gt[0]);
+    ASSERT_EQ(1u, gt[1]);
 
     gt = v[1].sampleData().genotype(0);
-    ASSERT_EQ(2, gt.size());
-    ASSERT_EQ(0, gt[0]);
-    ASSERT_EQ(0, gt[1]);
+    ASSERT_EQ(2u, gt.size());
+    ASSERT_EQ(0u, gt[0]);
+    ASSERT_EQ(0u, gt[1]);
 
     gt = v[1].sampleData().genotype(1);
-    ASSERT_EQ(2, gt.size());
-    ASSERT_EQ(0, gt[0]);
-    ASSERT_EQ(1, gt[1]);
+    ASSERT_EQ(2u, gt.size());
+    ASSERT_EQ(0u, gt[0]);
+    ASSERT_EQ(1u, gt[1]);
 
     gt = v[1].sampleData().genotype(2);
     ASSERT_TRUE(gt.empty());
@@ -299,7 +299,7 @@ TEST_F(TestVcfEntry, move) {
     char const* addrRef = e.ref().data();
     string const* addrAlt = e.alt().data();
     string const* addrFilter = &*e.failedFilters().begin();
-    Entry::CustomValueMap::value_type const* addrInfo = &*e.info().begin(); 
+    Entry::CustomValueMap::value_type const* addrInfo = &*e.info().begin();
 
     // nested sample data addresses
     SampleData const& sd = e.sampleData();
@@ -343,7 +343,7 @@ TEST_F(TestVcfEntry, moreSamplesThanHeader) {
     // we're allowing trailing tabs
     e = Entry(&_header, "20\t14370\tid1\tT\tC\t29\tPASS\t.\tGT\t0/1\t0/1\t0/1\t");
     ASSERT_NO_THROW(e.sampleData());
-    ASSERT_EQ(3, e.sampleData().samplesWithData());
+    ASSERT_EQ(3u, e.sampleData().samplesWithData());
 }
 
 TEST_F(TestVcfEntry, copy) {

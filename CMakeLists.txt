@@ -34,11 +34,6 @@ if (CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "-Wall -ansi -pedantic -std=c++0x -fPIC -Wnon-virtual-dtor")
 endif ()
 
-# on linux mint 12, libgtest requires pthreads, so link thread libraries
-# everywhere
-find_package(Threads)
-link_libraries(${CMAKE_THREAD_LIBS_INIT})
-
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
 
@@ -55,16 +50,8 @@ message("Boost libraries: ${Boost_LIBRARIES}")
 include_directories("src/lib")
 
 # unit tests
-find_package(GTest)
-if(GTEST_FOUND)
-    message("Google Test framework found, building unit tests")
-    enable_testing(true)
-    add_projects(test/lib)
-else()
-    message("Google Test framework not found, no tests will be built")
-    message("GTest is available at http://code.google.com/p/googletest/")
-    message("Ubuntu users can likely sudo apt-get install libgtest-dev")
-endif()
+enable_testing(true)
+add_projects(test/lib)
 
 # main project
 
@@ -81,4 +68,3 @@ add_subdirectory(integration-test)
 add_subdirectory(doc)
 
 include(PackageInfo.cmake)
-

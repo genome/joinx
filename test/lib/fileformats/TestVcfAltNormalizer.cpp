@@ -54,9 +54,9 @@ TEST_F(TestVcfAltNormalizer, equivalentAlts) {
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(3, e.pos());
+    ASSERT_EQ(3u, e.pos());
     ASSERT_EQ("TCG", e.ref());
-    ASSERT_EQ(1, e.alt().size());
+    ASSERT_EQ(1u, e.alt().size());
     ASSERT_EQ("T", e.alt()[0]);
     ASSERT_EQ("0/0", e.sampleData().genotype(0).string());
     ASSERT_EQ("0/1", e.sampleData().genotype(1).string());
@@ -73,9 +73,9 @@ TEST_F(TestVcfAltNormalizer, insertion) {
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(3, e.pos());
+    ASSERT_EQ(3u, e.pos());
     ASSERT_EQ("T", e.ref());
-    ASSERT_EQ(1, e.alt().size());
+    ASSERT_EQ(1u, e.alt().size());
     ASSERT_EQ("TCG", e.alt()[0]);
 }
 
@@ -88,9 +88,9 @@ TEST_F(TestVcfAltNormalizer, insertionWithTrailingRepeatMatch) {
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(10, e.pos());
+    ASSERT_EQ(10u, e.pos());
     ASSERT_EQ("C", e.ref());
-    ASSERT_EQ(1, e.alt().size());
+    ASSERT_EQ(1u, e.alt().size());
     ASSERT_EQ("CGA", e.alt()[0]);
 }
 
@@ -103,9 +103,9 @@ TEST_F(TestVcfAltNormalizer, immovableInsertion) {
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(12, e.pos());
+    ASSERT_EQ(12u, e.pos());
     ASSERT_EQ("CG", e.ref());
-    ASSERT_EQ(1, e.alt().size());
+    ASSERT_EQ(1u, e.alt().size());
     ASSERT_EQ("AATT", e.alt()[0]);
 }
 
@@ -118,9 +118,9 @@ TEST_F(TestVcfAltNormalizer, deletion) {
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(3, e.pos());
+    ASSERT_EQ(3u, e.pos());
     ASSERT_EQ("TCG", e.ref());
-    ASSERT_EQ(1, e.alt().size());
+    ASSERT_EQ(1u, e.alt().size());
     ASSERT_EQ("T", e.alt()[0]);
 }
 
@@ -133,9 +133,9 @@ TEST_F(TestVcfAltNormalizer, deletionWithSubstitution) {
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(10, e.pos());
+    ASSERT_EQ(10u, e.pos());
     ASSERT_EQ("CGC", e.ref());
-    ASSERT_EQ(1, e.alt().size());
+    ASSERT_EQ(1u, e.alt().size());
     ASSERT_EQ("A", e.alt()[0]);
 }
 
@@ -148,9 +148,9 @@ TEST_F(TestVcfAltNormalizer, immovableDeletion) {
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(10, e.pos());
+    ASSERT_EQ(10u, e.pos());
     ASSERT_EQ("CGCG", e.ref());
-    ASSERT_EQ(1, e.alt().size());
+    ASSERT_EQ(1u, e.alt().size());
     ASSERT_EQ("AT", e.alt()[0]);
 }
 
@@ -163,9 +163,9 @@ TEST_F(TestVcfAltNormalizer, testSubstitution) {
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(9, e.pos());
+    ASSERT_EQ(9u, e.pos());
     ASSERT_EQ("G", e.ref());
-    ASSERT_EQ(1, e.alt().size());
+    ASSERT_EQ(1u, e.alt().size());
     ASSERT_EQ("C", e.alt()[0]);
 }
 
@@ -178,9 +178,9 @@ TEST_F(TestVcfAltNormalizer, testSubstitutionWithPadding) {
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(13, e.pos());
+    ASSERT_EQ(13u, e.pos());
     ASSERT_EQ("G", e.ref());
-    ASSERT_EQ(1, e.alt().size());
+    ASSERT_EQ(1u, e.alt().size());
     ASSERT_EQ("A", e.alt()[0]);
 }
 
@@ -203,7 +203,7 @@ TEST_F(TestVcfAltNormalizer, messyInsertionAndDeletion) {
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
-    ASSERT_EQ(13, e.pos());
+    ASSERT_EQ(13u, e.pos());
     ASSERT_EQ("TCCTCGCTC", e.ref());
     ASSERT_EQ("TCCTCGCT", e.alt()[0]);
     ASSERT_EQ("TCCTCGCTCCCTCGCTC", e.alt()[1]);
@@ -217,7 +217,7 @@ TEST_F(TestVcfAltNormalizer, indelAtPos1) {
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
-    ASSERT_EQ(1, e.pos());
+    ASSERT_EQ(1u, e.pos());
     ASSERT_EQ("AGA", e.ref());
     ASSERT_EQ("A", e.alt()[0]);
 

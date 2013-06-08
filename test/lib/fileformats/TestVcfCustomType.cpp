@@ -14,7 +14,7 @@ TEST(VcfCustomValue, fromString) {
     CustomType t1(s);
     ASSERT_EQ("NS", t1.id());
     ASSERT_EQ(CustomType::FIXED_SIZE, t1.numberType());
-    ASSERT_EQ(1, t1.number());
+    ASSERT_EQ(1u, t1.number());
     ASSERT_EQ("desc1=cool", t1.description());
     ASSERT_EQ(s, t1.toString());
 }
@@ -24,7 +24,7 @@ TEST(VcfCustomValue, negativeNumber) {
     CustomType t1(s);
     ASSERT_EQ("NS", t1.id());
     ASSERT_EQ(CustomType::VARIABLE_SIZE, t1.numberType());
-    ASSERT_EQ(0, t1.number());
+    ASSERT_EQ(0u, t1.number());
     ASSERT_EQ("desc1=cool", t1.description());
     ASSERT_EQ("ID=NS,Number=.,Type=Integer,Description=\"desc1=cool\"", t1.toString());
 }
