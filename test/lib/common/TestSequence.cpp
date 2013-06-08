@@ -35,21 +35,21 @@ TEST(Sequence, null) {
 TEST(Sequence, commonPrefixReverseIterators) {
     string a("GCC");
     string b("GA");
-    ASSERT_EQ(0, Sequence::commonPrefix(
+    ASSERT_EQ(0u, Sequence::commonPrefix(
         a.rbegin(), a.rend(),
         b.rbegin(), b.rend()
     ));
 
     a="GCC";
     b="GAC";
-    ASSERT_EQ(1, Sequence::commonPrefix(
+    ASSERT_EQ(1u, Sequence::commonPrefix(
         a.rbegin(), a.rend(),
         b.rbegin(), b.rend()
     ));
 
     a="GCC";
     b="GCC";
-    ASSERT_EQ(3, Sequence::commonPrefix(
+    ASSERT_EQ(3u, Sequence::commonPrefix(
         a.rbegin(), a.rend(),
         b.rbegin(), b.rend()
     ));

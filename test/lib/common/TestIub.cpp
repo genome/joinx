@@ -27,17 +27,17 @@ using namespace std;
 // N    AGCT       aNy
 
 TEST(Iub, alleles2bin) {
-    ASSERT_EQ(1, alleles2bin("A"));
-    ASSERT_EQ(2, alleles2bin("C"));
-    ASSERT_EQ(4, alleles2bin("G"));
-    ASSERT_EQ(8, alleles2bin("T"));
+    ASSERT_EQ(1u, alleles2bin("A"));
+    ASSERT_EQ(2u, alleles2bin("C"));
+    ASSERT_EQ(4u, alleles2bin("G"));
+    ASSERT_EQ(8u, alleles2bin("T"));
 
-    ASSERT_EQ(3, alleles2bin("AC"));
-    ASSERT_EQ(5, alleles2bin("AG"));
-    ASSERT_EQ(9, alleles2bin("AT"));
+    ASSERT_EQ(3u, alleles2bin("AC"));
+    ASSERT_EQ(5u, alleles2bin("AG"));
+    ASSERT_EQ(9u, alleles2bin("AT"));
 
-    ASSERT_EQ(6, alleles2bin("CG"));
-    ASSERT_EQ(10, alleles2bin("CT"));
+    ASSERT_EQ(6u, alleles2bin("CG"));
+    ASSERT_EQ(10u, alleles2bin("CT"));
 }
 
 TEST(Iub, alleles2iub) {

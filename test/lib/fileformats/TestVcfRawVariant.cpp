@@ -64,11 +64,11 @@ TEST_F(TestVcfRawVariant, singlealt) {
         RawVariant(14, "", "G"),
         RawVariant(11, "", "G")
     };
-    int nExpected = sizeof(expected) / sizeof(expected[0]);
+    size_t nExpected = sizeof(expected) / sizeof(expected[0]);
 
     vector<RawVariant> raw = RawVariant::processEntry(e);
     ASSERT_EQ(nExpected, raw.size());
-    for (int i = 0; i < nExpected; ++i) {
+    for (size_t i = 0; i < nExpected; ++i) {
         ASSERT_EQ(expected[i].pos, raw[i].pos) << " at index " << i << " in\n" << e;
         ASSERT_EQ(expected[i].ref, raw[i].ref) << " at index " << i << " in\n" << e;
         ASSERT_EQ(expected[i].alt, raw[i].alt) << " at index " << i << " in\n" << e;
@@ -86,11 +86,11 @@ TEST_F(TestVcfRawVariant, doublealt) {
         RawVariant(11, "TA", ""),
         RawVariant(11, "T", "")
     };
-    int nExpected = sizeof(expected) / sizeof(expected[0]);
+    size_t nExpected = sizeof(expected) / sizeof(expected[0]);
 
     vector<RawVariant> raw = RawVariant::processEntry(e);
     ASSERT_EQ(nExpected, raw.size());
-    for (int i = 0; i < nExpected; ++i) {
+    for (size_t i = 0; i < nExpected; ++i) {
         ASSERT_EQ(expected[i].pos, raw[i].pos) << " at index " << i << " in\n" << e;
         ASSERT_EQ(expected[i].ref, raw[i].ref) << " at index " << i << " in\n" << e;
         ASSERT_EQ(expected[i].alt, raw[i].alt) << " at index " << i << " in\n" << e;

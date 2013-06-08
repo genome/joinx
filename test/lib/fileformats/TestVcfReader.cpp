@@ -57,10 +57,10 @@ TEST(VcfReader, read) {
 
     const Vcf::Header& h = r.header();
 
-    ASSERT_EQ(19, r.lineNum()); //This prolly shouldn't be here as it is a test for TypedStream not VcfReader
-    ASSERT_EQ(6, h.infoTypes().size());
-    ASSERT_EQ(2, h.filters().size());
-    ASSERT_EQ(4, h.formatTypes().size());
+    ASSERT_EQ(19u, r.lineNum()); //This prolly shouldn't be here as it is a test for TypedStream not VcfReader
+    ASSERT_EQ(6u, h.infoTypes().size());
+    ASSERT_EQ(2u, h.filters().size());
+    ASSERT_EQ(4u, h.formatTypes().size());
 
     uint64_t lineCount = 19;
     vector<Entry> v;
@@ -70,10 +70,10 @@ TEST(VcfReader, read) {
         ASSERT_EQ(++lineCount,r.lineNum());   //should be at line 1 of the VCF lines (it skips the header)
     }
 
-    ASSERT_EQ(5, v.size());
-    ASSERT_EQ(14370, v[0].pos());
-    ASSERT_EQ(17330, v[1].pos());
-    ASSERT_EQ(1110696, v[2].pos());
-    ASSERT_EQ(1230237, v[3].pos());
-    ASSERT_EQ(1234567, v[4].pos());
+    ASSERT_EQ(5u, v.size());
+    ASSERT_EQ(14370u, v[0].pos());
+    ASSERT_EQ(17330u, v[1].pos());
+    ASSERT_EQ(1110696u, v[2].pos());
+    ASSERT_EQ(1230237u, v[3].pos());
+    ASSERT_EQ(1234567u, v[4].pos());
 }

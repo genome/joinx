@@ -109,10 +109,10 @@ namespace {
 TEST(VcfHeader, parse) {
     Header h = parse(headerText);
 
-    ASSERT_EQ(6, h.infoTypes().size());
-    ASSERT_EQ(4, h.formatTypes().size());
+    ASSERT_EQ(6u, h.infoTypes().size());
+    ASSERT_EQ(4u, h.formatTypes().size());
 
-    ASSERT_EQ(3, h.sampleNames().size());
+    ASSERT_EQ(3u, h.sampleNames().size());
     ASSERT_EQ("NA00001", h.sampleNames()[0]);
     ASSERT_EQ("NA00002", h.sampleNames()[1]);
     ASSERT_EQ("NA00003", h.sampleNames()[2]);
@@ -128,7 +128,7 @@ TEST(VcfHeader, merge) {
     ASSERT_THROW(h1.merge(h1copy, false), runtime_error);
     ASSERT_THROW(h1.merge(conflict, false), runtime_error);
     ASSERT_NO_THROW(h1.merge(different));
-    ASSERT_EQ(6, h1.sampleNames().size());
+    ASSERT_EQ(6u, h1.sampleNames().size());
     ASSERT_EQ("NA00001", h1.sampleNames()[0]);
     ASSERT_EQ("NA00002", h1.sampleNames()[1]);
     ASSERT_EQ("NA00003", h1.sampleNames()[2]);
@@ -139,7 +139,7 @@ TEST(VcfHeader, merge) {
     // doesn't throw if we allow duplicate sample names
     ASSERT_NO_THROW(h1.merge(h1copy, true));
     // make sure we didn't get duplicate names
-    ASSERT_EQ(6, h1.sampleNames().size());
+    ASSERT_EQ(6u, h1.sampleNames().size());
     ASSERT_EQ("NA00001", h1.sampleNames()[0]);
     ASSERT_EQ("NA00002", h1.sampleNames()[1]);
     ASSERT_EQ("NA00003", h1.sampleNames()[2]);
@@ -156,7 +156,7 @@ TEST(VcfHeader, merge) {
             date = i->second;
         }
     }
-    ASSERT_EQ(1, dateCount);
+    ASSERT_EQ(1u, dateCount);
     char dateStr[32] = {0};
     time_t now = time(NULL);
     strftime(dateStr, sizeof(dateStr), "%Y%m%d", localtime(&now));
@@ -168,9 +168,9 @@ TEST(VcfHeader, merge) {
 
 TEST(VcfHeader, sampleIndex) {
     Header h = parse(headerText);
-    ASSERT_EQ(0, h.sampleIndex("NA00001"));
-    ASSERT_EQ(1, h.sampleIndex("NA00002"));
-    ASSERT_EQ(2, h.sampleIndex("NA00003"));
+    ASSERT_EQ(0u, h.sampleIndex("NA00001"));
+    ASSERT_EQ(1u, h.sampleIndex("NA00002"));
+    ASSERT_EQ(2u, h.sampleIndex("NA00003"));
     ASSERT_THROW(h.sampleIndex("NA00004"), runtime_error);
     ASSERT_THROW(h.sampleIndex("hi"), runtime_error);
 }
@@ -211,10 +211,10 @@ TEST(VcfHeader, addInfoType) {
     ASSERT_TRUE(fetch);
     ASSERT_EQ("SUPERTYPE", fetch->id());
     ASSERT_EQ(CustomType::FIXED_SIZE, fetch->numberType());
-    ASSERT_EQ(1, fetch->number());
+    ASSERT_EQ(1u, fetch->number());
     ASSERT_EQ(CustomType::STRING, fetch->type());
     ASSERT_EQ("A type", fetch->description());
-    
+
     stringstream ss;
     ss << h;
     string expected = "##INFO=<ID=SUPERTYPE,Number=1,Type=String,Description=\"A type\">";

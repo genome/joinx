@@ -99,7 +99,7 @@ TEST(TestTokenizer, advance) {
     ASSERT_TRUE(t.extract(n));
     ASSERT_EQ(2, n);
 
-    ASSERT_EQ(2, t.advance(2));
+    ASSERT_EQ(2u, t.advance(2));
     ASSERT_TRUE(t.extract(s));
     ASSERT_EQ("five", s);
     ASSERT_TRUE(t.eof());
