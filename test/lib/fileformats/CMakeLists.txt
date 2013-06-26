@@ -3,27 +3,30 @@ cmake_minimum_required(VERSION 2.8)
 set(TEST_LIBS fileformats ${Boost_LIBRARIES})
 include_directories(${GTEST_INCLUDE_DIRS})
 
-def_test(Bed)
-def_test(Fasta)
-def_test(InferFileType)
-def_test(InputStream)
-def_test(StreamFactory)
-def_test(Variant)
-def_test(VcfAlleleMerger)
-def_test(VcfAltNormalizer)
-def_test(VcfCompare)
-def_test(VcfCustomType)
-def_test(VcfCustomValue)
-def_test(VcfEntry)
-def_test(VcfEntryMerger)
-def_test(VcfGenotypeCall)
-def_test(VcfGenotypeMerger)
-def_test(VcfHeader)
-def_test(VcfMap)
-def_test(VcfMatcher)
-def_test(VcfMergeStrategy)
-def_test(VcfRawVariant)
-def_test(VcfReader)
-def_test(VcfSampleTag)
-def_test(VcfValueMergers)
-def_test(WiggleReader)
+set(TEST_SOURCES
+    TestBed.cpp
+    TestFasta.cpp
+    TestInferFileType.cpp
+    TestInputStream.cpp
+    TestStreamFactory.cpp
+    TestVariant.cpp
+    TestVcfAlleleMerger.cpp
+    TestVcfAltNormalizer.cpp
+    TestVcfCompare.cpp
+    TestVcfCustomType.cpp
+    TestVcfCustomValue.cpp
+    TestVcfEntry.cpp
+    TestVcfEntryMerger.cpp
+    TestVcfGenotypeCall.cpp
+    TestVcfGenotypeMerger.cpp
+    TestVcfHeader.cpp
+    TestVcfMap.cpp
+    TestVcfMatcher.cpp
+    TestVcfMergeStrategy.cpp
+    TestVcfRawVariant.cpp
+    TestVcfReader.cpp
+    TestVcfSampleTag.cpp
+    TestVcfValueMergers.cpp
+    TestWiggleReader.cpp
+)
+add_unit_tests(TestFileFormats ${TEST_SOURCES})
