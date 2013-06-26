@@ -62,7 +62,7 @@ protected:
     std::set<std::string> _identifiers;
     std::set<std::string> _filters;
     std::set<std::string> _sampleNames;
-    std::set<std::string> _info;
+    std::set<std::string> _infoFieldNames;
     mutable std::vector<size_t> _sampleCounts;
 };
 

@@ -77,7 +77,7 @@ bool MergeStrategy::canMerge(Entry const& a, Entry const& b) const {
         return a.pos() == b.pos();
 
     // to handle identical and adjacent insertions
-    if (a.start() == a.stop() && b.start() == b.stop() 
+    if (a.start() == a.stop() && b.start() == b.stop()
         && (b.start() - a.start() <= 1))
     {
         return true;
@@ -113,10 +113,10 @@ uint32_t MergeStrategy::primarySampleStreamIndex() const {
     return _primarySampleStreamIndex;
 }
 
-
 void MergeStrategy::setDefaultMerger(const std::string& mergerName) {
     _default = _registry->getMerger(mergerName);
 }
+
 void MergeStrategy::setMerger(const std::string& id, const std::string& mergerName) {
     if (_header->infoType(id) == NULL) {
         cerr << str(format(
