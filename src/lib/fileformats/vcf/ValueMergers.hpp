@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AlleleMerger.hpp"
 #include "common/namespaces.hpp"
 
 #include <boost/noncopyable.hpp>
@@ -15,13 +16,15 @@ class CustomValue;
 class Entry;
 
 namespace ValueMergers {
+    typedef AlleleMerger::AltIndices AltIndices;
+
     /// Base class for all "Value Mergers": callable structs that can be
     /// used to combine CustomValue objects extracted from Vcf::Entry objects.
     /// These are useful for doing things like merging INFO, FILTER, or FORMAT
     /// records in vcf files.
     struct Base {
         typedef std::shared_ptr<const Base> const_ptr;
-        typedef std::function<const CustomValue*(const Entry*)> FetchFunc;
+        typedef std::function<const CustomValue*(Entry const*)> FetchFunc;
         virtual ~Base() {};
         /// the name of the merger. this is used when specifying merge
         /// strategies from a text file or from the command line
@@ -38,10 +41,11 @@ namespace ValueMergers {
         /// \param end the end of the range of Vcf::Entry objects to merge
         /// \return the new merged CustomValue
         virtual CustomValue operator()(
-            const CustomType* type,
+            CustomType const* type,
             FetchFunc fetch,
-            const Entry* begin,
-            const Entry* end
+            Entry const* begin,
+            Entry const* end,
+            AltIndices const& newAltIndices
             ) const = 0;
     };
 
@@ -74,10 +78,11 @@ namespace ValueMergers {
     /// Value Merger which uses the value from the first entry, ignoring the rest
     struct UseFirst : public Base {
         CustomValue operator()(
-            const CustomType* type,
+            CustomType const* type,
             FetchFunc fetch,
-            const Entry* begin,
-            const Entry* end
+            Entry const* begin,
+            Entry const* end,
+            AltIndices const& newAltIndices
             ) const;
         std::string name() const { return "first"; }
     };
@@ -86,10 +91,11 @@ namespace ValueMergers {
     /// containing all of the unique values found in the input range.
     struct UniqueConcat : public Base {
         CustomValue operator()(
-            const CustomType* type,
+            CustomType const* type,
             FetchFunc fetch,
-            const Entry* begin,
-            const Entry* end
+            Entry const* begin,
+            Entry const* end,
+            AltIndices const& newAltIndices
             ) const;
         std::string name() const { return "uniq-concat"; }
     };
@@ -99,10 +105,11 @@ namespace ValueMergers {
     /// is not the case.
     struct EnforceEquality : public Base {
         CustomValue operator()(
-            const CustomType* type,
+            CustomType const* type,
             FetchFunc fetch,
-            const Entry* begin,
-            const Entry* end
+            Entry const* begin,
+            Entry const* end,
+            AltIndices const& newAltIndices
             ) const;
         std::string name() const { return "enforce-equal"; }
     };
@@ -111,10 +118,11 @@ namespace ValueMergers {
     /// non-variable length numeric data.
     struct Sum : public Base {
         CustomValue operator()(
-            const CustomType* type,
+            CustomType const* type,
             FetchFunc fetch,
-            const Entry* begin,
-            const Entry* end
+            Entry const* begin,
+            Entry const* end,
+            AltIndices const& newAltIndices
             ) const;
         std::string name() const { return "sum"; }
     };
@@ -123,10 +131,11 @@ namespace ValueMergers {
     /// output.
     struct Ignore : public Base {
         CustomValue operator()(
-            const CustomType* type,
+            CustomType const* type,
             FetchFunc fetch,
-            const Entry* begin,
-            const Entry* end
+            Entry const* begin,
+            Entry const* end,
+            AltIndices const& newAltIndices
             ) const;
         std::string name() const { return "ignore"; }
     };
@@ -136,7 +145,8 @@ namespace ValueMergers {
             CustomType const* type,
             FetchFunc fetch,
             Entry const* begin,
-            Entry const* end
+            Entry const* end,
+            AltIndices const& newAltIndices
             ) const;
         std::string name() const { return "per-alt-delimited-list"; }
     };

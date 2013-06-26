@@ -168,7 +168,9 @@ double EntryMerger::qual() const {
 void EntryMerger::setInfo(CustomValueMap& info) const {
     try {
         for (auto i = _infoFieldNames.begin(); i != _infoFieldNames.end(); ++i) {
-            CustomValue v = _mergeStrategy.mergeInfo(*i, _begin, _end);
+            CustomValue v = _mergeStrategy.mergeInfo(
+                *i, _begin, _end, _alleleMerger.newAltIndices());
+
             if (!v.empty())
                 info.insert(make_pair(*i, v));
         }
@@ -232,13 +234,13 @@ void EntryMerger::setAltAndGenotypeData(
                 if (inserted.second || inserted.first->second == 0) {
                     // create a new set of values and populate them with information from this sample
                     inserted.first->second = new SampleData::ValueVector();
-                    genotypeFormatter.process(*inserted.first->second, format, e, sampleIdx, _alleleMerger.newGt()[idx]);
+                    genotypeFormatter.process(*inserted.first->second, format, e, sampleIdx, _alleleMerger.newAltIndices()[idx]);
                     if (!e->sampleData().isSampleFiltered(sampleIdx))
                         ++_sampleCounts[mergedIdx];
 
                 } else if (_mergeStrategy.mergeSamples()) {
                     // Data for this sample already exists and we are allowing merging to take place
-                    genotypeFormatter.merge(overridePreviousData, *inserted.first->second, format, e, sampleIdx, _alleleMerger.newGt()[idx]);
+                    genotypeFormatter.merge(overridePreviousData, *inserted.first->second, format, e, sampleIdx, _alleleMerger.newAltIndices()[idx]);
                     if (!e->sampleData().isSampleFiltered(sampleIdx))
                         ++_sampleCounts[mergedIdx];
                 } else {
