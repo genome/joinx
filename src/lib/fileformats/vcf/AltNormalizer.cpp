@@ -6,7 +6,6 @@
 #include <boost/format.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/is_same.hpp>
-#include <algorithm>
 #include <iterator>
 #include <map>
 #include <set>
