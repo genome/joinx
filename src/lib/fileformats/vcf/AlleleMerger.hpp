@@ -15,7 +15,7 @@ class Entry;
 
 class AlleleMerger {
 public:
-    typedef std::vector< std::vector<size_t> > GtIndices;
+    typedef std::vector< std::vector<size_t> > AltIndices;
     typedef std::map<std::string, size_t> AlleleMap;
 
     static std::string buildRef(Entry const* beg, Entry const* end);
@@ -26,8 +26,7 @@ public:
     bool merged() const { return _merged; }
     std::string const& ref() const { return _ref; }
     std::vector<std::string> const& mergedAlt() const { return _mergedAlt; }
-    GtIndices const& newGt() const { return _newGt; }
-    AlleleMap const& alleleMap() const { return _alleleMap; }
+    AltIndices const& newAltIndices() const { return _newAltIndices; }
 
 protected:
     void init(Entry const* beg, Entry const* end);
@@ -43,7 +42,7 @@ protected:
     // return values
     bool _merged;
     std::vector<std::string> _mergedAlt;
-    GtIndices _newGt;
+    AltIndices _newAltIndices;
 };
 
 END_NAMESPACE(Vcf)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AlleleMerger.hpp"
 #include "ValueMergers.hpp"
 #include "common/namespaces.hpp"
 
@@ -25,6 +26,8 @@ class ConsensusFilter;
 /// or parsed from an input stream (MergeStrategy::parse(header, instream)).
 class MergeStrategy {
 public:
+    typedef AlleleMerger::AltIndices AltIndices;
+
     enum SamplePriority {
         eORDER,
         eUNFILTERED,
@@ -65,7 +68,11 @@ public:
     /// \return a CustomValue object representing the result of the merge
     /// \exception runtime_error thrown if the info field is invalid, or if no action can
     ///   be found to handle the field named by 'which'
-    CustomValue mergeInfo(const std::string& which, const Entry* begin, const Entry* end) const;
+    CustomValue mergeInfo(
+            const std::string& which,
+            const Entry* begin,
+            const Entry* end,
+            AltIndices const& newAltIndices) const;
 
     /// Set the handler for the info field
     /// \param id the name of the info field to set the action for

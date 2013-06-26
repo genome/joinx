@@ -45,10 +45,11 @@ const Registry* Registry::getInstance() {
 }
 
 CustomValue UseFirst::operator()(
-    const CustomType* type,
+    CustomType const* type,
     FetchFunc fetch,
-    const Entry* begin,
-    const Entry* end
+    Entry const* begin,
+    Entry const* end,
+    AltIndices const& newAltIndices
     ) const
 {
     const CustomValue* v(fetch(begin));
@@ -58,10 +59,11 @@ CustomValue UseFirst::operator()(
 }
 
 CustomValue UniqueConcat::operator()(
-    const CustomType* type,
+    CustomType const* type,
     FetchFunc fetch,
-    const Entry* begin,
-    const Entry* end
+    Entry const* begin,
+    Entry const* end,
+    AltIndices const& newAltIndices
     ) const
 {
         CustomValue rv;
@@ -76,7 +78,7 @@ CustomValue UniqueConcat::operator()(
         set<string> seen;
         for (CustomValue::SizeType i = 0; i < v->size(); ++i)
             seen.insert(v->getString(i));
-        for (const Entry* e = begin; e != end; ++e) {
+        for (Entry const* e = begin; e != end; ++e) {
             const CustomValue *v = fetch(e);
             if (v) {
                 for (CustomValue::SizeType i = 0; i < v->size(); ++i) {
@@ -92,14 +94,15 @@ CustomValue UniqueConcat::operator()(
 }
 
 CustomValue EnforceEquality::operator()(
-    const CustomType* type,
+    CustomType const* type,
     FetchFunc fetch,
-    const Entry* begin,
-    const Entry* end
+    Entry const* begin,
+    Entry const* end,
+    AltIndices const& newAltIndices
     ) const
 {
     CustomValue rv;
-    for (const Entry* e = begin; e != end; ++e) {
+    for (Entry const* e = begin; e != end; ++e) {
         const CustomValue* v = fetch(e);
         if (!v)
             continue;
@@ -114,14 +117,15 @@ CustomValue EnforceEquality::operator()(
 }
 
 CustomValue Sum::operator()(
-    const CustomType* type,
+    CustomType const* type,
     FetchFunc fetch,
-    const Entry* begin,
-    const Entry* end
+    Entry const* begin,
+    Entry const* end,
+    AltIndices const& newAltIndices
     ) const
 {
     CustomValue rv(type);
-    for (const Entry* e = begin; e != end; ++e) {
+    for (Entry const* e = begin; e != end; ++e) {
         const CustomValue* v = fetch(e);
         if (!v || v->empty())
             continue;
@@ -131,20 +135,22 @@ CustomValue Sum::operator()(
 }
 
 CustomValue Ignore::operator()(
-    const CustomType* type,
+    CustomType const* type,
     FetchFunc fetch,
-    const Entry* begin,
-    const Entry* end
+    Entry const* begin,
+    Entry const* end,
+    AltIndices const& newAltIndices
     ) const
 {
     return CustomValue();
 }
 
 CustomValue PerAltDelimitedList::operator()(
-    const CustomType* type,
+    CustomType const* type,
     FetchFunc fetch,
-    const Entry* begin,
-    const Entry* end
+    Entry const* begin,
+    Entry const* end,
+    AltIndices const& newAltIndices
     ) const
 {
     if (type->numberType() != CustomType::PER_ALLELE) {
