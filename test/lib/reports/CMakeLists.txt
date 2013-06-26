@@ -7,4 +7,4 @@ set(TEST_SOURCES
     TestSnvConcordance.cpp
 )
 
-add_unit_tests(TestSnvConcordance ${TEST_SOURCES})
+add_unit_tests(TestReports ${TEST_SOURCES})
