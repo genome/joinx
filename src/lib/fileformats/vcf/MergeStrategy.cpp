@@ -150,7 +150,12 @@ const ValueMergers::Base* MergeStrategy::infoMerger(const string& which) const {
         return _registry->getMerger("enforce-equal");
 }
 
-CustomValue MergeStrategy::mergeInfo(const string& which, const Entry* begin, const Entry* end) const {
+CustomValue MergeStrategy::mergeInfo(
+        const string& which,
+        const Entry* begin,
+        const Entry* end,
+        AltIndices const& newAltIndices) const
+{
     const CustomValue* (Entry::*fetchInfo)(const string&) const = &Entry::info;
     FetchFunc fetch = bind(fetchInfo, _1, which);
     const CustomType* type = _header->infoType(which);
@@ -158,7 +163,7 @@ CustomValue MergeStrategy::mergeInfo(const string& which, const Entry* begin, co
         throw runtime_error(str(format("Unknown datatype for info field '%1%'") %which));
 
     const ValueMergers::Base* merger = infoMerger(which);
-    return (*merger)(type, fetch, begin, end);
+    return (*merger)(type, fetch, begin, end, newAltIndices);
 }
 
 ConsensusFilter const* MergeStrategy::consensusFilter() const {

@@ -32,7 +32,7 @@ void AlleleMerger::init(Entry const* beg, Entry const* end) {
         return;
 
     _merged = true;
-    _newGt.resize(end-beg);
+    _newAltIndices.resize(end-beg);
 
     uint64_t start = min_element(beg, end, &Entry::posLess)->pos();
     size_t inputAlts(0);
@@ -45,13 +45,13 @@ void AlleleMerger::init(Entry const* beg, Entry const* end) {
             if (len == 0) { // SNV
                 for (std::string::size_type i = 0; i < alt->size(); ++i)
                     var[off+i] = (*alt)[i];
-                _newGt[e-beg].push_back(addAllele(var));
+                _newAltIndices[e-beg].push_back(addAllele(var));
             } else if (len < 0) {
                 var.erase(off+alt->size(), -len);
-                _newGt[e-beg].push_back(addAllele(var));
+                _newAltIndices[e-beg].push_back(addAllele(var));
             } else { // insertion
                 var.insert(off+1, alt->data()+1);
-                _newGt[e-beg].push_back(addAllele(var));
+                _newAltIndices[e-beg].push_back(addAllele(var));
             }
         }
     }
