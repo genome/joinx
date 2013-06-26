@@ -27,6 +27,7 @@ public:
     std::string const& ref() const { return _ref; }
     std::vector<std::string> const& mergedAlt() const { return _mergedAlt; }
     GtIndices const& newGt() const { return _newGt; }
+    AlleleMap const& alleleMap() const { return _alleleMap; }
 
 protected:
     void init(Entry const* beg, Entry const* end);
