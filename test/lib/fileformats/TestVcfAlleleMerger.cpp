@@ -77,11 +77,11 @@ TEST_F(TestVcfAlleleMerger, insertion) {
     // yes, something was merged.
     ASSERT_TRUE(am.merged());
 
-    ASSERT_EQ("TCG", am.ref());
+    EXPECT_EQ("TCG", am.ref());
     // make sure the total # of (unique) alts is now 2
-    ASSERT_EQ(2u, am.mergedAlt().size());
-    ASSERT_EQ("TCGCG", am.mergedAlt()[0]);
-    ASSERT_EQ("TCGTG", am.mergedAlt()[1]); // the extra guy we threw in there
+    EXPECT_EQ(2u, am.mergedAlt().size());
+    EXPECT_EQ("TCGCG", am.mergedAlt()[0]);
+    EXPECT_EQ("TCGTG", am.mergedAlt()[1]); // the extra guy we threw in there
 
     // check genotype mapping for each sample
     // this is an array of arrays (one per sample) that maps indices into
@@ -91,11 +91,11 @@ TEST_F(TestVcfAlleleMerger, insertion) {
     // the first 3 entries should all be merged so their old index of
     // 0 should point to 0 again in the merged alts
     for (size_t i = 0; i < 3; ++i)
-        ASSERT_EQ(0u, am.newGt()[i][0]);
+        EXPECT_EQ(0u, am.newGt()[i][0]);
 
-    // the different guy's old index of 0 should now point to 1 in 
+    // the different guy's old index of 0 should now point to 1 in
     // the merged array
-    ASSERT_EQ(1u, am.newGt()[3][0]);
+    EXPECT_EQ(1u, am.newGt()[3][0]);
 }
 
 TEST_F(TestVcfAlleleMerger, deletion) {
@@ -110,14 +110,14 @@ TEST_F(TestVcfAlleleMerger, deletion) {
     // yes, something was merged.
     ASSERT_TRUE(am.merged());
 
-    ASSERT_EQ("TGGG", am.ref());
-    ASSERT_EQ(1u, am.mergedAlt().size());
-    ASSERT_EQ("TGG", am.mergedAlt()[0]);
+    EXPECT_EQ("TGGG", am.ref());
+    EXPECT_EQ(1u, am.mergedAlt().size());
+    EXPECT_EQ("TGG", am.mergedAlt()[0]);
 
     ASSERT_EQ(3u, am.newGt().size());
 
     for (size_t i = 0; i < 3; ++i)
-        ASSERT_EQ(0u, am.newGt()[i][0]);
+        EXPECT_EQ(0u, am.newGt()[i][0]);
 }
 
 TEST_F(TestVcfAlleleMerger, snv) {
@@ -129,14 +129,14 @@ TEST_F(TestVcfAlleleMerger, snv) {
 
     AlleleMerger am(ents);
     ASSERT_TRUE(am.merged());
-    ASSERT_EQ("TGA", am.ref());
-    ASSERT_EQ(1u, am.mergedAlt().size());
-    ASSERT_EQ("TGC", am.mergedAlt()[0]);
+    EXPECT_EQ("TGA", am.ref());
+    EXPECT_EQ(1u, am.mergedAlt().size());
+    EXPECT_EQ("TGC", am.mergedAlt()[0]);
 
     ASSERT_EQ(3u, am.newGt().size());
 
     for (size_t i = 0; i < 3; ++i)
-        ASSERT_EQ(0u, am.newGt()[i][0]);
+        EXPECT_EQ(0u, am.newGt()[i][0]);
 }
 
 TEST_F(TestVcfAlleleMerger, identical) {
@@ -147,13 +147,13 @@ TEST_F(TestVcfAlleleMerger, identical) {
     AlleleMerger am(ents);
 
     ASSERT_TRUE(am.merged());
-    ASSERT_EQ("T", am.ref());
-    ASSERT_EQ(1u, am.mergedAlt().size());
-    ASSERT_EQ("TG", am.mergedAlt()[0]);
+    EXPECT_EQ("T", am.ref());
+    EXPECT_EQ(1u, am.mergedAlt().size());
+    EXPECT_EQ("TG", am.mergedAlt()[0]);
 
     ASSERT_EQ(2u, am.newGt().size());
-    ASSERT_EQ(0u, am.newGt()[0][0]);
-    ASSERT_EQ(0u, am.newGt()[1][0]);
+    EXPECT_EQ(0u, am.newGt()[0][0]);
+    EXPECT_EQ(0u, am.newGt()[1][0]);
 }
 
 TEST_F(TestVcfAlleleMerger, overlapButNoMerge) {
@@ -163,12 +163,12 @@ TEST_F(TestVcfAlleleMerger, overlapButNoMerge) {
 
     AlleleMerger am(ents);
     ASSERT_TRUE(am.merged());
-    ASSERT_EQ("T", am.ref());
+    EXPECT_EQ("T", am.ref());
     ASSERT_EQ(2u, am.mergedAlt().size());
-    ASSERT_EQ("TG", am.mergedAlt()[0]);
-    ASSERT_EQ("TC", am.mergedAlt()[1]);
-    ASSERT_EQ(0u, am.newGt()[0][0]);
-    ASSERT_EQ(1u, am.newGt()[1][0]);
+    EXPECT_EQ("TG", am.mergedAlt()[0]);
+    EXPECT_EQ("TC", am.mergedAlt()[1]);
+    EXPECT_EQ(0u, am.newGt()[0][0]);
+    EXPECT_EQ(1u, am.newGt()[1][0]);
 }
 
 TEST_F(TestVcfAlleleMerger, mismatchChrom) {
@@ -186,7 +186,7 @@ TEST_F(TestVcfAlleleMerger, buildRefAdjacent) {
     ents.push_back(makeEntry("1", 13, "TGA", "T"));
     ents.push_back(makeEntry("1", 16, "CGA", "C"));
     string ref = AlleleMerger::buildRef(&*ents.begin(), &*ents.end());
-    ASSERT_EQ("ACGTGACGA", ref);
+    EXPECT_EQ("ACGTGACGA", ref);
 }
 
 TEST_F(TestVcfAlleleMerger, buildRefOverlap) {
@@ -195,7 +195,7 @@ TEST_F(TestVcfAlleleMerger, buildRefOverlap) {
     ents.push_back(makeEntry("1", 12,   "GTA", "T"));
     ents.push_back(makeEntry("1", 13,    "TAG", "C"));
     string ref = AlleleMerger::buildRef(&*ents.begin(), &*ents.end());
-    ASSERT_EQ("ACGTAG", ref);
+    EXPECT_EQ("ACGTAG", ref);
 }
 
 TEST_F(TestVcfAlleleMerger, buildRefDisjoint) {
@@ -206,7 +206,7 @@ TEST_F(TestVcfAlleleMerger, buildRefDisjoint) {
     ents.push_back(makeEntry("1", 14, "TGA", "T"));
     ents.push_back(makeEntry("1", 17, "CGA", "C"));
     string ref = AlleleMerger::buildRef(&*ents.begin(), &*ents.end());
-    ASSERT_EQ("", ref);
+    EXPECT_EQ("", ref);
 }
 
 TEST_F(TestVcfAlleleMerger, nullAlt) {
@@ -216,11 +216,11 @@ TEST_F(TestVcfAlleleMerger, nullAlt) {
     ents.push_back(makeEntry("1", 10, "A", "."));
 
     AlleleMerger am(ents);
-    ASSERT_TRUE(am.merged());    
+    ASSERT_TRUE(am.merged());
     ASSERT_EQ(2u, am.mergedAlt().size());
     ASSERT_EQ(3u, am.newGt().size());
-    ASSERT_EQ(0u, am.newGt()[0][0]);
-    ASSERT_EQ(1u, am.newGt()[1][0]);
+    EXPECT_EQ(0u, am.newGt()[0][0]);
+    EXPECT_EQ(1u, am.newGt()[1][0]);
     ASSERT_TRUE(am.newGt()[2].empty());
 }
 
@@ -235,5 +235,5 @@ TEST_F(TestVcfAlleleMerger, adjacentDeletion) {
     ASSERT_TRUE(am.newGt().size());
 
     string ref = AlleleMerger::buildRef(&*ents.begin(), &*ents.end());
-    ASSERT_EQ("CAGGAGTCCAGCGCAG", ref);
+    EXPECT_EQ("CAGGAGTCCAGCGCAG", ref);
 }
