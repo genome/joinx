@@ -130,6 +130,16 @@ namespace ValueMergers {
             ) const;
         std::string name() const { return "ignore"; }
     };
+
+    struct PerAltDelimitedList : public Base {
+        CustomValue operator()(
+            CustomType const* type,
+            FetchFunc fetch,
+            Entry const* begin,
+            Entry const* end
+            ) const;
+        std::string name() const { return "per-alt-delimited-list"; }
+    };
 }
 
 END_NAMESPACE(Vcf)

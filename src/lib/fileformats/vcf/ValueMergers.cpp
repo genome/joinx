@@ -140,6 +140,28 @@ CustomValue Ignore::operator()(
     return CustomValue();
 }
 
+CustomValue PerAltDelimitedList::operator()(
+    const CustomType* type,
+    FetchFunc fetch,
+    const Entry* begin,
+    const Entry* end
+    ) const
+{
+    if (type->numberType() != CustomType::PER_ALLELE) {
+        throw runtime_error(str(format(
+            "%1% merge strategy used with something other than per-allele type (%2%)"
+            ) % name() % CustomType::numberToString(type->numberType(), type->number())));
+    }
+    CustomValue rv(type);
+    for (Entry const* e = begin; e != end; ++e) {
+        CustomValue const* v = fetch(e);
+        if (!v || v->empty())
+            continue;
+    }
+    return rv;
+}
+
+
 }
 
 END_NAMESPACE(Vcf)
