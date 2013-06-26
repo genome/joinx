@@ -1,8 +1,6 @@
 #include "AltNormalizer.hpp"
 #include "Entry.hpp"
 #include "RawVariant.hpp"
-#include "common/CyclicIterator.hpp"
-#include "common/Sequence.hpp"
 #include "fileformats/Fasta.hpp"
 
 #include <boost/format.hpp>
@@ -39,9 +37,6 @@ void AltNormalizer::normalize(Entry& e) {
         size_t refLen = var->ref.size();
         size_t altLen = var->alt.size();
 
-        string::const_iterator varBegin;
-        string::const_iterator varEnd;
-
         // Skip silly alts that are actually the reference
         if (altLen == 0 && refLen == 0)
             continue;
@@ -50,23 +45,9 @@ void AltNormalizer::normalize(Entry& e) {
         // by RawVariant already).
         if ((altLen == 0 || refLen == 0)) {
             haveIndel = true;
-
-            // Make deletions look like insertions for uniform processing.
-            // Don't forget to swap it back later!
-            if (altLen == 0)
-                var->ref.swap(var->alt);
-
-            varBegin = var->alt.begin();
-            varEnd = var->alt.end();
-            size_t shift = leftShift(varBegin, varEnd, var->pos);
-            var->pos -= shift;
-            std::rotate(var->alt.begin(), var->alt.end() - shift % var->alt.size(), var->alt.end());
-
-            // swap back for deletions
-            if (altLen == 0)
-                var->ref.swap(var->alt);
+            normalizeRaw(*var, _sequence);
         }
-        
+
         minRefPos = min(size_t(var->pos), minRefPos);
         maxRefPos = max(size_t(var->lastRefPos()), maxRefPos);
     }
@@ -127,20 +108,6 @@ void AltNormalizer::normalize(Entry& e) {
             *alt += base;
         }
     }
-}
-
-size_t AltNormalizer::leftShift(
-    std::string::const_iterator varBegin,
-    std::string::const_iterator varEnd,
-    size_t varPos
-    )
-{
-    typedef string::const_reverse_iterator RevIter;
-    auto altCycleBeg = CyclicIterator<RevIter>(RevIter(varEnd), RevIter(varBegin));
-    auto altCycleEnd = CyclicIterator<RevIter>(RevIter(varBegin), RevIter(varBegin));
-    RevIter revRefBegin(_sequence.begin() + varPos - 1);
-    RevIter revRefEnd(_sequence.begin());
-    return Sequence::commonPrefix(altCycleBeg, altCycleEnd, revRefBegin, revRefEnd);
 }
 
 END_NAMESPACE(Vcf)

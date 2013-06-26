@@ -47,7 +47,7 @@ public:
     MapType::size_type size() const;
     MapType::size_type count(uint32_t idx) const;
     int formatKeyIndex(std::string const& key) const;
-    
+
 
     CustomValue const* get(uint32_t sampleIdx, std::string const& key) const;
     std::vector<CustomValue> const* get(uint32_t sampleIdx) const;
