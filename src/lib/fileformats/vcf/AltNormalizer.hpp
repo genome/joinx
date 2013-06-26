@@ -19,6 +19,11 @@ class Entry;
 
 template<typename RefStringType>
 size_t normalizeRaw(RawVariant& var, RefStringType const& refseq) {
+    // Process only pure indels (not those with substitutions or empty calls).
+    if ((!var.ref.empty() && !var.alt.empty())
+        || (var.ref.empty() && var.alt.empty()))
+        return 0;
+
     bool deletion = var.alt.empty();
     // Make deletions look like insertions for uniform processing.
     // (Don't you dare forget to swap these back later!)
