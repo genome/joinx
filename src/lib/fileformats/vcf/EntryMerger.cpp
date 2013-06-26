@@ -55,7 +55,7 @@ namespace {
         else
             throw logic_error(str(format(
                 "Programming error at %1%:%2%: didn't understand sample priority: %3%"
-                ) %__FILE__ %__LINE__ %int(prio)));
+                ) %__FILE__ %__LINE__ % int(prio)));
     }
 }
 
@@ -114,9 +114,11 @@ EntryMerger::EntryMerger(
         // Build set of all info fields present, validating as we go
         const CustomValueMap& info = e->info();
         for (auto i = info.begin(); i != info.end(); ++i) {
-            _info.insert(i->first);
+            _infoFieldNames.insert(i->first);
             if (!_mergedHeader->infoType(i->first)) {
-                throw runtime_error(str(format("Invalid info field '%1%' while merging vcf entries in %2%") %i->first %e->toString()));
+                throw runtime_error(str(format(
+                    "Invalid info field '%1%' while merging vcf entries in %2%"
+                    ) % i->first % e->toString()));
             }
         }
     }
@@ -165,7 +167,7 @@ double EntryMerger::qual() const {
 
 void EntryMerger::setInfo(CustomValueMap& info) const {
     try {
-        for (auto i = _info.begin(); i != _info.end(); ++i) {
+        for (auto i = _infoFieldNames.begin(); i != _infoFieldNames.end(); ++i) {
             CustomValue v = _mergeStrategy.mergeInfo(*i, _begin, _end);
             if (!v.empty())
                 info.insert(make_pair(*i, v));

@@ -151,8 +151,8 @@ Entry::Entry(EntryMerger&& merger)
         throw runtime_error(str(format("Failed to merge entries:\n %1%") %ss.str()));
     }
 
-    merger.setInfo(_info);
     merger.setAltAndGenotypeData(_alt, _sampleData);
+    merger.setInfo(_info);
 }
 
 void Entry::reheader(const Header* newHeader) {
