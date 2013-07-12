@@ -29,6 +29,10 @@ public:
     ChromPos(ChromPos const& b);
     ChromPos(ChromPos&& b);
 
+    ChromPos& operator=(ChromPos const& b);
+    ChromPos& operator=(ChromPos&& b);
+
+
     static void parseLine(const ChromPosHeader*, std::string& line, ChromPos& cp);
     void swap(ChromPos& rhs);
 

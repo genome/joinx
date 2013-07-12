@@ -37,6 +37,9 @@ public:
     Bed(const std::string& chrom, int64_t start, int64_t stop);
     Bed(const std::string& chrom, int64_t start, int64_t stop, const ExtraFieldsType& extraFields);
 
+    Bed& operator=(Bed const& b);
+    Bed& operator=(Bed&& b);
+
     static void parseLine(const BedHeader*, std::string& line, Bed& bed, int maxExtraFields = -1);
     void swap(Bed& rhs);
 

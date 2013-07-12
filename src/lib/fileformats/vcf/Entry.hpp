@@ -60,6 +60,9 @@ public:
     Entry(EntryMerger&& merger);
     Entry(const Header* h, const std::string& s);
 
+    Entry& operator=(Entry const& e);
+    Entry& operator=(Entry&& e);
+
     // This updates the entry to use the new header instead. This can
     // move the sample data around, but does not currently do any more
     // validation.
