@@ -110,6 +110,36 @@ Entry::Entry(Entry&& e) throw ()
 {
 }
 
+Entry& Entry::operator=(Entry const& e) {
+    _header = e._header;
+    _chrom = e._chrom;
+    _pos = e._pos;
+    _identifiers = e._identifiers;
+    _ref = e._ref;
+    _alt = e._alt;
+    _qual = e._qual;
+    _failedFilters = e._failedFilters;
+    _info = e._info;
+    _sampleString = e._sampleString;
+    _parsedSamples = e._parsedSamples;
+    _sampleData = e._sampleData;
+}
+
+Entry& Entry::operator=(Entry&& e) {
+    _header = std::move(e._header);
+    _chrom = std::move(e._chrom);
+    _pos = std::move(e._pos);
+    _identifiers = std::move(e._identifiers);
+    _ref = std::move(e._ref);
+    _alt = std::move(e._alt);
+    _qual = std::move(e._qual);
+    _failedFilters = std::move(e._failedFilters);
+    _info = std::move(e._info);
+    _sampleString = std::move(e._sampleString);
+    _parsedSamples = std::move(e._parsedSamples);
+    _sampleData = std::move(e._sampleData);
+}
+
 Entry::Entry(const Header* h)
     : _header(h)
     , _pos(0)

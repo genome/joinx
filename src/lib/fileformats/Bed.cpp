@@ -39,6 +39,26 @@ Bed::Bed(Bed&& b)
 {
 }
 
+Bed& Bed::operator=(Bed&& b) {
+    _chrom = std::move(b._chrom);
+    _start = std::move(b._start);
+    _stop = std::move(b._stop);
+    _length = std::move(b._length);
+    _extraFields = std::move(b._extraFields);
+    _line = std::move(b._line);
+    return *this;
+}
+
+Bed& Bed::operator=(Bed const& b) {
+    _chrom = b._chrom;
+    _start = b._start;
+    _stop = b._stop;
+    _length = b._length;
+    _extraFields = b._extraFields;
+    _line = b._line;
+    return *this;
+}
+
 Bed::Bed(const std::string& chrom, int64_t start, int64_t stop)
     : _chrom(chrom)
     , _start(start)
