@@ -32,6 +32,22 @@ ChromPos::ChromPos(ChromPos&& b)
 {
 }
 
+ChromPos& ChromPos::operator=(ChromPos const& b) {
+    _chrom = b._chrom;
+    _start = b._start;
+    _line = b._line;
+    return *this;
+}
+
+ChromPos& ChromPos::operator=(ChromPos&& b) {
+    _chrom = std::move(b._chrom);
+    _start = std::move(b._start);
+    _line = std::move(b._line);
+    return *this;
+}
+
+
+
 void ChromPos::parseLine(const ChromPosHeader*, std::string& line, ChromPos& cp) {
     Tokenizer<char> tokenizer(line);
     if (!tokenizer.extract(cp._chrom))
