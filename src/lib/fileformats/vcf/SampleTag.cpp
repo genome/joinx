@@ -119,7 +119,6 @@ SampleTag::SampleTag(std::string const& raw) {
 
 void SampleTag::toStream(std::ostream& s) const {
     s << "##SAMPLE=<";
-    vector<int> n = {1,2,3};
     karma::generate(
         ostream_iterator<char>(s, ""),
         (

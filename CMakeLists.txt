@@ -26,13 +26,8 @@ message("Doc path: ${INSTALL_DOC_PATH}")
 configure_file(version/version.h.in version/version.h @ONLY)
 include_directories(${PROJECT_BINARY_DIR}/version)
 
-if (CMAKE_COMPILER_IS_GNUCC)
-    set(CMAKE_C_FLAGS "-std=c99 -Wall -pedantic")
-endif ()
-
-if (CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "-Wall -ansi -pedantic -std=c++0x -fPIC -Wnon-virtual-dtor")
-endif ()
+set(CMAKE_C_FLAGS "-std=c99 -Wall -pedantic")
+set(CMAKE_CXX_FLAGS "-Wall -pedantic -std=c++0x -fPIC -Wnon-virtual-dtor")
 
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
