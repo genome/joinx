@@ -15,12 +15,6 @@ using namespace Vcf;
 using namespace std::placeholders;
 using namespace std;
 
-namespace {
-    ostream& operator<<(ostream& s, RawVariant const& rv) {
-        return s << rv.pos << " ref:" << rv.ref << ", alt:" << rv.alt;
-    }
-}
-
 class TestVcfRawVariant : public ::testing::Test {
 protected:
     TestVcfRawVariant() {
