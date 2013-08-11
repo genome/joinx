@@ -5,8 +5,10 @@
 #include "processors/IntersectFull.hpp"
 #include "processors/IntersectionOutputFormatter.hpp"
 
+#include <boost/assign/list_of.hpp>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
+
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>
@@ -76,11 +78,11 @@ void IntersectCommand::parseArguments(int argc, char** argv) {
     po::notify(vm);
 
     // check for mutually exclusive formatting options
-    vector<string> exclusiveFormattingOpts = {
-        "output-both",
-        "format-string",
-        "full",
-    };
+    vector<string> exclusiveFormattingOpts = boost::assign::list_of
+        ("output-both")
+        ("format-string")
+        ("full");
+
     vector<string> formattingOpts;
     for (auto i = exclusiveFormattingOpts.begin(); i != exclusiveFormattingOpts.end(); ++i) {
         if (vm.count(*i))

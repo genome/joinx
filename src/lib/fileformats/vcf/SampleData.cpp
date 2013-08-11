@@ -431,9 +431,7 @@ void SampleData::removeLowDepthGenotypes(uint32_t lowDepth) {
     }
 }
 
-END_NAMESPACE(Vcf)
-
-std::ostream& operator<<(std::ostream& s, Vcf::SampleData const& sampleData) {
+std::ostream& operator<<(std::ostream& s, SampleData const& sampleData) {
     auto const& fmt = sampleData.format();
     if (!fmt.empty()) {
         for (auto i = fmt.begin(); i != fmt.end(); ++i) {
@@ -476,3 +474,5 @@ std::ostream& operator<<(std::ostream& s, Vcf::SampleData const& sampleData) {
 
     return s;
 }
+
+END_NAMESPACE(Vcf)

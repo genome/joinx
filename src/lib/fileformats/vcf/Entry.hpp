@@ -140,6 +140,7 @@ inline bool Entry::operator<(const Entry& rhs) const {
     return cmp(rhs) < 0;
 }
 
+std::ostream& operator<<(std::ostream& s, const Entry& e);
+
 END_NAMESPACE(Vcf)
 
-std::ostream& operator<<(std::ostream& s, const Vcf::Entry& e);
