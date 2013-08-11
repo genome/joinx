@@ -1,6 +1,6 @@
 h1. joinx
 
-"!https://travis-ci.org/genome/joinx.png"
+"!https://travis-ci.org/genome/joinx.png!":https://travis-ci.org/genome/joinx
 
 p. Joinx is a lightweight tool for performing operations (e.g., intersection, difference, ...) on genomic data contained in vcf and .bed files. It also provides some limited analysis functions (concordance reports). An important assumption that joinx makes is that the input data is always sorted. This allows it to compute its results in an efficient manner.
 
