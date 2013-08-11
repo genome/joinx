@@ -14,7 +14,7 @@ h3. Setup repository
 h3. Install build dependencies
 
 Building requires:
-* gcc 4.4+
+* gcc 4.4+ or clang 3.2+
 * cmake 2.8+
 * boost 1.48+
 * gtest (google unit testing framework, optional for unit tests)
@@ -29,6 +29,8 @@ To install these on Ubuntu, try:
 p.  @sudo apt-get install cmake libboost-all-dev libgtest-dev@
 
 h3. Build, test, and install
+
+Note: if using clang, export the environment variables CC=clang, CXX=clang++.
 
 Joinx does not support in source builds. Create a new build directory, enter it, and run:
 
