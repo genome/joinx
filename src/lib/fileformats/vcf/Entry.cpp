@@ -123,6 +123,7 @@ Entry& Entry::operator=(Entry const& e) {
     _sampleString = e._sampleString;
     _parsedSamples = e._parsedSamples;
     _sampleData = e._sampleData;
+    return *this;
 }
 
 Entry& Entry::operator=(Entry&& e) {
@@ -138,6 +139,7 @@ Entry& Entry::operator=(Entry&& e) {
     _sampleString = std::move(e._sampleString);
     _parsedSamples = std::move(e._parsedSamples);
     _sampleData = std::move(e._sampleData);
+    return *this;
 }
 
 Entry::Entry(const Header* h)
@@ -408,9 +410,7 @@ std::vector<std::string> Entry::allelesForSample(size_t sampleIdx) const {
     return rv;
 }
 
-END_NAMESPACE(Vcf)
-
-ostream& operator<<(ostream& s, const Vcf::Entry& e) {
+ostream& operator<<(ostream& s, const Entry& e) {
     s << e.chrom() << '\t' << e.pos() << '\t';
     e.printList(s, e.identifiers());
     s << '\t' << e.ref() << '\t';
@@ -441,3 +441,5 @@ ostream& operator<<(ostream& s, const Vcf::Entry& e) {
 
     return s;
 }
+
+END_NAMESPACE(Vcf)

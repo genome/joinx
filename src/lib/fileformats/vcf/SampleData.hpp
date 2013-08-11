@@ -73,6 +73,6 @@ protected:
     mutable std::map<std::string, GenotypeCall> _gtCache;
 };
 
-END_NAMESPACE(Vcf)
+std::ostream& operator<<(std::ostream& s, SampleData const& sampleData);
 
-std::ostream& operator<<(std::ostream& s, Vcf::SampleData const& sampleData);
+END_NAMESPACE(Vcf)

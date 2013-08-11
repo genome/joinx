@@ -45,9 +45,9 @@ TEST(CigarString, fromString) {
     string str("99M5I99M");
     CigarString cs(str);
     CigarString::Op expected[] = {
-        { 99, MATCH },
-        { 5, INS },
-        { 99, MATCH },
+        CigarString::Op(99, MATCH),
+        CigarString::Op(5, INS),
+        CigarString::Op(99, MATCH),
     };
     ASSERT_EQ(3, cs.ops().size());
     for (int i = 0; i < 3; ++i)
@@ -57,9 +57,9 @@ TEST(CigarString, fromString) {
 
 TEST(CigarString, push_back) {
     CigarString::Op expected[] = {
-        { 99, MATCH },
-        { 5, INS },
-        { 99, MATCH },
+        CigarString::Op(99, MATCH),
+        CigarString::Op(5, INS),
+        CigarString::Op(99, MATCH),
     };
 
     CigarString cs;
