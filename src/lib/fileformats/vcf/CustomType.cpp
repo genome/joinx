@@ -1,6 +1,7 @@
 #include "CustomType.hpp"
 #include "common/Tokenizer.hpp"
 
+#include <boost/assign.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <set>
@@ -21,7 +22,7 @@ CustomType::CustomType()
 
 CustomType::CustomType(const string& raw) {
     Tokenizer<string> t(raw, ",=\"");
-    set<string> required = {"ID", "Number", "Type", "Description"};
+    set<string> required = boost::assign::list_of("ID")("Number")("Type")("Description");
 
     string id;
     while (t.extract(id)) {
