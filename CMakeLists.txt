@@ -26,8 +26,18 @@ message("Doc path: ${INSTALL_DOC_PATH}")
 configure_file(version/version.h.in version/version.h @ONLY)
 include_directories(${PROJECT_BINARY_DIR}/version)
 
-set(CMAKE_C_FLAGS "-std=c99 -Wall -pedantic")
-set(CMAKE_CXX_FLAGS "-Wall -pedantic -std=c++0x -fPIC -Wnon-virtual-dtor")
+if(${CMAKE_C_COMPILER_ID} MATCHES "GNU|Clang")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall -pedantic")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -std=c++0x -fPIC ")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor")
+    message("Set cflags to ${CMAKE_C_FLAGS}")
+    message("Set cxxflags to ${CMAKE_CXX_FLAGS}")
+else()
+    message(
+        WARNING
+        "Unknown compiler: ${CMAKE_C_COMPILER_ID}, we'll see how this goes..."
+    )
+endif()
 
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
