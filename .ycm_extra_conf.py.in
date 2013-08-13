@@ -31,6 +31,8 @@
 import os
 import ycm_core
 
+script_dir = os.path.dirname( os.path.abspath( __file__ ) )
+
 # These are the compilation flags that will be used in case there's no
 # compilation database set (by default, one is not set).
 flags = [
@@ -41,7 +43,7 @@ flags = [
         '-Wno-variadic-macros',
         '-fexceptions',
         '-std=c++0x',
-        '-I', './src/lib'
+        '-I', '%s/src/lib' % script_dir
 ]
 
 
@@ -57,10 +59,6 @@ if compilation_database_folder:
     database = ycm_core.CompilationDatabase( compilation_database_folder )
 else:
     database = None
-
-
-def script_dir():
-    return os.path.dirname( os.path.abspath( __file__ ) )
 
 
 def make_paths_in_flags_absolute( flags, working_directory ):
@@ -111,7 +109,7 @@ def FlagsForFile( filename ):
                     compilation_info.compiler_flags_,
                     compilation_info.compiler_working_dir_ )
     else:
-        relative_to = script_dir()
+        relative_to = script_dir
         final_flags = make_paths_in_flags_absolute( flags, relative_to )
 
     return {
