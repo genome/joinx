@@ -23,4 +23,5 @@ debian/postinst
 debian/prerm
 install_manifest.txt
 rbuild/
+tags
 version/version.h
