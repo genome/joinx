@@ -7,7 +7,6 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "joinx install prefix" FORCE)
 endif()
 
-
 if(DEFINED JOINX_DEBUG_VCF_MERGE)
     message("Vcf merge debugging output enabled")
     add_definitions("-DDEBUG_VCF_MERGE")
@@ -22,6 +21,10 @@ set(INSTALL_DOC_PATH share/doc/joinx${EXE_VERSION_SUFFIX})
 message("Install path: ${CMAKE_INSTALL_PREFIX}")
 message("Share path: ${INSTALL_SHARE_PATH}")
 message("Doc path: ${INSTALL_DOC_PATH}")
+
+# Dump clang compilation database for use with YCM
+set(CMAKE_EXPORT_COMPILE_COMMANDS on)
+configure_file(.ycm_extra_conf.py.in ${CMAKE_SOURCE_DIR}/.ycm_extra_conf.py @ONLY)
 
 configure_file(version/version.h.in version/version.h @ONLY)
 include_directories(${PROJECT_BINARY_DIR}/version)
