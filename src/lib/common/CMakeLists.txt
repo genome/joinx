@@ -28,4 +28,4 @@ set(SOURCES
 )
 
 add_library(common ${SOURCES})
-target_link_libraries(common ${Boost_LIBRARIES} ${ZLIB_LIBRARIES})
+target_link_libraries(common ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES})
