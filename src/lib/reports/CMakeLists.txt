@@ -10,4 +10,4 @@ set(SOURCES
 )
 
 add_library(reports ${SOURCES})
-target_link_libraries(reports common fileformats ${Boost_LIBRARIES})
+target_link_libraries(reports ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES})
