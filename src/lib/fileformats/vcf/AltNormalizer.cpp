@@ -32,6 +32,7 @@ void AltNormalizer::normalize(Entry& e) {
     size_t minRefPos = numeric_limits<size_t>::max();
     size_t maxRefPos = 0;
     bool haveIndel = false;
+    size_t numVariantsProcessed(0);
     for (auto var = rawVariants.begin(); var != rawVariants.end(); ++var) {
         size_t refLen = var->ref.size();
         size_t altLen = var->alt.size();
@@ -39,6 +40,8 @@ void AltNormalizer::normalize(Entry& e) {
         // Skip silly alts that are actually the reference
         if (altLen == 0 && refLen == 0)
             continue;
+
+        ++numVariantsProcessed;
 
         // Process pure indels only (alts with substitutions are normalized
         // by RawVariant already).
@@ -50,6 +53,9 @@ void AltNormalizer::normalize(Entry& e) {
         minRefPos = min(size_t(var->pos), minRefPos);
         maxRefPos = max(size_t(var->lastRefPos()), maxRefPos);
     }
+
+    if (!numVariantsProcessed)
+        return;
 
     assert(minRefPos >= 1);
     if (haveIndel && minRefPos > 1) {
