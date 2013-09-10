@@ -205,7 +205,7 @@ void SortCommand::exec() {
 
         for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i) {
             readers.push_back(ReaderPtr(new ReaderType(extractor, **i)));
-            mergedHeader.merge(readers.back()->header());
+            mergedHeader.merge(readers.back()->header(), true);
         }
 
         *out << mergedHeader;
