@@ -50,7 +50,12 @@ namespace {
     };
 }
 
-Header::Header() : _headerSeen(false), _sourceIndex(0) {}
+Header::Header()
+    : _headerSeen(false)
+    , _sourceIndex(0)
+    , _hasDuplicateSamples(false)
+{}
+
 Header::~Header() {
 }
 
@@ -157,7 +162,7 @@ void Header::parseHeaderLine(const std::string& line) {
             throw runtime_error(str(format(
                 "Duplicate sample name in vcf header: %1%"
                 ) %tok));
-        _sampleNames.push_back(tok);
+        addSample(tok);
     }
 }
 
@@ -179,15 +184,15 @@ void Header::assertValid() const {
 
 void Header::merge(const Header& other, bool allowDuplicateSamples) {
     for (auto iter = other._sampleNames.begin(); iter != other._sampleNames.end(); ++iter) {
-        auto exists = find(_sampleNames.begin(), _sampleNames.end(), *iter);
+        auto exists = _sampleIndices.find(*iter);
         size_t idx;
-        if (exists != _sampleNames.end()) {
+        if (exists != _sampleIndices.end()) {
             if (!allowDuplicateSamples)
                 throw runtime_error(str(format("Error merging VCF headers, sample name conflict: %1%") %*iter));
-            idx = distance(_sampleNames.begin(), exists);
+            idx = exists->second;
+            _hasDuplicateSamples = true;
         } else {
-            _sampleNames.push_back(*iter);
-            idx = _sampleNames.size()-1;
+            idx = addSample(*iter);
         }
         if (idx >= _sampleSourceCounts.size())
             _sampleSourceCounts.resize(idx+1);
@@ -212,10 +217,10 @@ void Header::merge(const Header& other, bool allowDuplicateSamples) {
 }
 
 uint32_t Header::sampleIndex(const std::string& sampleName) const {
-    auto iter = find(_sampleNames.begin(), _sampleNames.end(), sampleName);
-    if (iter == _sampleNames.end())
+    auto iter = _sampleIndices.find(sampleName);
+    if (iter == _sampleIndices.end())
         throw SampleNotFoundError(str(format("Request for sample name '%1%' which does not exist in this VCF header") %sampleName));
-    return distance(_sampleNames.begin(), iter);
+    return iter->second;
 }
 
 bool Header::empty() const {
@@ -262,17 +267,27 @@ std::vector<size_t> const& Header::sampleSourceCounts() const {
     return _sampleSourceCounts;
 }
 
+size_t Header::addSample(std::string const& name) {
+    auto exists = _sampleIndices.find(name);
+    if (exists != _sampleIndices.end())
+        return exists->second;
+
+    size_t idx = _sampleNames.size();
+    _sampleIndices[name] = idx;
+    _sampleNames.push_back(name);
+    return idx;
+}
+
 void Header::mirrorSample(std::string const& sampleName, std::string const& newName) {
-    auto newExists = find(_sampleNames.begin(), _sampleNames.end(), newName);
-    if (newExists != _sampleNames.end()) {
+    auto newExists = _sampleIndices.find(newName);
+    if (newExists != _sampleIndices.end()) {
         throw runtime_error(str(format(
             "Attempted to mirror sample '%1%' as '%2%', but sample '%2%' already exists"
             ) %sampleName %newName));
     }
 
     size_t targetIdx = sampleIndex(sampleName);
-    size_t newIdx = _sampleNames.size();
-    _sampleNames.push_back(newName);
+    size_t newIdx = addSample(newName);
     auto inserted = _mirroredSamples.insert(make_pair(newIdx, targetIdx));
     if (!inserted.second) {
         throw runtime_error(str(format(
