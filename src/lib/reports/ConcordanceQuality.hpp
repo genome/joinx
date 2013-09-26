@@ -1,8 +1,8 @@
 #pragma once
 
 #include "fileformats/Bed.hpp"
+#include "common/cstdint.hpp"
 
-#include <cstdint>
 #include <cstdlib>
 #include <map>
 #include <ostream>

@@ -3,10 +3,10 @@
 #include "CustomValue.hpp"
 #include "SampleData.hpp"
 #include "common/Tokenizer.hpp"
+#include "common/cstdint.hpp"
 #include "common/namespaces.hpp"
 
 #include <boost/lexical_cast.hpp>
-#include <cstdint>
 #include <map>
 #include <ostream>
 #include <string>

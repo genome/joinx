@@ -24,6 +24,7 @@ set(SOURCES
     UnknownSequenceError.hpp
     UnsortedDataError.hpp
     VariantType.hpp
+    cstdint.hpp
     namespaces.hpp
 )
 

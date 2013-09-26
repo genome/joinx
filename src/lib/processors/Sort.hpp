@@ -2,11 +2,11 @@
 
 #include "MergeSorted.hpp"
 #include "SortBuffer.hpp"
+#include "common/cstdint.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <algorithm>
-#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>

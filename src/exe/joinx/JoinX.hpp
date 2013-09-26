@@ -2,7 +2,6 @@
 
 #include "CommandBase.hpp"
 
-#include <cstdint>
 #include <string>
 
 class JoinX : public CommandBase {

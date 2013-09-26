@@ -2,8 +2,8 @@
 
 #include "AlleleMerger.hpp"
 #include "common/namespaces.hpp"
+#include "common/cstdint.hpp"
 
-#include <cstdint>
 #include <map>
 #include <set>
 #include <string>

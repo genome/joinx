@@ -1,7 +1,8 @@
 #pragma once
 
+#include "common/cstdint.hpp"
+
 #include <algorithm>
-#include <cstdint>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>

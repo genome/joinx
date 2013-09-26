@@ -1,4 +1,5 @@
 #include "common/MutationSpectrum.hpp"
+#include "common/cstdint.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/StreamHandler.hpp"
 #include "fileformats/vcf/CustomType.hpp"
@@ -9,7 +10,6 @@
 #include "fileformats/VcfReader.hpp"
 #include "Metrics.hpp"
 
-#include <cstdint>
 #include <functional>
 #include <iostream>
 #include <iterator>

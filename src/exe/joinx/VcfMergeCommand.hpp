@@ -4,7 +4,6 @@
 #include "fileformats/StreamHandler.hpp"
 #include "fileformats/vcf/MergeStrategy.hpp"
 
-#include <cstdint>
 #include <map>
 #include <string>
 

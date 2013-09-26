@@ -2,8 +2,7 @@
 
 #include "Entry.hpp"
 #include "common/namespaces.hpp"
-
-#include <cstdint>
+#include "common/cstdint.hpp"
 
 BEGIN_NAMESPACE(Vcf)
 

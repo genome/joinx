@@ -1,8 +1,8 @@
 #include "fileformats/Fasta.hpp"
 #include "fileformats/Bed.hpp"
+#include "common/cstdint.hpp"
 
 #include <algorithm>
-#include <cstdint>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -51,7 +51,7 @@ public:
             size_t(_regions.back().stop() + _padding),
             _srcFa.seqlen(chrom)
             );
-        
+
         // write sequence and remap headers
         outFa << ">" << _name << " "
             << chrom << ":" << seqStart << "-" << seqStop << "\n";
@@ -66,7 +66,7 @@ public:
             int64_t start = i->start() + 1;
             int64_t stop = i->stop();
             // is this the last region in this transcript?
-            bool last = (i == _regions.end() - 1); 
+            bool last = (i == _regions.end() - 1);
 
             // first region?
             if (i == _regions.begin() && start > _padding)

@@ -3,7 +3,6 @@
 #include "CommandBase.hpp"
 #include "fileformats/StreamHandler.hpp"
 
-#include <cstdint>
 #include <string>
 
 class VcfNormalizeIndelsCommand : public CommandBase {
