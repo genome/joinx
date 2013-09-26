@@ -5,14 +5,15 @@
 #include "fileformats/InputStream.hpp"
 #include "common/Tokenizer.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/format.hpp>
+
 #include <functional>
 #include <set>
 #include <stdexcept>
 
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 
 BEGIN_NAMESPACE(Vcf)
 
@@ -134,7 +135,7 @@ void MergeStrategy::setMerger(const std::string& id, const std::string& mergerNa
 
 const ValueMergers::Base* MergeStrategy::infoMerger(const string& which) const {
     const CustomValue* (Entry::*fetchInfo)(const string&) const = &Entry::info;
-    FetchFunc fetch = bind(fetchInfo, _1, which);
+    FetchFunc fetch = boost::bind(fetchInfo, _1, which);
     const CustomType* type = _header->infoType(which);
     if (!type)
         throw runtime_error(str(format("Unknown datatype for info field '%1%'") %which));
@@ -157,7 +158,7 @@ CustomValue MergeStrategy::mergeInfo(
         AltIndices const& newAltIndices) const
 {
     const CustomValue* (Entry::*fetchInfo)(const string&) const = &Entry::info;
-    FetchFunc fetch = bind(fetchInfo, _1, which);
+    FetchFunc fetch = boost::bind(fetchInfo, _1, which);
     const CustomType* type = _header->infoType(which);
     if (!type)
         throw runtime_error(str(format("Unknown datatype for info field '%1%'") %which));

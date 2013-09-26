@@ -1,11 +1,13 @@
 #include "fileformats/StreamFactory.hpp"
 
 #include <gtest/gtest.h>
+
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+
 #include <string>
-#include <functional>
 
 using namespace std;
-using namespace std::placeholders;
 
 class InputStream;
 
@@ -29,9 +31,9 @@ struct Foo {
 };
 
 TEST(StreamFactory, works) {
-    typedef std::function<void(const Foo::HeaderType*, string&, Foo&)> Extractor;
+    typedef boost::function<void(const Foo::HeaderType*, string&, Foo&)> Extractor;
     typedef StreamFactory<Foo, Extractor> FactoryType;
-    Extractor e(bind(&Foo::parseLine, _1, _2, _3));
+    Extractor e(boost::bind(&Foo::parseLine, _1, _2, _3));
     FactoryType factory(e);
     stringstream ss1("test1\n");
     stringstream ss2("test2\n");

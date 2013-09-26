@@ -24,7 +24,6 @@
 namespace po = boost::program_options;
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 
 CommandBase::ptr VcfReportCommand::create(int argc, char** argv) {
     boost::shared_ptr<VcfReportCommand> app(new VcfReportCommand);

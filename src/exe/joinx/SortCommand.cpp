@@ -13,6 +13,8 @@
 #include "processors/BedDeduplicator.hpp"
 #include "processors/Sort.hpp"
 
+#include <boost/bind.hpp>
+
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <functional>
@@ -21,7 +23,6 @@
 namespace po = boost::program_options;
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 
 CommandBase::ptr SortCommand::create(int argc, char** argv) {
     boost::shared_ptr<SortCommand> app(new SortCommand);
@@ -141,7 +142,7 @@ void SortCommand::exec() {
 
 
     if (type == CHROMPOS) {
-        ChromPosOpenerType cpOpener = bind(&openChromPos, _1);
+        ChromPosOpenerType cpOpener = boost::bind(&openChromPos, _1);
         typedef OutputWriter<ChromPos> WriterType;
         WriterType writer(*out);
         vector<ChromPosReader::ptr> readers;
@@ -161,7 +162,7 @@ void SortCommand::exec() {
         sorter.execute();
     } else if (type == BED) {
         int extraFields = _unique ? 1 : 0;
-        BedOpenerType bedOpener = bind(&openBed, _1, extraFields);
+        BedOpenerType bedOpener = boost::bind(&openBed, _1, extraFields);
         typedef OutputWriter<Bed> WriterType;
         WriterType writer(*out);
         vector<BedReader::ptr> readers;
@@ -202,7 +203,8 @@ void SortCommand::exec() {
         vector<ReaderPtr> readers;
 
         Vcf::Header mergedHeader;
-        VcfExtractor extractor = bind(&Vcf::Entry::parseLineAndReheader, _1, &mergedHeader, _2, _3);
+        VcfExtractor extractor = boost::bind(
+                &Vcf::Entry::parseLineAndReheader, _1, &mergedHeader, _2, _3);
 
         for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i) {
             readers.push_back(ReaderPtr(new ReaderType(extractor, **i)));
@@ -211,7 +213,7 @@ void SortCommand::exec() {
 
         *out << mergedHeader;
 
-        VcfOpenerType vcfOpener = bind(&openVcf, _1);
+        VcfOpenerType vcfOpener = boost::bind(&openVcf, _1);
         Sort<VcfReader, VcfOpenerType, WriterType> sorter(
             readers,
             vcfOpener,

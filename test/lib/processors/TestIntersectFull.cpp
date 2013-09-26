@@ -3,6 +3,9 @@
 #include "fileformats/InputStream.hpp"
 #include "fileformats/TypedStream.hpp"
 
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+
 #include <gtest/gtest.h>
 #include <functional>
 #include <memory>
@@ -11,7 +14,6 @@
 #include <utility>
 
 using namespace std;
-using namespace std::placeholders;
 
 namespace {
     const string BEDA =
@@ -56,9 +58,9 @@ namespace {
         vector<Bed> missesB;
     };
 
-    typedef function<void(const BedHeader*, string&, Bed&)> Extractor;
+    typedef boost::function<void(const BedHeader*, string&, Bed&)> Extractor;
     typedef TypedStream<Bed, Extractor> BedReader;
-    Extractor extractor = bind(&Bed::parseLine, _1, _2, _3, 2);
+    Extractor extractor = boost::bind(&Bed::parseLine, _1, _2, _3, 2);
 }
 
 TEST(TestIntersectFull, intersectSelf) {

@@ -9,7 +9,6 @@
 
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 namespace po = boost::program_options;
 
 CommandBase::ptr Wig2BedCommand::create(int argc, char** argv) {

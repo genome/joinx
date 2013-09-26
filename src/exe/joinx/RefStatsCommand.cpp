@@ -5,15 +5,17 @@
 #include "fileformats/Fasta.hpp"
 #include "fileformats/InputStream.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/format.hpp>
+#include <boost/function.hpp>
 #include <boost/program_options.hpp>
+
 #include <algorithm>
 #include <cctype>
 #include <functional>
 
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 namespace po = boost::program_options;
 
 CommandBase::ptr RefStatsCommand::create(int argc, char** argv) {
@@ -119,8 +121,8 @@ void RefStatsCommand::exec() {
     ostream* out = _streams.get<ostream>(_outFile);
 
     InputStream::ptr inStream = _streams.wrap<istream, InputStream>(_bedFile);
-    typedef function<void(const BedHeader*, string&, Bed&)> ExtractorType;
-    ExtractorType extractor = bind(&Bed::parseLine, _1, _2, _3, 1);
+    typedef boost::function<void(const BedHeader*, string&, Bed&)> ExtractorType;
+    ExtractorType extractor = boost::bind(&Bed::parseLine, _1, _2, _3, 1);
     typedef TypedStream<Bed, ExtractorType> BedReader;
     BedReader bedReader(extractor, *inStream);
     Fasta refSeq(_fastaFile);

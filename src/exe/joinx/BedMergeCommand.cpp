@@ -18,7 +18,6 @@
 namespace po = boost::program_options;
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 
 CommandBase::ptr BedMergeCommand::create(int argc, char** argv) {
     boost::shared_ptr<BedMergeCommand> app(new BedMergeCommand);

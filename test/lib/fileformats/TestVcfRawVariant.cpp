@@ -12,7 +12,6 @@
 #include <gtest/gtest.h>
 
 using namespace Vcf;
-using namespace std::placeholders;
 using namespace std;
 
 class TestVcfRawVariant : public ::testing::Test {

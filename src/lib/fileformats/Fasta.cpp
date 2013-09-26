@@ -4,11 +4,13 @@
 #include "common/Tokenizer.hpp"
 #include "common/UnknownSequenceError.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/format.hpp>
+#include <boost/function.hpp>
+
 #include <algorithm>
 #include <cctype>
 #include <fstream>
-#include <functional>
 #include <locale>
 #include <stdexcept>
 #include <vector>
@@ -16,7 +18,6 @@
 
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 
 namespace {
     const char* INDEX_EXTENSION = ".fai";
@@ -95,8 +96,8 @@ public:
         : _beg(data)
         , _pos(data)
         , _end(data+len)
-        , _isspace(bind(&std::isspace<char>, _1, _loc))
-        , _isgraph(bind(&std::isgraph<char>, _1, _loc))
+        , _isspace(boost::bind(&std::isspace<char>, _1, _loc))
+        , _isgraph(boost::bind(&std::isgraph<char>, _1, _loc))
     {
     }
 
@@ -161,8 +162,8 @@ protected:
     char const* _pos;
     char const* _end;
     locale _loc;
-    function<bool(char)> _isspace;
-    function<bool(char)> _isgraph;
+    boost::function<bool(char)> _isspace;
+    boost::function<bool(char)> _isgraph;
 };
 
 Fasta::Fasta(

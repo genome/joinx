@@ -6,6 +6,7 @@
 #include "Header.hpp"
 #include "common/Tokenizer.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/format.hpp>
 
 #include <algorithm>
@@ -18,7 +19,6 @@
 #include <utility>
 
 using boost::format;
-using namespace std::placeholders;
 using namespace std;
 
 BEGIN_NAMESPACE(Vcf)
@@ -204,7 +204,9 @@ void SampleData::addFilter(uint32_t sampleIdx, std::string const& filterName) {
                 "no FT FORMAT tag appears in header") %sampleIdx %filterName));
     }
 
-    auto ftIter = find_if(_format.begin(), _format.end(), bind(&customTypeIdMatches, "FT", _1));
+    auto ftIter = find_if(_format.begin(), _format.end(),
+            boost::bind(&customTypeIdMatches, "FT", _1));
+
     size_t ftIdx(0);
     if (ftIter == _format.end()) {
         _format.push_back(FT);
@@ -213,7 +215,7 @@ void SampleData::addFilter(uint32_t sampleIdx, std::string const& filterName) {
         ftIdx = ftIter - _format.begin();
     }
 
-    
+
     if (sampleIter->second->size() <= ftIdx) {
         sampleIter->second->resize(ftIdx+1);
     }
@@ -242,7 +244,8 @@ SampleData::FormatType const& SampleData::format() const {
 }
 
 int SampleData::formatKeyIndex(std::string const& key) const {
-    auto i = find_if(_format.begin(), _format.end(), bind(&customTypeIdMatches, key, _1));
+    auto i = find_if(_format.begin(), _format.end(),
+            boost::bind(&customTypeIdMatches, key, _1));
     if (i == _format.end())
         return -1;
     return distance(_format.begin(), i);
@@ -341,7 +344,9 @@ bool SampleData::isSampleFiltered(uint32_t idx, std::string* filterName) const {
 }
 
 int32_t SampleData::samplesFailedFilter() const {
-    auto i = find_if(_format.begin(), _format.end(), bind(&customTypeIdMatches, "FT", _1));
+    auto i = find_if(_format.begin(), _format.end(),
+            boost::bind(&customTypeIdMatches, "FT", _1));
+
     if (i == _format.end())
         return -1;
 
@@ -364,7 +369,9 @@ int32_t SampleData::samplesFailedFilter() const {
 }
 
 int32_t SampleData::samplesEvaluatedByFilter() const {
-    auto i = find_if(_format.begin(), _format.end(), bind(&customTypeIdMatches, "FT", _1));
+    auto i = find_if(_format.begin(), _format.end(),
+            boost::bind(&customTypeIdMatches, "FT", _1));
+
     if (i == _format.end())
         return -1;
 
@@ -417,7 +424,9 @@ void SampleData::renumberGT(std::map<size_t, size_t> const& altMap) {
 }
 
 void SampleData::removeLowDepthGenotypes(uint32_t lowDepth) {
-    auto i = find_if(_format.begin(), _format.end(), bind(&customTypeIdMatches, "DP", _1));
+    auto i = find_if(_format.begin(), _format.end(),
+            boost::bind(&customTypeIdMatches, "DP", _1));
+
     if (i == _format.end())
         return;
 
