@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <string>
 #include <utility>
@@ -78,8 +79,13 @@ public:
     void mirrorSample(std::string const& sampleName, std::string const& newName);
     std::map<size_t, size_t> const& mirroredSamples() const;
 
+    bool hasDuplicateSamples() const {
+        return _hasDuplicateSamples;
+    }
+
 protected:
     void parseHeaderLine(std::string const& line);
+    size_t addSample(std::string const& name);
 
 protected:
     std::map<std::string, CustomType> _infoTypes;
@@ -95,6 +101,8 @@ protected:
     std::vector<size_t> _sampleSourceCounts;
 
     std::map<size_t, size_t> _mirroredSamples;
+    std::unordered_map<std::string, size_t> _sampleIndices;
+    bool _hasDuplicateSamples;
 };
 
 END_NAMESPACE(Vcf)
