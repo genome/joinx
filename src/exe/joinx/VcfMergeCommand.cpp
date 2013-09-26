@@ -14,6 +14,7 @@
 #include "fileformats/vcf/SampleTag.hpp"
 #include "processors/MergeSorted.hpp"
 
+#include <boost/scoped_ptr.hpp>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 
@@ -23,7 +24,7 @@
 
 namespace po = boost::program_options;
 using boost::format;
-using std::unique_ptr;
+using boost::scoped_ptr;
 using namespace std;
 using namespace std::placeholders;
 using Vcf::CustomType;
@@ -158,8 +159,8 @@ namespace {
 }
 
 void VcfMergeCommand::exec() {
-    unique_ptr<Vcf::AltNormalizer> normalizer;
-    unique_ptr<Fasta> ref;
+    scoped_ptr<Vcf::AltNormalizer> normalizer;
+    scoped_ptr<Fasta> ref;
     if (!_fastaFile.empty()) {
         ref.reset(new Fasta(_fastaFile));
         normalizer.reset(new Vcf::AltNormalizer(*ref));
@@ -222,9 +223,9 @@ void VcfMergeCommand::exec() {
 
     PrinterType printer(*out);
     auto writer = std::bind(
-        &writeEntry<PrinterType, unique_ptr<Vcf::AltNormalizer>, Vcf::Entry>,
+        &writeEntry<PrinterType, scoped_ptr<Vcf::AltNormalizer>, Vcf::Entry>,
         printer, std::ref(normalizer), _1);
-    unique_ptr<Vcf::ConsensusFilter> cnsFilt;
+    scoped_ptr<Vcf::ConsensusFilter> cnsFilt;
     if (_consensusRatio > 0) {
         mergedHeader.addFilter(_consensusFilter, _consensusFilterDesc);
         if (mergedHeader.formatType("FT") == NULL) {

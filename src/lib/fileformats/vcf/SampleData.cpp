@@ -102,7 +102,7 @@ void SampleData::parse(std::string const& raw) {
             if (data.size() > _format.size())
                 throw runtime_error("More per-sample values than described in format section");
 
-            unique_ptr<ValueVector> values(new ValueVector);
+            std::auto_ptr<ValueVector> values(new ValueVector);
             values->resize(data.size());
             for (uint32_t i = 0; i < data.size(); ++i) {
                 (*values)[i] = CustomValue(_format[i], data[i]);

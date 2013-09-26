@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/scoped_ptr.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 
 #include <cstddef>
@@ -29,8 +30,8 @@ public:
 
 protected:
     std::string _name;
-    std::unique_ptr<Index> _index;
+    Index* _index;
     char const* _data;
     size_t _len;
-    std::unique_ptr<boost::iostreams::mapped_file_source> _f;
+    boost::scoped_ptr<boost::iostreams::mapped_file_source> _f;
 };

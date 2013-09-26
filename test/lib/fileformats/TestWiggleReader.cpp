@@ -1,5 +1,7 @@
 #include "fileformats/WiggleReader.hpp"
 
+#include <boost/scoped_ptr.hpp>
+
 #include <gtest/gtest.h>
 #include <memory>
 #include <sstream>
@@ -44,8 +46,8 @@ protected:
         _in.reset(new InputStream("test", *_ss));
     }
 
-    unique_ptr<stringstream> _ss;
-    unique_ptr<InputStream> _in;
+    boost::scoped_ptr<stringstream> _ss;
+    boost::scoped_ptr<InputStream> _in;
 };
 
 
