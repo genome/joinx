@@ -1,5 +1,5 @@
 #include "JoinX.hpp"
-#include "common/IOError.hpp"
+#include "common/Exceptions.hpp"
 #include "common/UnsortedDataError.hpp"
 
 #include <boost/program_options.hpp>
@@ -13,6 +13,9 @@ int main(int argc, char** argv) {
     try {
         JoinX app(argc, argv);
         app.exec();
+    } catch (CmdlineHelpException const& e) {
+        std::cout << e.what() << "\n";
+        return 0;
     } catch (const po::multiple_occurrences& e) {
         // this doesn't work on boost 1.40, which is what we are stuck with
         // for now :(
