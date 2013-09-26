@@ -28,7 +28,7 @@ void AltNormalizer::normalize(Entry& e) {
         _sequence = _ref.sequence(_seqName, 1, len);
     }
 
-    vector<RawVariant> rawVariants(RawVariant::processEntry(e));
+    RawVariant::Vector rawVariants(RawVariant::processEntry(e));
     size_t minRefPos = numeric_limits<size_t>::max();
     size_t maxRefPos = 0;
     bool haveIndel = false;
