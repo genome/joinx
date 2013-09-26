@@ -1,8 +1,8 @@
 #pragma once
 
 #include "common/namespaces.hpp"
+#include "common/cstdint.hpp"
 
-#include <cstdint>
 #include <ostream>
 #include <set>
 #include <string>

@@ -1,6 +1,6 @@
+#include "common/cstdint.hpp"
 #include "fileformats/vcf/CustomValue.hpp"
 
-#include <cstdint>
 #include <sstream>
 #include <stdexcept>
 #include <string>

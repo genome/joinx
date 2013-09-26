@@ -1,9 +1,9 @@
 #pragma once
 
 #include "common/CigarString.hpp"
+#include "common/cstdint.hpp"
 #include "fileformats/vcf/RawVariant.hpp"
 
-#include <cstdint>
 #include <string>
 
 class Fasta;
@@ -15,12 +15,12 @@ public:
         Fasta& ref,
         int flank,
         std::string const& seqname);
-    
+
     std::string sequence() const;
     std::string cigar() const;
     int64_t start() const;
     int64_t stop() const;
-    
+
 protected:
     std::string _sequence;
     CigarString _cigar;
@@ -40,6 +40,6 @@ inline int64_t VariantContig::start() const {
     return _start;
 }
 
-inline int64_t VariantContig::stop() const { 
+inline int64_t VariantContig::stop() const {
     return _stop;
 }

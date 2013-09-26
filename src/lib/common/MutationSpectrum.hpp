@@ -1,7 +1,8 @@
 #pragma once
 
+#include "common/cstdint.hpp"
+
 #include <array>
-#include <cstdint>
 #include <ostream>
 
 // class to keep track of what SNVs have been seen.

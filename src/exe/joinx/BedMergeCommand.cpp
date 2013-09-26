@@ -1,5 +1,6 @@
 #include "BedMergeCommand.hpp"
 
+#include "common/cstdint.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/BedReader.hpp"
 #include "fileformats/InputStream.hpp"
@@ -8,7 +9,6 @@
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
-#include <cstdint>
 #include <deque>
 #include <functional>
 #include <memory>
