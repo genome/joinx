@@ -1,9 +1,9 @@
 #pragma once
 
 #include "common/namespaces.hpp"
+#include "common/cstdint.hpp"
 
 #include <boost/format.hpp>
-#include <cstdint>
 #include <string>
 
 BEGIN_NAMESPACE(Vcf)

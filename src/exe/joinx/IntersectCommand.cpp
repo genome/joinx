@@ -1,6 +1,7 @@
 #include "IntersectCommand.hpp"
 #include "IntersectCollector.hpp"
 
+#include "common/cstdint.hpp"
 #include "fileformats/TypedStream.hpp"
 #include "processors/IntersectFull.hpp"
 #include "processors/IntersectionOutputFormatter.hpp"
@@ -10,7 +11,6 @@
 #include <boost/program_options.hpp>
 
 #include <algorithm>
-#include <cstdint>
 #include <cstdio>
 #include <fstream>
 #include <functional>

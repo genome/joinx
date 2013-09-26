@@ -1,9 +1,9 @@
 #pragma once
 
 #include "CommandBase.hpp"
+#include "common/cstdint.hpp"
 #include "fileformats/StreamHandler.hpp"
 
-#include <cstdint>
 #include <string>
 
 class BedMergeCommand : public CommandBase {

@@ -5,10 +5,10 @@
 #include "common/namespaces.hpp"
 #include "common/CyclicIterator.hpp"
 #include "common/Sequence.hpp"
+#include "common/cstdint.hpp"
 
 #include <algorithm>
 #include <cstddef>
-#include <cstdint>
 #include <string>
 #include <vector>
 

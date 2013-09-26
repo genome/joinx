@@ -1,3 +1,4 @@
+#include "common/cstdint.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/StreamHandler.hpp"
 #include "fileformats/vcf/CustomValue.hpp"
@@ -8,7 +9,6 @@
 #include "fileformats/vcf/AltNormalizer.hpp"
 #include "fileformats/Fasta.hpp"
 
-#include <cstdint>
 #include <functional>
 #include <iostream>
 #include <iterator>

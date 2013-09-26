@@ -1,10 +1,10 @@
 #pragma once
 
 #include "fileformats/Variant.hpp"
+#include "common/cstdint.hpp"
 
 #include <boost/format.hpp>
 #include <cmath>
-#include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <vector>

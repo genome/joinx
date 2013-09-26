@@ -5,7 +5,6 @@
 #include "common/namespaces.hpp"
 #include "fileformats/StreamHandler.hpp"
 
-#include <cstdint>
 #include <map>
 #include <string>
 #include <vector>

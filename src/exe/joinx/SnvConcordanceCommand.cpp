@@ -8,7 +8,6 @@
 
 #include <boost/program_options.hpp>
 #include <algorithm>
-#include <cstdint>
 #include <cstdio>
 #include <fstream>
 #include <functional>

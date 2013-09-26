@@ -1,8 +1,8 @@
 #pragma once
 
 #include "common/Exceptions.hpp"
+#include "common/cstdint.hpp"
 
-#include <cstdint>
 #include <iostream>
 #include <map>
 #include <memory>

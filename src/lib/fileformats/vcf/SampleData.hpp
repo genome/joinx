@@ -2,8 +2,8 @@
 
 #include "GenotypeCall.hpp"
 #include "common/namespaces.hpp"
+#include "common/cstdint.hpp"
 
-#include <cstdint>
 #include <map>
 #include <ostream>
 #include <string>

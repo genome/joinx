@@ -1,8 +1,8 @@
 #pragma once
 
 #include "common/namespaces.hpp"
+#include "common/cstdint.hpp"
 
-#include <cstdint>
 #include <map>
 
 BEGIN_NAMESPACE(Vcf)

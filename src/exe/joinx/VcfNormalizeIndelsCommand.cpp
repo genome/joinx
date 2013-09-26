@@ -11,7 +11,6 @@
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
-#include <cstdint>
 #include <functional>
 #include <stdexcept>
 
