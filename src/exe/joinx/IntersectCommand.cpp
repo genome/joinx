@@ -26,7 +26,7 @@ using namespace std::placeholders;
 using namespace std;
 
 CommandBase::ptr IntersectCommand::create(int argc, char** argv) {
-    std::shared_ptr<IntersectCommand> app(new IntersectCommand);
+    boost::shared_ptr<IntersectCommand> app(new IntersectCommand);
     app->parseArguments(argc, argv);
     return app;
 }

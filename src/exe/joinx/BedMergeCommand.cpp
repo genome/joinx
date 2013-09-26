@@ -21,7 +21,7 @@ using namespace std;
 using namespace std::placeholders;
 
 CommandBase::ptr BedMergeCommand::create(int argc, char** argv) {
-    std::shared_ptr<BedMergeCommand> app(new BedMergeCommand);
+    boost::shared_ptr<BedMergeCommand> app(new BedMergeCommand);
     app->parseArguments(argc, argv);
     return app;
 }

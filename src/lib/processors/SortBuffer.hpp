@@ -4,6 +4,7 @@
 #include "fileformats/InputStream.hpp"
 #include "fileformats/StreamFactory.hpp"
 
+#include <boost/shared_ptr.hpp>
 #include <boost/format.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
@@ -18,7 +19,7 @@
 template<typename StreamType, typename StreamOpener, typename OutputFunc>
 class SortBuffer {
 public:
-    typedef typename std::shared_ptr<StreamType> StreamPtr;
+    typedef typename boost::shared_ptr<StreamType> StreamPtr;
     typedef typename StreamType::ValueType ValueType;
     typedef typename ValueType::HeaderType HeaderType;
     typedef typename std::deque<ValueType*>::size_type size_type;

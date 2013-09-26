@@ -4,6 +4,8 @@
 #include "common/namespaces.hpp"
 
 #include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include <functional>
 #include <map>
 #include <memory>
@@ -23,7 +25,7 @@ namespace ValueMergers {
     /// These are useful for doing things like merging INFO, FILTER, or FORMAT
     /// records in vcf files.
     struct Base {
-        typedef std::shared_ptr<const Base> const_ptr;
+        typedef boost::shared_ptr<const Base> const_ptr;
         typedef std::function<const CustomValue*(Entry const*)> FetchFunc;
         virtual ~Base() {};
         /// the name of the merger. this is used when specifying merge

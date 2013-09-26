@@ -20,7 +20,7 @@ using namespace std;
 using namespace std::placeholders;
 
 CommandBase::ptr VcfNormalizeIndelsCommand::create(int argc, char** argv) {
-    std::shared_ptr<VcfNormalizeIndelsCommand> app(new VcfNormalizeIndelsCommand);
+    boost::shared_ptr<VcfNormalizeIndelsCommand> app(new VcfNormalizeIndelsCommand);
     app->parseArguments(argc, argv);
     return app;
 }

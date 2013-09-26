@@ -24,7 +24,7 @@ using namespace std;
 using namespace std::placeholders;
 
 CommandBase::ptr SortCommand::create(int argc, char** argv) {
-    std::shared_ptr<SortCommand> app(new SortCommand);
+    boost::shared_ptr<SortCommand> app(new SortCommand);
     app->parseArguments(argc, argv);
     return app;
 }
@@ -88,8 +88,10 @@ void SortCommand::parseArguments(int argc, char** argv) {
 
 namespace {
     template<typename T, typename X>
-    vector< shared_ptr<T> > setupStreams(const vector< shared_ptr<InputStream> >& v, X& extractor) {
-        vector< shared_ptr<T> > rv;
+    vector< boost::shared_ptr<T> > setupStreams(
+        const vector< boost::shared_ptr<InputStream> >& v, X& extractor)
+    {
+        vector< boost::shared_ptr<T> > rv;
         for (auto i = v.begin(); i != v.end(); ++i) {
             rv.push_back(shared_ptr<T>(new T(extractor, **i)));
         }
@@ -196,7 +198,7 @@ void SortCommand::exec() {
         WriterType writer(*out);
 
         typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
-        typedef shared_ptr<ReaderType> ReaderPtr;
+        typedef boost::shared_ptr<ReaderType> ReaderPtr;
         vector<ReaderPtr> readers;
 
         Vcf::Header mergedHeader;

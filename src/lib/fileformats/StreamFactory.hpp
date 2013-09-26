@@ -2,7 +2,7 @@
 
 #include "TypedStream.hpp"
 
-#include <memory>
+#include <boost/shared_ptr.hpp>
 
 class InputStream;
 
@@ -11,7 +11,7 @@ class StreamFactory {
 public:
     typedef ValueClass ValueType;
     typedef TypedStream<ValueType, Extractor> StreamType;
-    typedef std::shared_ptr<StreamType> StreamPtr;
+    typedef boost::shared_ptr<StreamType> StreamPtr;
 
     StreamFactory(Extractor& extractor)
         : _extractor(extractor)

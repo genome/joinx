@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
 
     string name;
     string line;
-    unique_ptr<Transcript> t;
+    std::unique_ptr<Transcript> t;
     while (getline(regions, line)) {
         // begina a new transcript, name = line.substr(2)
         if (line[0] == '#') {

@@ -2,6 +2,8 @@
 
 #include "common/cstdint.hpp"
 
+#include <boost/shared_ptr.hpp>
+
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -24,17 +26,17 @@ public:
     // for T is expected to accept T(const string& name, iostream& s)
 
     template<typename StreamType, typename WrapperType>
-    std::shared_ptr<WrapperType> wrap(const std::string& path);
+    boost::shared_ptr<WrapperType> wrap(const std::string& path);
 
     template<typename StreamType, typename WrapperType>
-    std::vector< std::shared_ptr<WrapperType> > wrap(const std::vector<std::string>& paths);
+    std::vector< boost::shared_ptr<WrapperType> > wrap(const std::vector<std::string>& paths);
 
     uint32_t cinReferences() const;
     uint32_t coutReferences() const;
 
 protected:
     struct Stream {
-        std::shared_ptr<std::iostream> stream;
+        boost::shared_ptr<std::iostream> stream;
         openmode mode;
     };
 
@@ -75,13 +77,13 @@ inline std::ostream* StreamHandler::get<std::ostream>(const std::string& path) {
 }
 
 template<typename StreamType, typename WrapperType>
-inline std::shared_ptr<WrapperType> StreamHandler::wrap(const std::string& path) {
-    return std::shared_ptr<WrapperType>(new WrapperType(path, *get<StreamType>(path)));
+inline boost::shared_ptr<WrapperType> StreamHandler::wrap(const std::string& path) {
+    return boost::shared_ptr<WrapperType>(new WrapperType(path, *get<StreamType>(path)));
 }
 
 template<typename StreamType, typename WrapperType>
-inline std::vector< std::shared_ptr<WrapperType> > StreamHandler::wrap(const std::vector<std::string>& paths) {
-    std::vector< std::shared_ptr<WrapperType> > rv;
+inline std::vector< boost::shared_ptr<WrapperType> > StreamHandler::wrap(const std::vector<std::string>& paths) {
+    std::vector< boost::shared_ptr<WrapperType> > rv;
     for (auto i = paths.begin(); i != paths.end(); ++i)
         rv.push_back(wrap<StreamType, WrapperType>(*i));
     return rv;

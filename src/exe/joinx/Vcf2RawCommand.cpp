@@ -16,7 +16,7 @@ using namespace std::placeholders;
 namespace po = boost::program_options;
 
 CommandBase::ptr Vcf2RawCommand::create(int argc, char** argv) {
-    std::shared_ptr<Vcf2RawCommand> app(new Vcf2RawCommand);
+    boost::shared_ptr<Vcf2RawCommand> app(new Vcf2RawCommand);
     app->parseArguments(argc, argv);
     return app;
 }

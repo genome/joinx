@@ -17,7 +17,7 @@ using namespace std;
 using namespace std::placeholders;
 
 CommandBase::ptr VcfSiteFilterCommand::create(int argc, char** argv) {
-    std::shared_ptr<VcfSiteFilterCommand> app(new VcfSiteFilterCommand);
+    boost::shared_ptr<VcfSiteFilterCommand> app(new VcfSiteFilterCommand);
     app->parseArguments(argc, argv);
     return app;
 }
@@ -65,7 +65,7 @@ void VcfSiteFilterCommand::parseArguments(int argc, char** argv) {
     description.precision(2);
     description << "More than " << _minFailFilter * 100.0 << "% samples with data failed the per-sample filter";
     _filterDescription = description.str();
-    
+
 }
 
 void VcfSiteFilterCommand::exec() {
@@ -76,7 +76,7 @@ void VcfSiteFilterCommand::exec() {
 
     typedef function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
     typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
-    typedef shared_ptr<ReaderType> ReaderPtr;
+    typedef boost::shared_ptr<ReaderType> ReaderPtr;
     typedef OutputWriter<Vcf::Entry> WriterType;
 
     VcfExtractor extractor = bind(&Vcf::Entry::parseLine, _1, _2, _3);
@@ -84,7 +84,7 @@ void VcfSiteFilterCommand::exec() {
     ReaderType reader(extractor, *instream);
     //create filter entry for header
     reader.header().addFilter(_filterName,_filterDescription);
-    
+
     Vcf::Entry e;
     *out << reader.header();
     while (reader.next(e)) {
