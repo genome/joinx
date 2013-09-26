@@ -17,7 +17,7 @@ using namespace std;
 using namespace std::placeholders;
 
 CommandBase::ptr VcfFilterCommand::create(int argc, char** argv) {
-    std::shared_ptr<VcfFilterCommand> app(new VcfFilterCommand);
+    boost::shared_ptr<VcfFilterCommand> app(new VcfFilterCommand);
     app->parseArguments(argc, argv);
     return app;
 }
@@ -64,7 +64,7 @@ void VcfFilterCommand::exec() {
 
     typedef function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
     typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
-    typedef shared_ptr<ReaderType> ReaderPtr;
+    typedef boost::shared_ptr<ReaderType> ReaderPtr;
     typedef OutputWriter<Vcf::Entry> WriterType;
 
     VcfExtractor extractor = bind(&Vcf::Entry::parseLine, _1, _2, _3);

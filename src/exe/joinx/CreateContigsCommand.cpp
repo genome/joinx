@@ -30,7 +30,7 @@ CreateContigsCommand::CreateContigsCommand()
 }
 
 CommandBase::ptr CreateContigsCommand::create(int argc, char** argv) {
-    std::shared_ptr<CreateContigsCommand> app(new CreateContigsCommand);
+    boost::shared_ptr<CreateContigsCommand> app(new CreateContigsCommand);
     app->parseArguments(argc, argv);
     return app;
 }
@@ -96,7 +96,7 @@ void CreateContigsCommand::exec() {
 
     typedef function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
     typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
-    typedef shared_ptr<ReaderType> ReaderPtr;
+    typedef boost::shared_ptr<ReaderType> ReaderPtr;
 
     VcfExtractor extractor = bind(&Vcf::Entry::parseLine, _1, _2, _3);
     ReaderType reader(extractor, *instream);

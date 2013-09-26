@@ -16,18 +16,20 @@
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
+
 #include <functional>
 #include <memory>
 #include <stdexcept>
 
 namespace po = boost::program_options;
 using boost::format;
+using std::unique_ptr;
 using namespace std;
 using namespace std::placeholders;
 using Vcf::CustomType;
 
 CommandBase::ptr VcfMergeCommand::create(int argc, char** argv) {
-    std::shared_ptr<VcfMergeCommand> app(new VcfMergeCommand);
+    boost::shared_ptr<VcfMergeCommand> app(new VcfMergeCommand);
     app->parseArguments(argc, argv);
     return app;
 }
@@ -185,7 +187,7 @@ void VcfMergeCommand::exec() {
 
     typedef function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
     typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
-    typedef shared_ptr<ReaderType> ReaderPtr;
+    typedef boost::shared_ptr<ReaderType> ReaderPtr;
     typedef OutputWriter<Vcf::Entry> PrinterType;
 
     vector<ReaderPtr> readers;

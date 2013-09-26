@@ -17,7 +17,7 @@ using namespace std::placeholders;
 namespace po = boost::program_options;
 
 CommandBase::ptr RefStatsCommand::create(int argc, char** argv) {
-    std::shared_ptr<RefStatsCommand> app(new RefStatsCommand);
+    boost::shared_ptr<RefStatsCommand> app(new RefStatsCommand);
     app->parseArguments(argc, argv);
     return app;
 }

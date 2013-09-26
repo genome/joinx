@@ -5,6 +5,7 @@
 #include "CustomValue.hpp"
 
 #include <boost/format.hpp>
+
 #include <set>
 #include <stdexcept>
 

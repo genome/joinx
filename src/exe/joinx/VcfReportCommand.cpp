@@ -27,7 +27,7 @@ using namespace std;
 using namespace std::placeholders;
 
 CommandBase::ptr VcfReportCommand::create(int argc, char** argv) {
-    std::shared_ptr<VcfReportCommand> app(new VcfReportCommand);
+    boost::shared_ptr<VcfReportCommand> app(new VcfReportCommand);
     app->parseArguments(argc, argv);
     return app;
 }

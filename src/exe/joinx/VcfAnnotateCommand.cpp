@@ -24,7 +24,7 @@ using namespace std;
 using namespace placeholders;
 
 CommandBase::ptr VcfAnnotateCommand::create(int argc, char** argv) {
-    shared_ptr<VcfAnnotateCommand> app(new VcfAnnotateCommand);
+    boost::shared_ptr<VcfAnnotateCommand> app(new VcfAnnotateCommand);
     app->parseArguments(argc, argv);
     return app;
 }
