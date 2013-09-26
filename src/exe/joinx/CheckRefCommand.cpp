@@ -6,13 +6,13 @@
 #include "fileformats/Fasta.hpp"
 #include "fileformats/InputStream.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/format.hpp>
+#include <boost/function.hpp>
 #include <boost/program_options.hpp>
-#include <functional>
 
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 namespace po = boost::program_options;
 
 CommandBase::ptr CheckRefCommand::create(int argc, char** argv) {
@@ -70,8 +70,8 @@ void CheckRefCommand::parseArguments(int argc, char** argv) {
 
 void CheckRefCommand::exec() {
     InputStream::ptr inStream = _streams.wrap<istream, InputStream>(_bedFile);
-    typedef function<void(const BedHeader*, string&, Bed&)> ExtractorType;
-    ExtractorType extractor = bind(&Bed::parseLine, _1, _2, _3, 1);
+    typedef boost::function<void(const BedHeader*, string&, Bed&)> ExtractorType;
+    ExtractorType extractor = boost::bind(&Bed::parseLine, _1, _2, _3, 1);
     typedef TypedStream<Bed, ExtractorType> BedReader;
     BedReader bedReader(extractor, *inStream);
     Fasta refSeq(_fastaFile);

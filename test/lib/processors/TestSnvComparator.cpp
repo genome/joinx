@@ -5,14 +5,16 @@
 
 #include "MockResultCollector.hpp"
 
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+
 #include <gtest/gtest.h>
-#include <functional>
+
 #include <sstream>
 #include <stdexcept>
 #include <string>
 
 using namespace std;
-using namespace std::placeholders;
 
 const string BEDA =
     "1\t2\t3\tA/T\t43\n"
@@ -35,10 +37,10 @@ const string BEDB =
     "Y\t2\t3\tA/T\t44\n";
 
 namespace {
-    typedef function<void(const BedHeader*, string&, Bed&)> Extractor;
-    Extractor exA = bind(&Bed::parseLine, _1, _2, _3, 2);
-    Extractor exB = bind(&Bed::parseLine, _1, _2, _3, 0);
-    typedef TypedStream<Bed, std::function<void(const BedHeader*, std::string&, Bed&)> > BedReader;
+    typedef boost::function<void(const BedHeader*, string&, Bed&)> Extractor;
+    Extractor exA = boost::bind(&Bed::parseLine, _1, _2, _3, 2);
+    Extractor exB = boost::bind(&Bed::parseLine, _1, _2, _3, 0);
+    typedef TypedStream<Bed, boost::function<void(const BedHeader*, std::string&, Bed&)> > BedReader;
 }
 
 TEST(SnvComparator, intersectAll) {

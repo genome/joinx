@@ -2,7 +2,8 @@
 
 #include "common/namespaces.hpp"
 
-#include <functional>
+#include <boost/function.hpp>
+
 #include <vector>
 #include <string>
 
@@ -14,7 +15,7 @@ class MergeStrategy;
 
 class Builder {
 public:
-    typedef std::function<void(Entry&)> OutputFunc;
+    typedef boost::function<void(Entry&)> OutputFunc;
     Builder(
         const MergeStrategy& mergeStrategy,
         Header* header,

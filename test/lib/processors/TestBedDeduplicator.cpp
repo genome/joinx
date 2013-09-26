@@ -11,7 +11,6 @@
 #include <vector>
 
 using namespace std;
-using namespace std::placeholders;
 
 TEST(BedDeduplicator, deduplicate) {
     string inputText[] = {

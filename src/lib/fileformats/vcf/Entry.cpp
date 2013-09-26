@@ -18,7 +18,6 @@
 
 using boost::format;
 using boost::lexical_cast;
-using namespace placeholders;
 using namespace std;
 
 BEGIN_NAMESPACE(Vcf)

@@ -5,12 +5,12 @@
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <cassert>
-#include <functional>
 #include <iterator>
 #include <memory>
 #include <sstream>
@@ -19,7 +19,6 @@
 #include <vector>
 
 using namespace std;
-using namespace std::placeholders;
 using namespace Vcf;
 
 namespace {
@@ -262,7 +261,7 @@ TEST_F(TestVcfEntryMerger, GTfieldAlwaysFirst) {
 // That is, that the samples show up in the right output column.
 TEST_F(TestVcfEntryMerger, Builder) {
     vector<Entry> v;
-    Builder builder(*_defaultMs, &_mergedHeader, bind(&push_back, ref(v), _1));
+    Builder builder(*_defaultMs, &_mergedHeader, boost::bind(&push_back, ref(v), _1));
     string t1="20\t14370\tid1\tT\tG\t.\tPASS\tVC=Samtools\tDP\t1";
     string t2="21\t14370\tid1\tT\tC\t29\tPASS\tVC=Samtools\tDP\t2";
     Entry entries[2]; 
@@ -309,7 +308,7 @@ TEST_F(TestVcfEntryMerger, insertion) {
 
 TEST_F(TestVcfEntryMerger, nullAlt) {
     vector<Entry> v;
-    Builder builder(*_defaultMs, &_mergedHeader, bind(&push_back, ref(v), _1));
+    Builder builder(*_defaultMs, &_mergedHeader, boost::bind(&push_back, ref(v), _1));
     string t1="20\t14370\tid1\tT\tG\t.\tPASS\tVC=Samtools\tDP\t1";
     string t2="20\t14370\tid1\tT\t.\t29\tPASS\tVC=Samtools\tDP\t2";
     Entry entries[2]; 

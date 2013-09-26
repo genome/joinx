@@ -14,7 +14,6 @@
 #include <vector>
 
 using namespace Vcf;
-using namespace std::placeholders;
 using namespace std;
 
 /* from Dave:

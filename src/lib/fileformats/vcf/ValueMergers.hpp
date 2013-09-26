@@ -3,6 +3,7 @@
 #include "AlleleMerger.hpp"
 #include "common/namespaces.hpp"
 
+#include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
@@ -27,7 +28,7 @@ namespace ValueMergers {
     /// records in vcf files.
     struct Base {
         typedef boost::shared_ptr<const Base> const_ptr;
-        typedef std::function<const CustomValue*(Entry const*)> FetchFunc;
+        typedef boost::function<const CustomValue*(Entry const*)> FetchFunc;
         virtual ~Base() {};
         /// the name of the merger. this is used when specifying merge
         /// strategies from a text file or from the command line

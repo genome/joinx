@@ -12,16 +12,17 @@
 #include "fileformats/vcf/Header.hpp"
 #include "processors/IntersectSimple.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/format.hpp>
+#include <boost/function.hpp>
 #include <boost/program_options.hpp>
-#include <functional>
+
 #include <iterator>
 #include <stdexcept>
 
 namespace po = boost::program_options;
 using boost::format;
 using namespace std;
-using namespace placeholders;
 
 CommandBase::ptr VcfAnnotateCommand::create(int argc, char** argv) {
     boost::shared_ptr<VcfAnnotateCommand> app(new VcfAnnotateCommand);
@@ -148,12 +149,12 @@ void VcfAnnotateCommand::exec() {
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
 
-    typedef function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
+    typedef boost::function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
     typedef TypedStream<Vcf::Entry, VcfExtractor> VcfReader;
     typedef OutputWriter<Vcf::Entry> Writer;
     typedef SimpleVcfAnnotator<Writer> AnnoType;
 
-    VcfExtractor vcfEx = bind(&Vcf::Entry::parseLine, _1, _2, _3);
+    VcfExtractor vcfEx = boost::bind(&Vcf::Entry::parseLine, _1, _2, _3);
     VcfReader vcfReader(vcfEx, *inputStreams[0]);
     VcfReader annoReader(vcfEx, *inputStreams[1]);
 

@@ -4,7 +4,8 @@
 #include "fileformats/vcf/VariantAdaptor.hpp"
 #include "fileformats/InputStream.hpp"
 
-#include <functional>
+#include <boost/bind.hpp>
+
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -12,7 +13,6 @@
 #include <gtest/gtest.h>
 
 using namespace Vcf;
-using namespace std::placeholders;
 using namespace std;
 
 namespace {
@@ -70,7 +70,7 @@ protected:
 TEST_F(TestVcfMatcher, matchChromLT) {
     typedef Conditions::RelOp<string, less<string> > LT;
     string val("21");
-    LT::Extractor ext = bind(&Entry::chrom, _1);
+    LT::Extractor ext = boost::bind(&Entry::chrom, _1);
     LT chromMatch(val, ext);
 
     ASSERT_TRUE(chromMatch(v[0]));
@@ -83,7 +83,7 @@ TEST_F(TestVcfMatcher, matchChromLT) {
 
 TEST_F(TestVcfMatcher, matchPos) {
     typedef Conditions::RelOp<uint64_t, less<uint64_t> > LT;
-    LT::Extractor ext = bind(&Entry::pos, _1);
+    LT::Extractor ext = boost::bind(&Entry::pos, _1);
     uint64_t val = 1200000;
     LT posMatch(val, ext);
 
@@ -97,7 +97,7 @@ TEST_F(TestVcfMatcher, matchPos) {
 
 TEST_F(TestVcfMatcher, posNotLess) {
     typedef Conditions::RelOp<uint64_t, less<uint64_t> > LT;
-    LT::Extractor ext = bind(&Entry::pos, _1);
+    LT::Extractor ext = boost::bind(&Entry::pos, _1);
     uint64_t val = 1200000;
     LT posMatch(val, ext);
     Conditions::Not n(posMatch);
@@ -112,7 +112,7 @@ TEST_F(TestVcfMatcher, posNotLess) {
 
 TEST_F(TestVcfMatcher, refEq) {
     typedef Conditions::RelOp<string, equal_to<string> > EQ;
-    EQ::Extractor ext = bind(&Entry::ref, _1);
+    EQ::Extractor ext = boost::bind(&Entry::ref, _1);
     string val("G");
     EQ refMatch(val, ext);
 
@@ -129,11 +129,11 @@ TEST_F(TestVcfMatcher, logicalAnd) {
     typedef Conditions::RelOp<uint64_t, greater<uint64_t> > IntGt;
     typedef Conditions::BinaryLogical< logical_and<bool> > And;
 
-    StrEq::Extractor ext1 = bind(&Entry::chrom, _1);
+    StrEq::Extractor ext1 = boost::bind(&Entry::chrom, _1);
     string val1("20");
     StrEq chromMatch(val1, ext1);
 
-    IntGt::Extractor ext2 = bind(&Entry::pos, _1);
+    IntGt::Extractor ext2 = boost::bind(&Entry::pos, _1);
     uint64_t val2 = 1200000;
     IntGt posMatch(val2, ext2);
 

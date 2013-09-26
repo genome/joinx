@@ -12,7 +12,6 @@
 
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 
 BEGIN_NAMESPACE(Vcf)
 

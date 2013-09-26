@@ -6,15 +6,16 @@
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/format.hpp>
+#include <boost/function.hpp>
 #include <boost/program_options.hpp>
-#include <functional>
+
 #include <stdexcept>
 
 namespace po = boost::program_options;
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 
 CommandBase::ptr VcfSiteFilterCommand::create(int argc, char** argv) {
     boost::shared_ptr<VcfSiteFilterCommand> app(new VcfSiteFilterCommand);
@@ -74,12 +75,12 @@ void VcfSiteFilterCommand::exec() {
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
 
-    typedef function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
+    typedef boost::function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
     typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
     typedef boost::shared_ptr<ReaderType> ReaderPtr;
     typedef OutputWriter<Vcf::Entry> WriterType;
 
-    VcfExtractor extractor = bind(&Vcf::Entry::parseLine, _1, _2, _3);
+    VcfExtractor extractor = boost::bind(&Vcf::Entry::parseLine, _1, _2, _3);
     WriterType writer(*out);
     ReaderType reader(extractor, *instream);
     //create filter entry for header

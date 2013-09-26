@@ -4,6 +4,9 @@
 #include "fileformats/InputStream.hpp"
 #include "fileformats/InferFileType.hpp"
 
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+
 #include <gtest/gtest.h>
 #include <functional>
 #include <sstream>
@@ -12,7 +15,6 @@
 #include <vector>
 
 using namespace std;
-using namespace std::placeholders;
 using namespace Vcf;
 
 namespace {
@@ -49,9 +51,9 @@ TEST(VcfReader, read) {
     InputStream in("test", ss);
     inferFileType(in);
 
-    typedef function<void(const Vcf::Header*, string&, Entry&)> Extractor;
+    typedef boost::function<void(const Vcf::Header*, string&, Entry&)> Extractor;
     typedef TypedStream<Entry, Extractor> VcfReader;
-    Extractor extractor = bind(&Entry::parseLine, _1, _2, _3);
+    Extractor extractor = boost::bind(&Entry::parseLine, _1, _2, _3);
     VcfReader r(extractor, in);
     Entry e;
 

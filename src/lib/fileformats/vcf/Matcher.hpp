@@ -4,6 +4,8 @@
 #include "common/namespaces.hpp"
 #include <iostream>
 
+#include <boost/function.hpp>
+
 #include <string>
 #include <functional>
 
@@ -37,7 +39,7 @@ namespace Conditions {
     template<typename T, typename Compare>
     class RelOp : public Base {
     public:
-        typedef std::function<const T&(const Entry&)> Extractor;
+        typedef boost::function<const T&(const Entry&)> Extractor;
         RelOp(const T& value, const Extractor& extractor, Compare cmp = Compare())
             : _value(value)
             , _extractor(extractor)

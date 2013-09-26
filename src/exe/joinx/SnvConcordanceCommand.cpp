@@ -6,18 +6,19 @@
 #include "processors/IntersectFull.hpp"
 #include "reports/SnvConcordance.hpp"
 
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include <boost/program_options.hpp>
+
 #include <algorithm>
 #include <cstdio>
 #include <fstream>
-#include <functional>
 #include <iostream>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
 
 using namespace std;
-using namespace std::placeholders;
 namespace po = boost::program_options;
 
 CommandBase::ptr SnvConcordanceCommand::create(int argc, char** argv) {
@@ -155,8 +156,8 @@ void SnvConcordanceCommand::exec() {
         throw runtime_error("Multiple input streams from stdin specified. Abort.");
 
 
-    typedef function<void(const BedHeader*, string&, Bed&)> Extractor;
-    Extractor extractor = bind(&Bed::parseLine, _1, _2, _3, -1);
+    typedef boost::function<void(const BedHeader*, string&, Bed&)> Extractor;
+    Extractor extractor = boost::bind(&Bed::parseLine, _1, _2, _3, -1);
     typedef TypedStream<Bed, Extractor> BedReader;
     BedReader fa(extractor, *inA);
     BedReader fb(extractor, *inB);
