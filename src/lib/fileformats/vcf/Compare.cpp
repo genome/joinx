@@ -16,8 +16,8 @@ AltIntersect::ResultType AltIntersect::operator()(Entry const& a, Entry const& b
     if (a.chrom() != b.chrom())
         return rv;
 
-    vector<RawVariant> rawA = RawVariant::processEntry(a);
-    vector<RawVariant> rawB = RawVariant::processEntry(b);
+    RawVariant::Vector rawA = RawVariant::processEntry(a);
+    RawVariant::Vector rawB = RawVariant::processEntry(b);
 
     map<RawVariant, uint32_t> xsec;
 

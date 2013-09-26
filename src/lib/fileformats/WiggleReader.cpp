@@ -70,7 +70,7 @@ bool WiggleReader::next(Bed& value) {
 
 void WiggleReader::getEntry(Bed& value) {
     vector<string> extra;
-    extra.emplace_back(_last);
+    extra.push_back(_last);
     value = Bed(_chrom, _posBeg-1, _pos - 1, extra);
     if (_step != _span) {
         _posBeg += _step;
@@ -78,7 +78,6 @@ void WiggleReader::getEntry(Bed& value) {
     } else {
         _posBeg = _pos;
     }
-
 }
 
 std::string WiggleReader::errorMessage(std::string const& msg) const {

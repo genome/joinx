@@ -106,7 +106,7 @@ void CreateContigsCommand::exec() {
         if (entry.identifiers().empty())
             continue;
 
-        vector<Vcf::RawVariant> variants = Vcf::RawVariant::processEntry(entry);
+        Vcf::RawVariant::Vector variants = Vcf::RawVariant::processEntry(entry);
         for (auto i = variants.begin(); i != variants.end(); ++i) {
             size_t idx = distance(variants.begin(), i);
             stringstream namestream;
