@@ -4,6 +4,8 @@
 #include "fileformats/vcf/ValueMergers.hpp"
 #include "fileformats/InputStream.hpp"
 
+#include <boost/scoped_ptr.hpp>
+
 #include <gtest/gtest.h>
 #include <stdexcept>
 #include <sstream>
@@ -115,7 +117,7 @@ public:
     vector<Entry> _snvs;
     vector<Entry> _indels;
     vector<Header> _headers;
-    unique_ptr<MergeStrategy> _defaultMs;
+    boost::scoped_ptr<MergeStrategy> _defaultMs;
 };
 
 TEST_F(TestVcfMergeStrategy, parse) {
