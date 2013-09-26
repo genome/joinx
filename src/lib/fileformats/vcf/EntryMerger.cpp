@@ -218,8 +218,12 @@ void EntryMerger::setAltAndGenotypeData(
         for (auto si = samples.begin(); si != samples.end(); ++si) {
             uint32_t sampleIdx = si->first;
             const string& sampleName = e->header().sampleNames()[sampleIdx];
-            int primaryEntryIdx = getPrimaryEntryIdx(sampleName);
-            bool overridePreviousData = (e-_begin) == primaryEntryIdx;
+
+            bool overridePreviousData = true;
+            if (_mergedHeader->hasDuplicateSamples()) {
+                int primaryEntryIdx = getPrimaryEntryIdx(sampleName);
+                overridePreviousData = (e-_begin) == primaryEntryIdx;
+            }
 
             try {
                 SampleData::ValueVector const* values = samples.get(sampleIdx);
