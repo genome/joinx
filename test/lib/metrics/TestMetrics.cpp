@@ -4,6 +4,8 @@
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 
+#include <boost/ptr_container/ptr_vector.hpp>
+
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <fstream>
@@ -97,7 +99,7 @@ protected:
             Entry e;
             Vcf::Entry::parseLine(&_header, entries[i], e);
             _entries.push_back(e);
-            _metrics.emplace_back(new Metrics::EntryMetrics(e, _novelIndicators));
+            _metrics.push_back(new Metrics::EntryMetrics(e, _novelIndicators));
         }
     }
 
@@ -110,7 +112,7 @@ protected:
     Header _header;
     vector<string> _novelIndicators;
     vector<Entry> _entries;
-    vector<unique_ptr<Metrics::EntryMetrics>> _metrics;
+    boost::ptr_vector<Metrics::EntryMetrics> _metrics;
 };
 
 // Parameterized test fixture for mutation spectrum test of doom.
@@ -131,7 +133,7 @@ protected:
 // NOTE: The expected values in most of these tests are based on
 // entry[0] defined near the top of this module.
 TEST_F(TestMetrics, genotypeDistribution) {
-    auto dist = _metrics[0]->genotypeDistribution();
+    auto dist = _metrics[0].genotypeDistribution();
 
     ASSERT_EQ(6u, dist.size());
     ASSERT_EQ(1u, dist[GenotypeCall("0/0")]);
@@ -161,7 +163,7 @@ TEST_F(TestMetrics, genotypeDistribution) {
 
 TEST_F(TestMetrics, allelicDistribution) {
     // REF = A, ALT = C,T
-    auto const& dist = _metrics[0]->allelicDistribution();
+    auto const& dist = _metrics[0].allelicDistribution();
     ASSERT_EQ(3u, dist.size());
 
     // How many times did we see the reference (GT 0)
@@ -174,7 +176,7 @@ TEST_F(TestMetrics, allelicDistribution) {
 
 TEST_F(TestMetrics, allelicDistribution_insertion) {
     // REF = A, ALT = AT
-    auto const& dist = _metrics[1]->allelicDistribution();
+    auto const& dist = _metrics[1].allelicDistribution();
     ASSERT_EQ(2u, dist.size());
 
     // How many times did we see the reference (GT 0)
@@ -185,7 +187,7 @@ TEST_F(TestMetrics, allelicDistribution_insertion) {
 
 TEST_F(TestMetrics, allelicDistribution_deletion) {
     // REF = AGTA, ALT = A
-    auto const& dist = _metrics[2]->allelicDistribution();
+    auto const& dist = _metrics[2].allelicDistribution();
     ASSERT_EQ(2u, dist.size());
 
     // How many times did we see the reference (GT 0)
@@ -196,7 +198,7 @@ TEST_F(TestMetrics, allelicDistribution_deletion) {
 }
 
 TEST_F(TestMetrics, allelicDistributionBySample) {
-    auto const& dist = _metrics[0]->allelicDistributionBySample();
+    auto const& dist = _metrics[0].allelicDistributionBySample();
 
     ASSERT_EQ(3u, dist.size());
 
@@ -209,7 +211,7 @@ TEST_F(TestMetrics, allelicDistributionBySample) {
 }
 
 TEST_F(TestMetrics, allelicDistributionBySample_insertion) {
-    auto const& dist = _metrics[1]->allelicDistributionBySample();
+    auto const& dist = _metrics[1].allelicDistributionBySample();
 
     ASSERT_EQ(2u, dist.size());
 
@@ -221,7 +223,7 @@ TEST_F(TestMetrics, allelicDistributionBySample_insertion) {
 }
 
 TEST_F(TestMetrics, allelicDistributionBySample_deletion) {
-    auto const& dist = _metrics[2]->allelicDistributionBySample();
+    auto const& dist = _metrics[2].allelicDistributionBySample();
 
     ASSERT_EQ(2u, dist.size());
 
@@ -236,7 +238,7 @@ TEST_F(TestMetrics, minorAlleleFrequency) {
     // we have diploid 10 samples with 1 filtered for 18 total alleles
     // the minor allele is 2, which shows up 5 times in the data.
     // (see the definition of entries[0])
-    ASSERT_NEAR(5.0/18.0, _metrics[0]->minorAlleleFrequency(), 1e-14);
+    ASSERT_NEAR(5.0/18.0, _metrics[0].minorAlleleFrequency(), 1e-14);
 }
 
 // The next test probably warrants an explanation.
@@ -346,7 +348,7 @@ INSTANTIATE_TEST_CASE_P(
 );
 
 TEST_F(TestMetrics, mutationSpectrum_indel) {
-    auto const& spectrum = _metrics[1]->mutationSpectrum();
+    auto const& spectrum = _metrics[1].mutationSpectrum();
     for(int i = 0; i < 4; ++i) {
         for(int j =0; j < 4; ++j) {
             EXPECT_EQ(0u, spectrum("ACGT"[i],"ACGT"[j]));

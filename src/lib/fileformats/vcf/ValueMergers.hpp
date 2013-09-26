@@ -4,6 +4,7 @@
 #include "common/namespaces.hpp"
 
 #include <boost/noncopyable.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <functional>
@@ -72,7 +73,7 @@ namespace ValueMergers {
         Registry();
     protected:
         /// holds a pointer to the singleton instance of this class
-        static std::unique_ptr<Registry> _instance;
+        static boost::scoped_ptr<Registry> _instance;
         /// a map of the available mergers, keyed by name
         std::map<std::string, Base::const_ptr> _mergers;
     };

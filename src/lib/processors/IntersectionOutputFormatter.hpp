@@ -1,5 +1,7 @@
 #pragma once
 
+#include "boost/ptr_container/ptr_vector.hpp"
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -21,7 +23,7 @@ public:
 
 protected:
     std::string _formatString;
-    std::vector<std::unique_ptr<ColumnBase>> _columns;
+    boost::ptr_vector<ColumnBase> _columns;
     std::ostream& _s;
 };
 

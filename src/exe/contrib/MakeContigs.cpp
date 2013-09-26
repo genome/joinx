@@ -2,6 +2,8 @@
 #include "fileformats/Bed.hpp"
 #include "common/cstdint.hpp"
 
+#include <boost/scoped_ptr.hpp>
+
 #include <algorithm>
 #include <cstdlib>
 #include <fstream>
@@ -137,7 +139,7 @@ int main(int argc, char** argv) {
 
     string name;
     string line;
-    std::unique_ptr<Transcript> t;
+    boost::scoped_ptr<Transcript> t;
     while (getline(regions, line)) {
         // begina a new transcript, name = line.substr(2)
         if (line[0] == '#') {

@@ -92,7 +92,7 @@ public:
             switch (t.lastDelim()) {
                 case '\0':
                 case ',':
-                    out.emplace_back(new Column(s, which, field));
+                    out.push_back(new Column(s, which, field));
                     break;
 
                 case '-':
@@ -101,7 +101,7 @@ public:
                             "Invalid format string component %1%") %fmt));
 
                     while (field <= rangeEnd)
-                        out.emplace_back(new Column(s, which, field++));
+                        out.push_back(new Column(s, which, field++));
                     break;
             }
         }
@@ -162,11 +162,11 @@ Formatter::Formatter(const std::string& formatString, std::ostream& s)
                 %formatString));
 
         if (token == "I") {
-            _columns.emplace_back(new IntersectionColumns(s));
+            _columns.push_back(new IntersectionColumns(s));
         } else if (token == "A") {
-            _columns.emplace_back(new CompleteColumn(s, 0));
+            _columns.push_back(new CompleteColumn(s, 0));
         } else if (token == "B") {
-            _columns.emplace_back(new CompleteColumn(s, 1));
+            _columns.push_back(new CompleteColumn(s, 1));
         } else {
             Column::parse(token, s, _columns);
         }
@@ -178,7 +178,7 @@ Formatter::~Formatter() {
 
 void Formatter::output(const Bed& a, const Bed& b) {
     for (unsigned i = 0; i < _columns.size(); ++i) {
-        _columns[i]->output(a, b);
+        _columns[i].output(a, b);
         if (i < _columns.size() - 1) _s << "\t";
     }
     _s << "\n";
@@ -187,8 +187,8 @@ void Formatter::output(const Bed& a, const Bed& b) {
 unsigned Formatter::extraFields(unsigned which) const {
     unsigned n = 0;
     for (auto i = _columns.begin(); i != _columns.end(); ++i)
-        if ((*i)->which() == 0)
-            n = max(n, (*i)->extraFields());
+        if (i->which() == 0)
+            n = max(n, i->extraFields());
     return n;
 }
 

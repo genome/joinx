@@ -5,6 +5,7 @@
 #include "CustomValue.hpp"
 
 #include <boost/format.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <set>
 #include <stdexcept>
@@ -16,7 +17,7 @@ BEGIN_NAMESPACE(Vcf)
 
 namespace ValueMergers {
 
-std::unique_ptr<Registry> Registry::_instance;
+boost::scoped_ptr<Registry> Registry::_instance;
 
 Registry::Registry() {
     registerMerger(Base::const_ptr(new UseFirst));

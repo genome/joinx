@@ -4,6 +4,8 @@
 #include "fileformats/StreamFactory.hpp"
 #include "fileformats/BedReader.hpp"
 
+#include <boost/ptr_container/ptr_vector.hpp>
+
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <memory>
@@ -66,17 +68,17 @@ protected:
 
         const int nStreams = 10;
         for (int i = 0; i < nStreams; ++i)
-            _rawStreams.emplace_back(new stringstream);
+            _rawStreams.push_back(new stringstream);
 
         auto iter = _shuffledBeds.begin();
         while (iter != _shuffledBeds.end()) {
             for (int i = 0; i < nStreams && iter != _shuffledBeds.end(); ++i) {
-                *_rawStreams[i] << *iter++ << "\n";
+                _rawStreams[i] << *iter++ << "\n";
             }
         }
 
         for (int i = 0; i < nStreams; ++i) {
-            _inputStreams.push_back(InputStream::ptr(new InputStream("test", *_rawStreams[i])));
+            _inputStreams.push_back(InputStream::ptr(new InputStream("test", _rawStreams[i])));
             _bedReaders.push_back(openBed(*_inputStreams.back(), 0));
         }
     }
@@ -88,7 +90,7 @@ protected:
     vector<Bed> _shuffledBeds;
     stringstream _expectedStr;
 
-    vector<unique_ptr<stringstream>> _rawStreams;
+    boost::ptr_vector<stringstream> _rawStreams;
     vector<InputStream::ptr> _inputStreams;
     vector<BedReader::ptr> _bedReaders;
 };

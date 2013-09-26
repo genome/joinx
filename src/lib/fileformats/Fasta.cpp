@@ -143,8 +143,8 @@ public:
         }
     }
 
-    std::unique_ptr<Fasta::Index> generate() {
-        std::unique_ptr<Fasta::Index> index(new Fasta::Index);
+    Fasta::Index* generate() {
+        Fasta::Index* index(new Fasta::Index);
         while (_pos < _end) {
             Entry e;
             extractName(e);
@@ -155,7 +155,7 @@ public:
         }
         return index;
     }
-    
+
 protected:
     char const* _beg;
     char const* _pos;
@@ -170,6 +170,7 @@ Fasta::Fasta(
         char const* data,
         size_t len)
     : _name(name)
+    , _index(0)
     , _data(data)
     , _len(len)
 {
@@ -179,6 +180,7 @@ Fasta::Fasta(
 
 Fasta::Fasta(std::string const& path)
     : _name(path)
+    , _index(0)
 {
     try {
         _f.reset(new boost::iostreams::mapped_file_source(path));
@@ -192,7 +194,7 @@ Fasta::Fasta(std::string const& path)
     string faiPath = path + INDEX_EXTENSION;
     ifstream in(faiPath);
     if (in) {
-        _index.reset(new Index(in));
+        _index = new Index(in);
     } else {
         IndexGenerator gen(_data, _len);
         _index = gen.generate();
@@ -206,9 +208,8 @@ Fasta::Fasta(std::string const& path)
 }
 
 Fasta::~Fasta() {
-    // this must be in the .cpp file. if we let the compiler generate a
-    // destructor, it will complain about the unique_ptrs to incomplete
-    // types in the header.
+    delete _index;
+    _index = 0;
 }
 
 std::string const& Fasta::name() const {
@@ -219,7 +220,7 @@ size_t Fasta::seqlen(std::string const& seq) const {
     Index::Entry const* e = _index->entry(seq);
     if (e) {
         return e->len;
-    }    
+    }
 
     return 0;
 }
@@ -240,7 +241,7 @@ std::string Fasta::sequence(std::string const& seq, size_t pos, size_t len) cons
             "Request for %1%:%2%-%3% in %4%, but %1% has length %5%"
             ) %seq %pos %(pos+len) %_name %e->len));
     }
-    
+
     // convert to 0 based array index
     --pos;
 
@@ -256,7 +257,7 @@ std::string Fasta::sequence(std::string const& seq, size_t pos, size_t len) cons
         skipBases = 0;
         lineStart += e->lineLength;
     }
-    
+
     return rv;
 }
 
