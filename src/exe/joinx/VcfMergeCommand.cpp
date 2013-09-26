@@ -97,7 +97,7 @@ void VcfMergeCommand::parseArguments(int argc, char** argv) {
     if (vm.count("help")) {
         stringstream ss;
         ss << opts;
-        throw runtime_error(ss.str());
+        throw CmdlineHelpException(ss.str());
     }
 
     _exactPos = vm.count("exact-pos") > 0;

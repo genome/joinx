@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/Exceptions.hpp"
+
 #include <cstdint>
 #include <iostream>
 #include <map>
