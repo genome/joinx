@@ -5,6 +5,8 @@
 #include "common/Sequence.hpp"
 #include "common/namespaces.hpp"
 
+#include <boost/ptr_container/ptr_vector.hpp>
+
 #include <vector>
 #include <string>
 #include <utility>
@@ -21,11 +23,12 @@ BEGIN_NAMESPACE(Vcf)
 class RawVariant {
 public:
     static RawVariant None;
+    typedef boost::ptr_vector<RawVariant> Vector;
 
-    static std::vector<RawVariant> processEntry(Entry const& e) {
-        vector<RawVariant> rv;
+    static Vector processEntry(Entry const& e) {
+        Vector rv;
         for (auto alt = e.alt().begin(); alt != e.alt().end(); ++alt)
-            rv.emplace_back(e.pos(), e.ref(), *alt);
+            rv.push_back(new RawVariant(e.pos(), e.ref(), *alt));
         return rv;
     }
 

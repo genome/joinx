@@ -59,7 +59,7 @@ TEST_F(TestVcfRawVariant, singlealt) {
     };
     size_t nExpected = sizeof(expected) / sizeof(expected[0]);
 
-    vector<RawVariant> raw = RawVariant::processEntry(e);
+    RawVariant::Vector raw = RawVariant::processEntry(e);
     ASSERT_EQ(nExpected, raw.size());
     for (size_t i = 0; i < nExpected; ++i) {
         ASSERT_EQ(expected[i].pos, raw[i].pos) << " at index " << i << " in\n" << e;
@@ -81,7 +81,7 @@ TEST_F(TestVcfRawVariant, doublealt) {
     };
     size_t nExpected = sizeof(expected) / sizeof(expected[0]);
 
-    vector<RawVariant> raw = RawVariant::processEntry(e);
+    RawVariant::Vector raw = RawVariant::processEntry(e);
     ASSERT_EQ(nExpected, raw.size());
     for (size_t i = 0; i < nExpected; ++i) {
         ASSERT_EQ(expected[i].pos, raw[i].pos) << " at index " << i << " in\n" << e;
