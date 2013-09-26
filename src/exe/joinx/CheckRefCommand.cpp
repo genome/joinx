@@ -52,7 +52,7 @@ void CheckRefCommand::parseArguments(int argc, char** argv) {
     if (vm.count("help")) {
         stringstream ss;
         ss << opts;
-        throw runtime_error(ss.str());
+        throw CmdlineHelpException(ss.str());
     }
 
     if (!vm.count("bed")) {

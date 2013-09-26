@@ -1,6 +1,6 @@
 #include "SortCommand.hpp"
 
-#include "common/IOError.hpp"
+#include "common/Exceptions.hpp"
 #include "fileformats/BedReader.hpp"
 #include "fileformats/ChromPosReader.hpp"
 #include "fileformats/InferFileType.hpp"
@@ -70,7 +70,7 @@ void SortCommand::parseArguments(int argc, char** argv) {
     if (vm.count("help")) {
         stringstream ss;
         ss << opts;
-        throw runtime_error(ss.str());
+        throw CmdlineHelpException(ss.str());
     }
 
     if (vm.count("unique"))

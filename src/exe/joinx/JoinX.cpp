@@ -18,6 +18,7 @@
 #include "VcfReportCommand.hpp"
 #include "Wig2BedCommand.hpp"
 
+#include "common/Exceptions.hpp"
 #include "common/ProgramDetails.hpp"
 
 #include <boost/format.hpp>
@@ -58,10 +59,10 @@ JoinX::JoinX(int argc, char** argv)
 
     string cmdstr = argv[1];
     if (cmdstr == "-h" || cmdstr == "--help")
-        throw runtime_error(cmdHelp.str());
+        throw CmdlineHelpException(cmdHelp.str());
 
     if (cmdstr == "-v" || cmdstr == "--version")
-        throw runtime_error(makeProgramVersionInfo("joinx"));
+        throw CmdlineHelpException(makeProgramVersionInfo("joinx"));
 
     _cmd = subCommand(cmdstr, argc-1, &argv[1]);
     if (!_cmd)

@@ -6,7 +6,7 @@ set(SOURCES
     CigarString.cpp
     CigarString.hpp
     CyclicIterator.hpp
-    IOError.hpp
+    Exceptions.hpp
     Iub.hpp
     MultiType.hpp
     MutationSpectrum.cpp

@@ -1,5 +1,5 @@
 #include "StreamHandler.hpp"
-#include "common/IOError.hpp"
+#include "common/Exceptions.hpp"
 
 #include <boost/format.hpp>
 
