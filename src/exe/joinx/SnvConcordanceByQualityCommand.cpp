@@ -103,7 +103,7 @@ SnvConcordanceByQualityCommand::SnvConcordanceByQualityCommand() {
 }
 
 CommandBase::ptr SnvConcordanceByQualityCommand::create(int argc, char** argv) {
-    std::shared_ptr<SnvConcordanceByQualityCommand> app(new SnvConcordanceByQualityCommand);
+    boost::shared_ptr<SnvConcordanceByQualityCommand> app(new SnvConcordanceByQualityCommand);
     app->parseArguments(argc, argv);
     return app;
 }

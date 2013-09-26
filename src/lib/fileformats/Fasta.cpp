@@ -143,8 +143,8 @@ public:
         }
     }
 
-    unique_ptr<Fasta::Index> generate() {
-        unique_ptr<Fasta::Index> index(new Fasta::Index);
+    std::unique_ptr<Fasta::Index> generate() {
+        std::unique_ptr<Fasta::Index> index(new Fasta::Index);
         while (_pos < _end) {
             Entry e;
             extractName(e);

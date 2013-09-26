@@ -20,7 +20,7 @@ iostream* StreamHandler::getFile(const std::string& path, openmode mode) {
         return i->second.stream.get();
     } else {
         Stream s;
-        s.stream = shared_ptr<fstream>(new fstream(path.c_str(), mode));
+        s.stream = boost::shared_ptr<fstream>(new fstream(path.c_str(), mode));
         s.mode = mode;
         if (!*s.stream) {
             throw IOError(str(format("Failed to open file %1%") %path));

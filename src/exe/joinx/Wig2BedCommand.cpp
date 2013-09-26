@@ -13,7 +13,7 @@ using namespace std::placeholders;
 namespace po = boost::program_options;
 
 CommandBase::ptr Wig2BedCommand::create(int argc, char** argv) {
-    std::shared_ptr<Wig2BedCommand> app(new Wig2BedCommand);
+    boost::shared_ptr<Wig2BedCommand> app(new Wig2BedCommand);
     app->parseArguments(argc, argv);
     return app;
 }

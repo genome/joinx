@@ -7,6 +7,7 @@
 #include "common/Tokenizer.hpp"
 
 #include <boost/format.hpp>
+
 #include <algorithm>
 #include <functional>
 #include <iterator>

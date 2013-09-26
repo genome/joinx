@@ -1,13 +1,14 @@
 #pragma once
 
+#include <boost/iostreams/filter/bzip2.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include <deque>
 #include <istream>
 #include <memory>
 #include <string>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filter/bzip2.hpp>
-
-#include <boost/iostreams/filtering_stream.hpp>
 
 enum CompressionType {
     NONE,
@@ -20,7 +21,7 @@ CompressionType compressionTypeFromString(const std::string& s);
 
 class InputStream {
 public:
-    typedef std::shared_ptr<InputStream> ptr;
+    typedef boost::shared_ptr<InputStream> ptr;
 
     static ptr create(const std::string& name, std::istream& rawStream);
 

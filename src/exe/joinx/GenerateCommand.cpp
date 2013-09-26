@@ -22,7 +22,7 @@ GenerateCommand::GenerateCommand()
 }
 
 CommandBase::ptr GenerateCommand::create(int argc, char** argv) {
-    std::shared_ptr<GenerateCommand> app(new GenerateCommand);
+    boost::shared_ptr<GenerateCommand> app(new GenerateCommand);
     app->parseArguments(argc, argv);
     return app;
 }

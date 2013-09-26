@@ -3,6 +3,8 @@
 #include "common/Exceptions.hpp"
 #include "common/cstdint.hpp"
 
+#include <boost/shared_ptr.hpp>
+
 #include <iostream>
 #include <map>
 #include <memory>
@@ -10,7 +12,7 @@
 
 class CommandBase {
 public:
-    typedef std::shared_ptr<CommandBase> ptr;
+    typedef boost::shared_ptr<CommandBase> ptr;
 
     virtual ~CommandBase() {}
 

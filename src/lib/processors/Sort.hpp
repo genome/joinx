@@ -6,6 +6,8 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
@@ -17,11 +19,11 @@
 template<typename StreamType, typename StreamOpener, typename OutputFunc>
 class Sort {
 public:
-    typedef typename std::shared_ptr<StreamType> StreamPtr;
+    typedef typename boost::shared_ptr<StreamType> StreamPtr;
     typedef typename StreamType::ValueType ValueType;
     typedef typename ValueType::HeaderType HeaderType;
     typedef SortBuffer<StreamType, StreamOpener, OutputFunc> BufferType;
-    typedef std::shared_ptr<BufferType> BufferPtr;
+    typedef boost::shared_ptr<BufferType> BufferPtr;
 
     Sort(
             const std::vector<StreamPtr>& inputs,

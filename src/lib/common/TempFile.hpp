@@ -1,13 +1,15 @@
 #pragma once
 
+#include <boost/shared_ptr.hpp>
+#include <boost/noncopyable.hpp>
+
 #include <fstream>
 #include <memory>
 #include <string>
-#include <boost/noncopyable.hpp>
 
 class TempFile : public boost::noncopyable {
 public:
-    typedef std::shared_ptr<TempFile> ptr;
+    typedef boost::shared_ptr<TempFile> ptr;
 
     static const char* sys_tmpdir();
     enum Mode {
@@ -37,7 +39,7 @@ protected:
 
 class TempDir : public boost::noncopyable {
 public:
-    typedef std::shared_ptr<TempDir> ptr;
+    typedef boost::shared_ptr<TempDir> ptr;
 
     enum Mode {
         LEAVE,
