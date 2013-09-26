@@ -10,7 +10,6 @@
 #include "fileformats/VcfReader.hpp"
 #include "Metrics.hpp"
 
-#include <functional>
 #include <iostream>
 #include <iterator>
 #include <memory>
@@ -18,7 +17,6 @@
 #include <limits>
 
 using namespace std;
-using namespace std::placeholders;
 
 int main(int argc, char** argv) {
     if (argc != 2) {

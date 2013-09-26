@@ -4,9 +4,11 @@
 #include "fileformats/StreamFactory.hpp"
 #include "fileformats/BedReader.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <gtest/gtest.h>
+
 #include <algorithm>
 #include <memory>
 #include <sstream>
@@ -16,7 +18,6 @@
 #include <functional>
 
 using namespace std;
-using namespace std::placeholders;
 
 namespace {
     const int CHROM_MAX = 22;
@@ -31,7 +32,7 @@ namespace {
         stringstream out;
     };
 
-    BedOpenerType bedOpener = bind(&openBed, _1, 0);
+    BedOpenerType bedOpener = boost::bind(&openBed, _1, 0);
     BedHeader hdr;
 }
 

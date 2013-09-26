@@ -8,7 +8,10 @@
 #include "processors/TypeFilter.hpp"
 #include "reports/ConcordanceQuality.hpp"
 
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include <boost/program_options.hpp>
+
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -17,7 +20,6 @@
 #include <stdexcept>
 
 using namespace std;
-using namespace std::placeholders;
 namespace po = boost::program_options;
 
 namespace {
@@ -27,7 +29,7 @@ void outputBed(ostream* out, const Bed& b) {
 
 class ResultCollector {
 public:
-    typedef function<void(const Bed&)> EventFunc;
+    typedef boost::function<void(const Bed&)> EventFunc;
 
     ResultCollector(
         StreamHandler& streams,
@@ -39,31 +41,31 @@ public:
 
         if (!hitFileA.empty()) {
             ostream* out = streams.get<ostream>(hitFileA);
-            addHitAListener(bind(&outputBed, out, _1));
+            addHitAListener(boost::bind(&outputBed, out, _1));
         }
 
         if (!hitFileB.empty()) {
             ostream* out = streams.get<ostream>(hitFileB);
-            addHitBListener(bind(&outputBed, out, _1));
+            addHitBListener(boost::bind(&outputBed, out, _1));
         }
 
         if (!missFileA.empty()) {
             ostream* out = streams.get<ostream>(missFileA);
-            addMissAListener(bind(&outputBed, out, _1));
+            addMissAListener(boost::bind(&outputBed, out, _1));
         }
 
         if (!missFileB.empty()) {
             ostream* out = streams.get<ostream>(missFileB);
-            addMissBListener(bind(&outputBed, out, _1));
+            addMissBListener(boost::bind(&outputBed, out, _1));
         }
     }
 
     template<typename T>
     void addAll(T* obj) {
-        addHitAListener(bind(&T::hitA, obj, _1));
-        addHitBListener(bind(&T::hitB, obj, _1));
-        addMissAListener(bind(&T::missA, obj, _1));
-        addMissBListener(bind(&T::missB, obj, _1));
+        addHitAListener(boost::bind(&T::hitA, obj, _1));
+        addHitBListener(boost::bind(&T::hitB, obj, _1));
+        addMissAListener(boost::bind(&T::missA, obj, _1));
+        addMissBListener(boost::bind(&T::missB, obj, _1));
     }
 
     void addHitAListener(const EventFunc& func) { _hitAFuncs.push_back(func); }
@@ -160,11 +162,11 @@ void SnvConcordanceByQualityCommand::exec() {
     NoReferenceFilter nref;
     TypeFilter snvOnly(Bed::SNV);
 
-    typedef function<void(const BedHeader*, string&, Bed&)> Extractor;
+    typedef boost::function<void(const BedHeader*, string&, Bed&)> Extractor;
     typedef TypedStream<Bed, Extractor> BedReader;
 
-    Extractor exA = bind(&Bed::parseLine, _1, _2, _3, 2);
-    Extractor exB = bind(&Bed::parseLine, _1, _2, _3, 0);
+    Extractor exA = boost::bind(&Bed::parseLine, _1, _2, _3, 2);
+    Extractor exB = boost::bind(&Bed::parseLine, _1, _2, _3, 0);
 
     BedReader fa(exA, *inStreamA);
     fa.addFilter(&snvOnly);

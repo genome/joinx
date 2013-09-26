@@ -7,13 +7,14 @@
 #include "vcf/Entry.hpp"
 #include "vcf/Header.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/format.hpp>
+#include <boost/function.hpp>
+
 #include <fstream>
-#include <functional>
 
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 
 namespace {
     bool testEmpty(InputStream& in) {
@@ -75,11 +76,11 @@ namespace {
 FileType inferFileType(InputStream& in) {
     FileType rv(UNKNOWN);
 
-    typedef function<void(const BedHeader*, string&, Bed&)> BedExtractor;
-    BedExtractor bedExtractor = bind(&Bed::parseLine, _1, _2, _3, -1);
+    typedef boost::function<void(const BedHeader*, string&, Bed&)> BedExtractor;
+    BedExtractor bedExtractor = boost::bind(&Bed::parseLine, _1, _2, _3, -1);
 
-    typedef function<void(const ChromPosHeader*, string&, ChromPos&)> ChromPosExtractor;
-    ChromPosExtractor cpExtractor = bind(&ChromPos::parseLine, _1, _2, _3);
+    typedef boost::function<void(const ChromPosHeader*, string&, ChromPos&)> ChromPosExtractor;
+    ChromPosExtractor cpExtractor = boost::bind(&ChromPos::parseLine, _1, _2, _3);
 
     if (testReader<Bed, BedExtractor>(in, bedExtractor)) {
         rv = BED;

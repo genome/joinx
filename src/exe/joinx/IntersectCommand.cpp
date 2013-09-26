@@ -7,13 +7,14 @@
 #include "processors/IntersectionOutputFormatter.hpp"
 
 #include <boost/assign/list_of.hpp>
+#include <boost/bind.hpp>
 #include <boost/format.hpp>
+#include <boost/function.hpp>
 #include <boost/program_options.hpp>
 
 #include <algorithm>
 #include <cstdio>
 #include <fstream>
-#include <functional>
 #include <iostream>
 #include <iterator>
 #include <memory>
@@ -22,7 +23,6 @@
 
 namespace po = boost::program_options;
 using boost::format;
-using namespace std::placeholders;
 using namespace std;
 
 CommandBase::ptr IntersectCommand::create(int argc, char** argv) {
@@ -164,10 +164,10 @@ void IntersectCommand::exec() {
     if (_streams.cinReferences() > 1)
         throw runtime_error("Multiple input streams from stdin specified. Abort.");
 
-    typedef function<void (const BedHeader*, std::string&, Bed&)> Extractor;
+    typedef boost::function<void (const BedHeader*, std::string&, Bed&)> Extractor;
     typedef TypedStream<Bed, Extractor> BedReaderType;
-    Extractor exA = bind(&Bed::parseLine, _1, _2, _3, extraFieldsA);
-    Extractor exB = bind(&Bed::parseLine, _1, _2, _3, extraFieldsB);
+    Extractor exA = boost::bind(&Bed::parseLine, _1, _2, _3, extraFieldsA);
+    Extractor exB = boost::bind(&Bed::parseLine, _1, _2, _3, extraFieldsB);
     BedReaderType fa(exA, *inStreamA);
     BedReaderType fb(exB, *inStreamB);
 

@@ -1,9 +1,12 @@
 #include "AlleleMerger.hpp"
 
+#include <boost/algorithm/cxx11/all_of.hpp>
+#include <boost/bind.hpp>
+
 #include "Entry.hpp"
 
 using namespace std;
-using namespace std::placeholders;
+namespace ba = boost::algorithm;
 
 BEGIN_NAMESPACE(Vcf)
 
@@ -23,7 +26,7 @@ AlleleMerger::AlleleMerger(std::vector<Entry> const& ents)
 
 void AlleleMerger::init(Entry const* beg, Entry const* end) {
     // make sure range is non-trivial and all on the same chromosome
-    if (end-beg < 2 || !all_of(beg, end, bind(&Entry::chromEq, beg->chrom(), _1))) {
+    if (end-beg < 2 || !ba::all_of(beg, end, boost::bind(&Entry::chromEq, beg->chrom(), _1))) {
         return;
     }
 

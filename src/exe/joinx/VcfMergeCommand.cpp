@@ -14,11 +14,13 @@
 #include "fileformats/vcf/SampleTag.hpp"
 #include "processors/MergeSorted.hpp"
 
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+
 #include <boost/scoped_ptr.hpp>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 
-#include <functional>
 #include <memory>
 #include <stdexcept>
 
@@ -26,7 +28,6 @@ namespace po = boost::program_options;
 using boost::format;
 using boost::scoped_ptr;
 using namespace std;
-using namespace std::placeholders;
 using Vcf::CustomType;
 
 CommandBase::ptr VcfMergeCommand::create(int argc, char** argv) {
@@ -186,13 +187,13 @@ void VcfMergeCommand::exec() {
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
 
-    typedef function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
+    typedef boost::function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
     typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
     typedef boost::shared_ptr<ReaderType> ReaderPtr;
     typedef OutputWriter<Vcf::Entry> PrinterType;
 
     vector<ReaderPtr> readers;
-    VcfExtractor extractor = bind(&Vcf::Entry::parseLine, _1, _2, _3);
+    VcfExtractor extractor = boost::bind(&Vcf::Entry::parseLine, _1, _2, _3);
 
     Vcf::Header mergedHeader;
     for (size_t i = 0; i < inputStreams.size(); ++i) {
@@ -222,7 +223,7 @@ void VcfMergeCommand::exec() {
     }
 
     PrinterType printer(*out);
-    auto writer = std::bind(
+    auto writer = boost::bind(
         &writeEntry<PrinterType, scoped_ptr<Vcf::AltNormalizer>, Vcf::Entry>,
         printer, std::ref(normalizer), _1);
     scoped_ptr<Vcf::ConsensusFilter> cnsFilt;

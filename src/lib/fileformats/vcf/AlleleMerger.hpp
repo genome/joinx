@@ -3,8 +3,6 @@
 #include "common/cstdint.hpp"
 #include "common/namespaces.hpp"
 
-#include <algorithm>
-#include <functional>
 #include <map>
 #include <string>
 #include <vector>

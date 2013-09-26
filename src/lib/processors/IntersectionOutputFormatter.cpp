@@ -1,5 +1,8 @@
 #include "IntersectionOutputFormatter.hpp"
 
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+
 #include "fileformats/Bed.hpp"
 #include "common/Tokenizer.hpp"
 #include <boost/format.hpp>
@@ -9,7 +12,6 @@
 
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 
 namespace IntersectionOutput {
 
@@ -53,18 +55,18 @@ public:
     {
         switch (_field) {
             case 0:
-                _output = std::bind(&Column::outputChrom, this, _1, _2);
+                _output = boost::bind(&Column::outputChrom, this, _1, _2);
                 break;
             case 1:
-                _output = std::bind(&Column::outputStart, this, _1, _2);
+                _output = boost::bind(&Column::outputStart, this, _1, _2);
                 break;
             case 2:
-                _output = std::bind(&Column::outputStop, this, _1, _2);
+                _output = boost::bind(&Column::outputStop, this, _1, _2);
                 break;
             default:
                 _field -= 3;
                 _extraFields = _field + 1;
-                _output = std::bind(&Column::outputExtraField, this, _1, _2);
+                _output = boost::bind(&Column::outputExtraField, this, _1, _2);
                 break;
         }
     }
@@ -137,7 +139,7 @@ public:
 
 protected:
     unsigned _field;
-    std::function<void(const Bed&, const Bed&)> _output;
+    boost::function<void(const Bed&, const Bed&)> _output;
 };
 
 class CompleteColumn : public ColumnBase {

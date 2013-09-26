@@ -12,7 +12,6 @@
 
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 namespace po = boost::program_options;
 
 CommandBase::ptr Vcf2RawCommand::create(int argc, char** argv) {

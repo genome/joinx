@@ -6,8 +6,9 @@
 #include "Header.hpp"
 #include "MergeStrategy.hpp"
 
-#include <algorithm>
-#include <functional>
+#include <boost/bind.hpp>
+#include <boost/algorithm/cxx11/any_of.hpp>
+
 #include <iostream>
 #ifdef DEBUG_VCF_MERGE
 # include <iterator>
@@ -16,7 +17,7 @@
 #include <utility>
 
 using namespace std;
-using namespace std::placeholders;
+namespace ba = boost::algorithm;
 
 BEGIN_NAMESPACE(Vcf)
 
@@ -38,7 +39,8 @@ Builder::~Builder() {
 void Builder::operator()(const Entry& e) {
     e.header();
     if (_entries.empty()
-        || any_of(_entries.begin(), _entries.end(), bind(&MergeStrategy::canMerge, _mergeStrategy, e, _1)))
+        || ba::any_of(_entries.begin(), _entries.end(),
+            boost::bind(&MergeStrategy::canMerge, _mergeStrategy, e, _1)))
     {
         _entries.push_back(e);
         return;
@@ -51,7 +53,8 @@ void Builder::operator()(const Entry& e) {
 void Builder::operator()(Entry&& e) {
     e.header();
     if (_entries.empty() 
-        || any_of(_entries.begin(), _entries.end(), bind(&MergeStrategy::canMerge, _mergeStrategy, e, _1)))
+        || ba::any_of(_entries.begin(), _entries.end(),
+            boost::bind(&MergeStrategy::canMerge, _mergeStrategy, e, _1)))
     {
         _entries.push_back(std::move(e));
         return;

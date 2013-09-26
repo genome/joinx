@@ -2,6 +2,8 @@
 #include "fileformats/vcf/Header.hpp"
 #include "common/Sequence.hpp"
 
+#include <boost/bind.hpp>
+
 #include <locale>
 #include <string>
 #include <boost/format.hpp>
@@ -11,7 +13,6 @@
 
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 
 BEGIN_NAMESPACE(Metrics)
 namespace {
@@ -262,7 +263,8 @@ void SampleMetrics::processEntry(Vcf::Entry& e, EntryMetrics& m) {
     // convenience
     auto const& sd = e.sampleData();
     auto const& fmt = sd.format();
-    uint64_t offset = distance(fmt.begin(), find_if(fmt.begin(), fmt.end(), bind(&customTypeIdMatches, "FT", _1)));
+    uint64_t offset = distance(fmt.begin(), find_if(fmt.begin(), fmt.end(),
+            boost::bind(&customTypeIdMatches, "FT", _1)));
 
     locale loc;
     std::string ref(e.ref());   //for mutation spectrum

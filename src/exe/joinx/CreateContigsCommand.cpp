@@ -10,16 +10,17 @@
 #include "fileformats/vcf/RawVariant.hpp"
 #include "processors/VariantContig.hpp"
 
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <fstream>
-#include <functional>
 #include <memory>
 #include <stdexcept>
 
 using boost::format;
 using namespace std;
-using namespace std::placeholders;
 namespace po = boost::program_options;
 
 CreateContigsCommand::CreateContigsCommand()
@@ -94,11 +95,11 @@ void CreateContigsCommand::exec() {
 
     InputStream::ptr instream(_streams.wrap<istream, InputStream>(_variantsFile));
 
-    typedef function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
+    typedef boost::function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
     typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
     typedef boost::shared_ptr<ReaderType> ReaderPtr;
 
-    VcfExtractor extractor = bind(&Vcf::Entry::parseLine, _1, _2, _3);
+    VcfExtractor extractor = boost::bind(&Vcf::Entry::parseLine, _1, _2, _3);
     ReaderType reader(extractor, *instream);
     Vcf::Entry entry;
     while (reader.next(entry)) {

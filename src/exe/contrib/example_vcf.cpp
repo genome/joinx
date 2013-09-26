@@ -15,7 +15,6 @@
 #include <memory>
 
 using namespace std;
-using namespace std::placeholders;
 
 int main(int argc, char** argv) {
     if (argc != 3) {

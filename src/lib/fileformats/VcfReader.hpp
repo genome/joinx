@@ -4,14 +4,16 @@
 #include "vcf/Entry.hpp"
 #include "vcf/Header.hpp"
 
+#include <boost/function.hpp>
+
 #include <functional>
 #include <string>
 #include <vector>
 
 namespace {
-typedef std::function<void(const Vcf::Header*, std::string&, Vcf::Entry&)> VcfExtractor;
+typedef boost::function<void(const Vcf::Header*, std::string&, Vcf::Entry&)> VcfExtractor;
 typedef TypedStream<Vcf::Entry, VcfExtractor> VcfReader;
-typedef std::function<VcfReader::ptr(InputStream&)> VcfOpenerType;
+typedef boost::function<VcfReader::ptr(InputStream&)> VcfOpenerType;
 }
 
 VcfReader::ptr openVcf(InputStream& in);
