@@ -25,3 +25,7 @@ before_script:
 
 script:
     - ctest -V
+
+branches:
+    only:
+        -master
