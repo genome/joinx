@@ -67,18 +67,20 @@ void AlleleMerger::init(Entry const* beg, Entry const* end) {
 string AlleleMerger::buildRef(Entry const* beg, Entry const* end) {
     // beg -> end should be sorted by start position
     string ref = beg->ref();
-    uint64_t pos = beg->pos() + ref.size();
+    uint64_t lastPos = beg->pos() + ref.size();
 
     for (Entry const* e = beg+1; e != end; ++e) {
-        if (pos < e->pos())
+        if (lastPos < e->pos())
             return "";
 
-        if (e->pos() + e->ref().size() < pos)
+        if (e->pos() + e->ref().size() <= lastPos) {
             continue;
+        }
 
-        ptrdiff_t off = pos - e->pos();
+        ptrdiff_t off = lastPos - e->pos();
+
         ref += e->ref().data() + off;
-        pos += e->ref().size() - off;
+        lastPos += e->ref().size() - off;
     }
 
     return ref;
