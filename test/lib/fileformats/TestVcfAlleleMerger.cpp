@@ -244,3 +244,16 @@ TEST_F(TestVcfAlleleMerger, adjacentDeletion) {
     string ref = AlleleMerger::buildRef(&*ents.begin(), &*ents.end());
     EXPECT_EQ("CAGGAGTCCAGCGCAG", ref);
 }
+
+TEST_F(TestVcfAlleleMerger, deletionPaddingAfter) {
+    vector<Entry> ents;
+    ents.push_back(makeEntry("1", 10, "ACGT", "CGT"));
+    ents.push_back(makeEntry("1", 10, "ACGT", "CG"));
+
+    AlleleMerger am(ents);
+    ASSERT_TRUE(am.merged());
+    EXPECT_EQ("ACGT", am.ref());
+    ASSERT_EQ(2u, am.mergedAlt().size());
+    EXPECT_EQ("CGT", am.mergedAlt()[0]);
+    EXPECT_EQ("CG", am.mergedAlt()[1]);
+}
