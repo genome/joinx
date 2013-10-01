@@ -197,6 +197,14 @@ TEST_F(TestVcfAlleleMerger, buildRefOverlap) {
     EXPECT_EQ("ACGTAG", ref);
 }
 
+TEST_F(TestVcfAlleleMerger, buildRefExactMatch) {
+    vector<Entry> ents;
+    ents.push_back(makeEntry("1", 10, "ACGT", "CGT"));
+    ents.push_back(makeEntry("1", 10, "ACGT", "GT"));
+    string ref = AlleleMerger::buildRef(&*ents.begin(), &*ents.end());
+    EXPECT_EQ("ACGT", ref);
+}
+
 TEST_F(TestVcfAlleleMerger, buildRefDisjoint) {
     // when there are gaps in the reference, an empty string should be returned
     // since we cannot infer the sequence.
