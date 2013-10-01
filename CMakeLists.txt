@@ -64,13 +64,14 @@ message("Boost libraries: ${Boost_LIBRARIES}")
 # make sure to pick up headers from library dirs
 include_directories("src/lib")
 
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+
 # unit tests
 enable_testing(true)
 add_projects(test/lib)
 
 # main project
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 add_projects(src/lib)
 add_projects(src/exe)
 
