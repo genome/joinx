@@ -102,7 +102,7 @@ RawVariant RawVariant::mergeIndelWithSubstitution(std::pair<RawVariant, RawVaria
 
     newRef.append(b.ref);
     newAlt.append(b.alt);
-    
+
     return RawVariant(pos, std::move(newRef), std::move(newAlt));
 }
 
