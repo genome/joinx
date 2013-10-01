@@ -4,6 +4,7 @@
 #include <boost/bind.hpp>
 
 #include "Entry.hpp"
+#include "RawVariant.hpp"
 
 using namespace std;
 namespace ba = boost::algorithm;
@@ -37,25 +38,18 @@ void AlleleMerger::init(Entry const* beg, Entry const* end) {
     _merged = true;
     _newAltIndices.resize(end-beg);
 
-    uint64_t start = min_element(beg, end, &Entry::posLess)->pos();
+    int64_t start = min_element(beg, end, &Entry::posLess)->pos();
     size_t inputAlts(0);
     for (auto e = beg; e != end; ++e) {
         inputAlts += e->alt().size();
-        for (auto alt = e->alt().begin(); alt != e->alt().end(); ++alt) {
+        auto rawVariants = RawVariant::processEntry(*e);
+        for (auto alt = rawVariants.begin(); alt != rawVariants.end(); ++alt) {
             std::string var = _ref;
-            int64_t off = e->pos() - start;
-            int32_t len = alt->size() - e->ref().size();
-            if (len == 0) { // SNV
-                for (std::string::size_type i = 0; i < alt->size(); ++i)
-                    var[off+i] = (*alt)[i];
-                _newAltIndices[e-beg].push_back(addAllele(var));
-            } else if (len < 0) {
-                var.erase(off+alt->size(), -len);
-                _newAltIndices[e-beg].push_back(addAllele(var));
-            } else { // insertion
-                var.insert(off+1, alt->data()+1);
-                _newAltIndices[e-beg].push_back(addAllele(var));
-            }
+            assert(alt->pos >= start);
+            size_t varStart = alt->pos - start;
+            size_t refLen = alt->ref.size();
+            var.replace(varStart, refLen, alt->alt);
+            _newAltIndices[e - beg].push_back(addAllele(var));
         }
     }
 
