@@ -12,7 +12,9 @@ if(DEFINED JOINX_DEBUG_VCF_MERGE)
     add_definitions("-DDEBUG_VCF_MERGE")
 endif()
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_SOURCE_DIR}/build-common/cmake")
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build-common/cmake)
+#set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_SOURCE_DIR}/build-common/cmake")
 include(TestHelper)
 include(VersionHelper)
 include(ProjectHelper)
@@ -31,10 +33,11 @@ include_directories(${PROJECT_BINARY_DIR}/version)
 
 if(${CMAKE_C_COMPILER_ID} MATCHES "GNU|Clang")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall -pedantic -fPIC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wall -pedantic -fPIC ")
+endif()
+
+if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU|Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -fPIC ")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor")
-    message("Set cflags to ${CMAKE_C_FLAGS}")
-    message("Set cxxflags to ${CMAKE_CXX_FLAGS}")
 else()
     message(
         WARNING
@@ -43,6 +46,20 @@ else()
 endif()
 
 include(PlatformChecks)
+find_cxx11_flags(CXX11_FLAGS CXX11_FOUND)
+if(NOT CXX11_FOUND)
+    message(FATAL_ERROR
+        "Failed to find C++11 support with compiler:
+         ${CMAKE_CXX_COMPILER} (${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}).")
+endif(NOT CXX11_FOUND)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAGS}")
+
+check_include_file_cxx(cstdint HAVE_CSTDINT)
+check_include_file_cxx(stdint.h HAVE_STDINT_H)
+# Google Test wants to include <tr1/tuple> instead of just tuple
+# If we can't find it, we have to force it to use its own implementation
+check_include_file_cxx(tr1/tuple HAVE_TR1_TUPLE)
 
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
@@ -57,11 +74,10 @@ if (Boost_FOUND)
 else()
     message("Failed to find boost, we'll try to download and build it")
     include(BuildBoost)
+    build_boost(1.54.0 ${CMAKE_BINARY_DIR}/vendor/boost)
 endif()
 
 include_directories(${Boost_INCLUDE_DIRS})
-message("Boost include directory: ${Boost_INCLUDE_DIRS}")
-message("Boost libraries: ${Boost_LIBRARIES}")
 
 # make sure to pick up headers from library dirs
 include_directories("src/lib")
