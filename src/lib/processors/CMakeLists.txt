@@ -10,13 +10,15 @@ set(SOURCES
     IntersectionOutputFormatter.hpp
     MergeSorted.hpp
     NoReferenceFilter.hpp
+    RefStats.hpp
     RemapContig.hpp
     SnvComparator.hpp
     Sort.hpp
     SortBuffer.hpp
     TypeFilter.hpp
-    VariantContig.hpp
     VariantContig.cpp
+    VariantContig.hpp
+    VcfToRaw.hpp
 )
 
 add_library(processors ${SOURCES})
