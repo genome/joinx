@@ -68,7 +68,7 @@ find_package(BZip2 REQUIRED)
 include_directories(BZIP2_INCLUDE_DIR)
 add_definitions(${BZIP2_DEFINITIONS})
 
-set(REQUIRED_BOOST_LIBS program_options filesystem system iostreams)
+set(REQUIRED_BOOST_LIBS program_options filesystem system iostreams regex)
 find_package(Boost 1.51 COMPONENTS ${REQUIRED_BOOST_LIBS})
 if (Boost_FOUND)
 else()
