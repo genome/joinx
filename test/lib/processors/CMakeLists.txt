@@ -8,6 +8,7 @@ set(TEST_SOURCES
     TestIntersectFull.cpp
     TestMergeSorted.cpp
     TestNoReferenceFilter.cpp
+    TestRefStats.cpp
     TestSnvComparator.cpp
     TestSort.cpp
     TestVariantContig.cpp
