@@ -10,6 +10,7 @@ set(SOURCES
     IntersectionOutputFormatter.hpp
     MergeSorted.hpp
     NoReferenceFilter.hpp
+    RefStats.cpp
     RefStats.hpp
     RemapContig.hpp
     SnvComparator.hpp
