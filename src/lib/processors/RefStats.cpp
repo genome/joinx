@@ -10,8 +10,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <iostream>
-
 namespace {
     template<typename T>
     bool longer(T const& x, T const& y) {
@@ -37,11 +35,13 @@ void RefStats::match(std::string const& ref, size_t padding /* = 0*/) {
     }
 
     boost::regex re(ssRegex.str());
-    boost::sregex_token_iterator begin(ref.begin() + padding, ref.end() - padding, re, 0);
+    boost::match_flag_type flags(boost::match_default);
+    boost::sregex_token_iterator begin(ref.begin() + padding, ref.end() - padding, re, flags);
     boost::sregex_token_iterator end;
 
     for (; begin != end; ++begin) {
-        ++_counts[*begin];
+        auto const& result = *begin;
+        _counts[result] += result.length();
     }
 }
 
