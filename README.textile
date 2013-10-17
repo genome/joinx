@@ -16,7 +16,7 @@ h3. Install build dependencies
 Building requires:
 * gcc 4.4+ or clang 3.2+
 * cmake 2.8+
-* boost 1.51+ (will be downloaded and built if not found)
+* boost 1.51+ (will be built if not found)
 * zlib/bzip2 development files (headers, libraries)
 
 Integration tests require:
