@@ -68,14 +68,17 @@ find_package(BZip2 REQUIRED)
 include_directories(BZIP2_INCLUDE_DIR)
 add_definitions(${BZIP2_DEFINITIONS})
 
+# Find or build boost
 set(REQUIRED_BOOST_LIBS program_options filesystem system iostreams regex)
-find_package(Boost 1.51 COMPONENTS ${REQUIRED_BOOST_LIBS})
-if (Boost_FOUND)
-else()
-    message("Failed to find boost, we'll try to download and build it")
+find_package(Boost 1.54 COMPONENTS ${REQUIRED_BOOST_LIBS})
+if (NOT Boost_FOUND)
+    set(BOOST_URL ${CMAKE_SOURCE_DIR}/vendor/boost-1_54_0-joinx.tar.gz)
+    message("Failed to find boost, we'll build it from source.")
     include(BuildBoost)
-    build_boost(1.54.0 ${CMAKE_BINARY_DIR}/vendor/boost)
+    build_boost(${BOOST_URL} ${CMAKE_BINARY_DIR}/vendor/boost ${REQUIRED_BOOST_LIBS})
 endif()
+message("-- Boost include directory: ${Boost_INCLUDE_DIRS}")
+message("-- Boost libraries: ${Boost_LIBRARIES}")
 
 include_directories(${Boost_INCLUDE_DIRS})
 
