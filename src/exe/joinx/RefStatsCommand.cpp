@@ -138,15 +138,22 @@ void RefStatsCommand::exec() {
         try {
             char prevBase(0);
             char nextBase(0);
+            size_t seqlen = refSeq.seqlen(entry.chrom());
 
             if (entry.start() > 0)
                 prevBase = toupper(refSeq.sequence(entry.chrom(), entry.start()));
 
-            if (size_t(entry.stop()) <= refSeq.seqlen(entry.chrom()))
+            if (size_t(entry.stop()) < seqlen)
                 nextBase = toupper(refSeq.sequence(entry.chrom(), entry.stop()+1));
 
+            size_t sublen = entry.stop() - entry.start();
+            if (entry.start() + sublen > seqlen) {
+                sublen = seqlen - entry.start();
+                entry.stop(seqlen);
+            }
+
             string ref = refSeq.sequence(entry.chrom(), entry.start()+1,
-                entry.stop()-entry.start());
+                sublen);
 
             string ucref(ref.size(), '\0');
             transform(ref.begin(), ref.end(), ucref.begin(), ::toupper);
