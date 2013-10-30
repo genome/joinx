@@ -29,6 +29,8 @@ function(build_boost BOOST_URL BUILD_DIR)
         INSTALL_COMMAND ""
     )
 
+    add_dependencies(deps boost-1.54)
     set(Boost_INCLUDE_DIRS ${BOOST_ROOT}/include PARENT_SCOPE)
 
 endfunction(build_boost BOOST_VERSION BUILD_DIR)
+
