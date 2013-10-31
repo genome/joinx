@@ -1,10 +1,12 @@
 #include "RefStatsCommand.hpp"
 
 #include "fileformats/Bed.hpp"
-#include "fileformats/TypedStream.hpp"
+#include "fileformats/BedReader.hpp"
 #include "fileformats/Fasta.hpp"
 #include "fileformats/InputStream.hpp"
+#include "processors/RefStats.hpp"
 
+#include <boost/assign/list_of.hpp>
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
 #include <boost/function.hpp>
@@ -14,6 +16,7 @@
 #include <cctype>
 #include <functional>
 
+using boost::assign::list_of;
 using boost::format;
 using namespace std;
 namespace po = boost::program_options;
@@ -59,8 +62,9 @@ void RefStatsCommand::parseArguments(int argc, char** argv) {
         throw CmdlineHelpException(ss.str());
     }
 
-    if (vm.count("ref-bases"))
+    if (vm.count("ref-bases")) {
         _refBases = true;
+    }
 
     if (!vm.count("bed")) {
         stringstream ss;
@@ -75,96 +79,35 @@ void RefStatsCommand::parseArguments(int argc, char** argv) {
     }
 }
 
-namespace {
-    struct rstats {
-        size_t at;
-        size_t cg;
-        size_t cpg;
-    };
-
-    rstats getstats(string const& ref, char prevBase, char nextBase) {
-        rstats rv = { 0, 0, 0 };
-        if (ref.empty())
-            return rv;
-
-        // we handle the first and last base (if set) outside of the loop to
-        // check for
-        // CpG
-        string::size_type start(0);
-        string::size_type end(ref.size());
-
-        if (prevBase == 'C' && ref[0] == 'G') {
-            ++start;
-            ++rv.cpg;
-        }
-
-        if (start < end && *ref.rbegin() == 'C' && nextBase == 'G') {
-            --end;
-            ++rv.cpg;
-        }
-
-        for (string::size_type i = start; i < end; ++i) {
-            if (ref[i] == 'A' || ref[i] == 'T') {
-                ++rv.at;
-            } else if (i < end-1 && ref[i] == 'C' && ref[i+1] == 'G') {
-                rv.cpg += 2;
-                ++i;
-            } else if (ref[i] == 'C' || ref[i] == 'G') {
-                ++rv.cg;
-            }
-        }
-        return rv;
-    }
-}
-
 void RefStatsCommand::exec() {
     ostream* out = _streams.get<ostream>(_outFile);
 
     InputStream::ptr inStream = _streams.wrap<istream, InputStream>(_bedFile);
-    typedef boost::function<void(const BedHeader*, string&, Bed&)> ExtractorType;
-    ExtractorType extractor = boost::bind(&Bed::parseLine, _1, _2, _3, 1);
-    typedef TypedStream<Bed, ExtractorType> BedReader;
-    BedReader bedReader(extractor, *inStream);
+    auto bedReader = openBed(*inStream);
     Fasta refSeq(_fastaFile);
 
     Bed entry;
-    string referenceBases;
     *out << "#chr\tstart\tstop\t#a/t\t#c/g\t#cpg";
     if (_refBases)
         *out << "\tref";
     *out << "\n";
 
-    while (bedReader.next(entry)) {
+    std::vector<std::string> toks = list_of("CG")("A")("C")("G")("T");
+    RefStats refStats(toks, refSeq);
+
+    while (bedReader->next(entry)) {
         try {
-            char prevBase(0);
-            char nextBase(0);
-            size_t seqlen = refSeq.seqlen(entry.chrom());
+            auto result = refStats.match(entry);
+            auto at = result.count("A") + result.count("T");
+            auto cg = result.count("C") + result.count("G");
+            auto cpg = result.count("CG");
 
-            if (entry.start() > 0)
-                prevBase = toupper(refSeq.sequence(entry.chrom(), entry.start()));
+            *out << entry.chrom() << "\t" << entry.start() << "\t"
+                << entry.start() + result.referenceString.size() << "\t"
+                << at << "\t" << cg << "\t" << cpg;
 
-            if (size_t(entry.stop()) < seqlen)
-                nextBase = toupper(refSeq.sequence(entry.chrom(), entry.stop()+1));
-
-            size_t sublen = entry.stop() - entry.start();
-            if (entry.start() + sublen > seqlen) {
-                sublen = seqlen - entry.start();
-                entry.stop(seqlen);
-            }
-
-            string ref = refSeq.sequence(entry.chrom(), entry.start()+1,
-                sublen);
-
-            string ucref(ref.size(), '\0');
-            transform(ref.begin(), ref.end(), ucref.begin(), ::toupper);
-
-            rstats rs = getstats(ucref, prevBase, nextBase);
-            *out << entry << "\t"
-                << rs.at << "\t"
-                << rs.cg << "\t"
-                << rs.cpg;
             if (_refBases)
-                *out  << "\t" << ref;
+                *out  << "\t" << result.referenceString;
             *out << "\n";
         } catch (const exception& e) {
             cerr << entry << "\tERROR: " << e.what() << "\n";

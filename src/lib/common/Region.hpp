@@ -20,4 +20,5 @@ struct Region {
     {}
 
     int64_t overlap(Region const& that) const;
+    int64_t size() const;
 };
