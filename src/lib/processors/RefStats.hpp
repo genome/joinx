@@ -1,22 +1,43 @@
 #pragma once
 
+#include "common/Region.hpp"
+#include "common/cstdint.hpp"
+
+#include <boost/regex.hpp>
+
 #include <cstddef>
 #include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include <iostream>
+class Fasta;
 
 class RefStats {
 public:
-    RefStats(std::vector<std::string> const& toks);
+    struct Result {
+        std::string referenceString;
+        std::unordered_map<std::string, size_t> counts;
+        size_t count(std::string const& x) const {
+            auto iter = counts.find(x);
+            if (iter != counts.end()) {
+                return iter->second;
+            }
+            return 0;
+        }
+    };
 
-    void match(std::string const& ref, size_t padding = 0);
+    RefStats(std::vector<std::string> const& toks, Fasta& refSeq);
 
-    size_t count(std::string const& tok) const;
+    Result match(std::string const& seq, Region const& region);
+
+    template<typename EntryType>
+    Result match(EntryType const& entry) {
+        return match(entry.chrom(), Region(entry.start(), entry.stop()));
+    }
 
 private:
     std::vector<std::string> _tokens;
-    std::unordered_map<std::string, size_t> _counts;
+    Fasta& _refSeq;
+    boost::regex _regex;
 };

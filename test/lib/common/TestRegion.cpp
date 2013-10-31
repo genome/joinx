@@ -32,3 +32,8 @@ TEST(TestRegion, overlapDisjoint) {
     EXPECT_EQ(0, y.overlap(x));
 }
 
+TEST(TestRegion, size) {
+    EXPECT_EQ(0, (Region(10, 10)).size());
+    EXPECT_EQ(1, (Region(10, 11)).size());
+    EXPECT_EQ(11, (Region(10, 21)).size());
+}
