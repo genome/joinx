@@ -7,8 +7,6 @@ set(SOURCES
     BedMergeCommand.hpp
     CheckRefCommand.cpp
     CheckRefCommand.hpp
-    CommandBase.cpp
-    CommandBase.hpp
     CreateContigsCommand.cpp
     CreateContigsCommand.hpp
     GenerateCommand.cpp
@@ -50,7 +48,7 @@ set(SOURCES
 set(EXECUTABLE_NAME joinx)
 add_executable(${EXECUTABLE_NAME} ${SOURCES})
 target_link_libraries(${EXECUTABLE_NAME}
-    processors reports metrics fileformats common
+    processors reports metrics fileformats common ui
     ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES})
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES PACKAGE_OUTPUT_NAME ${EXECUTABLE_NAME}${EXE_VERSION_SUFFIX})
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin/)

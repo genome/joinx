@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CommandBase.hpp"
+#include "ui/CommandBase.hpp"
 #include "common/cstdint.hpp"
 #include "fileformats/StreamHandler.hpp"
 

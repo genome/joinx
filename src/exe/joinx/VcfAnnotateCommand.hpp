@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CommandBase.hpp"
+#include "ui/CommandBase.hpp"
 #include "annotate/SimpleVcfAnnotator.hpp"
 #include "common/namespaces.hpp"
 #include "fileformats/StreamHandler.hpp"
