@@ -2,6 +2,9 @@
 
 #include <boost/format.hpp>
 
+#include <sstream>
+#include <stdexcept>
+
 using namespace std;
 using boost::format;
 
@@ -24,4 +27,44 @@ void CommandBase::describeSubCommands(std::ostream& s, const std::string& indent
             continue;
         s << indent << iter->second->name() << " - " << iter->second->description() << endl;
     }
+}
+
+namespace NewCommands {
+
+namespace po = boost::program_options;
+using boost::format;
+
+CommandBase::CommandBase()
+    : _opts("Available Options")
+{
+}
+
+void CommandBase::parseCommandLine(int argc, char** argv) {
+    configureOptions();
+
+    po::variables_map vm;
+    po::store(
+        po::command_line_parser(argc, argv)
+            .options(_opts)
+            .positional(_posOpts).run(),
+        vm
+    );
+    po::notify(vm);
+
+    if (vm.count("help")) {
+        std::stringstream ss;
+        ss << _opts;
+        throw std::runtime_error(ss.str());
+    }
+
+    auto const& req = requiredOptions();
+    for (auto iter = req.begin(); iter != req.end(); ++iter) {
+        if (!vm.count(*iter)) {
+            throw std::runtime_error(str(format(
+                "Required argument '%1%' missing"
+                ) % *iter));
+        }
+    }
+}
+
 }
