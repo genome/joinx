@@ -1,0 +1,23 @@
+track type=wiggle_0 name=SomaticCoverage viewLimits=0:1
+fixedStep chrom=chr1 start=99 step=1
+2
+0
+0
+0
+1
+0
+0
+0
+fixedStep chrom=chr2 start=100 step=1
+1
+2
+2
+3
+fixedStep chrom=chr3 start=100 step=10
+1
+1
+1
+fixedStep chrom=chr4 start=100 step=10 span=2
+1
+1
+1
