@@ -1,0 +1,14 @@
+##fileformat=VCFv4.1
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=FT,Number=.,Type=String,Description="Filters">
+##FORMAT=<ID=BAD,Description="Bad">
+##FILTER=<ID=sf60,Description="More than 60% samples with data failed the per-sample filter">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE1	SAMPLE2	SAMPLE3
+1	100	.	A	T	67	PASS	.	GT:FT	0/1:.	0/1:.	0/1:.
+1	200	.	A	T	67	sf60	.	GT:FT	0/1:.	0/1:.	0/1:BAD
+1	300	.	A	T	67	sf60	.	GT:FT	0/1:.	0/1:BAD	0/1:BAD
+1	400	.	A	T	67	sf60	.	GT:FT	0/1:BAD	0/1:BAD	0/1:BAD
+1	500	.	A	T	67	PASS	.	GT:FT	0/1:PASS	0/1:PASS	0/1:PASS
+1	600	.	A	T	67	PASS	.	GT:FT	0/1:PASS	0/1:PASS	0/1:BAD
+1	700	.	A	T	67	sf60	.	GT:FT	0/1:PASS	0/1:BAD	0/1:BAD
+1	800	.	A	T	67	sf60	.	GT:FT	0/1:BAD	0/1:BAD	0/1:BAD
