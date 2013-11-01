@@ -47,6 +47,5 @@ set(SOURCES
 
 add_library(ui ${SOURCES})
 target_link_libraries(ui
-    common fileformats
     ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES}
 )
