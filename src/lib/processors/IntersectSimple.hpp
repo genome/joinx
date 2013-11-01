@@ -7,6 +7,7 @@
 #include <deque>
 #include <stdexcept>
 
+
 template<typename StreamTypeA, typename StreamTypeB, typename OutType>
 class IntersectSimple {
 public: // types and data
@@ -127,3 +128,9 @@ protected:
     TypeB _valueB;
     std::deque<CacheEntry> _cache;
 };
+
+template<typename StreamTypeA, typename StreamTypeB, typename OutType>
+IntersectSimple<StreamTypeA, StreamTypeB, OutType>
+makeSimpleIntersector(StreamTypeA& sa, StreamTypeB& sb, OutType& out) {
+    return IntersectSimple<StreamTypeA, StreamTypeB, OutType>(sa, sb, out);
+}
