@@ -84,6 +84,15 @@ public:
     void checkEof() const;
     uint64_t lineNum() const;
 
+    // Function f should accept ValueType and return bool.
+    // e.g., bool f(ValueType const& v), bool f(ValueType& v), ...
+    // If f returns false, iteration ends.
+    template<typename Function>
+    void foreachEntry(Function f) {
+        ValueType value;
+        while (next(value) && f(value));
+    }
+
 protected:
     std::string nextLine();
 

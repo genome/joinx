@@ -1,14 +1,16 @@
-#include "fileformats/TypedStream.hpp"
+#include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/InputStream.hpp"
-#include "fileformats/InferFileType.hpp"
+
+#include <gtest/gtest.h>
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
+#include <boost/scoped_ptr.hpp>
 
-#include <gtest/gtest.h>
 #include <functional>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -44,38 +46,86 @@ namespace {
         "20\t1230237\t.\tT\t.\t47\tPASS\tNS=3;DP=13;AA=T\tGT:GQ:DP:HQ\t0|0:54:7:56,60\t0|0:48:4:51,51\t0/0:61:2\n"
         "20\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tNS=3;DP=9;AA=G\tGT:GQ:DP\t0/1:35:4\t0/2:17:2\t1/1:40:3\n"
         ;
+
+    struct Collector {
+        explicit Collector(size_t maxEntries = std::numeric_limits<size_t>::max())
+            : maxEntries(maxEntries)
+        {
+        }
+
+        bool operator()(Vcf::Entry const& entry) {
+            if (entries.size() >= maxEntries) {
+                return false;
+            }
+
+            entries.push_back(entry);
+            return true;
+        }
+
+
+        size_t maxEntries;
+        std::vector<Vcf::Entry> entries;
+    };
 }
 
-TEST(VcfReader, read) {
-    stringstream ss(testData);
-    InputStream in("test", ss);
-    inferFileType(in);
+class TestVcfReader : public ::testing::Test {
+public:
+    void SetUp() {
+        _ss.reset(new std::stringstream(testData));
+        _in.reset(new InputStream("test", *_ss));
+        _reader = openVcf(*_in);
+    }
 
-    typedef boost::function<void(const Vcf::Header*, string&, Entry&)> Extractor;
-    typedef TypedStream<Entry, Extractor> VcfReader;
-    Extractor extractor = boost::bind(&Entry::parseLine, _1, _2, _3);
-    VcfReader r(extractor, in);
-    Entry e;
+protected:
+    boost::scoped_ptr<std::stringstream> _ss;
+    boost::scoped_ptr<InputStream> _in;
+    VcfReader::ptr _reader;
+};
 
-    const Vcf::Header& h = r.header();
+TEST_F(TestVcfReader, read) {
+    const Vcf::Header& h = _reader->header();
 
-    ASSERT_EQ(19u, r.lineNum()); //This prolly shouldn't be here as it is a test for TypedStream not VcfReader
-    ASSERT_EQ(6u, h.infoTypes().size());
-    ASSERT_EQ(2u, h.filters().size());
-    ASSERT_EQ(4u, h.formatTypes().size());
+    EXPECT_EQ(19u, _reader->lineNum());
+    EXPECT_EQ(6u, h.infoTypes().size());
+    EXPECT_EQ(2u, h.filters().size());
+    EXPECT_EQ(4u, h.formatTypes().size());
 
     uint64_t lineCount = 19;
     vector<Entry> v;
-    while (r.next(e)) {
+    Vcf::Entry e;
+    while (_reader->next(e)) {
         v.push_back(e);
 
-        ASSERT_EQ(++lineCount,r.lineNum());   //should be at line 1 of the VCF lines (it skips the header)
+        // should be at line 1 of the VCF lines (it skips the header)
+        EXPECT_EQ(++lineCount, _reader->lineNum());
     }
 
     ASSERT_EQ(5u, v.size());
-    ASSERT_EQ(14370u, v[0].pos());
-    ASSERT_EQ(17330u, v[1].pos());
-    ASSERT_EQ(1110696u, v[2].pos());
-    ASSERT_EQ(1230237u, v[3].pos());
-    ASSERT_EQ(1234567u, v[4].pos());
+    EXPECT_EQ(14370u, v[0].pos());
+    EXPECT_EQ(17330u, v[1].pos());
+    EXPECT_EQ(1110696u, v[2].pos());
+    EXPECT_EQ(1230237u, v[3].pos());
+    EXPECT_EQ(1234567u, v[4].pos());
+}
+
+TEST_F(TestVcfReader, foreachEntryUnlimited) {
+    Collector unlimited;
+    _reader->foreachEntry(std::ref(unlimited));
+
+    ASSERT_EQ(5u, unlimited.entries.size());
+    EXPECT_EQ(14370u, unlimited.entries[0].pos());
+    EXPECT_EQ(17330u, unlimited.entries[1].pos());
+    EXPECT_EQ(1110696u, unlimited.entries[2].pos());
+    EXPECT_EQ(1230237u, unlimited.entries[3].pos());
+    EXPECT_EQ(1234567u, unlimited.entries[4].pos());
+}
+
+TEST_F(TestVcfReader, foreachEntryLimited) {
+    Collector first3(3u);
+    _reader->foreachEntry(std::ref(first3));
+
+    ASSERT_EQ(3u, first3.entries.size());
+    EXPECT_EQ(14370u, first3.entries[0].pos());
+    EXPECT_EQ(17330u, first3.entries[1].pos());
+    EXPECT_EQ(1110696u, first3.entries[2].pos());
 }
