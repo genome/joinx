@@ -7,7 +7,7 @@ function(build_boost BOOST_URL BUILD_DIR)
 
     set(BOOST_ROOT ${BUILD_DIR}/boost)
     set(BOOST_SRC ${BUILD_DIR}/boost-src)
-    set(BOOST_BUILD_LOG ${BOOST_SRC}/build.log})
+    set(BOOST_BUILD_LOG ${BOOST_SRC}/build.log)
 
     foreach(libname ${REQUIRED_BOOST_LIBS})
         set(BOOST_BUILD_LIBS ${BOOST_BUILD_LIBS} --with-${libname})
