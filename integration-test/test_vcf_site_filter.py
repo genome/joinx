@@ -3,8 +3,8 @@
 from integrationtest import IntegrationTest, main
 import unittest
 
-class TestVcfFilter(IntegrationTest, unittest.TestCase):
-    def test_merge(self):
+class TestVcfSiteFilter(IntegrationTest, unittest.TestCase):
+    def test_filter_sites(self):
         input_file = self.inputFiles("vcf-site-filter/input.vcf")[0]
         output_file = self.tempFile("output.vcf")
         for i in ['0.3', '0.6', '0.9']:

@@ -4,7 +4,7 @@ from integrationtest import IntegrationTest, main
 import unittest
 
 class TestVcfFilter(IntegrationTest, unittest.TestCase):
-    def test_merge(self):
+    def test_filter(self):
         input_file = self.inputFiles("vcf-filter/input.vcf")[0]
         output_file = self.tempFile("output.vcf")
         for i in [2, 5, 6, 10]:
