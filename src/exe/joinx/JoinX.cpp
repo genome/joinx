@@ -1,35 +1,39 @@
 #include "JoinX.hpp"
-#include "BedMergeCommand.hpp"
-#include "CheckRefCommand.hpp"
-#include "CreateContigsCommand.hpp"
-#include "GenerateCommand.hpp"
-#include "IntersectCommand.hpp"
-#include "RefStatsCommand.hpp"
-#include "RemapCigarCommand.hpp"
-#include "SnvConcordanceByQualityCommand.hpp"
-#include "SnvConcordanceCommand.hpp"
-#include "SortCommand.hpp"
-#include "Vcf2RawCommand.hpp"
-#include "VcfAnnotateCommand.hpp"
-#include "VcfFilterCommand.hpp"
-#include "VcfSiteFilterCommand.hpp"
-#include "VcfMergeCommand.hpp"
-#include "VcfNormalizeIndelsCommand.hpp"
-#include "VcfReportCommand.hpp"
-#include "Wig2BedCommand.hpp"
+
+#include "ui/BedMergeCommand.hpp"
+#include "ui/CheckRefCommand.hpp"
+#include "ui/CreateContigsCommand.hpp"
+#include "ui/GenerateCommand.hpp"
+#include "ui/IntersectCommand.hpp"
+#include "ui/RefStatsCommand.hpp"
+#include "ui/RemapCigarCommand.hpp"
+#include "ui/SnvConcordanceByQualityCommand.hpp"
+#include "ui/SnvConcordanceCommand.hpp"
+#include "ui/SortCommand.hpp"
+#include "ui/Vcf2RawCommand.hpp"
+#include "ui/VcfAnnotateCommand.hpp"
+#include "ui/VcfFilterCommand.hpp"
+#include "ui/VcfMergeCommand.hpp"
+#include "ui/VcfNormalizeIndelsCommand.hpp"
+#include "ui/VcfReportCommand.hpp"
+#include "ui/VcfSiteFilterCommand.hpp"
+#include "ui/Wig2BedCommand.hpp"
 
 #include "common/Exceptions.hpp"
 #include "common/ProgramDetails.hpp"
 
+#include <boost/assign/list_of.hpp>
 #include <boost/format.hpp>
 #include <sstream>
 #include <stdexcept>
 
-using boost::format;
-using namespace std;
 
-JoinX::JoinX(int argc, char** argv)
-{
+namespace {
+    using boost::format;
+    using namespace std;
+}
+
+JoinX::JoinX() {
     registerSubCommand(BedMergeCommand::ptr(new BedMergeCommand));
     registerSubCommand(CheckRefCommand::ptr(new CheckRefCommand));
     registerSubCommand(CreateContigsCommand::ptr(new CreateContigsCommand));
@@ -48,11 +52,12 @@ JoinX::JoinX(int argc, char** argv)
     registerSubCommand(VcfNormalizeIndelsCommand::ptr(new VcfNormalizeIndelsCommand));
     registerSubCommand(VcfReportCommand::ptr(new VcfReportCommand));
     registerSubCommand(Wig2BedCommand::ptr(new Wig2BedCommand));
+}
 
+void JoinX::exec(int argc, char** argv) {
     stringstream cmdHelp;
     cmdHelp << "Valid subcommands:" << endl << endl;
     describeSubCommands(cmdHelp, "\t");
-
 
     if (argc < 2)
         throw runtime_error(str(format("No subcommand specified. %1%") %cmdHelp.str()));
@@ -64,15 +69,34 @@ JoinX::JoinX(int argc, char** argv)
     if (cmdstr == "-v" || cmdstr == "--version")
         throw CmdlineHelpException(makeProgramVersionInfo("joinx"));
 
-    _cmd = subCommand(cmdstr, argc-1, &argv[1]);
-    if (!_cmd)
+    auto found = _subCmds.find(cmdstr);
+    if (found == _subCmds.end())
         throw runtime_error(str(format("Invalid subcommand '%1%'. %2%") %cmdstr %cmdHelp.str()));
+
+    auto cmd = found->second;
+    cmd->parseCommandLine(argc - 1, &argv[1]);
+    cmd->exec();
 }
 
-CommandBase::ptr JoinX::create(int argc, char** argv) {
-    return ptr(new JoinX(argc, argv));
+CommandBase::ptr JoinX::subCommand(const std::string& name, int argc, char** argv) const {
+    SubCommandMap::const_iterator iter = _subCmds.find(name);
+    if (iter == _subCmds.end())
+        return CommandBase::ptr();
+    return iter->second;
 }
 
-void JoinX::exec() {
-    _cmd->exec();
+void JoinX::registerSubCommand(const CommandBase::ptr& app) {
+    std::pair<SubCommandMap::iterator, bool> result = _subCmds.insert(make_pair(app->name(), app));
+    if (!result.second)
+        throw runtime_error(str(format("Attempted to register duplicate subcommand name '%1%'") %app->name()));
 }
+
+void JoinX::describeSubCommands(std::ostream& s, const std::string& indent) {
+    for (SubCommandMap::const_iterator iter = _subCmds.begin(); iter != _subCmds.end(); ++iter) {
+        if (iter->second->hidden())
+            continue;
+        s << indent << iter->second->name() << " - " << iter->second->description() << endl;
+    }
+}
+
+

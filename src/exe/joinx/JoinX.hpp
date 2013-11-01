@@ -4,17 +4,21 @@
 
 #include <string>
 
-class JoinX : public CommandBase {
+class JoinX {
 public:
-    using CommandBase::ptr;
 
-    JoinX(int argc, char** argv);
+    JoinX();
 
-    ptr create(int argc, char** argv);
-    void exec();
+    void exec(int argc, char** argv);
+
     std::string name() const { return "joinx"; }
     std::string description() const { return "joinx"; }
 
+    CommandBase::ptr subCommand(const std::string& name, int argc, char** argv) const;
+    void registerSubCommand(const CommandBase::ptr& app);
+    void describeSubCommands(std::ostream& s, const std::string& indent = "\t");
+
 protected:
-    CommandBase::ptr _cmd;
+    typedef std::map<std::string, CommandBase::ptr> SubCommandMap;
+    SubCommandMap _subCmds;
 };

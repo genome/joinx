@@ -5,66 +5,65 @@
 #include <sstream>
 #include <stdexcept>
 
-using namespace std;
-using boost::format;
-
-CommandBase::ptr CommandBase::subCommand(const std::string& name, int argc, char** argv) const {
-    SubCommandMap::const_iterator iter = _subCmds.find(name);
-    if (iter == _subCmds.end())
-        return ptr();
-    return iter->second->create(argc, argv);
-}
-
-void CommandBase::registerSubCommand(const ptr& app) {
-    std::pair<SubCommandMap::iterator, bool> result = _subCmds.insert(make_pair(app->name(), app));
-    if (!result.second)
-        throw runtime_error(str(format("Attempted to register duplicate subcommand name '%1%'") %app->name()));
-}
-
-void CommandBase::describeSubCommands(std::ostream& s, const std::string& indent) {
-    for (SubCommandMap::const_iterator iter = _subCmds.begin(); iter != _subCmds.end(); ++iter) {
-        if (iter->second->hidden())
-            continue;
-        s << indent << iter->second->name() << " - " << iter->second->description() << endl;
-    }
-}
-
-namespace NewCommands {
+#include <iostream>
 
 namespace po = boost::program_options;
 using boost::format;
+using namespace std;
 
 CommandBase::CommandBase()
-    : _opts("Available Options")
+    : _optionsParsed(false)
 {
 }
 
-void CommandBase::parseCommandLine(int argc, char** argv) {
-    configureOptions();
-
-    po::variables_map vm;
-    po::store(
-        po::command_line_parser(argc, argv)
-            .options(_opts)
-            .positional(_posOpts).run(),
-        vm
-    );
-    po::notify(vm);
-
-    if (vm.count("help")) {
-        std::stringstream ss;
-        ss << _opts;
-        throw std::runtime_error(ss.str());
+void CommandBase::parseCommandLine(std::vector<std::string> const& args) {
+    if (_optionsParsed) {
+        throw OptionsReparsedException(str(format(
+            "Attempted to parse command line options multiple times in "
+            "command %1%!")
+            % name()));
     }
 
-    auto const& req = requiredOptions();
-    for (auto iter = req.begin(); iter != req.end(); ++iter) {
-        if (!vm.count(*iter)) {
-            throw std::runtime_error(str(format(
-                "Required argument '%1%' missing"
-                ) % *iter));
-        }
+    _opts.add_options()
+        ("help,h", "this message")
+        ;
+
+    configureOptions();
+
+    try {
+
+        auto parsedArgs = po::command_line_parser(args)
+                .options(_opts)
+                .positional(_posOpts).run();
+
+        po::store(parsedArgs, _varMap);
+
+        _parsedArgs.reset(new po::parsed_options(parsedArgs));
+
+        po::notify(_varMap);
+
+    } catch (...) {
+        // program options will throw if required options are not passed
+        // before we have a chance to check if the user has asked for
+        // --help. If they have, let's give it to them, otherwise, rethrow.
+        checkHelp();
+        throw;
+    }
+
+    checkHelp();
+    finalizeOptions();
+}
+
+void CommandBase::checkHelp() const {
+    if (_varMap.count("help")) {
+        stringstream ss;
+        ss << _opts;
+        throw CmdlineHelpException(ss.str());
     }
 }
 
+void CommandBase::parseCommandLine(int argc, char** argv) {
+    assert(argc > 0);
+    std::vector<std::string> args(argv + 1, argv + argc);
+    parseCommandLine(args);
 }
