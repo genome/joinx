@@ -1,3 +1,4 @@
+def_integration_test(joinx VcfFilter test_vcf_filter.py)
 def_integration_test(joinx BedMerge test_bed_merge.py)
 def_integration_test(joinx CommandLine test_cmdline.py)
 def_integration_test(joinx CreateContigs test_create_contigs.py)
