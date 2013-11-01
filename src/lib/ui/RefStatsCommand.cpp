@@ -32,19 +32,19 @@ void RefStatsCommand::configureOptions() {
     _opts.add_options()
         ("bed,b",
             po::value<string>(&_bedFile)->required(),
-            "input .bed file (required, - for stdin)")
+            "input .bed file (required, use '-' for stdin)")
 
         ("fasta,f",
             po::value<string>(&_fastaFile)->required(),
-            "input fasta file (required, - for stdin)")
+            "input fasta file (required, use '-' for stdin)")
 
         ("output,o",
-            po::value<string>(&_outFile),
-            "output .bed file (default: stdout)")
+            po::value<string>(&_outFile)->default_value("-"),
+            "output .bed file (omit or use '-' for stdout)")
 
         ("ref-bases,r",
-            po::bool_switch(&_refBases),
-            "output reference bases in each region (default: false)")
+            po::bool_switch(&_refBases)->default_value(false),
+            "output reference bases in each region")
     ;
 
     _posOpts.add("bed", 1);
