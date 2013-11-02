@@ -1,23 +1,43 @@
 #pragma once
 
-#include <ctime>
+#include <boost/chrono/chrono_io.hpp>
 
-// measure elapsed cpu time
-class Timer {
+#include <cstddef>
+#include <ostream>
+#include <string>
+#include <sstream>
+
+template<
+        typename _Clock = boost::chrono::high_resolution_clock,
+        typename _DefaultUnits = boost::chrono::milliseconds
+        >
+class BasicTimer {
 public:
-    Timer()
-        : _start(clock())
-    {
-    }
+    typedef _Clock clock_type;
+    typedef _DefaultUnits default_units;
 
-    double elapsed() const {
-        return (clock() - _start) / double(CLOCKS_PER_SEC);
-    }
+    BasicTimer() : _start(clock_type::now()) {}
 
     void reset() {
-        _start = clock();
+        _start = clock_type::now();
     }
 
-protected:
-    clock_t _start;
+    template<typename T>
+    T elapsed_as() const {
+        return boost::chrono::duration_cast<T>(clock_type::now() - _start);
+    }
+
+    default_units elapsed() const {
+        return elapsed_as<default_units>();
+    }
+
+private:
+    typename clock_type::time_point _start;
 };
+
+typedef BasicTimer<
+        boost::chrono::high_resolution_clock,
+        boost::chrono::milliseconds
+        >
+    WallTimer;
+
