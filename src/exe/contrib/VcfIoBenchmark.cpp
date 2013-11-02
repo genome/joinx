@@ -3,17 +3,51 @@
 #include "fileformats/StreamHandler.hpp"
 #include "fileformats/VcfReader.hpp"
 
-#include <iostream>
+#include <boost/ptr_container/ptr_vector.hpp>
 
-size_t testSharedPtr(VcfReader::ptr const& reader, std::ostream& out) {
-    Vcf::Entry entry;
-    size_t count(0);
-    while (reader->next(entry)) {
-        out << entry << "\n";
-        ++count;
+#include <cstdint>
+#include <functional>
+#include <iostream>
+#include <string>
+#include <vector>
+
+struct IBenchmark {
+    virtual ~IBenchmark() {}
+
+    virtual std::string name() const = 0;
+    virtual size_t run(VcfReader::ptr const& reader, std::ostream& out) const = 0;
+};
+
+struct TestInOut : public IBenchmark {
+
+    std::string name() const { return "input and output"; }
+    size_t run(VcfReader::ptr const& reader, std::ostream& out) const {
+        Vcf::Entry entry;
+        size_t count(0);
+        auto& r = *reader;
+        while (r.next(entry)) {
+            out << entry << "\n";
+            ++count;
+        }
+        return count;
     }
-    return count;
-}
+};
+
+struct TestInOnly : public IBenchmark {
+    std::string name() const { return "input only"; }
+
+    size_t run(VcfReader::ptr const& reader, std::ostream& out) const {
+        Vcf::Entry entry;
+        size_t count(0);
+        auto& r = *reader;
+        while (r.next(entry)) {
+            ++count;
+        }
+        return count;
+
+    }
+};
+
 
 int main(int argc, char** argv) {
     if (argc != 3) {
@@ -21,14 +55,21 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    StreamHandler streams;
-    InputStream::ptr inStream = streams.wrap<std::istream, InputStream>(argv[1]);
-    ostream* out = streams.get<ostream>(argv[2]);
-    auto reader= openVcf(*inStream);
+    boost::ptr_vector<IBenchmark> tests;
+//    tests.push_back(new TestInOut);
+    tests.push_back(new TestInOnly);
 
-    WallTimer timer;
-    size_t count = testSharedPtr(reader, *out);
-    std::cout << "Shared ptr: " << count << " entries in " << timer.elapsed() << "\n";
+    for (auto iter = tests.begin(); iter != tests.end(); ++iter) {
+        StreamHandler streams;
+        InputStream::ptr inStream = streams.wrap<std::istream, InputStream>(argv[1]);
+        ostream* out = streams.get<ostream>(argv[2]);
+        auto reader = openVcf(*inStream);
+
+        WallTimer timer;
+        size_t count = iter->run(reader, *out);
+        std::cout << iter->name() << ": " << count << " entries in "
+            << timer.elapsed() << "\n";
+    }
 
     return 0;
 }
