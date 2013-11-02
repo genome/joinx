@@ -285,7 +285,7 @@ void Entry::parse(const Header* h, const string& s) {
             throw runtime_error(str(format("Failed to lookup type for info field '%1%'") %key));
         CustomValue cv(type, value);
         cv.setNumAlts(_alt.size());
-        auto inserted = _info.insert(make_pair(key, CustomValue(type, value)));
+        auto inserted = _info.insert(make_pair(key, cv));
         if (!inserted.second)
             throw runtime_error(str(format("Duplicate value for info field '%1%'") %key));
     }
