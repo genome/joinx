@@ -15,7 +15,15 @@ target_link_libraries(${EXAMPLE_EXECUTABLE_NAME}
 set_target_properties(${EXAMPLE_EXECUTABLE_NAME} PROPERTIES PACKAGE_OUTPUT_NAME ${EXAMPLE_EXECUTABLE_NAME}${EXE_VERSION_SUFFIX})
 
 add_executable(mkcontigs MakeContigs.cpp)
-target_link_libraries(mkcontigs fileformats
+target_link_libraries(mkcontigs
     processors reports metrics fileformats common
     ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES})
+
+
+
+add_executable(vcf-io-benchmark VcfIoBenchmark.cpp)
+target_link_libraries(vcf-io-benchmark
+    fileformats common
+    ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES})
+
 
