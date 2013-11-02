@@ -1,5 +1,11 @@
 #pragma once
 
+#include "CustomType.hpp"
+#include "SampleTag.hpp"
+#include "common/namespaces.hpp"
+
+#include <boost/unordered_map.hpp>
+
 #include <cstdlib>
 #include <iostream>
 #include <map>
@@ -9,10 +15,6 @@
 #include <utility>
 #include <vector>
 
-#include "CustomType.hpp"
-#include "SampleTag.hpp"
-#include "common/namespaces.hpp"
-
 BEGIN_NAMESPACE(Vcf)
 
 // FIXME: put in a separate file
@@ -21,6 +23,11 @@ public:
     SampleNotFoundError(const std::string& what)
         : std::runtime_error(what)
     {}
+};
+
+template<typename K, typename V>
+struct HeaderMap {
+    typedef boost::unordered_map<K, V> type;
 };
 
 class Header {
@@ -53,10 +60,10 @@ public:
     CustomType const* infoType(std::string const& id) const;
     CustomType const* formatType(std::string const& id) const;
     SampleTag const* sampleTag(std::string const& id) const;
-    std::map<std::string, CustomType> const& infoTypes() const;
-    std::map<std::string, CustomType> const& formatTypes() const;
-    std::map<std::string, std::string> const& filters() const;
-    std::map<std::string, SampleTag> const& sampleTags() const;
+    HeaderMap<std::string, CustomType>::type const& infoTypes() const;
+    HeaderMap<std::string, CustomType>::type const& formatTypes() const;
+    HeaderMap<std::string, std::string>::type const& filters() const;
+    HeaderMap<std::string, SampleTag>::type const& sampleTags() const;
     std::vector<std::string> const& sampleNames() const;
 
     uint32_t sampleCount() const { return _sampleNames.size(); }
@@ -77,7 +84,7 @@ public:
     // preserve the sample input columns in the output as well as producing the
     // merged column.
     void mirrorSample(std::string const& sampleName, std::string const& newName);
-    std::map<size_t, size_t> const& mirroredSamples() const;
+    HeaderMap<size_t, size_t>::type const& mirroredSamples() const;
 
     bool hasDuplicateSamples() const {
         return _hasDuplicateSamples;
@@ -88,20 +95,20 @@ protected:
     size_t addSample(std::string const& name);
 
 protected:
-    std::map<std::string, CustomType> _infoTypes;
-    std::map<std::string, CustomType> _formatTypes;
+    HeaderMap<std::string, CustomType>::type _infoTypes;
+    HeaderMap<std::string, CustomType>::type _formatTypes;
     // filters = name -> description
-    std::map<std::string, std::string> _filters;
+    HeaderMap<std::string, std::string>::type _filters;
     std::vector<RawLine> _metaInfoLines;
     std::vector<std::string> _sampleNames;
-    std::map<std::string, SampleTag> _sampleTags;
+    HeaderMap<std::string, SampleTag>::type _sampleTags;
     bool _headerSeen;
     uint32_t _sourceIndex;
 
     std::vector<size_t> _sampleSourceCounts;
 
-    std::map<size_t, size_t> _mirroredSamples;
-    std::unordered_map<std::string, size_t> _sampleIndices;
+    HeaderMap<size_t, size_t>::type _mirroredSamples;
+    HeaderMap<std::string, size_t>::type _sampleIndices;
     bool _hasDuplicateSamples;
 };
 

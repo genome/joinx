@@ -238,19 +238,19 @@ SampleTag const* Header::sampleTag(std::string const& id) const {
     return mapGetPtr(_sampleTags, id);
 }
 
-std::map<std::string, CustomType> const& Header::infoTypes() const {
+HeaderMap<std::string, CustomType>::type const& Header::infoTypes() const {
     return _infoTypes;
 }
 
-std::map<std::string, CustomType> const& Header::formatTypes() const {
+HeaderMap<std::string, CustomType>::type const& Header::formatTypes() const {
     return _formatTypes;
 }
 
-std::map<std::string, std::string> const& Header::filters() const {
+HeaderMap<std::string, std::string>::type const& Header::filters() const {
     return _filters;
 }
 
-std::map<std::string, SampleTag> const& Header::sampleTags() const {
+HeaderMap<std::string, SampleTag>::type const& Header::sampleTags() const {
     return _sampleTags;
 }
 
@@ -295,7 +295,7 @@ void Header::mirrorSample(std::string const& sampleName, std::string const& newN
     }
 }
 
-std::map<size_t, size_t> const& Header::mirroredSamples() const {
+HeaderMap<size_t, size_t>::type const& Header::mirroredSamples() const {
     return _mirroredSamples;
 }
 
