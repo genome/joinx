@@ -74,6 +74,7 @@ add_custom_target(deps ALL)
 set(REQUIRED_BOOST_LIBS program_options filesystem system iostreams regex)
 set(BOOST_URL ${CMAKE_SOURCE_DIR}/vendor/boost-1_54_0-joinx.tar.gz)
 include(BuildBoost)
+add_definitions("-DBOOST_CHRONO_HEADER_ONLY")
 build_boost(${BOOST_URL} ${CMAKE_BINARY_DIR}/vendor/boost ${REQUIRED_BOOST_LIBS})
 
 message("-- Boost include directory: ${Boost_INCLUDE_DIRS}")
