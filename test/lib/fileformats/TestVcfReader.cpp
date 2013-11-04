@@ -110,7 +110,8 @@ TEST_F(TestVcfReader, read) {
 
 TEST_F(TestVcfReader, foreachEntryUnlimited) {
     Collector unlimited;
-    _reader->foreachEntry(std::ref(unlimited));
+    // gcc 4.4 (ubuntu 10.04) can't handle std::ref(collector)(), so use bind.
+    _reader->foreachEntry(boost::bind(&Collector::operator(), &unlimited, _1));
 
     ASSERT_EQ(5u, unlimited.entries.size());
     EXPECT_EQ(14370u, unlimited.entries[0].pos());
@@ -122,7 +123,7 @@ TEST_F(TestVcfReader, foreachEntryUnlimited) {
 
 TEST_F(TestVcfReader, foreachEntryLimited) {
     Collector first3(3u);
-    _reader->foreachEntry(std::ref(first3));
+    _reader->foreachEntry(boost::bind(&Collector::operator(), &first3, _1));
 
     ASSERT_EQ(3u, first3.entries.size());
     EXPECT_EQ(14370u, first3.entries[0].pos());
