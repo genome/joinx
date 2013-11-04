@@ -1,5 +1,7 @@
 #pragma once
 
+#include "InputStream.hpp"
+#include "io/ILineSource.hpp"
 #include "common/cstdint.hpp"
 
 #include <boost/shared_ptr.hpp>
@@ -16,6 +18,10 @@ class StreamHandler {
 public:
     typedef std::ios_base::openmode openmode;
     StreamHandler();
+
+    InputStream::ptr openForReading(std::string const& path);
+    std::vector<InputStream::ptr> openForReading(
+            std::vector<std::string> const& paths);
 
     // T must be istream, ostream, or iostream
     // we can't just use iostream because that won't work for cin/cout
