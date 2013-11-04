@@ -5,8 +5,22 @@ import unittest
 
 class TestSort(IntegrationTest, unittest.TestCase):
 
-    def test_sort(self):
+    def test_sort_bed(self):
         input_files = self.inputFiles("sort/unsorted*.bed")
+        expected_file = self.inputFiles("sort/expected-sort.bed")[0]
+        output_file = self.tempFile("output.bed")
+
+        # test normal and stable sort
+        for arg in ["", "-s"]:
+            params = [ "sort", "-o", output_file, arg ]
+            params.extend(input_files)
+            rv, err = self.execute(params)
+            self.assertEqual(0, rv)
+            self.assertEqual('', err)
+            self.assertFilesEqual(expected_file, output_file)
+
+    def test_sort_compressed_bed(self):
+        input_files = self.inputFiles("sort/unsorted*.bed.gz")
         expected_file = self.inputFiles("sort/expected-sort.bed")[0]
         output_file = self.tempFile("output.bed")
 
@@ -48,19 +62,16 @@ class TestSort(IntegrationTest, unittest.TestCase):
         self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file)
 
-    def test_compression(self):
-        input_files = self.inputFiles("sort/unsorted*.bed")
-        expected_file = self.inputFiles("sort/expected-sort.bed")[0]
+    def test_sort_compressed_vcf(self):
+        input_files = self.inputFiles("sort/unsorted*.vcf.gz")
+        expected_file = self.inputFiles("sort/expected-sort.vcf")[0]
         output_file = self.tempFile("output.bed")
-
-        # test none, gzip, and bzip2 compression
-        for arg in ["", "-C g", "-C b" ]:
-            params = [ "sort", "-o", output_file, arg ]
-            params.extend(input_files)
-            rv, err = self.execute(params)
-            self.assertEqual(0, rv)
-            self.assertEqual('', err)
-            self.assertFilesEqual(expected_file, output_file)
+        params = [ "sort", "-o", output_file ]
+        params.extend(input_files)
+        rv, err = self.execute(params)
+        self.assertEqual('', err)
+        self.assertEqual(0, rv)
+        self.assertFilesEqual(expected_file, output_file, filter_regex="##fileDate=")
 
     def test_sort_vcf(self):
         # currently only 1 vcf file at a time can be sorted, as it is trickier
