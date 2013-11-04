@@ -114,7 +114,7 @@ namespace {
 void SortCommand::exec() {
     CompressionType compression = compressionTypeFromString(_compressionString);
 
-    vector<InputStream::ptr> inputStreams = _streams.wrap<istream, InputStream>(_filenames);
+    vector<InputStream::ptr> inputStreams = _streams.openForReading(_filenames);
     FileType type = detectFormat(inputStreams);
     ostream* out = _streams.get<ostream>(_outputFile);
     if (_streams.cinReferences() > 1)

@@ -19,13 +19,7 @@ class TestVcfAnnotate(IntegrationTest, unittest.TestCase):
         self.assertEqual(0, rv)
         self.assertEqual('', err)
 
-        expected_lines = "\n".join([x for x in open(expected_file).readlines()
-                if not x.startswith("##annotation")])
-
-        output_lines = "\n".join([x for x in open(output_file).readlines()
-                if not x.startswith("##annotation")])
-
-        self.assertMultiLineEqual(expected_lines, output_lines)
+        self.assertFilesEqual(expected_file, output_file, filter_regex="##annotation")
 
 if __name__ == "__main__":
     main()
