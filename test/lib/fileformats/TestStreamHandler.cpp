@@ -25,11 +25,13 @@ namespace {
 
     struct StdinRedirector {
         StdinRedirector(std::string const& path) {
-            freopen(path.c_str(), "r", stdin);
+            if (freopen(path.c_str(), "r", stdin) == NULL) {
+                throw std::runtime_error("Failed to freopen stdin!");
+            }
         }
 
         ~StdinRedirector() {
-            fclose(stdin);
+            (void)fclose(stdin);
         }
     };
 }
