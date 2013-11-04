@@ -59,8 +59,11 @@ void TempFile::_mkstemp() {
         _stream.open(_path.c_str(), ios::in|ios::out|ios::binary);
     }
 
-    if (!_stream.is_open())
-        throw runtime_error(str(format("Failed to create temp file with template %1%: %2%") %_path %strerror(errno)));
+    if (!_stream.is_open()) {
+        throw runtime_error(str(format(
+            "Failed to create temp file with template %1%: %2%")
+            % _path %strerror(errno)));
+    }
 
     if (_mode == ANON) {
         bfs::remove(_path);
