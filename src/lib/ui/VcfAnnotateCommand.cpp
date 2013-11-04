@@ -125,20 +125,17 @@ void VcfAnnotateCommand::exec() {
     typedef OutputWriter<Vcf::Entry> Writer;
     typedef SimpleVcfAnnotator<Writer> AnnoType;
 
-    vector<string> filenames;
-    filenames.push_back(_vcfFile);
-    filenames.push_back(_annoFile);
-    vector<InputStream::ptr> inputStreams = _streams.wrap<istream, InputStream>(filenames);
+    auto vcfIn = _streams.openForReading(_vcfFile);
+    auto annoIn = _streams.openForReading(_annoFile);
+
     ostream* out = _streams.get<ostream>(_outputFile);
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
-
-    auto vcfReader = openVcf(*inputStreams[0]);
-    auto annoReader = openVcf(*inputStreams[1]);
+    auto vcfReader = openVcf(*vcfIn);
+    auto annoReader = openVcf(*annoIn);
 
     Vcf::Header& annoHeader = annoReader->header();
     Vcf::Header& header = vcfReader->header();
-
     header.add(str(format("##annotation=%s") % _annoFile));
 
     postProcessArguments(header, annoHeader);

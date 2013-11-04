@@ -58,7 +58,7 @@ void VcfSiteFilterCommand::exec() {
     _filterDescription = description.str();
 
 
-    InputStream::ptr instream(_streams.wrap<istream, InputStream>(_infile));
+    InputStream::ptr instream(_streams.openForReading(_infile));
     ostream* out = _streams.get<ostream>(_outputFile);
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");

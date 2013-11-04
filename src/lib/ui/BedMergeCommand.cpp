@@ -44,7 +44,7 @@ void BedMergeCommand::configureOptions() {
 }
 
 void BedMergeCommand::exec() {
-    InputStream::ptr inStream = _streams.wrap<istream, InputStream>(_inputFile);
+    InputStream::ptr inStream = _streams.openForReading(_inputFile);
     ostream* outStream = _streams.get<ostream>(_outputFile);
 
     BedReader::ptr in = openBed(*inStream, 0);

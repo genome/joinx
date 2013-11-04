@@ -3,7 +3,6 @@
 #include "common/UnknownSequenceError.hpp"
 #include "fileformats/Fasta.hpp"
 #include "fileformats/InputStream.hpp"
-#include "fileformats/TypedStream.hpp"
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/CustomValue.hpp"
 #include "fileformats/vcf/Entry.hpp"
@@ -69,14 +68,10 @@ void CreateContigsCommand::exec() {
     ostream *outputFasta = _streams.get<ostream>(_outputFasta);
     ostream *outputRemap = _streams.get<ostream>(_outputRemap);
 
-    InputStream::ptr instream(_streams.wrap<istream, InputStream>(_variantsFile));
+    InputStream::ptr in(_streams.openForReading(_variantsFile));
+    auto vcfReader = openVcf(*in);
+    auto& reader = *vcfReader;
 
-    typedef boost::function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
-    typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
-    typedef boost::shared_ptr<ReaderType> ReaderPtr;
-
-    VcfExtractor extractor = boost::bind(&Vcf::Entry::parseLine, _1, _2, _3);
-    ReaderType reader(extractor, *instream);
     Vcf::Entry entry;
     while (reader.next(entry)) {
         if (entry.identifiers().empty())

@@ -130,8 +130,8 @@ void SnvConcordanceByQualityCommand::configureOptions() {
 
 void SnvConcordanceByQualityCommand::exec() {
 
-    InputStream::ptr inStreamA(_streams.wrap<istream, InputStream>(_fileA));
-    InputStream::ptr inStreamB(_streams.wrap<istream, InputStream>(_fileB));
+    InputStream::ptr inStreamA(_streams.openForReading(_fileA));
+    InputStream::ptr inStreamB(_streams.openForReading(_fileB));
     ostream* out = _streams.get<ostream>(_reportFile);
 
     // set up input filters, keep SNV only, and reject entries with N ref value

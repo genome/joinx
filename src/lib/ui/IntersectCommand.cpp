@@ -2,7 +2,7 @@
 #include "IntersectCollector.hpp"
 
 #include "common/cstdint.hpp"
-#include "fileformats/TypedStream.hpp"
+#include "fileformats/BedReader.hpp"
 #include "processors/IntersectFull.hpp"
 #include "processors/IntersectionOutputFormatter.hpp"
 
@@ -145,18 +145,17 @@ void IntersectCommand::exec() {
     // the outputFormatter!
     unsigned extraFieldsA = max(1u, outputFormatter.extraFields(0));
     unsigned extraFieldsB = max(1u, outputFormatter.extraFields(1));
-    InputStream::ptr inStreamA(_streams.wrap<istream, InputStream>(_fileA));
-    InputStream::ptr inStreamB(_streams.wrap<istream, InputStream>(_fileB));
+    InputStream::ptr inStreamA(_streams.openForReading(_fileA));
+    BedReader::ptr readerPtrA = openBed(*inStreamA, extraFieldsA);
+    auto& fa = *readerPtrA;
+
+    InputStream::ptr inStreamB(_streams.openForReading(_fileB));
+    BedReader::ptr readerPtrB = openBed(*inStreamB, extraFieldsB);
+    auto& fb = *readerPtrB;
+
     // don't try to read cin more than once or you will have a bad day
     if (_streams.cinReferences() > 1)
         throw runtime_error("Multiple input streams from stdin specified. Abort.");
-
-    typedef boost::function<void (const BedHeader*, std::string&, Bed&)> Extractor;
-    typedef TypedStream<Bed, Extractor> BedReaderType;
-    Extractor exA = boost::bind(&Bed::parseLine, _1, _2, _3, extraFieldsA);
-    Extractor exB = boost::bind(&Bed::parseLine, _1, _2, _3, extraFieldsB);
-    BedReaderType fa(exA, *inStreamA);
-    BedReaderType fb(exB, *inStreamB);
 
     // optional "miss" output streams
     ostream* outMissA(NULL);
@@ -165,6 +164,6 @@ void IntersectCommand::exec() {
     if (!_missFileB.empty()) outMissB = _streams.get<ostream>(_missFileB);
 
     IntersectCollector c(_outputBoth, _exactPos, _exactAllele, _iubMatch, _dbsnpMatch, outputFormatter, outMissA, outMissB);
-    IntersectFull<BedReaderType,BedReaderType,IntersectCollector> intersector(fa, fb, c, _adjacentInsertions);
+    IntersectFull<BedReader, BedReader, IntersectCollector> intersector(fa, fb, c, _adjacentInsertions);
     intersector.execute();
 }

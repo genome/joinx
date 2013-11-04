@@ -45,7 +45,7 @@ void VcfNormalizeIndelsCommand::configureOptions() {
 
 void VcfNormalizeIndelsCommand::exec() {
     Fasta ref(_fastaPath);
-    InputStream::ptr inStream = _streams.wrap<istream, InputStream>(_inputFile);
+    InputStream::ptr inStream = _streams.openForReading(_inputFile);
     ostream* out = _streams.get<ostream>(_outputFile);
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");

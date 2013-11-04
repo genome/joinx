@@ -185,7 +185,7 @@ void VcfMergeCommand::exec() {
         normalizer.reset(new Vcf::AltNormalizer(*ref));
     }
 
-    vector<InputStream::ptr> inputStreams = _streams.wrap<istream, InputStream>(_filenames);
+    vector<InputStream::ptr> inputStreams = _streams.openForReading(_filenames);
 
     ostream* out = _streams.get<ostream>(_outputFile);
     if (_streams.cinReferences() > 1)
@@ -241,7 +241,7 @@ void VcfMergeCommand::exec() {
     mergeStrategy.exactPos(_exactPos);
 
     if (!_mergeStrategyFile.empty()) {
-        InputStream::ptr msFile(_streams.wrap<istream, InputStream>(_mergeStrategyFile));
+        InputStream::ptr msFile(_streams.openForReading(_mergeStrategyFile));
         mergeStrategy.parse(*msFile);
     }
     mergeStrategy.clearFilters(_clearFilters);

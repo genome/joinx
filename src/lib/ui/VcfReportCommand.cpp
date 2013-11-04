@@ -55,7 +55,7 @@ void VcfReportCommand::configureOptions() {
 }
 
 void VcfReportCommand::exec() {
-    InputStream::ptr instream(_streams.wrap<istream, InputStream>(_infile));
+    InputStream::ptr instream(_streams.openForReading(_infile));
     ostream* perSampleOut = _streams.get<ostream>(_perSampleFile);
     ostream* perSiteOut = _streams.get<ostream>(_perSiteFile);
     if (_streams.cinReferences() > 1)
