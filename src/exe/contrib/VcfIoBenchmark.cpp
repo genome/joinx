@@ -61,9 +61,9 @@ int main(int argc, char** argv) {
 
     for (auto iter = tests.begin(); iter != tests.end(); ++iter) {
         StreamHandler streams;
-        InputStream::ptr inStream = streams.wrap<std::istream, InputStream>(argv[1]);
+        auto in = streams.openForReading(argv[1]);
+        auto reader = openVcf(*in);
         ostream* out = streams.get<ostream>(argv[2]);
-        auto reader = openVcf(*inStream);
 
         WallTimer timer;
         size_t count = iter->run(reader, *out);
