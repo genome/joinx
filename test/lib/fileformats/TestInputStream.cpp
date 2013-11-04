@@ -5,6 +5,26 @@
 
 using namespace std;
 
+TEST(InputStream, peek) {
+    std::stringstream ss("o\nm\ng\n");
+    InputStream in("test", ss);
+    std::string line;
+
+    EXPECT_EQ('o', in.peek());
+    in.getline(line);
+    EXPECT_EQ("o", line);
+
+    EXPECT_EQ('m', in.peek());
+    in.getline(line);
+    EXPECT_EQ("m", line);
+
+    EXPECT_EQ('g', in.peek());
+    in.getline(line);
+    EXPECT_EQ("g", line);
+
+    EXPECT_EQ(-1, in.peek());
+}
+
 TEST(InputStream, caching) {
     stringstream ss("1\n2\n3\n");
     string line;

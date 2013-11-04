@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-set(TEST_LIBS fileformats common)
+set(TEST_LIBS fileformats io common)
 include_directories(${GTEST_INCLUDE_DIRS})
 
 set(TEST_SOURCES
@@ -9,6 +9,7 @@ set(TEST_SOURCES
     TestInferFileType.cpp
     TestInputStream.cpp
     TestStreamFactory.cpp
+    TestStreamHandler.cpp
     TestVariant.cpp
     TestVcfAlleleMerger.cpp
     TestVcfAltNormalizer.cpp
