@@ -99,7 +99,7 @@ class TestIntersect(IntegrationTest, unittest.TestCase):
 
     def test_unsorted_data(self):
         params = ["intersect"]
-        params.extend(self.inputFiles("a.bed", "unsorted0.bed"))
+        params.extend(self.inputFiles("a.bed", "sort/unsorted0.bed"))
         rv, err = self.execute(params)
         self.assertEqual(3, rv)
         self.assertTrue(err.startswith("Unsorted data found in stream"))
