@@ -38,8 +38,9 @@ public:
     static Header fromStream(T& stream) {
         Header rv;
         std::string line;
-        while (stream.peek() == '#' && getline(stream, line))
+        while (stream.peek() == '#' && getline(stream, line)) {
             rv.add(line);
+        }
         return rv;
     }
 
