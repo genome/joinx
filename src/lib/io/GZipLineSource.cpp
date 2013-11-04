@@ -15,7 +15,7 @@ class GZipLineSource::LineBuffer {
 public:
     enum Status {
         WHOLE_LINE = 0,
-        PARTIAL_LINE,
+        PARTIAL_LINE
     };
 
     typedef char value_type;
