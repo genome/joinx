@@ -99,7 +99,7 @@ GZipLineSource::~GZipLineSource() {
 
 bool GZipLineSource::getline(std::string& line) {
     line.erase();
-    LineBuffer::Status lineStatus;
+    LineBuffer::Status lineStatus(LineBuffer::PARTIAL_LINE);
 
     if (!_buffer->empty()) {
         lineStatus = _buffer->appendUntil(line, '\n');
