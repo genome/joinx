@@ -1,4 +1,5 @@
 #include "InputStream.hpp"
+#include "io/StreamLineSource.hpp"
 
 #include <boost/format.hpp>
 #include <stdexcept>
@@ -6,25 +7,7 @@
 using boost::format;
 using namespace std;
 
-namespace {
-/*
-    const unsigned maxCompressionMagic = 3;
-    const struct CompressionAlgorithm {
-        CompressionType alg;
-        int len;
-        const char* magic;
-    } compressionMagic[] = {
-        { GZIP, 2, "\037\213" },
-        { BZIP2, 3, "BZh" }
-    };
-    unsigned nCompressionAlgs = sizeof(compressionMagic)/sizeof(compressionMagic[0]);
-*/
-}
-
-
 CompressionType compressionTypeFromString(const string& s) {
-    using boost::format;
-
     if (s.empty() || s == "n")
         return NONE;
     else if (s == "g")
@@ -35,18 +18,33 @@ CompressionType compressionTypeFromString(const string& s) {
         throw runtime_error(str(format("Invalid compression string '%1%'. Expected one of: n,g,z,b") %s));
 }
 
-InputStream::ptr InputStream::create(const string& name, istream& rawStream) {
-    return ptr(new InputStream(name, rawStream));
+InputStream::ptr InputStream::create(const string& name, ILineSource::ptr& in) {
+    return ptr(new InputStream(name, in));
 }
 
-InputStream::InputStream(const string& name, istream& rawStream)
+InputStream::ptr InputStream::create(const string& name, istream& in) {
+    return ptr(new InputStream(name, in));
+}
+
+InputStream::InputStream(const std::string& name, ILineSource::ptr& in)
     : _name(name)
-    , _rawStream(rawStream)
+    , _inptr(in.release())
+    , _in(*_inptr)
+    , _caching(false)
+    , _cacheIter(_cache.begin())
+    , _lineNum(0)
+
+{
+}
+
+InputStream::InputStream(const string& name, istream& in)
+    : _name(name)
+    , _inptr(new StreamLineSource(in))
+    , _in(*_inptr)
     , _caching(false)
     , _cacheIter(_cache.begin())
     , _lineNum(0)
 {
-    _in.push(_rawStream);
 }
 
 void InputStream::caching(bool value) {
@@ -66,7 +64,7 @@ bool InputStream::getline(string& line) {
     }
 
     // read until we get a line that isn't blank.
-    while (!_in.eof() && std::getline(_in, line) && line.empty())
+    while (!_in.eof() && _in.getline(line) && line.empty())
         ++_lineNum;
 
 /*
@@ -85,17 +83,11 @@ bool InputStream::getline(string& line) {
     return _in;
 }
 
-char InputStream::peek() const {
+char InputStream::peek() {
     if (_cacheIter != _cache.end())
         return (*_cacheIter)[0];
 
-    char c(0);
-    streamsize n;
-    if ((n = boost::iostreams::read(_in, &c, 1)) > 0) {
-        boost::iostreams::putback(_in, c);
-    }
-
-    return c;
+    return _in.peek();
 }
 
 

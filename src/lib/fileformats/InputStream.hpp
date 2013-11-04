@@ -1,8 +1,7 @@
 #pragma once
 
-#include <boost/iostreams/filter/bzip2.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
+#include "io/ILineSource.hpp"
+
 #include <boost/shared_ptr.hpp>
 
 #include <deque>
@@ -23,26 +22,26 @@ class InputStream {
 public:
     typedef boost::shared_ptr<InputStream> ptr;
 
+    static ptr create(const std::string& name, ILineSource::ptr& rawStream);
     static ptr create(const std::string& name, std::istream& rawStream);
 
-    InputStream(const std::string& name, std::istream& s);
+    InputStream(const std::string& name, ILineSource::ptr& in);
+    InputStream(const std::string& name, std::istream& in);
 
     void caching(bool value);
     void rewind();
     bool getline(std::string& line);
     bool eof() const;
     bool good() const;
-    char peek() const;
+    char peek();
     uint64_t lineNum() const;
 
     const std::string& name() const;
 
 protected:
     std::string _name;
-    std::istream& _rawStream;
-    boost::iostreams::filtering_stream<boost::iostreams::input> _in;
-    boost::iostreams::gzip_decompressor _gzipDecompressor;
-    boost::iostreams::bzip2_decompressor _bzip2Decompressor;
+    std::unique_ptr<ILineSource> _inptr;
+    ILineSource& _in;
     bool _caching;
     std::deque<std::string> _cache;
     std::deque<std::string>::iterator _cacheIter;
