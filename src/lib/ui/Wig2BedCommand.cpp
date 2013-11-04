@@ -43,7 +43,7 @@ void Wig2BedCommand::configureOptions() {
 
 void Wig2BedCommand::exec() {
     ostream* out = _streams.get<ostream>(_outFile);
-    InputStream::ptr in = _streams.wrap<istream, InputStream>(_wigFile);
+    InputStream::ptr in = _streams.openForReading(_wigFile);
     WiggleReader wr(*in, _stripChr);
     Bed bed;
     while (wr.next(bed)) {

@@ -54,7 +54,7 @@ void RefStatsCommand::configureOptions() {
 void RefStatsCommand::exec() {
     ostream* out = _streams.get<ostream>(_outFile);
 
-    InputStream::ptr inStream = _streams.wrap<istream, InputStream>(_bedFile);
+    InputStream::ptr inStream = _streams.openForReading(_bedFile);
     auto bedReader = openBed(*inStream);
     Fasta refSeq(_fastaFile);
 

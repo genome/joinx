@@ -73,7 +73,7 @@ void Vcf2RawCommand::exec() {
     Fasta ref(_refFa);
 
     ostream* out = _streams.get<ostream>(_outFile);
-    InputStream::ptr in = _streams.wrap<istream, InputStream>(_vcfFile);
+    auto in = _streams.openForReading(_vcfFile);
     VcfReader::ptr vcfReader = openVcf(*in);
     OutputWriter writer(*out, ref);
     VcfToRaw<VcfReader, OutputWriter> converter(*vcfReader, writer);

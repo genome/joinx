@@ -1,10 +1,10 @@
 #include "CheckRefCommand.hpp"
 
-#include "fileformats/Variant.hpp"
 #include "fileformats/Bed.hpp"
-#include "fileformats/TypedStream.hpp"
+#include "fileformats/BedReader.hpp"
 #include "fileformats/Fasta.hpp"
 #include "fileformats/InputStream.hpp"
+#include "fileformats/Variant.hpp"
 
 #include <boost/assign/list_of.hpp>
 #include <boost/bind.hpp>
@@ -47,11 +47,9 @@ void CheckRefCommand::configureOptions() {
 }
 
 void CheckRefCommand::exec() {
-    InputStream::ptr inStream = _streams.wrap<istream, InputStream>(_bedFile);
-    typedef boost::function<void(const BedHeader*, string&, Bed&)> ExtractorType;
-    ExtractorType extractor = boost::bind(&Bed::parseLine, _1, _2, _3, 1);
-    typedef TypedStream<Bed, ExtractorType> BedReader;
-    BedReader bedReader(extractor, *inStream);
+    InputStream::ptr inStream = _streams.openForReading(_bedFile);
+    BedReader::ptr bedReader = openBed(*inStream, 1);
+
     Fasta refSeq(_fastaFile);
 
     ostream* report = _streams.get<ostream>(_reportFile);
@@ -64,10 +62,11 @@ void CheckRefCommand::exec() {
     Bed entry;
     string referenceBases;
     uint64_t misses = 0;
-    while (bedReader.next(entry)) {
+    auto& reader = *bedReader;
+    while (reader.next(entry)) {
         Variant v(entry);
         try {
-            uint64_t len = v.stop()-v.start();
+            uint64_t len = v.stop() - v.start();
             // bed is 0-based, so we add 1 to the start position
             referenceBases = refSeq.sequence(v.chrom(), v.start()+1, len);
             if (v.reference().data() != referenceBases) {

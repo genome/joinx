@@ -39,11 +39,11 @@ void RemapCigarCommand::configureOptions() {
 }
 
 void RemapCigarCommand::exec() {
-    istream* in = _streams.get<istream>(_inputFile);
+    InputStream::ptr in = _streams.openForReading(_inputFile);
     ostream* out = _streams.get<ostream>(_outputFile);
 
     string line;
-    while (getline(*in, line)) {
+    while (in->getline(line)) {
         string::size_type pos = line.find("ZR:Z:REMAP");
         if (pos == string::npos) {
             *out << line << "\n";

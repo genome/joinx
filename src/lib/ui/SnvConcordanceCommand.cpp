@@ -1,8 +1,8 @@
 #include "SnvConcordanceCommand.hpp"
 
 #include "fileformats/Bed.hpp"
+#include "fileformats/BedReader.hpp"
 #include "fileformats/InputStream.hpp"
-#include "fileformats/TypedStream.hpp"
 #include "processors/IntersectFull.hpp"
 #include "reports/SnvConcordance.hpp"
 
@@ -110,8 +110,8 @@ void SnvConcordanceCommand::exec() {
         throw runtime_error("Input files have the same name, '" + _fileA + "', not good.");
     }
 
-    InputStream::ptr inA(_streams.wrap<istream, InputStream>(_fileA));
-    InputStream::ptr inB(_streams.wrap<istream, InputStream>(_fileB));
+    InputStream::ptr inA(_streams.openForReading(_fileA));
+    InputStream::ptr inB(_streams.openForReading(_fileB));
 
     ostream* out = _streams.get<ostream>(_outputFile);
     ostream* outHit(0);
@@ -128,12 +128,10 @@ void SnvConcordanceCommand::exec() {
     if (_streams.cinReferences() > 1)
         throw runtime_error("Multiple input streams from stdin specified. Abort.");
 
-
-    typedef boost::function<void(const BedHeader*, string&, Bed&)> Extractor;
-    Extractor extractor = boost::bind(&Bed::parseLine, _1, _2, _3, -1);
-    typedef TypedStream<Bed, Extractor> BedReader;
-    BedReader fa(extractor, *inA);
-    BedReader fb(extractor, *inB);
+    BedReader::ptr faPtr = openBed(*inA, -1);
+    BedReader::ptr fbPtr = openBed(*inB, -1);
+    BedReader& fa = *faPtr;
+    BedReader& fb = *fbPtr;
 
     SnvConcordance::DepthOrQual depthOrQual = _useDepth ? SnvConcordance::DEPTH : SnvConcordance::QUAL;
     SnvConcordance concordance(depthOrQual);
