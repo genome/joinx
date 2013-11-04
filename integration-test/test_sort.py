@@ -6,8 +6,8 @@ import unittest
 class TestSort(IntegrationTest, unittest.TestCase):
 
     def test_sort(self):
-        input_files = self.inputFiles("unsorted*.bed")
-        expected_file = self.inputFiles("expected-sort.bed")[0]
+        input_files = self.inputFiles("sort/unsorted*.bed")
+        expected_file = self.inputFiles("sort/expected-sort.bed")[0]
         output_file = self.tempFile("output.bed")
 
         # test normal and stable sort
@@ -23,18 +23,18 @@ class TestSort(IntegrationTest, unittest.TestCase):
         output_file = self.tempFile("output.bed")
         params = [ "sort", "-u", "-o", output_file ]
         params.extend(self.inputFiles(
-            "union-a.bed",
-            "union-b.bed"
+            "sort/union-a.bed",
+            "sort/union-b.bed"
         ))
         rv, err = self.execute(params)
         self.assertEqual('', err)
         self.assertEqual(0, rv)
-        expected_file = self.inputFiles("expected-union.bed")[0]
+        expected_file = self.inputFiles("sort/expected-union.bed")[0]
         self.assertFilesEqual(expected_file, output_file)
- 
+
     def test_sort_tmp(self):
-        input_files = self.inputFiles("unsorted*.bed")
-        expected_file = self.inputFiles("expected-sort.bed")[0]
+        input_files = self.inputFiles("sort/unsorted*.bed")
+        expected_file = self.inputFiles("sort/expected-sort.bed")[0]
         output_file = self.tempFile("output.bed")
 
         lines = sum([len(open(x).readlines()) for x in input_files])
@@ -48,27 +48,25 @@ class TestSort(IntegrationTest, unittest.TestCase):
         self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file)
 
-    # automatic compressed file detection is currently disabled
-    # TODO: re-enable
-    #def test_compression(self):
-        #input_files = self.inputFiles("unsorted*.bed")
-        #expected_file = self.inputFiles("expected-sort.bed")[0]
-        #output_file = self.tempFile("output.bed")
+    def test_compression(self):
+        input_files = self.inputFiles("sort/unsorted*.bed")
+        expected_file = self.inputFiles("sort/expected-sort.bed")[0]
+        output_file = self.tempFile("output.bed")
 
-        ## test none, gzip, and bzip2 compression
-        #for arg in ["", "-C g", "-C b" ]:
-            #params = [ "sort", "-o", output_file, arg ]
-            #params.extend(input_files)
-            #rv, err = self.execute(params)
-            #self.assertEqual(0, rv)
-            #self.assertEqual('', err)
-            #self.assertFilesEqual(expected_file, output_file)
+        # test none, gzip, and bzip2 compression
+        for arg in ["", "-C g", "-C b" ]:
+            params = [ "sort", "-o", output_file, arg ]
+            params.extend(input_files)
+            rv, err = self.execute(params)
+            self.assertEqual(0, rv)
+            self.assertEqual('', err)
+            self.assertFilesEqual(expected_file, output_file)
 
     def test_sort_vcf(self):
         # currently only 1 vcf file at a time can be sorted, as it is trickier
         # to merge vcf than bed.
-        input_files = self.inputFiles("unsorted*.vcf")
-        expected_file = self.inputFiles("expected-sort.vcf")[0]
+        input_files = self.inputFiles("sort/unsorted*.vcf")
+        expected_file = self.inputFiles("sort/expected-sort.vcf")[0]
         output_file = self.tempFile("output.bed")
         params = [ "sort", "-o", output_file ]
         params.extend(input_files)
@@ -78,8 +76,8 @@ class TestSort(IntegrationTest, unittest.TestCase):
         self.assertFilesEqual(expected_file, output_file, filter_regex="##fileDate=")
 
     def test_sort_some_empty(self):
-        expected_file = self.inputFiles("expected-sort.bed")[0]
-        input_files = self.inputFiles("unsorted*.bed")
+        expected_file = self.inputFiles("sort/expected-sort.bed")[0]
+        input_files = self.inputFiles("sort/unsorted*.bed")
         temp_empty = self.tempFile("empty.bed")
         open(temp_empty, "w").close();
         input_files.append(temp_empty)
