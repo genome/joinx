@@ -136,8 +136,8 @@ void VcfReportCommand::exec() {
 
         //next genotype distribution
         //FIXME this will likely only work as expected if our genotypes are unphased and always diploid.
-        std::vector<uint32_t> allelesBySample = siteMetrics.allelicDistributionBySample();
-        map<const Vcf::GenotypeCall, uint32_t>  distribution = siteMetrics.genotypeDistribution();
+        auto const& allelesBySample = siteMetrics.allelicDistributionBySample();
+        auto const& distribution = siteMetrics.genotypeDistribution();
 
         *perSiteOut << "\t";
         for(uint32_t index1 = 0; index1 < allelesBySample.size(); ++index1) {
@@ -146,7 +146,13 @@ void VcfReportCommand::exec() {
                 unphasedGenotype << index2 << "/" << index1;
                 Vcf::GenotypeCall gt(unphasedGenotype.str());        
                 //*perSiteOut << gt.string() << ":";
-                *perSiteOut << distribution[gt];
+
+                uint32_t count = 0;
+                auto iter = distribution.find(gt);
+                if (iter != distribution.end()) {
+                    count = iter->second;
+                }
+                *perSiteOut << count;
                 //FIXME this is undoubtedly bad
                 if( (index1 + 1) < allelesBySample.size() || index2 < index1 ) {
                     *perSiteOut << ","; 
