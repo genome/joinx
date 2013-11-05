@@ -1,0 +1,31 @@
+language: cpp
+
+compiler:
+    - clang
+    - gcc
+
+notifications:
+    email:
+        on_failure: always
+        on_success: change
+
+before_install:
+    - sudo apt-get update
+    - sudo apt-get install cmake
+
+install:
+    - sudo apt-get install libboost1.48-all-dev zlib1g-dev libbz2-dev
+
+before_script:
+    - git submodule update --init
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=debug
+    - make VERBOSE=1
+
+script:
+    - ctest -V
+
+branches:
+    only:
+        -master
