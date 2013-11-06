@@ -5,6 +5,7 @@
 #include "GenotypeCall.hpp"
 #include "Header.hpp"
 #include "common/Tokenizer.hpp"
+#include "io/StreamJoin.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
@@ -230,12 +231,7 @@ void SampleData::addFilter(uint32_t sampleIdx, std::string const& filterName) {
     filters.erase("PASS");
     filters.insert(filterName);
     stringstream ss;
-    for (auto i = filters.begin(); i != filters.end(); ++i) {
-        if (i != filters.begin())
-            ss << ";";
-        ss << *i;
-    }
-
+    ss << streamJoin(filters).delimiter(";").emptyString(".");
     values[ftIdx] = CustomValue(FT, ss.str());
 }
 
@@ -444,10 +440,10 @@ void SampleData::removeLowDepthGenotypes(uint32_t lowDepth) {
 std::ostream& operator<<(std::ostream& s, SampleData const& sampleData) {
     auto const& fmt = sampleData.format();
     if (!fmt.empty()) {
-        for (auto i = fmt.begin(); i != fmt.end(); ++i) {
-            if (i != fmt.begin())
-                s << ':';
-            s << (*i)->id();
+        auto i = fmt.begin();
+        s << (*i)->id();
+        for (++i; i != fmt.end(); ++i) {
+            s << ':' << (*i)->id();
         }
     } else {
         s << '.';
@@ -478,8 +474,9 @@ std::ostream& operator<<(std::ostream& s, SampleData const& sampleData) {
             s << ".";
         ++sampleCounter;
     }
-    while (sampleCounter++ < nSamples)
+    while (sampleCounter++ < nSamples) {
         s << "\t.";
+    }
 
 
     return s;
