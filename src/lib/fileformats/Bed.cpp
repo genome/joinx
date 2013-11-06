@@ -140,7 +140,7 @@ const std::string& Bed::toString() const {
     if (_line.empty()) {
         stringstream ss;
         ss << _chrom << "\t" << _start << "\t" << _stop;
-        for (ExtraFieldsType::const_iterator iter = _extraFields.begin(); iter != _extraFields.end(); ++iter)
+        for (auto iter = _extraFields.begin(); iter != _extraFields.end(); ++iter)
             ss << "\t" << *iter;
         _line = ss.str();
     }
