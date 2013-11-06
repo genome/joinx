@@ -5,6 +5,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 set(TEST_SOURCES
     TestGZipLineSource.cpp
+    TestStreamJoin.cpp
 )
 
 add_unit_tests(TestIo ${TEST_SOURCES})
