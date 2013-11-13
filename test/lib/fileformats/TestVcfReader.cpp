@@ -3,6 +3,9 @@
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/InputStream.hpp"
 
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+
 #include <gtest/gtest.h>
 
 #include <boost/bind.hpp>

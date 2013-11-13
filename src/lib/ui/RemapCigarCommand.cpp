@@ -16,7 +16,6 @@ using boost::format;
 using namespace std;
 namespace po = boost::program_options;
 
-
 RemapCigarCommand::RemapCigarCommand()
     : _inputFile("-")
     , _outputFile("-")

@@ -79,7 +79,6 @@ find_package(BZip2 REQUIRED)
 include_directories(BZIP2_INCLUDE_DIR)
 add_definitions(${BZIP2_DEFINITIONS})
 
-
 add_custom_target(deps ALL)
 
 set(REQUIRED_BOOST_LIBS program_options filesystem system iostreams regex)
@@ -91,7 +90,6 @@ build_zlib(${ZLIB_URL} ${CMAKE_BINARY_DIR}/vendor/zlib)
 
 message("-- Boost include directory: ${Boost_INCLUDE_DIRS}")
 message("-- Boost libraries: ${Boost_LIBRARIES}")
-
 include_directories(${Boost_INCLUDE_DIRS})
 
 # make sure to pick up headers from library dirs

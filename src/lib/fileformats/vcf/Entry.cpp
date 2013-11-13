@@ -409,6 +409,15 @@ std::vector<std::string> Entry::allelesForSample(size_t sampleIdx) const {
     return rv;
 }
 
+void Entry::samplesToStream(std::ostream& s) const {
+    if (!_parsedSamples) {
+        s << _sampleString;
+    }
+    else {
+        s << sampleData();
+    }
+}
+
 ostream& operator<<(ostream& s, const Entry& e) {
     s << e.chrom() << '\t' << e.pos() << '\t';
     e.printList(s, e.identifiers());
@@ -430,13 +439,14 @@ ostream& operator<<(ostream& s, const Entry& e) {
             if (i != info.begin())
                 s << ';';
             s << i->second.type().id();
-            string value = i->second.toString();
             if (!i->second.empty()) {
-                s << "=" << value;
+                s << "=";
+                i->second.toStream(s);
             }
         }
     }
-    s << '\t' << e.sampleData();
+    s << '\t';
+    e.samplesToStream(s);
 
     return s;
 }
