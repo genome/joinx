@@ -121,6 +121,8 @@ public:
 
     void swap(Entry& other);
 
+    void samplesToStream(std::ostream& s) const;
+
 protected:
     const Header* _header;
     std::string _chrom;
