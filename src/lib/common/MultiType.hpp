@@ -71,12 +71,6 @@ protected:
     bool _alloc;
 };
 
-template<typename T>
-inline T const* multiGet(MultiType const* v) {
-    throw std::runtime_error("multiGet called with unsupported type!");
-    return 0;
-}
-
 template<>
 inline std::string const* multiGet<std::string>(MultiType const* v) {
     if (v->empty()) return 0;
@@ -105,11 +99,6 @@ template<>
 inline bool const* multiGet<bool>(MultiType const* v) {
     if (v->empty()) return 0;
     return &v->_u.b;
-}
-
-template<typename T>
-T& multiGet(MultiType& v) {
-    throw std::runtime_error("multiGet called with unsupported type!");
 }
 
 template<>
