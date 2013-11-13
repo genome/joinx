@@ -1,9 +1,11 @@
 #pragma once
 
 #include "CustomType.hpp"
-#include "common/MultiType.hpp"
+#include "common/cstdint.hpp"
 #include "common/Tokenizer.hpp"
 #include "common/namespaces.hpp"
+
+#include <boost/variant.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -15,7 +17,7 @@ BEGIN_NAMESPACE(Vcf)
 
 class CustomValue {
 public:
-    typedef MultiType ValueType;
+    typedef boost::variant<boost::blank, int64_t, double, char, bool, std::string> ValueType;
     typedef std::vector<ValueType>::size_type SizeType;
 
     CustomValue();
@@ -81,10 +83,16 @@ protected:
             if (t.nextTokenMatches(""))
                 return false;
 
+            T tmp;
             if (t.nextTokenMatches(nullString)) {
                 t.advance();
-            } else if (!t.extract(_values[idx].ref<T>()))
+            }
+            else if (t.extract(tmp)) {
+                _values[idx] = tmp;
+            }
+            else {
                 return false;
+            }
             ++idx;
         }
         type().validateIndex(_values.size()-1);
@@ -110,7 +118,7 @@ inline const T* CustomValue::get(SizeType idx) const {
     type().validateIndex(idx);
     if (idx >= _values.size())
         return 0;
-    return _values[idx].get<T>();
+    return boost::get<T>(&_values[idx]);
 }
 
 
@@ -155,9 +163,8 @@ inline void CustomValue::toStream_impl(ostream& s) const {
     for (SizeType i = 0; i < size(); ++i) {
         if (i > 0)
             s << ",";
-        T const* value(0);
-        if (!_values[i].empty() && (value = _values[i].get<T>()))
-            s << *value;
+        if (_values[i].which() != 0)
+            s << _values[i];
         else
             s << '.';
     }

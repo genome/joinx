@@ -61,8 +61,9 @@ CustomValue::CustomValue(const CustomType* type, const string& value)
 
 const CustomValue::ValueType* CustomValue::getAny(SizeType idx) const {
     type().validateIndex(idx);
-    if (idx >= _values.size())
+    if (idx >= _values.size() || _values[idx].which() == 0) {
         return 0;
+    }
     return &_values[idx];
 }
 

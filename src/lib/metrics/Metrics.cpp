@@ -175,7 +175,7 @@ void EntryMetrics::identifyNovelAlleles() {
             if(database->size() == numAlts) {
                 //we know we have the same number of values as alts
                 for(Vcf::CustomValue::SizeType j = 0; j != _novelByAlt.size(); ++j) {
-                    _novelByAlt[j] = _novelByAlt[j] && database->getAny(j)->empty(); //if either is true it is novel. Not sure if this will actually work.
+                    _novelByAlt[j] = _novelByAlt[j] && database->getAny(j) == 0;
                 }
             }
             else {
