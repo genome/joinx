@@ -7,6 +7,7 @@
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
 #include <boost/function.hpp>
+#include <boost/unordered_map.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -14,7 +15,6 @@
 #include <locale>
 #include <stdexcept>
 #include <vector>
-#include <map>
 
 using boost::format;
 using namespace std;
@@ -84,7 +84,7 @@ public: // functions
 
 protected: // data
     vector<string> _entryNames;
-    map<string, Entry> _entries;
+    boost::unordered_map<string, Entry> _entries;
     friend class IndexGenerator;
 };
 
