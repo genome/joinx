@@ -4,6 +4,7 @@
 #include "fileformats/BedReader.hpp"
 #include "fileformats/Fasta.hpp"
 #include "fileformats/InputStream.hpp"
+#include "io/StreamJoin.hpp"
 #include "processors/RefStats.hpp"
 
 #include <boost/assign/list_of.hpp>
@@ -15,12 +16,13 @@
 #include <algorithm>
 #include <cctype>
 #include <functional>
+#include <locale>
+#include <stdexcept>
 
 using boost::assign::list_of;
 using boost::format;
 using namespace std;
 namespace po = boost::program_options;
-
 
 RefStatsCommand::RefStatsCommand()
     : _refBases(false)
@@ -29,6 +31,12 @@ RefStatsCommand::RefStatsCommand()
 }
 
 void RefStatsCommand::configureOptions() {
+    std::vector<std::string> defTokens = list_of
+        ("a/t")
+        ("c/g")
+        ("cg")
+        ;
+
     _opts.add_options()
         ("bed,b",
             po::value<string>(&_bedFile)->required(),
@@ -41,6 +49,11 @@ void RefStatsCommand::configureOptions() {
         ("output,o",
             po::value<string>(&_outFile)->default_value("-"),
             "output .bed file (omit or use '-' for stdout)")
+
+        ("token,t",
+            po::value<std::vector<std::string>>(&_tokens)->default_value(
+                defTokens, "-c a/t -c c/g -c cg"),
+            "scan for the given token. a / character represents alternation (i.e., a/t = a OR t)")
 
         ("ref-bases,r",
             po::bool_switch(&_refBases)->default_value(false),
@@ -58,25 +71,23 @@ void RefStatsCommand::exec() {
     auto bedReader = openBed(*inStream);
     Fasta refSeq(_fastaFile);
 
+    RefStats refStats(_tokens, refSeq);
+
     Bed entry;
-    *out << "#chr\tstart\tstop\t#a/t\t#c/g\t#cpg";
+    *out << "#chr\tstart\tstop\t#" << streamJoin(_tokens).delimiter("\t#");
+
     if (_refBases)
         *out << "\tref";
     *out << "\n";
 
-    std::vector<std::string> toks = list_of("CG")("A")("C")("G")("T");
-    RefStats refStats(toks, refSeq);
-
     while (bedReader->next(entry)) {
         try {
             auto result = refStats.match(entry);
-            auto at = result.count("A") + result.count("T");
-            auto cg = result.count("C") + result.count("G");
-            auto cpg = result.count("CG");
-
             *out << entry.chrom() << "\t" << entry.start() << "\t"
-                << entry.start() + result.referenceString.size() << "\t"
-                << at << "\t" << cg << "\t" << cpg;
+                << entry.start() + result.referenceString.size();
+            for (auto i = _tokens.begin(); i != _tokens.end(); ++i) {
+                *out << "\t" << result.count(*i);
+            }
 
             if (_refBases)
                 *out  << "\t" << result.referenceString;

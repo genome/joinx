@@ -2,6 +2,8 @@
 
 #include "ui/CommandBase.hpp"
 
+#include <boost/unordered_map.hpp>
+
 #include <fstream>
 #include <string>
 #include <vector>
@@ -18,11 +20,13 @@ public:
     void configureOptions();
     void exec();
 
+
 protected:
     bool _refBases;
     std::string _outFile;
     std::string _bedFile;
     std::string _fastaFile;
+    std::vector<std::string> _tokens;
 };
 
 

@@ -1,41 +1,107 @@
 #include "RefStats.hpp"
 
+#include "common/Tokenizer.hpp"
 #include "fileformats/Fasta.hpp"
+#include "io/StreamJoin.hpp"
+
+#include <boost/format.hpp>
 
 #include <algorithm>
 #include <cstddef>
 #include <functional>
+#include <iterator>
+#include <cctype>
+#include <locale>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <unordered_map>
+#include <utility>
 #include <vector>
 
-#include <iostream>
+using boost::format;
 
 namespace {
     template<typename T>
     bool longer(T const& x, T const& y) {
         return x.size() > y.size();
     }
+
+    bool invalidChar(char c) {
+        return !std::isalnum(c);
+    }
 }
 
+TokenSpec::TokenSpec(std::vector<std::string> const& toks)
+    : _origTokens(toks)
+{
+    for (auto i = toks.begin(); i != toks.end(); ++i) {
+        auto const& fullToken = *i;
+        std::vector<std::string> components;
+        Tokenizer<char>::split(fullToken, '/', std::back_inserter(components));
+
+        for (auto j = components.begin(); j != components.end(); ++j) {
+            auto invalid = std::find_if(j->begin(), j->end(), invalidChar);
+
+            if (invalid != j->end()) {
+                throw InvalidTokenError(str(format(
+                    "Invalid character '%1%' found in token '%2%'"
+                    ) % *invalid % fullToken));
+            }
+            addComponent(*j, fullToken);
+        }
+    }
+
+    std::stable_sort(_tokens.begin(), _tokens.end(), &longer<std::string>);
+}
+
+void TokenSpec::addComponent(std::string const& component, std::string const& fullToken) {
+    // transform to uppercase
+    std::string ucase(component);
+    std::transform(ucase.begin(), ucase.end(), ucase.begin(), ::toupper);
+
+    auto inserted = _tokenMap.insert(std::make_pair(ucase, fullToken));
+    if (!inserted.second) {
+        throw DuplicateTokenError(str(format(
+            "Duplicate element '%1%' in token '%2%' (already specified by '%3%')")
+            % component % fullToken % inserted.first->second));
+    }
+
+    _tokens.push_back(ucase);
+}
+
+
+std::vector<std::string> const& TokenSpec::tokens() const {
+    return _tokens;
+}
+
+std::vector<std::string> const& TokenSpec::origTokens() const {
+    return _origTokens;
+}
+
+
+std::string const& TokenSpec::tokenFor(std::string const& x) const {
+    auto found = _tokenMap.find(x);
+    if (found == _tokenMap.end()) {
+        throw std::runtime_error(str(format(
+            "Could not find matched element %1% in token map!")
+            % x
+            ));
+    }
+    return found->second;
+}
+
+
+
 RefStats::RefStats(std::vector<std::string> const& toks, Fasta& refSeq)
-    : _tokens(toks)
+    : _tokenSpec(toks)
     , _refSeq(refSeq)
 {
-    if (_tokens.empty()) {
+    if (_tokenSpec.tokens().empty()) {
         throw std::runtime_error("RefStats called with empty token list.");
     }
 
-    std::sort(_tokens.begin(), _tokens.end(), &longer<std::string>);
-
     std::stringstream ssRegex;
-    for (auto i = _tokens.begin(); i != _tokens.end(); ++i) {
-        if (i != _tokens.begin())
-            ssRegex << "|";
-        ssRegex << "(" << *i << ")";
-    }
+    ssRegex << "(" << streamJoin(_tokenSpec.tokens()).delimiter(")|(") << ")";
 
     _regex = ssRegex.str();
 }
@@ -48,7 +114,7 @@ auto RefStats::match(std::string const& seq, Region const& region) -> Result {
     int64_t seqlen = _refSeq.seqlen(seq);
 
     // tokens[0] is the longest token
-    int64_t padding = _tokens[0].size() - 1;
+    int64_t padding = _tokenSpec.tokens()[0].size() - 1;
     Region paddedRegion(
         std::max(region.begin - padding, 0l),
         std::min(region.end + padding, seqlen)
@@ -71,7 +137,8 @@ auto RefStats::match(std::string const& seq, Region const& region) -> Result {
         matchRegion.end = matchRegion.begin + size;
 
         int64_t overlap = region.overlap(matchRegion);
-        counts[whichToken] += overlap;
+        auto const& actualToken = _tokenSpec.tokenFor(whichToken);
+        counts[actualToken] += overlap;
     }
 
     result.referenceString = result.referenceString.substr(

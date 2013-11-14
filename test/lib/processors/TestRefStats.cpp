@@ -3,6 +3,7 @@
 #include "fileformats/Fasta.hpp"
 
 #include <boost/assign/list_of.hpp>
+#include <boost/format.hpp>
 
 #include <gtest/gtest.h>
 
@@ -11,6 +12,7 @@
 #include <string>
 
 using boost::assign::list_of;
+using boost::format;
 
 namespace {
     struct Reference {
@@ -87,4 +89,60 @@ TEST(TestRefStats, edges) {
     EXPECT_EQ(0u, stats.count("T"));
 
     EXPECT_EQ(ref.bases.substr(5, 11), stats.referenceString);
+}
+
+TEST(TestTokenSpec, invalidToken) {
+    std::vector<std::string> invalid = list_of
+            ("A+C")
+            ("A|C")
+            ("A.*C")
+            ("A.+G")
+            ("A?G")
+            ;
+
+    for (auto i = invalid.begin(); i != invalid.end(); ++i) {
+        std::vector<std::string> x(1, *i);
+        EXPECT_THROW((TokenSpec(x)), InvalidTokenError);
+    }
+}
+
+TEST(TestTokenSpec, duplicateTokens) {
+    std::vector<std::string> ok = list_of("A")("AC")("G/T");
+    EXPECT_NO_THROW((TokenSpec(ok)));
+
+    {
+        std::vector<std::string> dup = list_of("A")("AC")("A/T");
+        EXPECT_THROW((TokenSpec(dup)), DuplicateTokenError);
+    }
+    {
+        std::vector<std::string> dup = list_of("C")("AC")("C/T");
+        EXPECT_THROW((TokenSpec(dup)), DuplicateTokenError);
+    }
+    {
+        std::vector<std::string> dup = list_of("A")("AC")("A");
+        EXPECT_THROW((TokenSpec(dup)), DuplicateTokenError);
+    }
+    {
+        std::vector<std::string> dup = list_of("A")("AC")("AC/T");
+        EXPECT_THROW((TokenSpec(dup)), DuplicateTokenError);
+    }
+}
+
+TEST(TestTokenSpec, tokenMap) {
+    std::vector<std::string> tokens = list_of("a/t")("c/g")("cg");
+    std::vector<std::string> expectedTokens = list_of("CG")("A")("T")("C")("G");
+
+    TokenSpec spec(tokens);
+    EXPECT_EQ(expectedTokens, spec.tokens());
+    EXPECT_EQ(tokens, spec.origTokens());
+
+    EXPECT_EQ("a/t", spec.tokenFor("A"));
+    EXPECT_EQ("a/t", spec.tokenFor("T"));
+
+    EXPECT_EQ("c/g", spec.tokenFor("C"));
+    EXPECT_EQ("c/g", spec.tokenFor("G"));
+
+    EXPECT_EQ("cg", spec.tokenFor("CG"));
+
+    EXPECT_THROW(spec.tokenFor("x"), std::runtime_error);
 }

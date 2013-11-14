@@ -37,5 +37,28 @@ class TestRefStats(IntegrationTest, unittest.TestCase):
         self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file)
 
+    def test_duplicate_tokens(self):
+        fasta_file = self.inputFiles("refstats.fa")[0]
+        bed_file = self.inputFiles("refstats.bed")[0]
+
+        params = ["ref-stats", "-b", bed_file, "-f", fasta_file,
+                "-t", "a", "-t", "a/t"]
+
+        rv, err = self.execute(params)
+        self.assertNotEqual(0, rv)
+        self.assertTrue("Duplicate element" in err)
+
+    def test_invalid_tokens(self):
+        fasta_file = self.inputFiles("refstats.fa")[0]
+        bed_file = self.inputFiles("refstats.bed")[0]
+
+        params = ["ref-stats", "-b", bed_file, "-f", fasta_file,
+                "-t", "a.c"]
+
+        rv, err = self.execute(params)
+        self.assertNotEqual(0, rv)
+        self.assertTrue("Invalid character" in err)
+
+
 if __name__ == "__main__":
     main()
