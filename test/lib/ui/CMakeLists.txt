@@ -7,4 +7,4 @@ set(TEST_SOURCES
     TestBedMergeCommand
 )
 
-add_unit_tests(TestUiLib ${TEST_SOURCES})
+add_unit_tests(TestUi ${TEST_SOURCES})
