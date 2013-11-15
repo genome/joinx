@@ -98,14 +98,21 @@ namespace {
         iter = inputStreams.begin();
 
         FileType type = inferFileType(**iter++);
-        if (type == UNKNOWN)
-            throw runtime_error(str(format("Unable to infer file type for %1%") %(*inputStreams.begin())->name()));
+        if (type == UNKNOWN) {
+            throw runtime_error(str(format(
+                "Unable to infer file type for %1%")
+                % (*inputStreams.begin())->name()));
+        }
 
         for (; iter != inputStreams.end(); ++iter) {
             FileType otherType = inferFileType(**iter);
             if (otherType != type)
-                throw runtime_error(str(format("Multiple file formats detected (%1%), abort.") %(*iter)->name()));
+                throw runtime_error(str(format(
+                    "Multiple file formats detected (%1%), abort.")
+                    % (*iter)->name()));
         }
+
+
 
         return type;
     }
