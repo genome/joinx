@@ -13,6 +13,10 @@ set(SOURCES
     ChromPosReader.hpp
     Fasta.cpp
     Fasta.hpp
+    FastaIndex.cpp
+    FastaIndex.hpp
+    FastaIndexGenerator.cpp
+    FastaIndexGenerator.hpp
     InferFileType.cpp
     InferFileType.hpp
     InputStream.cpp
