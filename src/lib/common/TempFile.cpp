@@ -54,7 +54,7 @@ TempFile::~TempFile() {
 
 void TempFile::_mkstemp() {
     int fd = mkstemp(&_path[0]);
-    if (fd > 0) {
+    if (fd != -1) {
         close(fd);
         _stream.open(_path.c_str(), ios::in|ios::out|ios::binary);
     }
