@@ -170,8 +170,10 @@ void EntryMerger::setInfo(CustomValueMap& info) const {
             CustomValue v = _mergeStrategy.mergeInfo(
                 *i, _begin, _end, _alleleMerger.newAltIndices());
 
-            if (!v.empty())
+            if (!v.empty()) {
+                v.setNumAlts(_alleleMerger.mergedAlt().size());
                 info.insert(make_pair(*i, v));
+            }
         }
     } catch (const exception& e) {
         throw runtime_error(str(format(

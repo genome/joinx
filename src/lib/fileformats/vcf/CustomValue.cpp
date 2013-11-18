@@ -119,8 +119,18 @@ void CustomValue::setString(SizeType idx, const std::string& value) {
 }
 
 void CustomValue::setNumAlts(uint32_t n) {
-    if (type().numberType() == CustomType::PER_ALLELE)
+    if (type().numberType() == CustomType::PER_ALLELE) {
+        if (_values.size() > n ) {
+            std::stringstream ss;
+            ss << (*this);
+            throw std::runtime_error(str(format(
+                "Too many values in per-alt value '%1%' for field '%2%', "
+                "expected at most %3%"
+                ) % ss.str() % type().id() % n));
+        }
+
         _values.resize(n);
+    }
 }
 
 std::string CustomValue::getString(SizeType idx) const {

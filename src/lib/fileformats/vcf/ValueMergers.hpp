@@ -7,9 +7,9 @@
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/unordered_map.hpp>
 
 #include <functional>
-#include <map>
 #include <memory>
 #include <string>
 
@@ -76,7 +76,7 @@ namespace ValueMergers {
         /// holds a pointer to the singleton instance of this class
         static boost::scoped_ptr<Registry> _instance;
         /// a map of the available mergers, keyed by name
-        std::map<std::string, Base::const_ptr> _mergers;
+        boost::unordered_map<std::string, Base::const_ptr> _mergers;
     };
 
     /// Value Merger which uses the value from the first entry, ignoring the rest

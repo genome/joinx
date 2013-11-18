@@ -1,14 +1,16 @@
 #include "ValueMergers.hpp"
 
-#include "Entry.hpp"
 #include "CustomType.hpp"
 #include "CustomValue.hpp"
+#include "Entry.hpp"
+#include "io/StreamJoin.hpp"
 
 #include <boost/format.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include <set>
+#include <sstream>
 #include <stdexcept>
+#include <unordered_set>
 
 using boost::format;
 using namespace std;
@@ -25,6 +27,7 @@ Registry::Registry() {
     registerMerger(Base::const_ptr(new Ignore));
     registerMerger(Base::const_ptr(new Sum));
     registerMerger(Base::const_ptr(new UniqueConcat));
+    registerMerger(Base::const_ptr(new PerAltDelimitedList));
 }
 
 void Registry::registerMerger(Base::const_ptr const& merger) {
@@ -161,11 +164,26 @@ CustomValue PerAltDelimitedList::operator()(
             ) % name() % CustomType::numberToString(type->numberType(), type->number())));
     }
     CustomValue rv(type);
-    for (Entry const* e = begin; e != end; ++e) {
+    boost::unordered_map<size_t, std::unordered_set<std::string>> newValues;
+
+    size_t i(0);
+    for (Entry const* e = begin; e != end; ++e, ++i) {
         CustomValue const* v = fetch(e);
         if (!v || v->empty())
             continue;
+
+        for (size_t j = 0; j < v->size(); ++j) {
+            auto idx = newAltIndices[i][j];
+            newValues[idx].insert(v->getString(j));
+        }
     }
+
+    for (auto iter = newValues.begin(); iter != newValues.end(); ++iter) {
+        std::stringstream ss;
+        ss << streamJoin(iter->second).delimiter("/").emptyString(".");
+        rv.set(iter->first, ss.str());
+    }
+
     return rv;
 }
 

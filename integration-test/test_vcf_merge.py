@@ -33,7 +33,7 @@ class TestVcfMerge(IntegrationTest, unittest.TestCase):
         expected_file = self.inputFiles("vcf-merge/expected-merge-samples-c60.vcf")[0]
         output_file = self.tempFile("output.vcf")
 
-        params = [ "vcf-merge", 
+        params = [ "vcf-merge",
             "-s",
             "-R '0.6,CNS,Consensus filter'",
             "-M", merge_strategy_file,
@@ -53,7 +53,7 @@ class TestVcfMerge(IntegrationTest, unittest.TestCase):
         expected_file = self.inputFiles("vcf-merge/expected-merge-samples-c50.vcf")[0]
         output_file = self.tempFile("output.vcf")
 
-        params = [ "vcf-merge", 
+        params = [ "vcf-merge",
             "-s",
             "-R '0.5,CNS,Consensus filter'",
             "-M", merge_strategy_file,
@@ -74,7 +74,7 @@ class TestVcfMerge(IntegrationTest, unittest.TestCase):
         expected_file = self.inputFiles("vcf-merge/expected-merge-samples-c50-D.vcf")[0]
         output_file = self.tempFile("output.vcf")
 
-        params = [ "vcf-merge", 
+        params = [ "vcf-merge",
             "-s",
             "-D", "%s=-A" %input_files[0],
             "-D", "%s=-B" %input_files[1],
@@ -86,6 +86,27 @@ class TestVcfMerge(IntegrationTest, unittest.TestCase):
         self.assertEqual(0, rv)
         self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file, filter_regex="##fileDate=")
+
+    def test_vcf_merge_per_alt_list(self):
+        merge_strategy_file = self.tempFile("strategy.ms")
+        open(merge_strategy_file, "w").write("info.CALLER=per-alt-delimited-list")
+
+        input_files = sorted(self.inputFiles("vcf-merge/merge-per-alt-list-[12].vcf"))
+        self.assertEqual(2, len(input_files))
+        expected_file = self.inputFiles("vcf-merge/expected-merge-per-alt-list.vcf")[0]
+        output_file = self.tempFile("output.vcf")
+
+        params = [ "vcf-merge",
+            "-M", merge_strategy_file,
+            "-o", output_file
+        ] + input_files
+        rv, err = self.execute(params)
+        self.assertEqual('', err)
+        self.assertEqual(0, rv)
+        self.assertFilesEqual(expected_file, output_file, filter_regex="##fileDate=")
+
+
+
 
 
 if __name__ == "__main__":
