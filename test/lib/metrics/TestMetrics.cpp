@@ -64,7 +64,7 @@ namespace {
         "1/1:DIE\t"
         "0/1:DIE\t"
         "0/0:PASS\t"
-            
+
         ,
         // ENTRY 3 a simple deletion
         "2\t3500\t.\tAGTA\tA\t.\t.\t.\tGT:FT\t"
@@ -215,7 +215,7 @@ TEST_F(TestMetrics, allelicDistributionBySample_insertion) {
     ASSERT_EQ(2u, dist.size());
 
     // How many samples have an A (GT 0)
-    ASSERT_EQ(4u, dist[0]); 
+    ASSERT_EQ(4u, dist[0]);
     // How many have an AT (GT 1)
     ASSERT_EQ(4u, dist[1]);
 
