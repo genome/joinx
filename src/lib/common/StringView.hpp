@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/functional/hash.hpp>
+
 #include <cassert>
 #include <cstring>
 #include <ostream>
@@ -157,4 +159,9 @@ bool operator==(std::string const& lhs, StringView const& rhs) {
 inline
 bool operator==(char const* lhs, StringView const& rhs) {
     return rhs == lhs;
+}
+
+inline
+size_t hash_value(StringView const& sv) {
+    return boost::hash_range(sv.begin(), sv.end());
 }
