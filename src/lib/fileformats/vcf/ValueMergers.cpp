@@ -3,11 +3,13 @@
 #include "CustomType.hpp"
 #include "CustomValue.hpp"
 #include "Entry.hpp"
+#include "common/Tokenizer.hpp"
 #include "io/StreamJoin.hpp"
 
 #include <boost/format.hpp>
 #include <boost/scoped_ptr.hpp>
 
+#include <iterator>
 #include <sstream>
 #include <stdexcept>
 #include <unordered_set>
@@ -158,6 +160,10 @@ CustomValue PerAltDelimitedList::operator()(
     AltIndices const& newAltIndices
     ) const
 {
+    // FIXME: make into merge strategy param
+    // requires ability to specify merge strategy params in the first place
+    static const char* delim = "/";
+
     if (type->numberType() != CustomType::PER_ALLELE) {
         throw runtime_error(str(format(
             "%1% merge strategy used with something other than per-allele type (%2%)"
@@ -174,13 +180,14 @@ CustomValue PerAltDelimitedList::operator()(
 
         for (size_t j = 0; j < v->size(); ++j) {
             auto idx = newAltIndices[i][j];
-            newValues[idx].insert(v->getString(j));
+            Tokenizer<std::string>::split(v->getString(j), delim,
+                    std::inserter(newValues[idx], newValues[idx].begin()));
         }
     }
 
     for (auto iter = newValues.begin(); iter != newValues.end(); ++iter) {
         std::stringstream ss;
-        ss << streamJoin(iter->second).delimiter("/").emptyString(".");
+        ss << streamJoin(iter->second).delimiter(delim).emptyString(".");
         rv.set(iter->first, ss.str());
     }
 

@@ -19,4 +19,4 @@
 ##FORMAT=<ID=FET,Number=1,Type=String,Description="P-value from Fisher's Exact Test">
 ##FORMAT=<ID=FT,Number=.,Type=String,Description="P-value from Fisher's Exact Test">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S1
-1	10	.	C	A,G	.	.	DP=3;CALLER=Samtools,Varscan	GT	0/1
+1	10	.	C	A,G	.	.	DP=3;CALLER=Samtools/Strelka,Varscan	GT	0/1

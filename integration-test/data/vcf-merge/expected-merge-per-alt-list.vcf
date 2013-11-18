@@ -19,4 +19,4 @@
 ##FORMAT=<ID=FT,Number=.,Type=String,Description="P-value from Fisher's Exact Test">
 ##fileDate=20131118
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S1	S2
-1	10	.	C	A,G	.	.	CALLER=Strelka/Samtools,GatkGermline/Varscan	GT	0/1	0/2
+1	10	.	C	A,G	.	.	CALLER=Samtools/Strelka,GatkGermline/Varscan	GT	0/1	0/2
