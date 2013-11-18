@@ -12,8 +12,8 @@ class TestVcfMerge(IntegrationTest, unittest.TestCase):
             "info.NOTHOME=uniq-concat\n"
         )
 
-        input_files = sorted(self.inputFiles("merge-[0-9].vcf"))
-        expected_file = self.inputFiles("merged.vcf")[0]
+        input_files = sorted(self.inputFiles("vcf-merge/merge-[0-9].vcf"))
+        expected_file = self.inputFiles("vcf-merge/merged.vcf")[0]
         output_file = self.tempFile("output.vcf")
 
         params = [ "vcf-merge", "-M", merge_strategy_file, "-o", output_file ]
@@ -29,8 +29,8 @@ class TestVcfMerge(IntegrationTest, unittest.TestCase):
         merge_strategy_file = self.tempFile("strategy.ms")
         open(merge_strategy_file, "w").write("info.CALLER=uniq-concat\n")
 
-        input_files = sorted(self.inputFiles("merge-samples-[12].vcf"))
-        expected_file = self.inputFiles("expected-merge-samples-c60.vcf")[0]
+        input_files = sorted(self.inputFiles("vcf-merge/merge-samples-[12].vcf"))
+        expected_file = self.inputFiles("vcf-merge/expected-merge-samples-c60.vcf")[0]
         output_file = self.tempFile("output.vcf")
 
         params = [ "vcf-merge", 
@@ -49,8 +49,8 @@ class TestVcfMerge(IntegrationTest, unittest.TestCase):
         merge_strategy_file = self.tempFile("strategy.ms")
         open(merge_strategy_file, "w").write("info.CALLER=uniq-concat\n")
 
-        input_files = sorted(self.inputFiles("merge-samples-[12].vcf"))
-        expected_file = self.inputFiles("expected-merge-samples-c50.vcf")[0]
+        input_files = sorted(self.inputFiles("vcf-merge/merge-samples-[12].vcf"))
+        expected_file = self.inputFiles("vcf-merge/expected-merge-samples-c50.vcf")[0]
         output_file = self.tempFile("output.vcf")
 
         params = [ "vcf-merge", 
@@ -69,9 +69,9 @@ class TestVcfMerge(IntegrationTest, unittest.TestCase):
         merge_strategy_file = self.tempFile("strategy.ms")
         open(merge_strategy_file, "w").write("info.CALLER=uniq-concat\n")
 
-        input_files = sorted(self.inputFiles("merge-samples-[12].vcf"))
+        input_files = sorted(self.inputFiles("vcf-merge/merge-samples-[12].vcf"))
         self.assertEqual(2, len(input_files))
-        expected_file = self.inputFiles("expected-merge-samples-c50-D.vcf")[0]
+        expected_file = self.inputFiles("vcf-merge/expected-merge-samples-c50-D.vcf")[0]
         output_file = self.tempFile("output.vcf")
 
         params = [ "vcf-merge", 
