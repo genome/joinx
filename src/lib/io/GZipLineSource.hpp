@@ -29,4 +29,5 @@ private:
     gzFile _fp;
     LineBuffer* _buffer;
     bool _bad;
+    bool _eof;
 };

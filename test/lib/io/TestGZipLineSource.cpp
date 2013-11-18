@@ -114,15 +114,15 @@ TEST_F(TestGZLineSourceRandom, noTrailingNewline) {
     GZipLineSource input(_tmpFiles[NO_TRAILING_NEWLINE]->path());
     EXPECT_TRUE(input);
     std::string line;
-    std::stringstream result;
+    std::stringstream ss;
     while (input.getline(line)) {
-        result << line;
-        if (!input.eof()) {
-            result << "\n";
-        }
+        ss << line << "\n";
     }
 
-    EXPECT_EQ(_data[NO_TRAILING_NEWLINE], result.str());
+    std::string result = ss.str();
+    // remove last newline we added
+    result = result.substr(0, result.size() - 1);
+    EXPECT_EQ(_data[NO_TRAILING_NEWLINE], result);
 }
 
 TEST(TestGZLineSource, invalidPath) {

@@ -81,6 +81,7 @@ GZipLineSource::GZipLineSource(int fd)
     , _fp(gzdopen(fd, "rb"))
     , _buffer(new LineBuffer(bufsz))
     , _bad(_fp == Z_NULL)
+    , _eof(false)
 {
 }
 
@@ -89,6 +90,7 @@ GZipLineSource::GZipLineSource(std::string const& path)
     , _fp(gzopen(path.c_str(), "rb"))
     , _buffer(new LineBuffer(bufsz))
     , _bad(_fp == Z_NULL)
+    , _eof(false)
 {
 }
 
@@ -118,7 +120,8 @@ bool GZipLineSource::getline(std::string& line) {
         }
     }
 
-    return lineStatus == LineBuffer::WHOLE_LINE || (line.size());
+    _eof = !(lineStatus == LineBuffer::WHOLE_LINE || (line.size()));
+    return !_eof;
 }
 
 char GZipLineSource::peek() {
@@ -134,7 +137,7 @@ char GZipLineSource::peek() {
 }
 
 bool GZipLineSource::eof() const {
-    return _buffer->empty() && gzeof(_fp);
+    return _buffer->empty() && _eof;
 }
 
 bool GZipLineSource::good() const {

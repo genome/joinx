@@ -1,5 +1,8 @@
 #include "fileformats/InputStream.hpp"
+#include "io/GZipLineSource.hpp"
+#include "common/TempFile.hpp"
 
+#include <fstream>
 #include <sstream>
 #include <gtest/gtest.h>
 
@@ -63,4 +66,17 @@ TEST(InputStream, caching) {
     ASSERT_EQ("3", line);
     ASSERT_FALSE(stream.getline(line));
     ASSERT_TRUE(stream.eof());
+}
+
+TEST(InputStream, gzipNoNewline) {
+    auto tmpFile = TempFile::create(TempFile::CLEANUP);
+    ofstream out(tmpFile->path());
+    out << "no newline";
+    out.close();
+
+    string line;
+    GZipLineSource::ptr gzin(new GZipLineSource(tmpFile->path()));
+    InputStream in("test", gzin);
+    EXPECT_TRUE(in.getline(line));
+    EXPECT_EQ("no newline", line);
 }
