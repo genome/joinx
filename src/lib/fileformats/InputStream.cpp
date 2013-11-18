@@ -67,12 +67,7 @@ bool InputStream::getline(string& line) {
     while (!_in.eof() && _in.getline(line) && line.empty())
         ++_lineNum;
 
-/*
-    if (_in.eof() && line.size() == 1 && line[0] == 0)
-        line.clear();
-    else 
-*/
-        ++_lineNum;
+    ++_lineNum;
 
 
     if (_caching && _in) {
