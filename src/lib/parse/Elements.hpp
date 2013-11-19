@@ -63,7 +63,8 @@ struct DelimitedField {
         }
         else {
             bool first = true;
-            for (auto const& x : value) {
+            for (auto iter = value.begin(); iter != value.end(); ++iter) {
+                auto const& x = *iter;
                 if (first) {
                     first = false;
                 }
