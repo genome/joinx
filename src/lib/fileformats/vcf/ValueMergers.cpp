@@ -10,9 +10,9 @@
 #include <boost/scoped_ptr.hpp>
 
 #include <iterator>
+#include <set>
 #include <sstream>
 #include <stdexcept>
-#include <unordered_set>
 
 using boost::format;
 using namespace std;
@@ -170,7 +170,7 @@ CustomValue PerAltDelimitedList::operator()(
             ) % name() % CustomType::numberToString(type->numberType(), type->number())));
     }
     CustomValue rv(type);
-    boost::unordered_map<size_t, std::unordered_set<std::string>> newValues;
+    boost::unordered_map<size_t, std::set<std::string>> newValues;
 
     size_t i(0);
     for (Entry const* e = begin; e != end; ++e, ++i) {
