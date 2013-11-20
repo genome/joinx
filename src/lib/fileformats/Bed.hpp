@@ -2,6 +2,8 @@
 
 #include "common/cstdint.hpp"
 
+#include <boost/lexical_cast.hpp>
+
 #include <algorithm>
 #include <ostream>
 #include <sstream>
@@ -64,6 +66,9 @@ public:
 
     const ExtraFieldsType& extraFields() const;
 
+    template<typename T>
+    void setExtra(size_t idx, T const& value, std::string const& filler = ".");
+
 protected:
     std::string _chrom;
     int64_t _start;
@@ -100,6 +105,15 @@ inline bool Bed::operator==(const Bed& rhs) const {
 
 inline const Bed::ExtraFieldsType& Bed::extraFields() const {
     return _extraFields;
+}
+
+template<typename T>
+inline void Bed::setExtra(size_t idx, T const& value, std::string const& filler /* = "."*/) {
+    _line.clear();
+    if (_extraFields.size() <= idx) {
+        _extraFields.resize(idx + 1, ".");
+    }
+    _extraFields[idx] = boost::lexical_cast<std::string>(value);
 }
 
 inline void Bed::start(std::string const& chrom) {
