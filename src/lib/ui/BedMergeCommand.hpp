@@ -5,6 +5,8 @@
 
 #include <string>
 
+class Bed;
+
 class BedMergeCommand : public CommandBase {
 public:
     BedMergeCommand();
@@ -17,8 +19,13 @@ public:
     void exec();
     void configureOptions();
 
+    bool shouldMerge(Bed const& a, Bed const& b) const;
+
 protected:
     std::string _inputFile;
     std::string _outputFile;
     size_t _distance;
+    bool _names;
+    bool _count;
+    bool _uniqueNames;
 };
