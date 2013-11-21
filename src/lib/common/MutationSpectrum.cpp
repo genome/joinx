@@ -1,4 +1,4 @@
-#include "MutationSpectrum.hpp" 
+#include "MutationSpectrum.hpp"
 
 #include <boost/format.hpp>
 #include <limits>
@@ -62,7 +62,7 @@ int MutationSpectrum::index(uint8_t from, uint8_t to) const {
     int fromIdx = _indexTable[int(from)];
     int toIdx = _indexTable[int(to)];
     if (fromIdx < 0 || toIdx < 0)
-        throw std::runtime_error(str(format("Invalid alleles for mutation spectrum: %1%->%2%") %from %to));
+        throw InvalidAlleleError(str(format("Invalid alleles for mutation spectrum: %1%->%2%") %from %to));
     return fromIdx*4+toIdx;
 }
 

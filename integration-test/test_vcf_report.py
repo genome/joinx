@@ -15,11 +15,8 @@ class TestVcfReport(IntegrationTest, unittest.TestCase):
         params = ["vcf-report", "-i", input_file, "-s", output_site_file,
                 "-S", output_sample_file]
         rv, err = self.execute(params)
-        if err:
-            print "STDERR:", err
-
         self.assertEqual(0, rv)
-        self.assertEqual('', err)
+        self.assertTrue('Skipping entry 8\t10' in err)
         self.assertFilesEqual(expected_site_file, output_site_file)
         self.assertFilesEqual(expected_sample_file, output_sample_file)
 

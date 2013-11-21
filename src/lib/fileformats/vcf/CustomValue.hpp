@@ -83,7 +83,7 @@ protected:
             if (t.nextTokenMatches(""))
                 return false;
 
-            T tmp;
+            T tmp = T();
             if (t.nextTokenMatches(nullString)) {
                 t.advance();
             }

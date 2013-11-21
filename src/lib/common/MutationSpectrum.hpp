@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/cstdint.hpp"
+#include "common/Exceptions.hpp"
 
 #include <array>
 #include <ostream>

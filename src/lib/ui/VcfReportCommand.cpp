@@ -1,5 +1,6 @@
 #include "VcfReportCommand.hpp"
 
+#include "common/Exceptions.hpp"
 #include "common/MutationSpectrum.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/StreamHandler.hpp"
@@ -74,7 +75,15 @@ void VcfReportCommand::exec() {
         totalSites++;
         if(!entry.sampleData().hasGenotypeData())
             continue;
-        Metrics::EntryMetrics siteMetrics(entry,_infoFields);
+
+        std::unique_ptr<Metrics::EntryMetrics> pSiteMetrics;
+        try {
+            pSiteMetrics.reset(new Metrics::EntryMetrics(entry, _infoFields));
+        } catch (InvalidAlleleError const& e) {
+            std::cerr << e.what() << "\nSkipping entry " << entry << "\n";
+            continue;
+        }
+        auto& siteMetrics = *pSiteMetrics;
 
         //output per-site metrics
         *perSiteOut << entry.chrom() << "\t" << entry.pos() << "\t" << entry.ref() << "\t";
@@ -189,6 +198,7 @@ void VcfReportCommand::exec() {
         // how many samples have a non-reference genotype?
         //cout << samplesWithNonRefGenotypes(entry) << "\n";
     }
+
     *perSampleOut << "SampleName\tTotalSites\tRef\tHet\tHom\tFilt\tMissing\tnonDiploid\tKnown\tNovel\tPercKnown\tSingleton\tVeryRare\tRare\tCommon\tTransitions\tTransversions\tTransition:Transversion" << endl;
     for(uint32_t i = 0; i < entry.header().sampleCount(); ++i) {
         *perSampleOut << entry.header().sampleNames()[i];

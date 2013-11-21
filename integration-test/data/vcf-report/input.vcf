@@ -31,3 +31,6 @@
 3	10	.	C	A,G	.	.	CALLER=Samtools,VarScan	GT	0/0	0/1	0/0	0/0	0/1	0/0	0/0	0/0	0/0
 4	10	.	C	A,G	.	.	CALLER=Samtools,VarScan	GT	0/1	1/1	1/2	0/1	1/1	1/2	0/1	1/1	1/2
 5	10	.	C	.	.	.	CALLER=Samtools,VarScan	GT	0/0	0/0	0/0	0/0	0/0	0/0	0/0	0/0	0/0
+6	10	.	N	.	.	.	CALLER=Samtools,VarScan	GT	0/0	0/0	0/0	0/0	0/0	0/0	0/0	0/0	0/0
+7	10	.	A	N	.	.	CALLER=Samtools,VarScan	GT	0/0	0/0	0/0	0/0	0/0	0/0	0/0	0/0	0/0
+8	10	.	A	N	.	.	CALLER=Samtools,VarScan	GT	0/0	0/0	0/0	0/0	0/0	0/0	0/0	0/0	0/1

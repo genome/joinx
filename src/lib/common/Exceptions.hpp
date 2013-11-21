@@ -19,3 +19,11 @@ public:
     }
 };
 
+
+class InvalidAlleleError : public std::runtime_error {
+public:
+    explicit InvalidAlleleError(std::string const& message)
+        : std::runtime_error(message)
+    {
+    }
+};
