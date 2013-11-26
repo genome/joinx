@@ -18,7 +18,7 @@ function(build_boost BOOST_URL BUILD_DIR)
     set(Boost_LIBRARIES ${BOOST_LIBS} PARENT_SCOPE)
 
     ExternalProject_Add(
-        boost-1.54
+        boost-1.55
         URL ${BOOST_URL}
         SOURCE_DIR ${BOOST_SRC}
         BINARY_DIR ${BOOST_SRC}
@@ -29,7 +29,7 @@ function(build_boost BOOST_URL BUILD_DIR)
         INSTALL_COMMAND ""
     )
 
-    add_dependencies(deps boost-1.54)
+    add_dependencies(deps boost-1.55)
     set(Boost_INCLUDE_DIRS ${BOOST_ROOT}/include PARENT_SCOPE)
 
 endfunction(build_boost BOOST_VERSION BUILD_DIR)
