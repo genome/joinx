@@ -5,6 +5,7 @@
 #include "common/Sequence.hpp"
 #include "common/namespaces.hpp"
 
+#include <boost/functional/hash.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <vector>
@@ -86,5 +87,14 @@ public:
     std::string ref;
     std::string alt;
 };
+
+inline
+size_t hash_value(RawVariant const& v) {
+    size_t seed = 0;
+    boost::hash_combine(seed, v.pos);
+    boost::hash_combine(seed, v.ref);
+    boost::hash_combine(seed, v.alt);
+    return seed;
+}
 
 END_NAMESPACE(Vcf)
