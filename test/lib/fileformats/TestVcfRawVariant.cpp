@@ -4,15 +4,19 @@
 #include "fileformats/InputStream.hpp"
 #include "common/VariantType.hpp"
 
+#include <gtest/gtest.h>
+
+#include <boost/assign/list_of.hpp>
+
 #include <functional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <gtest/gtest.h>
 
 using namespace Vcf;
 using namespace std;
+using boost::assign::list_of;
 
 class TestVcfRawVariant : public ::testing::Test {
 protected:
@@ -62,9 +66,9 @@ TEST_F(TestVcfRawVariant, singlealt) {
     RawVariant::Vector raw = RawVariant::processEntry(e);
     ASSERT_EQ(nExpected, raw.size());
     for (size_t i = 0; i < nExpected; ++i) {
-        ASSERT_EQ(expected[i].pos, raw[i].pos) << " at index " << i << " in\n" << e;
-        ASSERT_EQ(expected[i].ref, raw[i].ref) << " at index " << i << " in\n" << e;
-        ASSERT_EQ(expected[i].alt, raw[i].alt) << " at index " << i << " in\n" << e;
+        EXPECT_EQ(expected[i].pos, raw[i].pos) << " at index " << i << " in\n" << e;
+        EXPECT_EQ(expected[i].ref, raw[i].ref) << " at index " << i << " in\n" << e;
+        EXPECT_EQ(expected[i].alt, raw[i].alt) << " at index " << i << " in\n" << e;
     }
 }
 
@@ -84,63 +88,96 @@ TEST_F(TestVcfRawVariant, doublealt) {
     RawVariant::Vector raw = RawVariant::processEntry(e);
     ASSERT_EQ(nExpected, raw.size());
     for (size_t i = 0; i < nExpected; ++i) {
-        ASSERT_EQ(expected[i].pos, raw[i].pos) << " at index " << i << " in\n" << e;
-        ASSERT_EQ(expected[i].ref, raw[i].ref) << " at index " << i << " in\n" << e;
-        ASSERT_EQ(expected[i].alt, raw[i].alt) << " at index " << i << " in\n" << e;
+        EXPECT_EQ(expected[i].pos, raw[i].pos) << " at index " << i << " in\n" << e;
+        EXPECT_EQ(expected[i].ref, raw[i].ref) << " at index " << i << " in\n" << e;
+        EXPECT_EQ(expected[i].alt, raw[i].alt) << " at index " << i << " in\n" << e;
     }
 }
 
 TEST_F(TestVcfRawVariant, lastPos) {
     RawVariant snv(10, "A", "C");
-    ASSERT_EQ(10, snv.lastRefPos());
-    ASSERT_EQ(10, snv.lastAltPos());
+    EXPECT_EQ(10, snv.lastRefPos());
+    EXPECT_EQ(10, snv.lastAltPos());
 
     RawVariant ins(10, "A", "AC");
-    ASSERT_EQ(10, ins.lastRefPos());
-    ASSERT_EQ(11, ins.lastAltPos());
+    EXPECT_EQ(10, ins.lastRefPos());
+    EXPECT_EQ(11, ins.lastAltPos());
 
     RawVariant del(10, "AC", "A");
-    ASSERT_EQ(11, del.lastRefPos());
-    ASSERT_EQ(10, del.lastAltPos());
+    EXPECT_EQ(11, del.lastRefPos());
+    EXPECT_EQ(10, del.lastAltPos());
 }
 
 TEST_F(TestVcfRawVariant, split_merge_IndelWithSubstitution_insertion) {
     RawVariant var(10, "CAC", "TACGT");
     pair<RawVariant, RawVariant> pear = var.splitIndelWithSubstitution();
 
-    ASSERT_EQ(RawVariant(10, "C", "T"), pear.first);
-    ASSERT_EQ(RawVariant(13, "", "GT"), pear.second);
+    EXPECT_EQ(RawVariant(10, "C", "T"), pear.first);
+    EXPECT_EQ(RawVariant(13, "", "GT"), pear.second);
 
     RawVariant merged = var.mergeIndelWithSubstitution(pear);
-    ASSERT_EQ(var, merged);
+    EXPECT_EQ(var, merged);
 }
 
 TEST_F(TestVcfRawVariant, split_merge_IndelWithSubstitution_deletion) {
     RawVariant var(10, "CACGT", "TAC");
     pair<RawVariant, RawVariant> pear = var.splitIndelWithSubstitution();
-    ASSERT_EQ(RawVariant(10, "C", "T"), pear.first);
-    ASSERT_EQ(RawVariant(13, "GT", ""), pear.second);
+    EXPECT_EQ(RawVariant(10, "C", "T"), pear.first);
+    EXPECT_EQ(RawVariant(13, "GT", ""), pear.second);
 
     RawVariant merged = var.mergeIndelWithSubstitution(pear);
-    ASSERT_EQ(var, merged);
+    EXPECT_EQ(var, merged);
 }
 
 TEST_F(TestVcfRawVariant, split_merge_IndelWithSubstitution_noIndel) {
     RawVariant var(10, "TACG", "GACT");
-    ASSERT_EQ(10, var.pos);
-    ASSERT_EQ("TACG", var.ref);
-    ASSERT_EQ("GACT", var.alt);
+    EXPECT_EQ(10, var.pos);
+    EXPECT_EQ("TACG", var.ref);
+    EXPECT_EQ("GACT", var.alt);
     pair<RawVariant, RawVariant> pear = var.splitIndelWithSubstitution();
-    ASSERT_EQ(var, pear.first);
-    ASSERT_EQ(RawVariant::None, pear.second);
+    EXPECT_EQ(var, pear.first);
+    EXPECT_EQ(RawVariant::None, pear.second);
 
     RawVariant merged = var.mergeIndelWithSubstitution(pear);
-    ASSERT_EQ(var, merged);
+    EXPECT_EQ(var, merged);
 
     pear = RawVariant::None.splitIndelWithSubstitution();
-    ASSERT_EQ(RawVariant::None, pear.first);
-    ASSERT_EQ(RawVariant::None, pear.second);
+    EXPECT_EQ(RawVariant::None, pear.first);
+    EXPECT_EQ(RawVariant::None, pear.second);
 
     merged = var.mergeIndelWithSubstitution(pear);
-    ASSERT_EQ(RawVariant::None, merged);
+    EXPECT_EQ(RawVariant::None, merged);
+}
+
+TEST_F(TestVcfRawVariant, combineRefAllelesOverlap) {
+    std::vector<RawVariant> vars = list_of
+        (RawVariant(10, "AC", ""))
+        (RawVariant(11, "CG", ""))
+        (RawVariant(12, "GT", ""))
+        ;
+
+    std::string result = Vcf::RawVariant::combineRefAlleles(vars);
+    EXPECT_EQ("ACGT", result);
+}
+
+TEST_F(TestVcfRawVariant, combineRefAllelesAdjacent) {
+    std::vector<RawVariant> vars = list_of
+        (RawVariant(10, "AC", ""))
+        (RawVariant(12, "CG", ""))
+        (RawVariant(14, "GT", ""))
+        ;
+
+    std::string result = Vcf::RawVariant::combineRefAlleles(vars);
+    EXPECT_EQ("ACCGGT", result);
+}
+
+TEST_F(TestVcfRawVariant, combineRefAllelesGap) {
+    std::vector<RawVariant> vars = list_of
+        (RawVariant(10, "AC", ""))
+        (RawVariant(13, "CG", ""))
+        (RawVariant(16, "GT", ""))
+        ;
+
+    std::string result = Vcf::RawVariant::combineRefAlleles(vars);
+    EXPECT_EQ("AC.CG.GT", result);
 }

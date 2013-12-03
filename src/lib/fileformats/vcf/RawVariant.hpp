@@ -79,6 +79,36 @@ public:
     std::pair<RawVariant, RawVariant> splitIndelWithSubstitution() const;
     RawVariant mergeIndelWithSubstitution(std::pair<RawVariant, RawVariant> const& vars) const;
 
+    template<typename Container>
+    static std::string combineRefAlleles(Container const& x) {
+        if (x.empty()) {
+            return "";
+        }
+
+        int64_t lastRef = 0;
+        auto firstRef = x[0].pos;
+        for (auto i = x.begin(); i != x.end(); ++i) {
+            lastRef = std::max(i->lastRefPos(), lastRef);
+        }
+
+        std::string rv(lastRef - firstRef + 1, '.');
+        auto lastPos = firstRef;
+        for (auto i = x.begin(); i != x.end(); ++i) {
+            auto xLast = i->lastRefPos();
+            if (xLast < lastPos)
+                continue;
+
+            auto thisStart = std::max(lastPos, i->pos);
+            auto thisStartIdx = thisStart - firstRef;
+            auto thisSkip = thisStart - i->pos;
+            auto thisLen = i->ref.size() - thisSkip;
+            rv.replace(thisStartIdx, thisLen, i->ref.data() + thisStart - i->pos);
+            lastPos = xLast;
+        }
+        return rv;
+    }
+
+
 protected:
     void normalize();
 
