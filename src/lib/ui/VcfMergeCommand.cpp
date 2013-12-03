@@ -4,6 +4,7 @@
 #include "fileformats/Fasta.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/OutputWriter.hpp"
+#include "fileformats/StreamPump.hpp"
 #include "fileformats/TypedStream.hpp"
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/AltNormalizer.hpp"
@@ -251,9 +252,7 @@ void VcfMergeCommand::exec() {
     Vcf::Builder builder(mergeStrategy, &mergedHeader, writer);
     *out << mergedHeader;
     MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
-    Vcf::Entry e;
-    while (merger.next(e)) {
-        builder(e);
-    }
+    auto pump = makeStreamPump<Vcf::Entry>(merger, builder);
+    pump.execute();
     builder.flush();
 }
