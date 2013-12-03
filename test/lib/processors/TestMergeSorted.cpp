@@ -1,5 +1,6 @@
 #include "processors/MergeSorted.hpp"
 #include "fileformats/Bed.hpp"
+#include "fileformats/StreamPump.hpp"
 #include "fileformats/TypedStream.hpp"
 
 #include <boost/bind.hpp>
@@ -79,8 +80,9 @@ TEST_F(TestMergeSorted, execute) {
     }
 
     Collector c;
-    MergeSorted<Bed, BedReader::ptr, Collector> merger(bedStreams, c);
-    merger.execute();
+    MergeSorted<Bed, BedReader::ptr> merger(bedStreams);
+    auto pump = makeStreamPump<Bed>(merger, c);
+    pump.execute();
     ASSERT_EQ(_expectedBeds.size(), c.beds.size());
     for (unsigned i = 0; i < c.beds.size(); ++i)
         ASSERT_EQ(_expectedBeds[i], c.beds[i]);

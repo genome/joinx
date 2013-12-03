@@ -250,7 +250,10 @@ void VcfMergeCommand::exec() {
 
     Vcf::Builder builder(mergeStrategy, &mergedHeader, writer);
     *out << mergedHeader;
-    MergeSorted<Vcf::Entry, VcfReader::ptr, Vcf::Builder> merger(readers, builder);
-    merger.execute();
+    MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
+    Vcf::Entry e;
+    while (merger.next(e)) {
+        builder(e);
+    }
     builder.flush();
 }

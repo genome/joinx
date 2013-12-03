@@ -25,6 +25,7 @@ set(SOURCES
     StreamFactory.hpp
     StreamHandler.cpp
     StreamHandler.hpp
+    StreamPump.hpp
     TypedStream.hpp
     Variant.cpp
     Variant.hpp

@@ -75,8 +75,11 @@ public:
                 buf->sort();
                 _buffers.push_back(buf);
             }
-            MergeSorted<ValueType, BufferPtr, OutputFunc> merger(_buffers, _out);
-            merger.execute();
+            MergeSorted<ValueType, BufferPtr> merger(_buffers);
+            ValueType e;
+            while (merger.next(e)) {
+                _out(e);
+            }
         }
     }
 
