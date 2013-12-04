@@ -21,8 +21,10 @@ VcfReader::ptr openVcf(InputStream& in);
 template<typename InputStreamPtrs>
 std::vector<VcfReader::ptr> openVcfs(InputStreamPtrs& streams) {
     std::vector<VcfReader::ptr> rv;
+    size_t idx = 0;
     for (auto iter = streams.begin(); iter != streams.end(); ++iter) {
         rv.push_back(openVcf(**iter));
+        rv.back()->header().sourceIndex(idx++);
     }
     return rv;
 }
