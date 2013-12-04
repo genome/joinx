@@ -12,6 +12,7 @@
 #include "ui/SortCommand.hpp"
 #include "ui/Vcf2RawCommand.hpp"
 #include "ui/VcfAnnotateCommand.hpp"
+#include "ui/VcfCompareGtCommand.hpp"
 #include "ui/VcfFilterCommand.hpp"
 #include "ui/VcfMergeCommand.hpp"
 #include "ui/VcfNormalizeIndelsCommand.hpp"
@@ -46,6 +47,7 @@ JoinX::JoinX() {
     registerSubCommand(SortCommand::ptr(new SortCommand));
     registerSubCommand(Vcf2RawCommand::ptr(new Vcf2RawCommand));
     registerSubCommand(VcfAnnotateCommand::ptr(new VcfAnnotateCommand));
+    registerSubCommand(VcfCompareGtCommand::ptr(new VcfCompareGtCommand));
     registerSubCommand(VcfFilterCommand::ptr(new VcfFilterCommand));
     registerSubCommand(VcfSiteFilterCommand::ptr(new VcfSiteFilterCommand));
     registerSubCommand(VcfMergeCommand::ptr(new VcfMergeCommand));

@@ -30,6 +30,8 @@ set(SOURCES
     Vcf2RawCommand.hpp
     VcfAnnotateCommand.cpp
     VcfAnnotateCommand.hpp
+    VcfCompareGtCommand.cpp
+    VcfCompareGtCommand.hpp
     VcfFilterCommand.cpp
     VcfFilterCommand.hpp
     VcfMergeCommand.cpp

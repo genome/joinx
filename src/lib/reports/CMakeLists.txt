@@ -7,6 +7,8 @@ set(SOURCES
     ConcordanceQuality.hpp
     SnvConcordance.cpp
     SnvConcordance.hpp
+    VcfCompareGt.cpp
+    VcfCompareGt.hpp
 )
 
 add_library(reports ${SOURCES})
