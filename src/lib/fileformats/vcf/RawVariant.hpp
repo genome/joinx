@@ -33,6 +33,11 @@ public:
         return rv;
     }
 
+    RawVariant()
+        : pos(0)
+    {
+    }
+
     RawVariant(int64_t pos, std::string const& ref, std::string const& alt)
         : pos(pos)
         , ref(ref)
