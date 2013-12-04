@@ -39,7 +39,7 @@ public:
     void finalize() {
         std::vector<std::vector<size_t>> perSampleCounts;
 
-        for (auto i = fileNames_.begin(); i != fileNames_.end(); ++i) {
+        for (auto i = fileNames_.rbegin(); i != fileNames_.rend(); ++i) {
             out_ << *i << "\t";
         }
 
