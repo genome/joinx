@@ -44,7 +44,6 @@ struct Legend : IRenderElement {
 
         ctx->move_to(0, y);
         for (size_t i = 0; i < labels.size(); ++i) {
-            double yCenter = (2 * y - extents[i].height) / 2.0;
             ctx->save();
             auto fillColor = std::get<1>(labels[i]);
             auto strokeColor = fillColor;

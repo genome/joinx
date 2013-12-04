@@ -16,6 +16,69 @@ using boost::format;
 using boost::assign::list_of;
 using boost::lexical_cast;
 
+
+VennLayouts::VennLayouts() {
+    VennLayout three;
+    three.radius = 2.5;
+    three.fillAlpha = 0.3;
+    three.fontSize = 0.3;
+    three.tpad = 0.08;
+
+    three.circles.push_back
+        (FilledCircle(Point(4, 4), three.radius, Color(1, 0, 0), Color(1, 0, 0, three.fillAlpha)));
+    three.circles.push_back
+        (FilledCircle(Point(6, 4), three.radius, Color(0, 1, 0), Color(0, 1, 0, three.fillAlpha)));
+    three.circles.push_back
+        (FilledCircle(Point(5, 6), three.radius, Color(0, 0, 1), Color(0, 0, 1, three.fillAlpha)));
+
+    three.textPos.push_back
+        (std::make_pair(Point(4.0 - three.radius + three.tpad, 4.0), Text::AlignLeft));
+    three.textPos.push_back
+        (std::make_pair(Point(6.0 + three.radius - three.tpad, 4.0), Text::AlignRight));
+    three.textPos.push_back
+        (std::make_pair(Point(5.0, 3.0), Text::AlignCenter));
+    three.textPos.push_back
+        (std::make_pair(Point(5.0, 6.0 + three.radius / 2.0), Text::AlignCenter));
+    three.textPos.push_back
+        (std::make_pair(Point(2.666, 6.0), Text::AlignLeft));
+    three.textPos.push_back
+        (std::make_pair(Point(7.333, 6.0), Text::AlignRight));
+    three.textPos.push_back
+        (std::make_pair(Point(5.0, 5.0), Text::AlignCenter));
+
+
+    VennLayout two;
+    two.radius = 3.2;
+    two.fillAlpha = 0.3;
+    two.fontSize = 0.3;
+    two.tpad = 0.10;
+
+    two.circles.push_back
+        (FilledCircle(Point(3.5, 5), two.radius, Color(1, 0, 0), Color(1, 0, 0, two.fillAlpha)));
+    two.circles.push_back
+        (FilledCircle(Point(6.5, 5), two.radius, Color(0, 0, 1), Color(0, 0, 1, two.fillAlpha)));
+
+    two.textPos.push_back
+        (std::make_pair(Point(3.5 - two.radius + two.tpad, 5.0), Text::AlignLeft));
+    two.textPos.push_back
+        (std::make_pair(Point(6.5 + two.radius - two.tpad, 5.0), Text::AlignRight));
+    two.textPos.push_back
+        (std::make_pair(Point(5.0, 5.0), Text::AlignCenter));
+
+    geometries_[3] = three;
+    geometries_[2] = two;
+}
+
+auto VennLayouts::get(size_t n) const -> VennLayout const& {
+    auto iter = geometries_.find(n);
+    if (iter == geometries_.end()) {
+        throw std::runtime_error(str(format(
+            "Unsupported number of sets (%1%) for venn diagram"
+            ) % n));
+    }
+    return iter->second;
+}
+
 VennDiagram::VennDiagram(
         std::vector<std::string> const& setNames,
         std::vector<size_t> const& counts
@@ -23,11 +86,7 @@ VennDiagram::VennDiagram(
     : setNames_(setNames)
     , counts_(counts)
 {
-    if (setNames_.size() != 3) {
-        throw std::runtime_error(str(format(
-            "Unsupported number of sets (%1%) for venn diagram"
-            ) % setNames_.size()));
-    }
+    geometries_.get(setNames_.size());
 
     size_t expectedNumCounts = (1 << setNames_.size()) - 1;
     if (counts_.size() != expectedNumCounts) {
@@ -59,44 +118,20 @@ void VennDiagram::draw(std::string const& filename, int width, int height) {
     ctx->restore(); // restore color to black
 
     ctx->set_line_width(0.05);
-/*
-    ctx->rectangle(0.0, 0.0, 10.0, 10.0);
-    ctx->stroke();
-*/
 
-    double radius = 2.5;
-    double fillAlpha = 0.3;
-    double fontSize = 0.3;
-    double tpad = 0.08;
-
-    std::vector<FilledCircle> circles = list_of
-        (FilledCircle(Point(4, 4), radius, Color(1, 0, 0), Color(1, 0, 0, fillAlpha)))
-        (FilledCircle(Point(6, 4), radius, Color(0, 1, 0), Color(0, 1, 0, fillAlpha)))
-        (FilledCircle(Point(5, 6), radius, Color(0, 0, 1), Color(0, 0, 1, fillAlpha)))
-        ;
-
-    std::vector<std::pair<Point, Text::Align>> textPos = list_of
-        (std::make_pair(Point(4.0 - radius + tpad, 4.0), Text::AlignLeft))
-        (std::make_pair(Point(6.0 + radius - tpad, 4.0), Text::AlignRight))
-        (std::make_pair(Point(5.0, 3.0), Text::AlignCenter))
-        (std::make_pair(Point(5.0, 6.0 + radius / 2.0), Text::AlignCenter))
-        (std::make_pair(Point(2.666, 6.0), Text::AlignLeft))
-        (std::make_pair(Point(7.333, 6.0), Text::AlignRight))
-        (std::make_pair(Point(5.0, 5.0), Text::AlignCenter))
-        ;
-
+    auto geom = geometries_.get(setNames_.size());
 
     ctx->save();
     ctx->set_line_width(0.01);
-    for (auto i = circles.begin(); i != circles.end(); ++i) {
+    for (auto i = geom.circles.begin(); i != geom.circles.end(); ++i) {
         i->render(ctx);
     }
 
     ctx->restore();
 
-    Font font("Helvetica", fontSize);
+    Font font("Helvetica", geom.fontSize);
     for (size_t i = 0; i < counts_.size(); ++i) {
-        auto x = textPos[i];
+        auto x = geom.textPos[i];
         auto point = x.first;
         auto align = x.second;
         Text txt(point, counts_[i], font, align);
@@ -110,7 +145,7 @@ void VennDiagram::draw(std::string const& filename, int width, int height) {
 
     std::vector<std::tuple<std::string, Color>> labels;
     for (size_t i = 0; i < setNames_.size(); ++i) {
-        auto const& color = circles[i].fillColor;
+        auto const& color = geom.circles[i].fillColor;
         labels.push_back(std::make_tuple(setNames_[i], color));
     }
     Legend legend(font, labels);
