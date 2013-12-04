@@ -5,6 +5,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 set(TEST_SOURCES
     TestCigarString.cpp
+    TestInteger.cpp
     TestIub.cpp
     TestStringView.cpp
     TestMutationSpectrum.cpp

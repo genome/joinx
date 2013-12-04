@@ -7,6 +7,7 @@ set(SOURCES
     CigarString.hpp
     CyclicIterator.hpp
     Exceptions.hpp
+    Integer.hpp
     Iub.hpp
     MultiType.hpp
     MutationSpectrum.cpp
