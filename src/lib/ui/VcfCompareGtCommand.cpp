@@ -52,11 +52,20 @@ void VcfCompareGtCommand::configureOptions() {
 }
 
 void VcfCompareGtCommand::exec() {
+    if (filenames_.size() < 2) {
+        throw std::runtime_error("At least two input files are required");
+    }
+
     std::vector<InputStream::ptr> inputStreams = _streams.openForReading(filenames_);
     ostream* out = &std::cout;
 
     if (names_.empty()) {
         names_ = filenames_;
+    }
+    else if (names_.size() != filenames_.size()) {
+        throw std::runtime_error(
+            "Mismatch between the number of input files and the number "
+            "of names (-n) given");
     }
 
     auto readers = openVcfs(inputStreams);
