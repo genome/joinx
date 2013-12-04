@@ -12,8 +12,8 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/unordered_map.hpp>
 
-#include <iostream>
 #include <algorithm>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -115,8 +115,9 @@ private:
                     alleles.push_back(rv.release());
                 }
                 alleles.sort();
-                if (!alleles.empty())
-                    gtmap_[sampleIdx][alleles].push_back(streamIdx);
+                if (!alleles.empty()) {
+                    gtmap_[sampleIdx][alleles].insert(streamIdx);
+                }
             }
         }
         entries_[streamIdx].clear();
@@ -150,7 +151,7 @@ private:
     OutputWriter& out_;
     bool final_;
     std::vector<
-        boost::unordered_map<RawVariant::Vector, std::vector<size_t>>
+        boost::unordered_map<RawVariant::Vector, std::set<size_t>>
         > gtmap_;
 };
 

@@ -19,6 +19,8 @@ public:
 
 protected:
     std::vector<std::string> filenames_;
+    std::vector<std::string> names_;
     std::vector<std::string> noSampleFilenames_;
     std::vector<std::string> sampleNames_;
+    std::string pdfOutputDir_;
 };

@@ -3,9 +3,11 @@
 #include "fileformats/InputStream.hpp"
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/GenotypeComparator.hpp"
+#include "graphics/VennDiagram.hpp"
 #include "processors/MergeSorted.hpp"
 #include "reports/VcfCompareGt.hpp"
 
+#include <boost/filesystem.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
@@ -20,6 +22,7 @@
 namespace po = boost::program_options;
 using boost::format;
 using boost::scoped_ptr;
+namespace bfs = boost::filesystem;
 using Vcf::CustomType;
 
 VcfCompareGtCommand::VcfCompareGtCommand()
@@ -32,9 +35,17 @@ void VcfCompareGtCommand::configureOptions() {
             po::value<vector<string>>(&filenames_),
             "input file(s) (positional arguments work also)")
 
+        ("name,n",
+            po::value<vector<string>>(&names_),
+            "meaningful names for each of the input files (given in the same order)")
+
         ("sample-name,s",
             po::value<vector<string>>(&sampleNames_),
             "operate only on these samples (may specify multiple times)")
+
+        ("pdf-dir,p",
+            po::value<std::string>(&pdfOutputDir_),
+            "If specified, create venn diagrams for each sample in this directory")
         ;
 
     _posOpts.add("input-file", -1);
@@ -43,6 +54,10 @@ void VcfCompareGtCommand::configureOptions() {
 void VcfCompareGtCommand::exec() {
     std::vector<InputStream::ptr> inputStreams = _streams.openForReading(filenames_);
     ostream* out = &std::cout;
+
+    if (names_.empty()) {
+        names_ = filenames_;
+    }
 
     auto readers = openVcfs(inputStreams);
     std::vector<Vcf::Header const*> headers;
@@ -66,12 +81,7 @@ void VcfCompareGtCommand::exec() {
         }
     }
 
-    for (size_t i = 0; i < filenames_.size(); ++i) {
-        auto const& fn = filenames_[i];
-        *out << "#file[" << i << "]=" << fn << '\n';
-    }
-
-    VcfCompareGt report(sampleNames_, *out);
+    VcfCompareGt report(names_, sampleNames_, *out);
     MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
     auto cmp = Vcf::makeGenotypeComparator(sampleNames_, headers, readers.size(), report);
     Vcf::Entry* e(new Vcf::Entry);
@@ -82,4 +92,21 @@ void VcfCompareGtCommand::exec() {
     delete e;
     cmp.finalize();
     report.finalize();
+
+    if (!pdfOutputDir_.empty()) {
+        if (!bfs::is_directory(pdfOutputDir_)) {
+            throw std::runtime_error(str(format(
+                "pdf output directory '%1%' does not exist!"
+                ) % pdfOutputDir_));
+        }
+
+        for (size_t i = 0; i < sampleNames_.size(); ++i) {
+            bfs::path out(pdfOutputDir_);
+            out /= sampleNames_[i] + ".pdf";
+            auto counts = report.orderedCountsForSample(i);
+            VennDiagram vd(filenames_, counts);
+            vd.setTitle(sampleNames_[i]);
+            vd.draw(out.string(), 800, 800);
+        }
+    }
 }

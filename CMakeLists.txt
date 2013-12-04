@@ -75,6 +75,9 @@ check_include_file_cxx(stdint.h HAVE_STDINT_H)
 # If we can't find it, we have to force it to use its own implementation
 check_include_file_cxx(tr1/tuple HAVE_TR1_TUPLE)
 
+find_package(Cairomm REQUIRED)
+include_directories(${Cairomm_INCLUDE_DIRS})
+
 find_package(BZip2 REQUIRED)
 include_directories(BZIP2_INCLUDE_DIR)
 add_definitions(${BZIP2_DEFINITIONS})

@@ -24,7 +24,7 @@ namespace {
                 size_t sampleIdx,
                 std::string const& sequence,
                 Vcf::RawVariant::Vector const& vars,
-                std::vector<size_t> const& which)
+                std::set<size_t> const& which)
         {
             std::map<std::string, std::vector<std::string>> calls;
 
