@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <cstddef>
 #include <iostream>
+#include <map>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -26,34 +28,23 @@ namespace {
                 Vcf::RawVariant::Vector const& vars,
                 std::map<size_t, Vcf::Entry const*> const& which)
         {
-            std::map<std::string, std::vector<std::string>> calls;
-
+            std::vector<std::string> callStrings;
             for (auto i = vars.begin(); i != vars.end(); ++i) {
-                std::stringstream refpos;
-                refpos << i->pos << ": " << i->ref;
-                calls[refpos.str()].push_back(i->alt);
-            }
-
-            std::vector<std::string> xs;
-            for (auto i = calls.begin(); i != calls.end(); ++i) {
                 std::stringstream ss;
-                ss << i->first << " -> "
-                    << streamJoin(i->second).delimiter("/").emptyString(".")
-                    ;
+                ss << i->pos << " " << i->ref << "->" << i->alt;
 
-                xs.push_back(ss.str());
+                callStrings.push_back(ss.str());
             }
+            std::stringstream ss;
+            ss << "S" << sampleIdx << " " << sequence << " "
+                << streamJoin(callStrings).delimiter(",");
 
-            std::cout << sampleIdx << ": "
-                << sequence << "\t"
-                << streamJoin(xs).delimiter(",") << "\t";
-            for (auto i = which.begin(); i != which.end(); ++i) {
-                if (i != which.begin())
-                    std::cout << ",";
-                std::cout << i->first;
-            }
+            calls[ss.str()] = streamJoin(which).delimiter(",").toString();
         }
+
+        std::map<std::string, std::string> calls;
     };
+
 }
 
 class TestVcfGenotypeComparator : public ::testing::Test {
@@ -107,14 +98,31 @@ TEST_F(TestVcfGenotypeComparator, process) {
     Collector c;
     auto gcmp = Vcf::makeGenotypeComparator(sampleNames_, headers_, nStreams, c);
     gcmp.push(makeEntry(0, "1", 10, "A", "G", "1/1\t0/1"));
+    gcmp.push(makeEntry(2, "1", 10, "A", "G", "1/1\t0/1"));
     gcmp.push(makeEntry(1, "1", 10, "A", "G", "0/1\t1/1"));
     gcmp.push(makeEntry(2, "1", 10, "A", "C", "0/1"));
+
     gcmp.push(makeEntry(2, "1", 11, "A", "G", "0/1"));
     gcmp.push(makeEntry(0, "1", 11, "A", "G", "0/1"));
-    gcmp.push(makeEntry(0, "1", 12, "A", "G,C", "1/1"));
-    gcmp.push(makeEntry(0, "1", 12, "AA", "A,C", "1/1\t1/2"));
 
+    gcmp.push(makeEntry(0, "1", 12, "A", "G,C", "1/1\t1/2"));
+
+    gcmp.push(makeEntry(0, "1", 12, "AA", "A,C", "1/1\t1/2"));
     gcmp.finalize();
+
+    EXPECT_EQ("0,2", c.calls["S0 1 10 A->G,10 A->G"]);
+    EXPECT_EQ("0,2", c.calls["S1 1 10 A->A,10 A->G"]);
+    EXPECT_EQ(  "1", c.calls["S0 1 10 A->A,10 A->G"]);
+
+    EXPECT_EQ(  "2", c.calls["S0 1 10 A->A,10 A->C"]);
+
+    EXPECT_EQ("0,2", c.calls["S0 1 11 A->A,11 A->G"]);
+
+    EXPECT_EQ(  "0", c.calls["S0 1 12 A->G,12 A->G"]);
+    EXPECT_EQ(  "0", c.calls["S1 1 12 A->C,12 A->G"]);
+
+    EXPECT_EQ(  "0", c.calls["S0 1 13 A->,13 A->"]);
+    EXPECT_EQ(  "0", c.calls["S1 1 12 AA->C,13 A->"]);
 }
 
 TEST_F(TestVcfGenotypeComparator, siteFilter) {
