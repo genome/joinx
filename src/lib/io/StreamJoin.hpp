@@ -1,6 +1,8 @@
 #pragma once
 
 #include <ostream>
+#include <sstream>
+#include <string>
 
 template<typename Iterable>
 struct StreamJoin {
@@ -34,6 +36,12 @@ struct StreamJoin {
             }
         }
         return out;
+    }
+
+    std::string toString() const {
+        std::stringstream ss;
+        ss << *this;
+        return ss.str();
     }
 
     Iterable const& seq;

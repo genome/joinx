@@ -21,4 +21,6 @@ TEST(TestStreamJoin, integers) {
     std::stringstream ssNone;
     ssNone << streamJoin(empty).emptyString("NOTHING").delimiter(" THEN ");
     EXPECT_EQ("NOTHING", ssNone.str());
+
+    EXPECT_EQ("1,2,3", streamJoin(ints).delimiter(",").toString());
 }
