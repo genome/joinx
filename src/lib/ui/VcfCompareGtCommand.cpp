@@ -3,7 +3,6 @@
 #include "fileformats/InputStream.hpp"
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/GenotypeComparator.hpp"
-#include "graphics/VennDiagram.hpp"
 #include "processors/MergeSorted.hpp"
 #include "reports/VcfCompareGt.hpp"
 
@@ -42,10 +41,6 @@ void VcfCompareGtCommand::configureOptions() {
         ("sample-name,s",
             po::value<vector<string>>(&sampleNames_),
             "operate only on these samples (may specify multiple times)")
-
-        ("pdf-dir,p",
-            po::value<std::string>(&pdfOutputDir_),
-            "If specified, create venn diagrams for each sample in this directory")
         ;
 
     _posOpts.add("input-file", -1);
@@ -101,21 +96,4 @@ void VcfCompareGtCommand::exec() {
     delete e;
     cmp.finalize();
     report.finalize();
-
-    if (!pdfOutputDir_.empty()) {
-        if (!bfs::is_directory(pdfOutputDir_)) {
-            throw std::runtime_error(str(format(
-                "pdf output directory '%1%' does not exist!"
-                ) % pdfOutputDir_));
-        }
-
-        for (size_t i = 0; i < sampleNames_.size(); ++i) {
-            bfs::path out(pdfOutputDir_);
-            out /= sampleNames_[i] + ".pdf";
-            auto counts = report.orderedCountsForSample(i);
-            VennDiagram vd(filenames_, counts);
-            vd.setTitle(sampleNames_[i]);
-            vd.draw(out.string(), 800, 800);
-        }
-    }
 }
