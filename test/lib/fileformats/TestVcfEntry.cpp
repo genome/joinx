@@ -351,3 +351,17 @@ TEST_F(TestVcfEntry, copy) {
     Vcf::Entry::parseLine(&_header, line, e1);
     ASSERT_EQ(e1.toString(), line);
 }
+
+TEST_F(TestVcfEntry, isFiltered) {
+    EXPECT_TRUE(v[0].failedFilters().empty());
+    EXPECT_FALSE(v[0].isFiltered());
+
+    ASSERT_EQ(v[1].failedFilters().size(), 1);
+    EXPECT_EQ("q10", *v[1].failedFilters().begin());
+    EXPECT_TRUE(v[1].isFiltered());
+
+    ASSERT_EQ(v[2].failedFilters().size(), 1);
+    EXPECT_EQ("PASS", *v[2].failedFilters().begin());
+
+    EXPECT_FALSE(v[2].isFiltered());
+}

@@ -23,6 +23,11 @@ class Entry {
 public:
     friend class AltNormalizer;
 
+    static bool isInvalidFilterId (char c) {
+        return (c == ';' || isspace(c));
+    }
+
+
     enum FieldName {
         CHROM,
         POS,
@@ -73,10 +78,6 @@ public:
     void parseAndReheader(const Header* h, const Header* newH, const std::string& s);
 
     void addIdentifier(const std::string& id);
-    static bool isInvalidFilterId (char c) {
-        return (c == ';' || isspace(c));
-    }
-
     void addFilter(const std::string& filterName);
     void clearFilters();
 
@@ -88,6 +89,7 @@ public:
     double qual() const { return _qual; }
     const std::set<std::string>& failedFilters() const { return _failedFilters; }
     const CustomValueMap& info() const { return _info; }
+    bool isFiltered() const;
     const CustomValue* info(std::string const& key) const;
     void setInfo(std::string const& key, CustomValue const& value);
     const SampleData& sampleData() const;
