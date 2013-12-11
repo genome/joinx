@@ -4,6 +4,8 @@
 #include "common/namespaces.hpp"
 #include "common/cstdint.hpp"
 
+#include <boost/unordered_map.hpp>
+
 #include <map>
 #include <ostream>
 #include <string>
@@ -39,6 +41,7 @@ public:
     void swap(SampleData& other);
     void addFilter(uint32_t sampleIdx, std::string const& filterName);
 
+
     FormatType const& format() const;
     iterator begin();
     iterator end();
@@ -48,6 +51,8 @@ public:
     MapType::size_type count(uint32_t idx) const;
     int formatKeyIndex(std::string const& key) const;
 
+    void appendFormatField(std::string const& key);
+    void appendFormatFieldIfNotExists(std::string const& key);
 
     CustomValue const* get(uint32_t sampleIdx, std::string const& key) const;
     std::vector<CustomValue> const* get(uint32_t sampleIdx) const;
@@ -64,6 +69,8 @@ public:
 
     void renumberGT(std::map<size_t, size_t> const& altMap);
 
+    void sampleToStream(std::ostream& s, size_t sampleIdx) const;
+
 protected:
     void parse(std::string const& raw);
     void freeValues();
@@ -73,7 +80,7 @@ protected:
     std::vector<CustomType const*> _format;
     MapType _values;
 
-    mutable std::map<std::string, GenotypeCall> _gtCache;
+    mutable boost::unordered_map<std::string, GenotypeCall> _gtCache;
 };
 
 std::ostream& operator<<(std::ostream& s, SampleData const& sampleData);

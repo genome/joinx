@@ -82,10 +82,7 @@ void SampleData::parse(std::string const& raw) {
             if (i->empty())
                 continue;
 
-            auto type = header().formatType(*i);
-            if (!type)
-                throw runtime_error(str(boost::format("Unknown id in FORMAT field: %1%") %*i));
-            _format.push_back(type);
+            appendFormatField(*i);
         }
     }
 
@@ -437,6 +434,30 @@ void SampleData::removeLowDepthGenotypes(uint32_t lowDepth) {
     }
 }
 
+void SampleData::sampleToStream(std::ostream& s, size_t sampleIdx) const {
+    auto data = get(sampleIdx);
+    if (!data) {
+        s << ".";
+    }
+    else {
+        s << streamJoin(*data).delimiter(":");
+    }
+}
+
+void SampleData::appendFormatFieldIfNotExists(std::string const& key) {
+    if (formatKeyIndex(key) == -1) {
+        appendFormatField(key);
+    }
+}
+
+void SampleData::appendFormatField(std::string const& key) {
+    auto type = header().formatType(key);
+    if (!type) {
+        throw runtime_error(str(boost::format("Unknown id in FORMAT field: %1%") % key));
+    }
+    _format.push_back(type);
+}
+
 std::ostream& operator<<(std::ostream& s, SampleData const& sampleData) {
     auto const& fmt = sampleData.format();
     if (!fmt.empty()) {
@@ -461,19 +482,10 @@ std::ostream& operator<<(std::ostream& s, SampleData const& sampleData) {
         if (i->second == 0)
             continue;
         auto const& values = *i->second;
-        if (!values.empty()) {
-            for (auto j = values.begin(); j != values.end(); ++j) {
-                if (j != values.begin())
-                    s << ':';
-                if (j->empty())
-                    s << '.';
-                else
-                    j->toStream(s);
-            }
-        } else
-            s << ".";
+        s << streamJoin(values).delimiter(":").emptyString(".");
         ++sampleCounter;
     }
+
     while (sampleCounter++ < nSamples) {
         s << "\t.";
     }
