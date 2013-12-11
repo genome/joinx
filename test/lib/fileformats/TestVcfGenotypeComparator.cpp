@@ -11,7 +11,6 @@
 #include <cstddef>
 #include <iostream>
 #include <map>
-#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -39,7 +38,13 @@ namespace {
             ss << "S" << sampleIdx << " " << sequence << " "
                 << streamJoin(callStrings).delimiter(",");
 
-            calls[ss.str()] = streamJoin(which).delimiter(",").toString();
+            std::vector<size_t> fileIndices(which.size());
+            size_t idx = 0;
+            for (auto i = which.begin(); i != which.end(); ++i, ++idx) {
+                fileIndices[idx] = i->first;
+            }
+
+            calls[ss.str()] = streamJoin(fileIndices).delimiter(",").toString();
         }
 
         std::map<std::string, std::string> calls;
