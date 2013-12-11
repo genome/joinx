@@ -4,6 +4,7 @@
 #include "Header.hpp"
 #include "MergeStrategy.hpp"
 #include "common/Sequence.hpp"
+#include "io/StreamJoin.hpp"
 
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
@@ -425,25 +426,26 @@ void Entry::samplesToStream(std::ostream& s) const {
     }
 }
 
-ostream& operator<<(ostream& s, const Entry& e) {
-    s << e.chrom() << '\t' << e.pos() << '\t';
-    e.printList(s, e.identifiers());
-    s << '\t' << e.ref() << '\t';
-    e.printList(s, e.alt(), ',');
-    if (e.qual() <= Vcf::Entry::MISSING_QUALITY)
+void Entry::allButSamplesToStream(std::ostream& s) const {
+    s << _chrom << '\t' << _pos << '\t'
+        << streamJoin(identifiers()).delimiter(";").emptyString(".");
+
+    s << '\t' << _ref << '\t'
+        << streamJoin(_alt).delimiter(",").emptyString(".");
+
+    if (_qual <= Vcf::Entry::MISSING_QUALITY)
         s << "\t.\t";
     else
-        s << '\t' << e.qual() << '\t';
+        s << '\t' << _qual << '\t';
 
-    e.printList(s, e.failedFilters());
+    s << streamJoin(_failedFilters).delimiter(";").emptyString(".");
     s << '\t';
 
-    const Vcf::Entry::CustomValueMap& info = e.info();
-    if (info.empty()) {
+    if (_info.empty()) {
         s << '.';
     } else {
-        for (auto i = info.begin(); i != info.end(); ++i) {
-            if (i != info.begin())
+        for (auto i = _info.begin(); i != _info.end(); ++i) {
+            if (i != _info.begin())
                 s << ';';
             s << i->second.type().id();
             if (!i->second.empty()) {
@@ -452,6 +454,10 @@ ostream& operator<<(ostream& s, const Entry& e) {
             }
         }
     }
+}
+
+ostream& operator<<(ostream& s, const Entry& e) {
+    e.allButSamplesToStream(s);
     s << '\t';
     e.samplesToStream(s);
 

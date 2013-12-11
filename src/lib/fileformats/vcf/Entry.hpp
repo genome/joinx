@@ -105,24 +105,12 @@ public:
     std::string toString() const;
     std::vector<std::string> allelesForSample(size_t sampleIdx) const;
 
-    template<typename T>
-    void printList(std::ostream& s, const T& v, char delim = ';') const {
-        if (!v.empty()) {
-            for (auto i = v.begin(); i != v.end(); ++i) {
-                if (i != v.begin())
-                    s << delim;
-                s << *i;
-            }
-        } else {
-            s << '.';
-        }
-    }
-
     int cmp(const Entry& rhs) const;
     bool operator<(const Entry& rhs) const;
 
     void swap(Entry& other);
 
+    void allButSamplesToStream(std::ostream& s) const;
     void samplesToStream(std::ostream& s) const;
 
 protected:
