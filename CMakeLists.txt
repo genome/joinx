@@ -82,7 +82,7 @@ add_definitions(${BZIP2_DEFINITIONS})
 add_custom_target(deps ALL)
 
 set(REQUIRED_BOOST_LIBS program_options filesystem system iostreams regex)
-set(BOOST_URL ${CMAKE_SOURCE_DIR}/vendor/boost-1_55_0-joinx.tar.gz)
+set(BOOST_URL ${CMAKE_SOURCE_DIR}/vendor/boost)
 set(ZLIB_URL ${CMAKE_SOURCE_DIR}/vendor/zlib-1.2.8.tar.gz)
 add_definitions("-DBOOST_CHRONO_HEADER_ONLY")
 build_boost(${BOOST_URL} ${CMAKE_BINARY_DIR}/vendor/boost ${REQUIRED_BOOST_LIBS})
