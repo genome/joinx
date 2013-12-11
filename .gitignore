@@ -12,7 +12,6 @@ Makefile
 Testing/
 _CPack_Packages/
 bin/
-build/
 cmake_install.cmake
 debian/*.log
 debian/*.substvars
