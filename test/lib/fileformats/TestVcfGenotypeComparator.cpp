@@ -24,7 +24,7 @@ namespace {
                 size_t sampleIdx,
                 std::string const& sequence,
                 Vcf::RawVariant::Vector const& vars,
-                std::set<size_t> const& which)
+                std::map<size_t, Vcf::Entry const*> const& which)
         {
             std::map<std::string, std::vector<std::string>> calls;
 
@@ -46,8 +46,12 @@ namespace {
 
             std::cout << sampleIdx << ": "
                 << sequence << "\t"
-                << streamJoin(xs).delimiter(",") << "\t"
-                << streamJoin(which).delimiter(",") << "\n";
+                << streamJoin(xs).delimiter(",") << "\t";
+            for (auto i = which.begin(); i != which.end(); ++i) {
+                if (i != which.begin())
+                    std::cout << ",";
+                std::cout << i->first;
+            }
         }
     };
 }
@@ -58,6 +62,7 @@ public:
         std::string header(
             "##fileformat=VCFv4.1\n"
             "##FORMAT=<ID=GT,Type=String,Number=1,Description=\"Genotype\">\n"
+            "##FORMAT=<ID=FT,Type=String,Number=1,Description=\"Genotype filter\">\n"
             "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\tS2\n"
             );
 
@@ -89,7 +94,7 @@ public:
             )
     {
         stringstream ss;
-        ss << chrom << "\t" << pos << "\t.\t" << ref << "\t" << alt << "\t.\t.\t.\tGT\t" << gt;
+        ss << chrom << "\t" << pos << "\t.\t" << ref << "\t" << alt << "\t.\t.\t.\tGT:FT\t" << gt;
         return new Vcf::Entry(headers_[headerIdx], ss.str());
     }
 
@@ -99,9 +104,8 @@ protected:
 };
 
 TEST_F(TestVcfGenotypeComparator, process) {
-    using namespace Vcf;
     Collector c;
-    auto gcmp = makeGenotypeComparator(sampleNames_, headers_, nStreams, c);
+    auto gcmp = Vcf::makeGenotypeComparator(sampleNames_, headers_, nStreams, c);
     gcmp.push(makeEntry(0, "1", 10, "A", "G", "1/1\t0/1"));
     gcmp.push(makeEntry(1, "1", 10, "A", "G", "0/1\t1/1"));
     gcmp.push(makeEntry(2, "1", 10, "A", "C", "0/1"));
@@ -110,5 +114,26 @@ TEST_F(TestVcfGenotypeComparator, process) {
     gcmp.push(makeEntry(0, "1", 12, "A", "G,C", "1/1"));
     gcmp.push(makeEntry(0, "1", 12, "AA", "A,C", "1/1\t1/2"));
 
+    gcmp.finalize();
+}
+
+TEST_F(TestVcfGenotypeComparator, siteFilter) {
+    Collector c;
+    auto gcmp = Vcf::makeGenotypeComparator(sampleNames_, headers_, nStreams, c);
+
+    auto unfiltered = makeEntry(0, "1", 10, "A", "G", "1/1\t0/1");
+    auto filtered = makeEntry(1, "1", 10, "A", "G", "1/1\t0/1");
+    auto gtfiltered = makeEntry(2, "1", 10, "A", "G", "1/1:FalsePositive\t0/1");
+
+    filtered->addFilter("FalsePositive");
+
+    EXPECT_TRUE(filtered->isFiltered());
+    EXPECT_FALSE(unfiltered->isFiltered());
+    EXPECT_FALSE(gtfiltered->isFiltered());
+    EXPECT_TRUE(gtfiltered->sampleData().isSampleFiltered(0));
+
+    gcmp.push(filtered);
+    gcmp.push(unfiltered);
+    gcmp.push(gtfiltered);
     gcmp.finalize();
 }

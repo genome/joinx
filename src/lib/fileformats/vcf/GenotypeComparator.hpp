@@ -13,7 +13,7 @@
 #include <boost/unordered_map.hpp>
 
 #include <algorithm>
-#include <set>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -92,6 +92,10 @@ private:
     void processEntries(size_t streamIdx) {
         auto const& ents = entries_[streamIdx];
         for (auto e = ents.begin(); e != ents.end(); ++e) {
+            if (e->isFiltered()) {
+                continue;
+            }
+
             auto const& sd = e->sampleData();
             RawVariant::Vector rawvs = RawVariant::processEntry(*e);
             if (rawvs.empty()) {
@@ -100,6 +104,10 @@ private:
 
             for (size_t sampleIdx = 0; sampleIdx < sampleNames_.size(); ++sampleIdx) {
                 RawVariant::Vector alleles;
+                if (sd.isSampleFiltered(sampleIdx)) {
+                    continue;
+                }
+
                 GenotypeCall const& call = sd.genotype(sampleIndices_[streamIdx][sampleIdx]);
                 for (auto idx = call.indices().begin(); idx != call.indices().end(); ++idx) {
                     std::unique_ptr<RawVariant> rv;
@@ -116,11 +124,10 @@ private:
                 }
                 alleles.sort();
                 if (!alleles.empty()) {
-                    gtmap_[sampleIdx][alleles].insert(streamIdx);
+                    gtmap_[sampleIdx][alleles][streamIdx] = &*e;
                 }
             }
         }
-        entries_[streamIdx].clear();
     }
 
     void process() {
@@ -137,6 +144,10 @@ private:
             }
             sd.clear();
         }
+
+        for (size_t streamIdx = 0; streamIdx < entries_.size(); ++streamIdx) {
+            entries_[streamIdx].clear();
+        }
     }
 
 private:
@@ -151,7 +162,7 @@ private:
     OutputWriter& out_;
     bool final_;
     std::vector<
-        boost::unordered_map<RawVariant::Vector, std::set<size_t>>
+        boost::unordered_map<RawVariant::Vector, std::map<size_t, Entry const*>>
         > gtmap_;
 };
 

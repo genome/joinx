@@ -41,6 +41,10 @@ void VcfCompareGtCommand::configureOptions() {
         ("sample-name,s",
             po::value<vector<string>>(&sampleNames_),
             "operate only on these samples (may specify multiple times)")
+
+        ("result-dir,d",
+            po::value<string>(&outputDir_),
+            "put variant files here")
         ;
 
     _posOpts.add("input-file", -1);
@@ -85,7 +89,7 @@ void VcfCompareGtCommand::exec() {
         }
     }
 
-    VcfCompareGt report(names_, sampleNames_, *out);
+    VcfCompareGt report(names_, sampleNames_, *out, outputDir_);
     MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
     auto cmp = Vcf::makeGenotypeComparator(sampleNames_, headers, readers.size(), report);
     Vcf::Entry* e(new Vcf::Entry);
