@@ -3,6 +3,8 @@
 #include "fileformats/vcf/VariantAdaptor.hpp"
 #include "fileformats/InputStream.hpp"
 
+#include <boost/assign/list_of.hpp>
+
 #include <functional>
 #include <sstream>
 #include <stdexcept>
@@ -10,6 +12,7 @@
 #include <vector>
 #include <gtest/gtest.h>
 
+using boost::assign::list_of;
 using namespace Vcf;
 using namespace std;
 
@@ -356,12 +359,36 @@ TEST_F(TestVcfEntry, isFiltered) {
     EXPECT_TRUE(v[0].failedFilters().empty());
     EXPECT_FALSE(v[0].isFiltered());
 
-    ASSERT_EQ(v[1].failedFilters().size(), 1);
+    ASSERT_EQ(1u, v[1].failedFilters().size());
     EXPECT_EQ("q10", *v[1].failedFilters().begin());
     EXPECT_TRUE(v[1].isFiltered());
 
-    ASSERT_EQ(v[2].failedFilters().size(), 1);
+    ASSERT_EQ(1u, v[2].failedFilters().size());
     EXPECT_EQ("PASS", *v[2].failedFilters().begin());
 
     EXPECT_FALSE(v[2].isFiltered());
+}
+
+TEST_F(TestVcfEntry, allButSamplesToStream) {
+    std::stringstream ss;
+    std::string expected(
+        "20\t14370\trs6054257\tG\tA\t29\t.\tAF=0.5;DB;DP=14;H2;NS=3"
+        );
+
+    v[0].allButSamplesToStream(ss);
+    EXPECT_EQ(expected, ss.str());
+}
+
+TEST_F(TestVcfEntry, sampleDataPrintCertainSample) {
+    std::vector<std::string> expected = list_of
+        ("0|0:48:1:51,51")
+        ("1|0:48:8:51,51")
+        ("1/1:43:5:.,.")
+        ;
+
+    for (size_t i = 0; i < 3; ++i) {
+        std::stringstream ss;
+        v[0].sampleData().sampleToStream(ss, i);
+        EXPECT_EQ(expected[i], ss.str());
+    }
 }
