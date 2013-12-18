@@ -132,4 +132,10 @@ size_t hash_value(RawVariant const& v) {
     return seed;
 }
 
+inline
+std::ostream& operator<<(std::ostream& s,  RawVariant const& rv) {
+    s << rv.pos << "\t" << rv.ref << "\t" << rv.alt;
+    return s;
+}
+
 END_NAMESPACE(Vcf)
