@@ -51,6 +51,8 @@ void VcfCompareGt::operator()(
         auto const& entry = *i->second;
         entry.allButSamplesToStream(out);
         out << "\t";
+        entry.sampleData().formatToStream(out);
+        out << "\t";
         auto actualSampleIdx = entry.header().sampleIndex(sampleNames_[sampleIdx]);
         entry.sampleData().sampleToStream(out, actualSampleIdx);
         out << "\n";
