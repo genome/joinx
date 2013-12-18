@@ -69,6 +69,7 @@ public:
 
     void renumberGT(std::map<size_t, size_t> const& altMap);
 
+    void formatToStream(std::ostream& s) const;
     void sampleToStream(std::ostream& s, size_t sampleIdx) const;
 
 protected:

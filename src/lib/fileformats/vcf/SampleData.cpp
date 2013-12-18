@@ -458,8 +458,8 @@ void SampleData::appendFormatField(std::string const& key) {
     _format.push_back(type);
 }
 
-std::ostream& operator<<(std::ostream& s, SampleData const& sampleData) {
-    auto const& fmt = sampleData.format();
+void SampleData::formatToStream(std::ostream& s) const {
+    auto const& fmt = format();
     if (!fmt.empty()) {
         auto i = fmt.begin();
         s << (*i)->id();
@@ -469,8 +469,11 @@ std::ostream& operator<<(std::ostream& s, SampleData const& sampleData) {
     } else {
         s << '.';
     }
+}
 
+std::ostream& operator<<(std::ostream& s, SampleData const& sampleData) {
     uint32_t sampleCounter(0);
+    sampleData.formatToStream(s);
     uint32_t nSamples = sampleData.header().sampleCount();
     for (auto i = sampleData.begin(); i != sampleData.end(); ++i) {
         s << '\t';
