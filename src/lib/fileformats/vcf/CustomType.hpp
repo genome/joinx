@@ -46,6 +46,10 @@ public:
     DataType type() const;
     const std::string& description() const;
 
+    bool isScalar() const {
+        return _numberType == FIXED_SIZE && _number == 1;
+    }
+
     bool operator==(const CustomType& rhs) const {
         return
             _id == rhs._id &&

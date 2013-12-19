@@ -1,15 +1,49 @@
 #include "fileformats/vcf/CustomType.hpp"
 
+#include <gtest/gtest.h>
+
+#include <boost/assign/list_of.hpp>
+
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <gtest/gtest.h>
 
 using namespace std;
 using namespace Vcf;
+namespace ba = boost::assign;
 
-TEST(VcfCustomValue, fromString) {
+namespace {
+    std::vector<std::string> scalars = ba::list_of
+        ("ID=NS,Number=1,Type=Integer,Description=\"desc\"")
+        ("ID=NS,Number=1,Type=String,Description=\"desc\"")
+        ("ID=NS,Number=1,Type=Float,Description=\"desc\"")
+        ("ID=NS,Number=1,Type=Character,Description=\"desc\"")
+        ("ID=NS,Number=1,Type=Flag,Description=\"desc\"")
+        ;
+
+    std::vector<std::string> nonScalars = ba::list_of
+        ("ID=NS,Number=.,Type=Integer,Description=\"desc\"")
+        ("ID=NS,Number=A,Type=String,Description=\"desc\"")
+        ("ID=NS,Number=G,Type=Float,Description=\"desc\"")
+        ("ID=NS,Number=2,Type=Character,Description=\"desc\"")
+        ("ID=NS,Number=3,Type=Flag,Description=\"desc\"")
+        ;
+}
+
+TEST(TestVcfCustomType, isScalar) {
+    for (auto i = scalars.begin(); i != scalars.end(); ++i) {
+        CustomType t(*i);
+        EXPECT_TRUE(t.isScalar()) << *i << " should evaluate to a scalar type";
+    }
+
+    for (auto i = nonScalars.begin(); i != nonScalars.end(); ++i) {
+        CustomType t(*i);
+        EXPECT_FALSE(t.isScalar()) << *i << " should not evaluate to a scalar type";
+    }
+}
+
+TEST(TestVcfCustomType, fromString) {
     string s("ID=NS,Number=1,Type=Integer,Description=\"desc1=cool\"");
     CustomType t1(s);
     ASSERT_EQ("NS", t1.id());
@@ -19,7 +53,7 @@ TEST(VcfCustomValue, fromString) {
     ASSERT_EQ(s, t1.toString());
 }
 
-TEST(VcfCustomValue, negativeNumber) {
+TEST(TestVcfCustomType, negativeNumber) {
     string s("ID=NS,Number=-1,Type=Integer,Description=\"desc1=cool\"");
     CustomType t1(s);
     ASSERT_EQ("NS", t1.id());
