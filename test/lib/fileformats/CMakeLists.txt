@@ -27,6 +27,7 @@ set(TEST_SOURCES
     TestVcfMergeStrategy.cpp
     TestVcfRawVariant.cpp
     TestVcfReader.cpp
+    TestVcfSampleData.cpp
     TestVcfSampleTag.cpp
     TestVcfValueMergers.cpp
     TestWiggleReader.cpp
