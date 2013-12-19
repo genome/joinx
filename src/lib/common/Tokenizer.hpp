@@ -162,35 +162,50 @@ protected:
     }
 
     bool _extract(std::string& value);
+
+    template<typename T, typename V>
+    bool _extractNumeric(T& parser, V& value);
+
+
     bool _extract(const char** begin, const char** end);
-    bool _extract(int8_t&  value) { return _extractSigned(value); }
-    bool _extract(int16_t& value) { return _extractSigned(value); }
-    bool _extract(int32_t& value) { return _extractSigned(value); }
-    bool _extract(int64_t& value) { return _extractSigned(value); }
-    bool _extract(uint8_t&  value) { return _extractUnsigned(value); }
-    bool _extract(uint16_t& value) { return _extractUnsigned(value); }
-    bool _extract(uint32_t& value) { return _extractUnsigned(value); }
-    bool _extract(uint64_t& value) { return _extractUnsigned(value); }
+
+
+    bool _extract(int16_t& value) {
+        return _extractNumeric(boost::spirit::qi::short_, value);
+    }
+
+    bool _extract(int32_t& value) {
+        return _extractNumeric(boost::spirit::qi::int_, value);
+    }
+
+    bool _extract(int64_t& value) {
+        return _extractNumeric(boost::spirit::qi::long_, value);
+    }
+
+    bool _extract(uint16_t& value) {
+        return _extractNumeric(boost::spirit::qi::ushort_, value);
+    }
+
+    bool _extract(uint32_t& value) {
+        return _extractNumeric(boost::spirit::qi::uint_, value);
+    }
+
+    bool _extract(uint64_t& value) {
+        return _extractNumeric(boost::spirit::qi::ulong_, value);
+    }
+
 
     bool _extract(float& value) {
-        return _extractFloat(boost::spirit::qi::float_, value);
+        return _extractNumeric(boost::spirit::qi::float_, value);
     }
 
     bool _extract(double& value) {
-        return _extractFloat(boost::spirit::qi::double_, value);
+        return _extractNumeric(boost::spirit::qi::double_, value);
     }
 
     bool _extract(long double& value) {
-        return _extractFloat(boost::spirit::qi::long_double, value);
+        return _extractNumeric(boost::spirit::qi::long_double, value);
     }
-
-    template<typename T>
-    bool _extractSigned(T& value);
-    template<typename T>
-    bool _extractUnsigned(T& value);
-
-    template<typename T, typename V>
-    bool _extractFloat(T& parser, V& value);
 
     size_t nextDelim();
 
@@ -304,34 +319,8 @@ inline bool Tokenizer<std::string>::eof() const {
 }
 
 template<typename DelimType>
-template<typename T>
-inline bool Tokenizer<DelimType>::_extractSigned(T& value) {
-    char* realEnd = NULL;
-    string::size_type expectedLen =_end-_pos;
-    value = strtoll(&_sbeg[_pos], &realEnd, 10);
-    ptrdiff_t len = realEnd - &_sbeg[_pos];
-    bool rv = len == ptrdiff_t(expectedLen);
-    if (rv)
-        advance();
-    return rv;
-}
-
-template<typename DelimType>
-template<typename T>
-inline bool Tokenizer<DelimType>::_extractUnsigned(T& value) {
-    char* realEnd = NULL;
-    string::size_type expectedLen =_end-_pos;
-    value = strtoull(&_sbeg[_pos], &realEnd, 10);
-    ptrdiff_t len = realEnd - &_sbeg[_pos];
-    bool rv = len == ptrdiff_t(expectedLen);
-    if (rv)
-        advance();
-    return rv;
-}
-
-template<typename DelimType>
 template<typename T, typename V>
-inline bool Tokenizer<DelimType>::_extractFloat(T& parser, V& value) {
+inline bool Tokenizer<DelimType>::_extractNumeric(T& parser, V& value) {
     namespace qi = boost::spirit::qi;
     auto beg = &_sbeg[_pos];
     auto end = &_sbeg[_end];
