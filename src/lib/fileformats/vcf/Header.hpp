@@ -8,9 +8,10 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <unordered_map>
 #include <set>
+#include <sstream>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -41,6 +42,11 @@ public:
             rv.add(line);
         }
         return rv;
+    }
+
+    static Header fromString(std::string const& s) {
+        std::stringstream ss(s);
+        return fromStream(ss);
     }
 
     Header();
