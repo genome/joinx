@@ -9,6 +9,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
+#include <boost/unordered_set.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -39,6 +40,12 @@ SampleData& SampleData::operator=(SampleData const& other) {
     return *this;
 }
 
+SampleData& SampleData::operator=(SampleData&& other) {
+    std::swap(_header, other._header);
+    _format.swap(other._format);
+    _values.swap(other._values);
+    return *this;
+}
 
 
 SampleData::SampleData()
@@ -125,7 +132,9 @@ void SampleData::parse(Header const* h, std::string const& raw) {
 
 
     if (sampleIdx > _header->sampleNames().size()) {
-        throw runtime_error(str(boost::format("More samples than described in VCF header (%1% vs %2%).") %sampleIdx %_header->sampleNames().size()));
+        throw runtime_error(str(boost::format(
+            "More samples than described in VCF header (%1% vs %2%)."
+            ) %sampleIdx %_header->sampleNames().size()));
     }
 }
 
@@ -144,7 +153,7 @@ void SampleData::freeValues() {
     // Mirrored columns can lead to multiple copies of the same
     // pointer appearing in the _values map. We don't want to
     // delete them twice.
-    set<ValueVector*> uniqPtrs;
+    boost::unordered_set<ValueVector*> uniqPtrs;
     for (auto i = _values.begin(); i != _values.end(); ++i) {
         auto seen = uniqPtrs.insert(i->second);
         if (seen.second) {

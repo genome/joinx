@@ -31,6 +31,7 @@ public:
     SampleData(SampleData const& other);
     SampleData(SampleData&& other);
     SampleData& operator=(SampleData const&);
+    SampleData& operator=(SampleData&&);
 
     ~SampleData();
 
