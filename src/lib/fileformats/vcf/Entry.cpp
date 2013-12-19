@@ -385,7 +385,7 @@ void Entry::setInfo(std::string const& key, CustomValue const& value) {
 
 SampleData& Entry::sampleData() {
     if (!_parsedSamples) {
-        _sampleData = SampleData(_header, _sampleString);
+        _sampleData.parse(_header, _sampleString);
         _parsedSamples = true;
     }
 
@@ -394,7 +394,7 @@ SampleData& Entry::sampleData() {
 
 const SampleData& Entry::sampleData() const {
     if (!_parsedSamples) {
-        _sampleData = SampleData(_header, _sampleString);
+        _sampleData.parse(_header, _sampleString);
         _parsedSamples = true;
     }
 

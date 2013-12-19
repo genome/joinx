@@ -57,18 +57,18 @@ SampleData::SampleData(SampleData&& other)
 {
 }
 
-SampleData::SampleData(Header const* h, std::string const& raw)
-    : _header(h)
-{
+SampleData::SampleData(Header const* h, std::string const& raw) {
     try {
-        parse(raw);
+        parse(h, raw);
     } catch (...) {
         freeValues();
         throw;
     }
 }
 
-void SampleData::parse(std::string const& raw) {
+void SampleData::parse(Header const* h, std::string const& raw) {
+    _header = h;
+
     Tokenizer<char> tok(raw, '\t');
     char const* beg(0);
     char const* end(0);

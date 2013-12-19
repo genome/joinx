@@ -72,8 +72,8 @@ public:
     void formatToStream(std::ostream& s) const;
     void sampleToStream(std::ostream& s, size_t sampleIdx) const;
 
+    void parse(Header const* h, std::string const& raw);
 protected:
-    void parse(std::string const& raw);
     void freeValues();
 
 protected:
