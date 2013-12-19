@@ -96,43 +96,6 @@ bool CustomValue::empty() const {
     return _values.empty();
 }
 
-void CustomValue::setString(SizeType idx, const std::string& value) {
-    type().validateIndex(idx);
-    stringstream ss;
-    if (value.empty() || value == ".") {
-        _values.clear();
-        return;
-    }
-
-    switch (type().type()) {
-        case CustomType::INTEGER:
-            set<int64_t>(value);
-            break;
-
-        case CustomType::FLOAT:
-            set<double>(value);
-            ss << *get<double>(idx);
-            break;
-
-        case CustomType::CHAR:
-            set<char>(value);
-            break;
-
-        case CustomType::STRING:
-            set<string>(value);
-            break;
-
-        case CustomType::FLAG:
-            // no need for an extra bool
-            // the values very presence is an indication of its truthiness
-            break;
-
-        default:
-            throw runtime_error("Invalid custom VCF type!");
-            break;
-    }
-}
-
 void CustomValue::setNumAlts(uint32_t n) {
     if (type().numberType() == CustomType::PER_ALLELE) {
         if (_values.size() > n ) {

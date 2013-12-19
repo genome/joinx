@@ -40,7 +40,6 @@ public:
     template<typename T>
     void set(SizeType idx, const T& value);
 
-    void setString(SizeType idx, const std::string& value);
     std::string getString(SizeType idx) const;
     void toStream(std::ostream& s) const;
     std::string toString() const;
