@@ -41,6 +41,7 @@ struct TestInOnly : public IBenchmark {
         size_t count(0);
         auto& r = *reader;
         while (r.next(entry)) {
+            entry.sampleData();
             ++count;
         }
         return count;
