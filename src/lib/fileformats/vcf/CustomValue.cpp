@@ -3,6 +3,8 @@
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <utility>
+
 using boost::format;
 using boost::lexical_cast;
 using namespace std;
@@ -13,6 +15,19 @@ CustomValue::CustomValue()
     : _type(0)
 {
 }
+
+CustomValue::CustomValue(CustomValue const& other)
+    : _type(other._type)
+    , _values(other._values)
+{
+}
+
+CustomValue::CustomValue(CustomValue&& other)
+    : _type(other._type)
+    , _values(std::move(other._values))
+{
+}
+
 
 CustomValue::CustomValue(const CustomType* type)
     : _type(type)

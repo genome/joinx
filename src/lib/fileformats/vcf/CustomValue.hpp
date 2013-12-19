@@ -21,6 +21,10 @@ public:
     typedef std::vector<ValueType>::size_type SizeType;
 
     CustomValue();
+
+    CustomValue(CustomValue const& other);
+    CustomValue(CustomValue&& other);
+
     explicit CustomValue(const CustomType* type);
     CustomValue(const CustomType* type, const std::string& value);
 
