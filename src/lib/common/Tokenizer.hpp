@@ -4,6 +4,7 @@
 #include "common/cstdint.hpp"
 
 #include <boost/format.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 #include <algorithm>
 #include <cstdlib>
@@ -170,17 +171,26 @@ protected:
     bool _extract(uint16_t& value) { return _extractUnsigned(value); }
     bool _extract(uint32_t& value) { return _extractUnsigned(value); }
     bool _extract(uint64_t& value) { return _extractUnsigned(value); }
-    bool _extract(float& value) { return _extractFloat(strtof, value); }
-    bool _extract(double& value) { return _extractFloat(strtod, value); }
-    bool _extract(long double& value) { return _extractFloat(strtold, value); }
+
+    bool _extract(float& value) {
+        return _extractFloat(boost::spirit::qi::float_, value);
+    }
+
+    bool _extract(double& value) {
+        return _extractFloat(boost::spirit::qi::double_, value);
+    }
+
+    bool _extract(long double& value) {
+        return _extractFloat(boost::spirit::qi::long_double, value);
+    }
+
     template<typename T>
     bool _extractSigned(T& value);
     template<typename T>
     bool _extractUnsigned(T& value);
-    template<typename T>
-    bool _extractFloat(T& value);
-    template<typename T>
-    bool _extractFloat(T (*func)(const char*, char**), T& value);
+
+    template<typename T, typename V>
+    bool _extractFloat(T& parser, V& value);
 
     size_t nextDelim();
 
@@ -320,13 +330,16 @@ inline bool Tokenizer<DelimType>::_extractUnsigned(T& value) {
 }
 
 template<typename DelimType>
-template<typename T>
-inline bool Tokenizer<DelimType>::_extractFloat(T (*func)(const char*, char**), T& value) {
-    char* realEnd = NULL;
-    string::size_type expectedLen =_end-_pos;
-    value = func(&_sbeg[_pos], &realEnd);
-    ptrdiff_t len = realEnd - &_sbeg[_pos];
-    bool rv = len == ptrdiff_t(expectedLen);
+template<typename T, typename V>
+inline bool Tokenizer<DelimType>::_extractFloat(T& parser, V& value) {
+    namespace qi = boost::spirit::qi;
+    auto beg = &_sbeg[_pos];
+    auto end = &_sbeg[_end];
+
+    qi::parse(beg, end, parser, value);
+
+    //value = func(&_sbeg[_pos], &realEnd);
+    bool rv = beg == end;
     if (rv)
         advance();
     return rv;
