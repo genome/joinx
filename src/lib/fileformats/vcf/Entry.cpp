@@ -378,7 +378,7 @@ void Entry::setInfo(std::string const& key, CustomValue const& value) {
     if (i == _info.end()) {
         _info.insert(make_pair(key, value));
     } else {
-        i->second = value;
+        i->second = std::move(value);
     }
 }
 

@@ -25,6 +25,9 @@ public:
     CustomValue(CustomValue const& other);
     CustomValue(CustomValue&& other);
 
+    CustomValue& operator=(CustomValue const& other);
+    CustomValue& operator=(CustomValue&& other);
+
     explicit CustomValue(const CustomType* type);
     CustomValue(const CustomType* type, const std::string& value);
 

@@ -28,6 +28,17 @@ CustomValue::CustomValue(CustomValue&& other)
 {
 }
 
+CustomValue& CustomValue::operator=(CustomValue const& other) {
+    _type = other._type;
+    _values = other._values;
+    return *this;
+}
+
+CustomValue& CustomValue::operator=(CustomValue&& other) {
+    _type = other._type;
+    _values.swap(other._values);
+    return *this;
+}
 
 CustomValue::CustomValue(const CustomType* type)
     : _type(type)
