@@ -89,7 +89,7 @@ public:
 
         string remainder(&fmt[1]);
         Tokenizer<string> t(remainder, ",-");
-        unsigned field, rangeEnd;
+        unsigned field(0), rangeEnd(0);
         while (t.extract(field)) {
             switch (t.lastDelim()) {
                 case '\0':
