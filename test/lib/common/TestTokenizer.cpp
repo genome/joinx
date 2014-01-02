@@ -190,6 +190,21 @@ TEST(TestTokenizer, nextTokenMatches) {
     ASSERT_TRUE(t.eof());
 }
 
+TEST(Tokenizer, extractChar) {
+    string input("a,b,cd");
+
+    Tokenizer<char> t(input, ',');
+    char c(0);
+
+    EXPECT_TRUE(t.extract(c));
+    EXPECT_EQ('a', c);
+
+    EXPECT_TRUE(t.extract(c));
+    EXPECT_EQ('b', c);
+
+    EXPECT_FALSE(t.extract(c));
+}
+
 TEST(Tokenizer, extractPointers) {
     string input("ax=11,bx=22,cx=33");
     Tokenizer<char> t(input, ',');
