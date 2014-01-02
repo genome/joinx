@@ -145,7 +145,7 @@ uint32_t CigarString::length() const {
 void CigarString::parse(const string& data) {
     _ops.clear();
     Tokenizer<string> t(data, _op_to_chr);
-    uint32_t length;
+    uint32_t length(0);
     while (t.extract(length)) {
         if (t.lastDelim() == '\0')
             break;
