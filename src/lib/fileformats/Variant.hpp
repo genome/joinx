@@ -79,7 +79,6 @@ public:
 
     bool positionMatch(const Variant& rhs) const {
         return
-            type() == rhs.type() &&
             start() == rhs.start() &&
             stop() == rhs.stop();
     }

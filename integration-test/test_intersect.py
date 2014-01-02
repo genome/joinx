@@ -63,6 +63,21 @@ class TestIntersect(IntegrationTest, unittest.TestCase):
         expected_file = self.inputFiles("expected-no-adjacent-insertions.bed")[0]
         self.assertFilesEqual(expected_file, output_file)
 
+    def test_exact_pos_regions(self):
+        output_file = self.tempFile("output.bed")
+        params = [
+            "intersect",
+            "--exact-pos",
+            "-o", output_file
+        ]
+        a, b = self.inputFiles("a.bed", "a-regions.bed")
+        params.extend([a, b])
+        rv, err = self.execute(params)
+        self.assertEqual(0, rv)
+        self.assertEqual('', err)
+        expected_file = a
+        self.assertFilesEqual(expected_file, output_file)
+
     def test_partial_match(self):
         output_file = self.tempFile("output.bed")
         params = [
