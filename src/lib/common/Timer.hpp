@@ -31,6 +31,18 @@ public:
         return elapsed_as<default_units>();
     }
 
+    friend std::ostream& operator<<(std::ostream& s, BasicTimer const& t) {
+        // on some platforms, valgrind gets angry about printing the boost
+        // chrono types to std::cout/cerr. it modifies the stream in a way
+        // that is ok, but valgrand can't see that it gets cleaned up because
+        // it happens outside of main.
+        // workaround: print to a stringstream first;
+        std::stringstream ss;
+        ss << t.elapsed();
+        s << ss.str();
+        return s;
+    }
+
 private:
     typename clock_type::time_point _start;
 };
