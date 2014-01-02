@@ -19,6 +19,28 @@ using namespace std;
 // too general purpose (i.e., slow).
 template<typename DelimType>
 class Tokenizer {
+private: // details...
+    // Get value type from normal iterators
+    template<typename IterType, typename ValueType>
+    struct IteratorValue_impl {
+        typedef ValueType value_type;
+    };
+
+    // Get value type from output iterators
+    template<typename IterType>
+    struct IteratorValue_impl<IterType, void> {
+        typedef typename IterType::container_type::value_type value_type;
+    };
+
+    template<typename T>
+    struct IteratorValue {
+        typedef typename IteratorValue_impl<
+                T,
+                typename std::iterator_traits<T>::value_type
+                >::value_type
+                value_type;
+    };
+
 public:
     Tokenizer(std::string const& s, DelimType const& delim = '\t')
         : _sbeg(s.data())
@@ -85,14 +107,12 @@ public:
         char const* beg,
         char const* end,
         DelimType const& delim,
-        IterType v,
-        size_t ignoreFirst = 0 // ignore first n tokens
+        IterType v
         )
     {
         Tokenizer<DelimType> t(beg, end, delim);
-        typename IterType::container_type::value_type tmp;
-
-        while (ignoreFirst-- != 0 && t.extract(tmp));
+        typedef typename IteratorValue<IterType>::value_type ValueType;
+        ValueType tmp;
 
         while (t.extract(tmp))
             *v++ = std::move(tmp);
@@ -102,28 +122,20 @@ public:
     static void split(
         StringView const& s,
         DelimType const& delim,
-        IterType v,
-        size_t ignoreFirst = 0 // ignore first n tokens
+        IterType v
         )
     {
-        return split<IterType>(s.begin(), s.end(), delim, v, ignoreFirst);
+        return split<IterType>(s.begin(), s.end(), delim, v);
     }
 
     template<typename IterType>
     static void split(
         std::string const& s,
         DelimType const& delim,
-        IterType v,
-        size_t ignoreFirst = 0 // ignore first n tokens
+        IterType v
         )
     {
-        Tokenizer<DelimType> t(s, delim);
-        typename IterType::container_type::value_type tmp;
-
-        while (ignoreFirst-- != 0 && t.extract(tmp));
-
-        while (t.extract(tmp))
-            *v++ = std::move(tmp);
+        return split<IterType>(s.data(), s.data() + s.size(), delim, v);
     }
 
 
@@ -142,23 +154,18 @@ protected:
         std::string s;
         if (!extract(s))
             return false;
-        value = T(s);
+        value = std::move(s);
         return true;
     }
 
     // special case for casting string to char
     bool _extract(char& value) {
-        string s;
-        if (! extract(s))
-            return false;
-        if (s.size() == 1) {
-            value = s[0];
-            return true;
-        } else {
-            using boost::format;
-            throw std::runtime_error(str(format("Attempted to cast string '%1%' to char") %s));
+        bool rv = _end - _pos == 1;
+        if (rv) {
+            value = _sbeg[_pos];
+            advance();
         }
-        return false;
+        return rv;
     }
 
     bool _extract(std::string& value);
