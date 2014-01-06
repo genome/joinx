@@ -16,6 +16,7 @@ public:
 
     void configureOptions();
     void exec();
+    bool hidden() const { return true; }
 
 protected:
     std::vector<std::string> filenames_;
