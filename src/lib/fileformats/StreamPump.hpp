@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 template<typename ValueType, typename StreamType, typename OutputFunc>
 struct StreamPump {
     StreamPump(StreamType& s, OutputFunc& out)
@@ -11,7 +13,7 @@ struct StreamPump {
     void execute() {
         ValueType entry;
         while (stream_.next(entry)) {
-            out_(entry);
+            out_(std::move(entry));
         }
     }
 
