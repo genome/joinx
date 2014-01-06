@@ -131,6 +131,20 @@ public:
     boost::scoped_ptr<MergeStrategy> _defaultMs;
 };
 
+TEST_F(TestVcfEntryMerger, mergeDifferentSampleFields) {
+    string t1="20\t14370\tid1\tT\tG\t.\tPASS\tVC=Samtools\tGT:DP\t1/1:30";
+    string t2="20\t14370\tid1\tT\tC\t29\tPASS\tVC=Samtools\tGT\t0/1";
+    Entry entries[2];
+    Entry::parseLine(&_headers[0], t1, entries[0]);
+    Entry::parseLine(&_headers[1], t2, entries[1]);
+    EntryMerger merger(*_defaultMs, &_mergedHeader, entries, entries + 2);
+    Entry entry(std::move(merger));
+    std::stringstream ss;
+    // There was a bug about printing null CustomValue fields in sample
+    // data that happened in cases like this.
+    EXPECT_NO_THROW(ss << entry);
+}
+
 TEST_F(TestVcfEntryMerger, merge) {
     // We want to concatenate variant caller names
     _defaultMs->setMerger("VC", "uniq-concat");
@@ -264,7 +278,7 @@ TEST_F(TestVcfEntryMerger, Builder) {
     Builder builder(*_defaultMs, &_mergedHeader, boost::bind(&push_back, ref(v), _1));
     string t1="20\t14370\tid1\tT\tG\t.\tPASS\tVC=Samtools\tDP\t1";
     string t2="21\t14370\tid1\tT\tC\t29\tPASS\tVC=Samtools\tDP\t2";
-    Entry entries[2]; 
+    Entry entries[2];
     Entry::parseLine(&_headers[0], t1, entries[0]);
     Entry::parseLine(&_headers[1], t2, entries[1]);
     builder(*entries);
@@ -311,7 +325,7 @@ TEST_F(TestVcfEntryMerger, nullAlt) {
     Builder builder(*_defaultMs, &_mergedHeader, boost::bind(&push_back, ref(v), _1));
     string t1="20\t14370\tid1\tT\tG\t.\tPASS\tVC=Samtools\tDP\t1";
     string t2="20\t14370\tid1\tT\t.\t29\tPASS\tVC=Samtools\tDP\t2";
-    Entry entries[2]; 
+    Entry entries[2];
     Entry::parseLine(&_headers[0], t1, entries[0]);
     Entry::parseLine(&_headers[1], t2, entries[1]);
     builder(*entries);

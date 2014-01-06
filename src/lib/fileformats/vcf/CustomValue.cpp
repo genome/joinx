@@ -159,6 +159,10 @@ std::string CustomValue::getString(SizeType idx) const {
 }
 
 void CustomValue::toStream(ostream& s) const {
+    if (empty()) {
+        s << ".";
+        return;
+    }
 
     switch (type().type()) {
         case CustomType::INTEGER:
