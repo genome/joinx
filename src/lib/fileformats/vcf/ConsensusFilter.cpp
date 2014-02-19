@@ -20,15 +20,18 @@ void ConsensusFilter::apply(Entry& entry, std::vector<size_t> const* counts) con
     auto sourceCounts = _header->sampleSourceCounts();
     if (_percent > 0.0 && !_filterName.empty()) {
         for (auto i = sdata.begin(); i != sdata.end(); ++i) {
-            if (i->first >= sourceCounts.size())
+            auto const& sampleName = entry.header().sampleNames()[i->first];
+            size_t mergedIndex = _header->sampleIndex(sampleName);
+
+            if (mergedIndex >= sourceCounts.size())
                 throw runtime_error("Couldn't get source count.");
 
-            size_t total = sourceCounts[i->first];
+            size_t total = sourceCounts[mergedIndex];
             size_t actual = 0;
             if (counts)
-                actual = (*counts)[i->first];
+                actual = (*counts)[mergedIndex];
             else
-                actual = sdata.get(i->first) != 0;
+                actual = i->second != 0;
 
             double pct = actual/double(total);
             if (pct < _percent) {
