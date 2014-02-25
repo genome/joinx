@@ -25,6 +25,7 @@ boost::scoped_ptr<Registry> Registry::_instance;
 
 Registry::Registry() {
     registerMerger(Base::const_ptr(new UseFirst));
+    registerMerger(Base::const_ptr(new UseEarliest));
     registerMerger(Base::const_ptr(new EnforceEquality));
     registerMerger(Base::const_ptr(new Ignore));
     registerMerger(Base::const_ptr(new Sum));
@@ -63,6 +64,23 @@ CustomValue UseFirst::operator()(
     if (!v)
         return CustomValue();
     return *v;
+}
+
+CustomValue UseEarliest::operator()(
+    CustomType const* type,
+    FetchFunc fetch,
+    Entry const* begin,
+    Entry const* end,
+    AltIndices const& newAltIndices
+    ) const
+{
+    for (; begin != end; ++begin) {
+        const CustomValue* v(fetch(begin));
+        if (v) {
+            return *v;
+        }
+    }
+    return CustomValue();
 }
 
 CustomValue UniqueConcat::operator()(

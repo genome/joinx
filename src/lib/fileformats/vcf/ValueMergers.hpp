@@ -79,7 +79,7 @@ namespace ValueMergers {
         boost::unordered_map<std::string, Base::const_ptr> _mergers;
     };
 
-    /// Value Merger which uses the value from the first entry, ignoring the rest
+    /// Value Merger that uses the value from the first entry, ignoring the rest
     struct UseFirst : public Base {
         CustomValue operator()(
             CustomType const* type,
@@ -91,7 +91,19 @@ namespace ValueMergers {
         std::string name() const { return "first"; }
     };
 
-    /// Value Merger which will return a new variable length CustomValue
+    /// Value Merger that uses the value from the entry entry, ignoring the rest
+    struct UseEarliest : public Base {
+        CustomValue operator()(
+            CustomType const* type,
+            FetchFunc fetch,
+            Entry const* begin,
+            Entry const* end,
+            AltIndices const& newAltIndices
+            ) const;
+        std::string name() const { return "earliest"; }
+    };
+
+    /// Value Merger that will return a new variable length CustomValue
     /// containing all of the unique values found in the input range.
     struct UniqueConcat : public Base {
         CustomValue operator()(
