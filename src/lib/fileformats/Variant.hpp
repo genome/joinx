@@ -78,7 +78,7 @@ public:
     }
 
     bool positionMatch(const Variant& rhs) const {
-        return
+        return chrom() == rhs.chrom() &&
             start() == rhs.start() &&
             stop() == rhs.stop();
     }
