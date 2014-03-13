@@ -37,3 +37,14 @@ TEST(TestRegion, size) {
     EXPECT_EQ(1, (Region(10, 11)).size());
     EXPECT_EQ(11, (Region(10, 21)).size());
 }
+
+TEST(TestRegion, contains) {
+    Region outer(10, 20);
+    for (int i = 10; i < 20; ++i) {
+        for (int j = i; j < 20; ++j) {
+            Region inner(i, j);
+            EXPECT_TRUE(outer.contains(inner));
+            EXPECT_TRUE(inner.isContainedIn(outer));
+        }
+    }
+}

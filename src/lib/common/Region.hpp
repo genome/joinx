@@ -19,6 +19,9 @@ struct Region {
         , end(end)
     {}
 
+    bool contains(Region const& that) const;
+    bool isContainedIn(Region const& that) const;
+
     int64_t overlap(Region const& that) const;
     int64_t size() const;
 };
