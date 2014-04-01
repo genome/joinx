@@ -49,9 +49,6 @@ public:
     MapType::size_type count(uint32_t idx) const;
     int formatKeyIndex(std::string const& key) const;
 
-    void appendFormatField(std::string const& key);
-    void appendFormatFieldIfNotExists(std::string const& key);
-
     CustomValue const* get(uint32_t sampleIdx, std::string const& key) const;
     std::vector<CustomValue> const* get(uint32_t sampleIdx) const;
 
@@ -72,6 +69,9 @@ public:
 
     void parse(Header const* h, std::string const& raw);
 protected:
+    void appendFormatField(std::string const& key);
+    void appendFormatFieldIfNotExists(std::string const& key);
+
     void freeValues();
 
 protected:
