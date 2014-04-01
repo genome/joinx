@@ -22,7 +22,6 @@ public:
     typedef std::vector<CustomValue> ValueVector;
     typedef std::map<uint32_t, ValueVector*> MapType;
     typedef std::vector<CustomType const*> FormatType;
-    typedef MapType::iterator iterator;
     typedef MapType::const_iterator const_iterator;
 
     SampleData();
@@ -44,8 +43,6 @@ public:
 
 
     FormatType const& format() const;
-    iterator begin();
-    iterator end();
     const_iterator begin() const;
     const_iterator end() const;
     MapType::size_type size() const;

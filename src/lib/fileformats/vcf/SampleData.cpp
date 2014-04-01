@@ -279,14 +279,6 @@ SampleData::ValueVector const* SampleData::get(uint32_t sampleIdx) const {
     return iter->second;
 }
 
-SampleData::iterator SampleData::begin() {
-    return _values.begin();
-}
-
-SampleData::iterator SampleData::end() {
-    return _values.end();
-}
-
 SampleData::const_iterator SampleData::begin() const {
     return _values.begin();
 }
