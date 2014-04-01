@@ -96,6 +96,9 @@ public:
         return _hasDuplicateSamples;
     }
 
+    bool isReflected(size_t sampleIdx) const;
+    bool isReflection(size_t sampleIdx) const;
+
 protected:
     void parseHeaderLine(std::string const& line);
     size_t addSample(std::string const& name);
@@ -113,7 +116,12 @@ protected:
 
     std::vector<size_t> _sampleSourceCounts;
 
+    // maps sample idx -> the source it is reflecting
     HeaderMap<size_t, size_t>::type _mirroredSamples;
+
+    // maps sample idx -> # of times it is mirrored
+    HeaderMap<size_t, bool>::type _hasReflections;
+
     HeaderMap<std::string, size_t>::type _sampleIndices;
     bool _hasDuplicateSamples;
 };

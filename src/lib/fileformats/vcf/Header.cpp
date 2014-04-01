@@ -287,6 +287,8 @@ void Header::mirrorSample(std::string const& sampleName, std::string const& newN
 
     size_t targetIdx = sampleIndex(sampleName);
     size_t newIdx = addSample(newName);
+
+    _hasReflections[targetIdx] = true;
     auto inserted = _mirroredSamples.insert(make_pair(newIdx, targetIdx));
     if (!inserted.second) {
         throw runtime_error(str(format(
@@ -298,6 +300,17 @@ void Header::mirrorSample(std::string const& sampleName, std::string const& newN
 HeaderMap<size_t, size_t>::type const& Header::mirroredSamples() const {
     return _mirroredSamples;
 }
+
+bool Header::isReflected(size_t sampleIdx) const {
+    auto iter = _hasReflections.find(sampleIdx);
+    return iter != _hasReflections.end() && iter->second;
+}
+
+bool Header::isReflection(size_t sampleIdx) const {
+    auto iter = _mirroredSamples.find(sampleIdx);
+    return iter != _mirroredSamples.end();
+}
+
 
 END_NAMESPACE(Vcf)
 

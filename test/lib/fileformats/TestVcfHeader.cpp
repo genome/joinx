@@ -220,3 +220,29 @@ TEST(VcfHeader, addInfoType) {
     string expected = "##INFO=<ID=SUPERTYPE,Number=1,Type=String,Description=\"A type\">";
     ASSERT_NE(string::npos, ss.str().find(expected));
 }
+
+TEST(VcfHeader, sampleMirroring) {
+    Header h = parse(headerText);
+    EXPECT_EQ(3u, h.sampleCount());
+    EXPECT_FALSE(h.isReflected(0));
+    EXPECT_FALSE(h.isReflected(1));
+    EXPECT_FALSE(h.isReflected(2));
+
+    EXPECT_FALSE(h.isReflection(0));
+    EXPECT_FALSE(h.isReflection(1));
+    EXPECT_FALSE(h.isReflection(2));
+
+    h.mirrorSample("NA00001", "one");
+
+    EXPECT_EQ(4u, h.sampleCount());
+    EXPECT_EQ("one", h.sampleNames()[3]);
+    EXPECT_TRUE(h.isReflected(0));
+    EXPECT_FALSE(h.isReflected(1));
+    EXPECT_FALSE(h.isReflected(2));
+    EXPECT_FALSE(h.isReflected(3));
+
+    EXPECT_FALSE(h.isReflection(0));
+    EXPECT_FALSE(h.isReflection(1));
+    EXPECT_FALSE(h.isReflection(2));
+    EXPECT_TRUE(h.isReflection(3));
+}
