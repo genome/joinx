@@ -73,3 +73,46 @@ TEST_F(TestVcfSampleData, parse) {
         EXPECT_EQ(expectedFormat[i], sd.format()[i]->id());
     }
 }
+
+TEST_F(TestVcfSampleData, addFilterReflectedSamples) {
+    std::string txt = format + "\t" + oneSample;
+
+    header.mirrorSample("S1", "S1-COPY");
+    auto mainIdx = header.sampleIndex("S1");
+    auto copyIdx = header.sampleIndex("S1-COPY");
+
+    Vcf::SampleData sd(&header, txt);
+
+    EXPECT_EQ(2u, sd.samplesWithData());
+
+    EXPECT_FALSE(sd.isSampleFiltered(mainIdx));
+    EXPECT_FALSE(sd.isSampleFiltered(copyIdx));
+
+    sd.addFilter(mainIdx, "HATE");
+    std::string filterName;
+    EXPECT_TRUE(sd.isSampleFiltered(mainIdx, &filterName));
+    EXPECT_EQ("HATE", filterName);
+    EXPECT_FALSE(sd.isSampleFiltered(copyIdx));
+}
+
+
+TEST_F(TestVcfSampleData, addFilterReflectingSamples) {
+    std::string txt = format + "\t" + oneSample;
+
+    header.mirrorSample("S1", "S1-COPY");
+    auto mainIdx = header.sampleIndex("S1");
+    auto copyIdx = header.sampleIndex("S1-COPY");
+
+    Vcf::SampleData sd(&header, txt);
+
+    EXPECT_EQ(2u, sd.samplesWithData());
+
+    EXPECT_FALSE(sd.isSampleFiltered(mainIdx));
+    EXPECT_FALSE(sd.isSampleFiltered(copyIdx));
+
+    sd.addFilter(copyIdx, "HATE");
+    std::string filterName;
+    EXPECT_TRUE(sd.isSampleFiltered(copyIdx, &filterName));
+    EXPECT_EQ("HATE", filterName);
+    EXPECT_FALSE(sd.isSampleFiltered(mainIdx));
+}

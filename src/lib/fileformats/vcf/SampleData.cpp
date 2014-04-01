@@ -227,7 +227,14 @@ void SampleData::addFilter(uint32_t sampleIdx, std::string const& filterName) {
         sampleIter->second->resize(ftIdx+1);
     }
 
+    // rt #97906
+    // copy sample data on write when adding consensus filter for mirrored
+    // columns
+    if (_header->isReflected(sampleIdx) || _header->isReflection(sampleIdx)) {
+        sampleIter->second = new ValueVector(*sampleIter->second);
+    }
     ValueVector& values = *sampleIter->second;
+
     auto& prev = values[ftIdx];
     set<string> filters;
     if (!prev.empty())
@@ -321,7 +328,6 @@ uint32_t SampleData::samplesWithData() const {
 }
 
 bool SampleData::isSampleFiltered(uint32_t idx, std::string* filterName) const {
-    filterName = 0;
     CustomValue const* ft = get(idx, "FT");
     if (!ft || ft->empty())
         return false;
@@ -329,7 +335,7 @@ bool SampleData::isSampleFiltered(uint32_t idx, std::string* filterName) const {
     for (size_t i = 0; i < ft->size(); ++i) {
         string const& f = ft->getString(i);
         if (!f.empty() && f != "." && f != "PASS") {
-            if (filterName)
+            if (filterName != 0)
                 *filterName = f;
             return true;
         }
