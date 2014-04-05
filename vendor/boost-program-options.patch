@@ -1,0 +1,11 @@
+--- boost/boost/program_options/errors.hpp	2014-01-06 14:43:59.229556795 -0600
++++ /home/tabbott/Downloads/boost_1_55_0/boost/program_options/errors.hpp	2013-01-20 01:13:55.000000000 -0600
+@@ -25,7 +25,7 @@
+ 
+     inline std::string strip_prefixes(const std::string& text)
+     {
+-        return text.substr(text.find_first_not_of("-/")); 
++        return text.substr(text.find_last_of("-/") + 1);
+     }
+ 
+     /** Base class for all errors in the library. */
