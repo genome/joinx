@@ -367,10 +367,8 @@ const CustomValue* Entry::info(const string& key) const {
 }
 
 bool Entry::isFiltered() const {
-    if (_failedFilters.empty() || _failedFilters.size() > 1)
-        return false;
-
-    return *_failedFilters.begin() != "PASS";
+    return !_failedFilters.empty()
+        && !(_failedFilters.size() == 1 && *_failedFilters.begin() == "PASS");
 }
 
 void Entry::setInfo(std::string const& key, CustomValue const& value) {
@@ -381,7 +379,6 @@ void Entry::setInfo(std::string const& key, CustomValue const& value) {
         i->second = std::move(value);
     }
 }
-
 
 SampleData& Entry::sampleData() {
     if (!_parsedSamples) {
