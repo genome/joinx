@@ -74,6 +74,10 @@ namespace {
         "21\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\tAA=G;DP=9;NS=3\t.\t.\t.\t.\n"
         "22\t1234567\tmicrosat1\tGTC\tG,GTCT\t50\tPASS\t.\t.\t.\t.\t.\n"
         ;
+
+    string filteredTwiceLine =
+        "20\t14370\trs6054257\tG\tA\t29\tq10;s50\tAF=0.5;DB;DP=14;H2;NS=3\tGT:GQ:DP:HQ\t0|0:48:1:51,51\t1|0:48:8:51,51\t1/1:43:5:.,.\n"
+        ;
 }
 
 class TestVcfEntry : public ::testing::Test {
@@ -391,4 +395,37 @@ TEST_F(TestVcfEntry, sampleDataPrintCertainSample) {
         v[0].sampleData().sampleToStream(ss, i);
         EXPECT_EQ(expected[i], ss.str());
     }
+}
+
+TEST_F(TestVcfEntry, multipleFilters) {
+    stringstream vcfss(filteredTwiceLine);
+    string line;
+    ASSERT_TRUE(getline(vcfss, line));
+    Entry e(&_header, line);
+
+    EXPECT_EQ(2u, e.failedFilters().size());
+    EXPECT_TRUE(e.isFiltered());
+}
+
+TEST_F(TestVcfEntry, multipleFiltersWhitelist) {
+    stringstream vcfss(filteredTwiceLine);
+    string line;
+    ASSERT_TRUE(getline(vcfss, line));
+    Entry e(&_header, line);
+
+    EXPECT_EQ(2u, e.failedFilters().size());
+    EXPECT_TRUE(e.isFiltered());
+
+    std::set<std::string> whitelist;
+
+    whitelist.insert("s50");
+    EXPECT_TRUE(e.isFiltered());
+
+    whitelist.clear();
+    whitelist.insert("q10");
+    EXPECT_TRUE(e.isFiltered());
+
+    whitelist.insert("s50");
+    whitelist.insert("q10");
+    EXPECT_FALSE(e.isFilteredByAnythingExcept(whitelist));
 }

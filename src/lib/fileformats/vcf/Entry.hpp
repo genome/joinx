@@ -89,11 +89,28 @@ public:
     double qual() const { return _qual; }
     const std::set<std::string>& failedFilters() const { return _failedFilters; }
     const CustomValueMap& info() const { return _info; }
-    bool isFiltered() const;
     const CustomValue* info(std::string const& key) const;
     void setInfo(std::string const& key, CustomValue const& value);
     const SampleData& sampleData() const;
     SampleData& sampleData();
+
+    bool isFiltered() const;
+
+    template<typename T>
+    bool isFilteredByAnythingExcept(T const& whitelist) {
+        // Do the quick check first
+        if (!isFiltered()) {
+            return false;
+        }
+
+        auto const& filters = failedFilters();
+        for (auto i = filters.begin(); i != filters.end(); ++i) {
+            if (*i != "PASS" && whitelist.count(*i) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     int64_t start() const;
     int64_t stop() const;
