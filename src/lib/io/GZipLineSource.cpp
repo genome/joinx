@@ -53,6 +53,7 @@ public:
 
     template<typename Appendable>
     Status appendUntil(Appendable& tgt, value_type ch) {
+        Status rv(PARTIAL_LINE);
         value_type const* first = _buf.data() + _beg;
         value_type const* last = _buf.data() + _end;
         value_type const* chPos = std::find(first, last, ch);
@@ -60,12 +61,17 @@ public:
         tgt.append(first, sz);
         if (chPos == last) {
             _beg = _end = 0u;
-            return PARTIAL_LINE;
         }
         else {
             _beg = chPos - _buf.data() + 1;
-            return WHOLE_LINE;
+            rv = WHOLE_LINE;
         }
+
+        if (_beg == _end) {
+            _beg = _end = 0u;
+        }
+
+        return rv;
     }
 
 private:
@@ -79,7 +85,7 @@ private:
 GZipLineSource::GZipLineSource(int fd)
     : _path(str(format("fd%1%") % fd))
     , _fp(gzdopen(fd, "rb"))
-    , _buffer(new LineBuffer(bufsz))
+    , _buffer(new LineBuffer(bufferSize()))
     , _bad(_fp == Z_NULL)
     , _eof(false)
 {
@@ -146,4 +152,8 @@ bool GZipLineSource::good() const {
 
 GZipLineSource::operator bool() const {
     return good();
+}
+
+size_t GZipLineSource::bufferSize() {
+    return bufsz;
 }

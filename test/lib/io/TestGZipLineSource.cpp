@@ -125,6 +125,23 @@ TEST_F(TestGZLineSourceRandom, noTrailingNewline) {
     EXPECT_EQ(_data[NO_TRAILING_NEWLINE], result);
 }
 
+TEST(TestGZLineSource, exactBufferFill) {
+    TempFile::ptr tmp = TempFile::create(TempFile::CLEANUP);
+    size_t sz = GZipLineSource::bufferSize();
+    std::string data(sz - 1, 'a');
+    data += "\nhello!\n";
+    tmp->stream().write(data.data(), data.size());
+    tmp->stream().close();
+    GZipLineSource input(tmp->path());
+    EXPECT_TRUE(input);
+    std::string line;
+    EXPECT_TRUE(input.getline(line));
+    EXPECT_EQ(sz - 1, line.size());
+
+    EXPECT_FALSE(input.eof());
+    EXPECT_EQ('h', input.peek());
+}
+
 TEST(TestGZLineSource, invalidPath) {
     TempFile::ptr tmp = TempFile::create(TempFile::CLEANUP);
     bfs::remove(tmp->path());

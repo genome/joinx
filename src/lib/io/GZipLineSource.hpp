@@ -24,6 +24,8 @@ public:
     bool good() const;
     bool getline(std::string& line);
 
+    static size_t bufferSize();
+
 private:
     std::string _path;
     gzFile _fp;
