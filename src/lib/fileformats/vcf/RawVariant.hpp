@@ -133,6 +133,11 @@ size_t hash_value(RawVariant const& v) {
 }
 
 inline
+size_t hash_value(RawVariant::Vector const& vs) {
+    return boost::hash_range(vs.begin(), vs.end());
+}
+
+inline
 std::ostream& operator<<(std::ostream& s,  RawVariant const& rv) {
     s << rv.pos << "\t" << rv.ref << "\t" << rv.alt;
     return s;
