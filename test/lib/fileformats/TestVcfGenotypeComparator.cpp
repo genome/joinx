@@ -150,3 +150,43 @@ TEST_F(TestVcfGenotypeComparator, siteFilter) {
     gcmp.push(gtfiltered);
     gcmp.finalize();
 }
+
+TEST_F(TestVcfGenotypeComparator, processHet) {
+    Collector c;
+    auto gcmp = Vcf::makeGenotypeComparator(sampleNames_, headers_, nStreams, c);
+/*
+ *0/0    0/1            N
+ *0/1    0/1            Y
+ *0/1    1/1            Y
+ *1/1    0/1            Y
+ *0/2    0/1            N
+ *0/2    1/2            Y 
+ */
+
+    gcmp.push(makeEntry(0, "1", 10, "A", "C,G", "0/0"));
+    gcmp.push(makeEntry(1, "1", 10, "A", "C,G", "1/0"));
+
+    gcmp.push(makeEntry(0, "1", 20, "A", "C,G", "0/1"));
+    gcmp.push(makeEntry(1, "1", 20, "A", "C,G", "1/0"));
+
+    gcmp.push(makeEntry(0, "1", 30, "A", "C,G", "0/1"));
+    gcmp.push(makeEntry(1, "1", 30, "A", "C,G", "1/1"));
+
+    gcmp.push(makeEntry(0, "1", 40, "A", "C,G", "1/1"));
+    gcmp.push(makeEntry(1, "1", 40, "A", "C,G", "1/0"));
+
+    gcmp.push(makeEntry(0, "1", 50, "A", "C,G", "0/2"));
+    gcmp.push(makeEntry(1, "1", 50, "A", "C,G", "1/0"));
+
+    gcmp.push(makeEntry(0, "1", 60, "A", "C,G", "0/2"));
+    gcmp.push(makeEntry(1, "1", 60, "A", "C,G", "1/2"));
+
+    gcmp.finalize();
+
+    EXPECT_EQ(  "0", c.calls["S0 1 10 A->A,10 A->A"]);
+    EXPECT_EQ(  "1", c.calls["S0 1 10 A->A,10 A->C"]);
+
+    EXPECT_EQ("0,1", c.calls["S0 1 20 A->A,20 A->C"]);
+
+}
+

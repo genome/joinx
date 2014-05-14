@@ -25,6 +25,39 @@ size_t hash_value(RawVariant::Vector const& vs) {
 }
 
 template<typename OutputWriter>
+class GenotypeMatcher {
+public:
+    typedef std::vector<
+        boost::unordered_map<RawVariant::Vector, std::map<size_t, Entry const*>>
+    > MapType;
+
+    GenotypeMatcher(size_t numSamples, OutputWriter& out)
+        : gtmap_(numSamples)
+        , out_(out)
+    {
+    }
+
+    void add(size_t sampleIdx, RawVariant::Vector const& alleles, size_t streamIdx, Vcf::Entry const* e) {
+        gtmap_[sampleIdx][alleles][streamIdx] = &*e;
+    }
+
+    void report(std::string const& sequence) {
+        for (size_t sampleIdx = 0; sampleIdx < gtmap_.size(); ++sampleIdx) {
+            auto& sd = gtmap_[sampleIdx];
+            for (auto i = sd.begin(); i != sd.end(); ++i) {
+                auto const& rawvs = i->first;
+                auto const& who = i->second;
+                out_(sampleIdx, sequence, rawvs, who);
+            }
+            sd.clear();
+        }
+    }
+
+    MapType gtmap_;
+    OutputWriter& out_;
+};
+
+template<typename OutputWriter>
 class GenotypeComparator {
 public:
     template<typename HeaderVector>
@@ -38,9 +71,8 @@ public:
         , sampleIndices_(numStreams)
         , numStreams_(numStreams)
         , entries_(numStreams)
-        , out_(outputWriter)
         , final_(false)
-        , gtmap_(sampleNames.size())
+        , collector_(sampleNames.size(), outputWriter)
     {
         for (auto name = sampleNames_.begin(); name != sampleNames_.end(); ++name) {
             for (size_t i = 0; i < headers.size(); ++i) {
@@ -124,7 +156,7 @@ private:
                 }
                 alleles.sort();
                 if (!alleles.empty()) {
-                    gtmap_[sampleIdx][alleles][streamIdx] = &*e;
+                    collector_.add(sampleIdx, alleles, streamIdx, &*e);
                 }
             }
         }
@@ -135,15 +167,7 @@ private:
             processEntries(streamIdx);
         }
 
-        for (size_t sampleIdx = 0; sampleIdx < gtmap_.size(); ++sampleIdx) {
-            auto& sd = gtmap_[sampleIdx];
-            for (auto i = sd.begin(); i != sd.end(); ++i) {
-                auto const& rawvs = i->first;
-                auto const& who = i->second;
-                out_(sampleIdx, sequence_, rawvs, who);
-            }
-            sd.clear();
-        }
+        collector_.report(sequence_);
 
         for (size_t streamIdx = 0; streamIdx < entries_.size(); ++streamIdx) {
             entries_[streamIdx].clear();
@@ -159,11 +183,8 @@ private:
     Region region_;
     std::string sequence_;
     std::vector<EntryVector> entries_;
-    OutputWriter& out_;
     bool final_;
-    std::vector<
-        boost::unordered_map<RawVariant::Vector, std::map<size_t, Entry const*>>
-        > gtmap_;
+    GenotypeMatcher<OutputWriter> collector_;
 };
 
 template<typename HeaderVector, typename OutputWriter>
