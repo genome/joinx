@@ -17,6 +17,7 @@
 #include "ui/VcfMergeCommand.hpp"
 #include "ui/VcfNormalizeIndelsCommand.hpp"
 #include "ui/VcfReportCommand.hpp"
+#include "ui/VcfRemoveFilteredGtCommand.hpp"
 #include "ui/VcfSiteFilterCommand.hpp"
 #include "ui/Wig2BedCommand.hpp"
 
@@ -53,6 +54,7 @@ JoinX::JoinX() {
     registerSubCommand(VcfMergeCommand::ptr(new VcfMergeCommand));
     registerSubCommand(VcfNormalizeIndelsCommand::ptr(new VcfNormalizeIndelsCommand));
     registerSubCommand(VcfReportCommand::ptr(new VcfReportCommand));
+    registerSubCommand(VcfRemoveFilteredGtCommand::ptr(new VcfRemoveFilteredGtCommand));
     registerSubCommand(Wig2BedCommand::ptr(new Wig2BedCommand));
 }
 

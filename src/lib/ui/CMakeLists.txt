@@ -38,6 +38,8 @@ set(SOURCES
     VcfMergeCommand.hpp
     VcfNormalizeIndelsCommand.cpp
     VcfNormalizeIndelsCommand.hpp
+    VcfRemoveFilteredGtCommand.cpp
+    VcfRemoveFilteredGtCommand.hpp
     VcfReportCommand.cpp
     VcfReportCommand.hpp
     VcfSiteFilterCommand.cpp

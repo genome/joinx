@@ -1,0 +1,7 @@
+##fileformat=VCFv4.1
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=FT,Number=.,Type=String,Description="Genotype filters">
+##fileDate=20131118
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S1	S2
+1	10	.	C	A,G	.	.	.	GT:FT	0/1:.	0/2:PASS
+2	10	.	C	A,G	.	.	.	GT:FT	0/1:OK	.
