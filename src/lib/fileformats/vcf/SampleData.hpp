@@ -60,7 +60,9 @@ public:
     bool isSampleFiltered(uint32_t idx, std::string* filterName = 0) const;
     int32_t samplesFailedFilter() const;
     int32_t samplesEvaluatedByFilter() const;
+
     void removeLowDepthGenotypes(uint32_t lowDepth);
+    void removeFilteredWhitelist(std::set<std::string> const& whitelist);
 
     void renumberGT(std::map<size_t, size_t> const& altMap);
 

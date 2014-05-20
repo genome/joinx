@@ -441,6 +441,36 @@ void SampleData::removeLowDepthGenotypes(uint32_t lowDepth) {
     }
 }
 
+void SampleData::removeFilteredWhitelist(std::set<std::string> const& whitelist) {
+    // Check if we even have filters
+    auto i = find_if(_format.begin(), _format.end(),
+            boost::bind(&customTypeIdMatches, "FT", _1));
+
+    if (i == _format.end())
+        return;
+
+    uint32_t offset = distance(_format.begin(), i);
+
+    for (auto i = _values.begin(); i != _values.end(); ++i) {
+        if (i->second == 0)
+            continue;
+
+        auto& values = *i->second;
+        if (values.size() <= offset || values[offset].empty()) {
+            continue; // no filter here
+        }
+
+        for (size_t filtIdx = 0; filtIdx < values[offset].size(); ++filtIdx) {
+            std::string const* filterName = values[offset].get<std::string>(filtIdx);
+            if (filterName && *filterName != "PASS" && *filterName != "." &&
+                whitelist.count(*filterName) == 0)
+            {
+                values.clear();
+            }
+        }
+    }
+}
+
 void SampleData::sampleToStream(std::ostream& s, size_t sampleIdx) const {
     auto data = get(sampleIdx);
     if (!data) {

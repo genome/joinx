@@ -36,7 +36,7 @@ namespace {
         "##FORMAT=<ID=FT,Number=1,Type=String,Description=\"Sample Filtering\">\n"
         "##FORMAT=<ID=FPV,Number=1,Type=Float,Description=\"Floating point value\">\n"
         "##FORMAT=<ID=VLSL,Number=.,Type=String,Description=\"Variable length string list\">\n"
-        "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\tS2\tS3\n"
+        "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\tS2\tS3\tS4\tS5\n"
         );
 }
 
@@ -53,6 +53,31 @@ protected:
     std::string oneSample;
     Vcf::Header header;
 };
+
+TEST_F(TestVcfSampleData, removeFilteredWhitelist) {
+    std::set<std::string> keep{"OK", "ForcedGenotype"};
+    std::string text =
+        "GT:FT"
+        "\t0/1:."
+        "\t0/1:BAD"
+        "\t0/1:OK"
+        "\t0/1:PASS"
+        "\t0/1:ForcedGenotype"
+        ;
+
+    Vcf::SampleData sd(&header, text);
+    for (int i = 0; i < 5; ++i) {
+        ASSERT_FALSE(0 == sd.get(i));
+        EXPECT_FALSE(sd.get(i)->empty());
+    }
+
+    sd.removeFilteredWhitelist(keep);
+    EXPECT_TRUE(0 != sd.get(0) && !sd.get(0)->empty());
+    EXPECT_TRUE(0 == sd.get(1) || sd.get(1)->empty());
+    EXPECT_TRUE(0 != sd.get(2) && !sd.get(2)->empty());
+    EXPECT_TRUE(0 != sd.get(3) && !sd.get(3)->empty());
+    EXPECT_TRUE(0 != sd.get(4) && !sd.get(4)->empty());
+}
 
 TEST_F(TestVcfSampleData, parse) {
     std::string txt = format + "\t" + oneSample;
