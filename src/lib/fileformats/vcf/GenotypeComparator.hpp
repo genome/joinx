@@ -109,20 +109,26 @@ private:
                 }
 
                 GenotypeCall const& call = sd.genotype(sampleIndices_[streamIdx][sampleIdx]);
+                bool hasRef = false;
                 for (auto idx = call.indices().begin(); idx != call.indices().end(); ++idx) {
-                    std::unique_ptr<RawVariant> rv;
                     if (*idx > 0) {
-                        rv.reset(new RawVariant(rawvs[*idx - 1]));
+                        alleles.push_back(new RawVariant(rawvs[*idx - 1]));
                     }
                     else {
-                        rv.reset(new RawVariant);
-                        rv->pos = 0;
-                        rv->alt = "";
-                        rv->ref = "";
+                        hasRef = true;
                     }
-                    alleles.push_back(rv.release());
                 }
+
+                // If alleles is empty, then this is hom ref, skip it
+                if (alleles.empty()) {
+                    continue;
+                }
+
                 alleles.sort();
+                if (hasRef) {
+                    alleles.push_back(new RawVariant(alleles[0].pos, "", ""));
+                }
+
                 if (!alleles.empty()) {
                     gtmap_[sampleIdx][alleles][streamIdx] = &*e;
                 }

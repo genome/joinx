@@ -30,7 +30,7 @@ namespace {
             std::vector<std::string> callStrings;
             for (auto i = vars.begin(); i != vars.end(); ++i) {
                 std::stringstream ss;
-                if (i->pos == 0 && i->ref.empty() && i->alt.empty())
+                if (i->ref.empty() && i->alt.empty())
                     ss << "REF";
                 else
                     ss << i->pos << " " << i->ref << "->" << i->alt;
@@ -102,6 +102,18 @@ protected:
     std::vector<Vcf::Header*> headers_;
 };
 
+TEST_F(TestVcfGenotypeComparator, homRefSkipped) {
+    Collector c;
+    auto gcmp = Vcf::makeGenotypeComparator(sampleNames_, headers_, nStreams, c);
+
+    gcmp.push(makeEntry(0, "3", 20, "A", "A", "0/0"));
+    gcmp.push(makeEntry(1, "3", 20, "A", "A", "0/0"));
+
+    gcmp.finalize();
+
+    EXPECT_TRUE( c.calls.empty());
+}
+
 TEST_F(TestVcfGenotypeComparator, process) {
     Collector c;
     auto gcmp = Vcf::makeGenotypeComparator(sampleNames_, headers_, nStreams, c);
@@ -120,22 +132,31 @@ TEST_F(TestVcfGenotypeComparator, process) {
     gcmp.push(makeEntry(0, "2", 10, "AA", "AG", "0|1"));
     gcmp.push(makeEntry(1, "2", 11, "A", "G", "1|0"));
 
+    gcmp.push(makeEntry(0, "3", 10, "A", "A", "0/0"));
+    gcmp.push(makeEntry(1, "3", 10, "A", "A", "0/0"));
+
     gcmp.finalize();
 
-    EXPECT_EQ( "0,1", c.calls["S0 2 REF,11 A->G"]);
-    EXPECT_EQ("0,2", c.calls["S0 1 10 A->G,10 A->G"]);
-    EXPECT_EQ("0,2", c.calls["S1 1 REF,10 A->G"]);
-    EXPECT_EQ(  "1", c.calls["S0 1 REF,10 A->G"]);
+    size_t cnt = 0;
 
-    EXPECT_EQ(  "2", c.calls["S0 1 REF,10 A->C"]);
+    EXPECT_EQ(  "2", c.calls["S0 1 10 A->C,REF"]); ++cnt;
+    EXPECT_EQ(  "1", c.calls["S0 1 10 A->G,REF"]); ++cnt;
+    EXPECT_EQ("0,2", c.calls["S0 1 10 A->G,10 A->G"]); ++cnt;
+    EXPECT_EQ(  "1", c.calls["S1 1 10 A->G,10 A->G"]); ++cnt;
 
-    EXPECT_EQ("0,2", c.calls["S0 1 REF,11 A->G"]);
+    EXPECT_EQ("0,1", c.calls["S0 2 11 A->G,REF"]); ++cnt;
+    EXPECT_EQ("0,2", c.calls["S1 1 10 A->G,REF"]); ++cnt;
 
-    EXPECT_EQ(  "0", c.calls["S0 1 12 A->G,12 A->G"]);
-    EXPECT_EQ(  "0", c.calls["S1 1 12 A->C,12 A->G"]);
 
-    EXPECT_EQ(  "0", c.calls["S0 1 13 A->,13 A->"]);
-    EXPECT_EQ(  "0", c.calls["S1 1 12 AA->C,13 A->"]);
+    EXPECT_EQ("0,2", c.calls["S0 1 11 A->G,REF"]); ++cnt;
+
+    EXPECT_EQ(  "0", c.calls["S0 1 12 A->G,12 A->G"]); ++cnt;
+    EXPECT_EQ(  "0", c.calls["S1 1 12 A->C,12 A->G"]); ++cnt;
+
+    EXPECT_EQ(  "0", c.calls["S0 1 13 A->,13 A->"]); ++cnt;
+    EXPECT_EQ(  "0", c.calls["S1 1 12 AA->C,13 A->"]); ++cnt;
+
+    EXPECT_EQ(cnt, c.calls.size());
 }
 
 TEST_F(TestVcfGenotypeComparator, siteFilter) {
@@ -160,5 +181,5 @@ TEST_F(TestVcfGenotypeComparator, siteFilter) {
 
     // 2 doesn't show up because it is GT filtered
     EXPECT_EQ(  "0", c.calls["S0 1 10 A->G,10 A->G"]);
-    EXPECT_EQ("0,2", c.calls["S1 1 REF,10 A->G"]);
+    EXPECT_EQ("0,2", c.calls["S1 1 10 A->G,REF"]);
 }
