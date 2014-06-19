@@ -116,9 +116,9 @@ private:
                     }
                     else {
                         rv.reset(new RawVariant);
-                        rv->pos = e->pos();
-                        rv->alt = e->ref();
-                        rv->ref = e->ref();
+                        rv->pos = 0;
+                        rv->alt = "";
+                        rv->ref = "";
                     }
                     alleles.push_back(rv.release());
                 }
