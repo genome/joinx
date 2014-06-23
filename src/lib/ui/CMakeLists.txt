@@ -11,6 +11,8 @@ set(SOURCES
     CommandBase.hpp
     CreateContigsCommand.cpp
     CreateContigsCommand.hpp
+    FindHomopolymersCommand.cpp
+    FindHomopolymersCommand.hpp
     GenerateCommand.cpp
     GenerateCommand.hpp
     IntersectCollector.hpp

@@ -25,7 +25,26 @@ public:
         return commonPrefix(a.begin(), a.end(), b.begin(), b.end());
     }
 
+    template<typename Iterator, typename OutputFunc>
+    static void findHomopolymers(Iterator begin, Iterator end, OutputFunc out, size_t minLength) {
+        auto orig = begin;
+        auto last = begin;
+        while (begin != end) {
+            while (*++last == *begin && begin != end)
+                ;
 
+            if (last - begin >= minLength) {
+                out(begin - orig, last - orig, *begin);
+            }
+
+            begin = last;
+        }
+    }
+
+    template<typename StringType, typename OutputFunc>
+    static void findHomopolymers(StringType const& str, OutputFunc out, size_t minLength) {
+        findHomopolymers(str.begin(), str.end(), out, minLength);
+    }
 
     Sequence();
     Sequence(const std::string& data);

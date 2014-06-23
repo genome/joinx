@@ -3,6 +3,7 @@
 #include "ui/BedMergeCommand.hpp"
 #include "ui/CheckRefCommand.hpp"
 #include "ui/CreateContigsCommand.hpp"
+#include "ui/FindHomopolymersCommand.hpp"
 #include "ui/GenerateCommand.hpp"
 #include "ui/IntersectCommand.hpp"
 #include "ui/RefStatsCommand.hpp"
@@ -39,6 +40,7 @@ JoinX::JoinX() {
     registerSubCommand(BedMergeCommand::ptr(new BedMergeCommand));
     registerSubCommand(CheckRefCommand::ptr(new CheckRefCommand));
     registerSubCommand(CreateContigsCommand::ptr(new CreateContigsCommand));
+    registerSubCommand(FindHomopolymersCommand::ptr(new FindHomopolymersCommand));
     registerSubCommand(GenerateCommand::ptr(new GenerateCommand));
     registerSubCommand(IntersectCommand::ptr(new IntersectCommand));
     registerSubCommand(RefStatsCommand::ptr(new RefStatsCommand));
