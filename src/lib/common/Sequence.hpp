@@ -26,7 +26,7 @@ public:
     }
 
     template<typename Iterator, typename OutputFunc>
-    static void findHomopolymers(Iterator begin, Iterator end, OutputFunc out, size_t minLength) {
+    static void findHomopolymers(Iterator begin, Iterator end, OutputFunc& out, ssize_t minLength) {
         auto orig = begin;
         auto last = begin;
         while (begin != end) {
@@ -42,7 +42,7 @@ public:
     }
 
     template<typename StringType, typename OutputFunc>
-    static void findHomopolymers(StringType const& str, OutputFunc out, size_t minLength) {
+    static void findHomopolymers(StringType const& str, OutputFunc& out, ssize_t minLength) {
         findHomopolymers(str.begin(), str.end(), out, minLength);
     }
 

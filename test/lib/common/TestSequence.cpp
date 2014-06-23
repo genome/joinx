@@ -4,7 +4,6 @@
 
 #include <sstream>
 #include <string>
-#include <functional>
 #include <vector>
 
 using namespace std;
@@ -85,7 +84,7 @@ struct HomopolymerCollector {
 TEST(Sequence, findHomopolymers) {
     std::string testSequence = "ACGTAAAACCACTGGGATT";
     HomopolymerCollector c;
-    Sequence::findHomopolymers(testSequence, std::ref(c), 2);
+    Sequence::findHomopolymers(testSequence, c, 2);
     std::vector<HomopolymerCollector::Record> expected{
         {4, 8, 'A'},
         {8, 10, 'C'},
@@ -97,7 +96,7 @@ TEST(Sequence, findHomopolymers) {
     EXPECT_EQ(expected, c.records);
 
     c.records.clear();
-    Sequence::findHomopolymers(testSequence, std::ref(c), 3);
+    Sequence::findHomopolymers(testSequence, c, 3);
     expected = std::vector<HomopolymerCollector::Record>{
         {4, 8, 'A'},
         {13, 16, 'G'},
