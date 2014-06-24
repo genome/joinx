@@ -50,8 +50,8 @@ void FindHomopolymersCommand::configureOptions() {
 
         ("sequences,s",
             po::value<std::vector<std::string>>(&sequences_),
-            "optional sequences to restrict to (may be specified multiple times"
-            "default: all)")
+            "optional sequences to restrict to (may be specified multiple times, "
+            "default: all sequences)")
 
         ("min-length,m",
             po::value<size_t>(&minLength_)->default_value(5),
@@ -78,7 +78,7 @@ void FindHomopolymersCommand::finalizeOptions() {
     bool reverse = !ignoreChars_.empty() && ignoreChars_[0] == '-';
     std::fill(ignoreArray_.begin(), ignoreArray_.end(), reverse);
 
-    for (auto i = ignoreChars_.begin(); i != ignoreChars_.end(); ++i) {
+    for (auto i = ignoreChars_.begin() + (reverse?1:0); i != ignoreChars_.end(); ++i) {
         ignoreArray_[int(*i)] = !reverse;
     }
 }
