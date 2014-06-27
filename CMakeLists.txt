@@ -26,6 +26,10 @@ message("Install path: ${CMAKE_INSTALL_PREFIX}")
 message("Share path: ${INSTALL_SHARE_PATH}")
 message("Doc path: ${INSTALL_DOC_PATH}")
 
+
+find_package(Threads REQUIRED)
+link_libraries(${CMAKE_THREAD_LIBS_INIT})
+
 # Dump clang compilation database for use with YCM
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 configure_file(.ycm_extra_conf.py.in ${CMAKE_SOURCE_DIR}/.ycm_extra_conf.py @ONLY)
