@@ -94,7 +94,7 @@ void BedMergeCommand::exec() {
             }
             ++count;
 
-            bed.stop(peekBuf->stop());
+            bed.stop(std::max(peekBuf->stop(), bed.stop()));
             auto const& peekExtra = peekBuf->extraFields();
             if (_names && !peekExtra.empty()) {
                 names.insert(peekExtra[0]);
