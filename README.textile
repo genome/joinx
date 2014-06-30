@@ -16,8 +16,7 @@ h3. Install build dependencies
 Building requires:
 * gcc 4.4+ or clang 3.2+
 * cmake 2.8+
-* boost 1.51+ (will be built if not found)
-* zlib/bzip2 development files (headers, libraries)
+* zlib development files (headers, libraries)
 
 Integration tests require:
 * Python
@@ -25,7 +24,7 @@ Integration tests require:
 
 To install these on Ubuntu, try:
 
-p.  @sudo apt-get install cmake libboost-all-dev libgtest-dev@
+p.  @sudo apt-get install cmake build-essential zlib1g-dev@
 
 h3. Build, test, and install
 
@@ -39,6 +38,7 @@ Joinx does not support in source builds. Create a new build directory, enter it,
 *** -DBoost_NO_SYSTEM_PATHS=on   to skip checking system default locations for boost headers and libs
 *** -DBoost_USE_STATIC_LIBS=on   to link boost statically
 *** -DCMAKE_INSTALL_PREFIX=/path change the installation location (default: /usr)
+* @make deps@
 * @make@
 * @ctest@ (to run unit tests)
 * @make install@

@@ -12,7 +12,6 @@
 enum CompressionType {
     NONE,
     GZIP,
-    BZIP2,
     N_COMPRESSION_TYPES
 };
 

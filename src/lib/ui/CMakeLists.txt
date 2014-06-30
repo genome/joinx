@@ -53,5 +53,5 @@ set(SOURCES
 
 add_library(ui ${SOURCES})
 target_link_libraries(ui
-    ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES}
+    ${Boost_LIBRARIES} ${ZLIB_LIBRARIES}
 )

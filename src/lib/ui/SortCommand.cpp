@@ -61,7 +61,7 @@ void SortCommand::configureOptions() {
 
         ("compression,C",
             po::value<string>(&_compressionString)->default_value(""),
-            "type of compression to use for tmpfiles, n=none, g=gzip, b=bzip2. default=n")
+            "type of compression to use for temp files, n=none, g=gzip. default=n")
 
         ("unique,u",
             po::bool_switch(&_unique),

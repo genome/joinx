@@ -7,7 +7,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/format.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filter/bzip2.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 
 #include <algorithm>
@@ -73,11 +72,9 @@ public:
         {
             io::filtering_stream<io::output> out;
             io::gzip_compressor gzip;
-            io::bzip2_compressor bzip2;
 
             switch (_compression) {
                 case GZIP: out.push(gzip); break;
-                case BZIP2: out.push(bzip2); break;
                 case NONE:
                 default:
                     break;
@@ -96,7 +93,6 @@ public:
 
         switch (_compression) {
             case GZIP: _in.push(_gzipDecompressor); break;
-            case BZIP2: _in.push(_bzip2Decompressor); break;
             case NONE:
             default:
                 break;
@@ -155,6 +151,5 @@ protected:
     // for reading compressed tmp file
     boost::iostreams::filtering_stream<boost::iostreams::input> _in;
     boost::iostreams::gzip_decompressor _gzipDecompressor;
-    boost::iostreams::bzip2_decompressor _bzip2Decompressor;
     InputStream _inputStream;
 };

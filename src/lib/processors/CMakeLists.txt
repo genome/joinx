@@ -23,4 +23,4 @@ set(SOURCES
 )
 
 add_library(processors ${SOURCES})
-target_link_libraries(processors ${Boost_LIBRARIES} ${BZIP2_LIBRARIES} ${ZLIB_LIBRARIES})
+target_link_libraries(processors ${Boost_LIBRARIES} ${ZLIB_LIBRARIES})

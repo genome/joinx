@@ -103,13 +103,6 @@ TEST_F(TestSort, unstable) {
     ASSERT_EQ(_expectedStr.str(), out.out.str());
 }
 
-TEST_F(TestSort, bzip2) {
-    Collector<Bed> out;
-    SortType sorter(_bedReaders, bedOpener, out, hdr, _expectedBeds.size()/10, false, BZIP2);
-    sorter.execute();
-    ASSERT_EQ(_expectedStr.str(), out.out.str());
-}
-
 TEST_F(TestSort, gzip) {
     Collector<Bed> out;
     SortType sorter(_bedReaders, bedOpener, out, hdr, _expectedBeds.size()/10, false, GZIP);

@@ -12,4 +12,4 @@ set(SOURCES
 )
 
 add_library(io ${SOURCES})
-target_link_libraries(io ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES})
+target_link_libraries(io ${Boost_LIBRARIES} ${ZLIB_LIBRARIES})

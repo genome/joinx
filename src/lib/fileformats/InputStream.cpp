@@ -12,8 +12,6 @@ CompressionType compressionTypeFromString(const string& s) {
         return NONE;
     else if (s == "g")
         return GZIP;
-    else if (s == "b")
-        return BZIP2;
     else
         throw runtime_error(str(format("Invalid compression string '%1%'. Expected one of: n,g,z,b") %s));
 }
