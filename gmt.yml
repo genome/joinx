@@ -1,0 +1,13 @@
+name: JoinX
+short_name: joinx
+icon_16: gmt/icon_16.png
+icon_48: gmt/icon_48.png
+biostars_tag: JoinX
+
+menu:
+  - text: Overview
+    href: gmt/index.md
+  - text: Documentation
+    href: gmt/documentation.html
+  - text: Install
+    href: gmt/install.md

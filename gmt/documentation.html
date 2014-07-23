@@ -1,0 +1,305 @@
+<h1><a name="___top"></a></h1>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="NAME"
+>NAME</a></h1>
+
+<p>joinx - a tool for manipulating genomic data</p>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="SYNOPSIS"
+>SYNOPSIS</a></h1>
+
+<p>joinx [--version|-v] SUBCOMMAND [SUBCOMMAND-ARGS]</p>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="DESCRIPTION"
+>DESCRIPTION</a></h1>
+
+<p>Joinx is a lightweight tool for performing manipulating genomic data contained in BED or VCF files.
+It also provides some limited analysis functions (concordance reports),
+and can be used to generate contigs from variant files and a reference sequence.
+An important assumption that joinx makes is that the input data is always sorted.
+This allows it to compute its results in an efficient manner.</p>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="INTERSECT_SUBCOMMAND"
+>INTERSECT SUBCOMMAND</a></h1>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="SYNOPSIS"
+>SYNOPSIS</a></h2>
+
+<p>joinx intersect [OPTIONS] a.bed b.bed</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="DESCRIPTION"
+>DESCRIPTION</a></h2>
+
+<p>This subcommand is used to perform set operations (intersect,
+difference,
+symmetric difference) on BED files.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="OPTIONS"
+>OPTIONS</a></h2>
+
+<p>-h,
+--help Display usage information</p>
+
+<p>-a,
+--file-a &#60;path&#62; (or first positional argument) Path to sorted input .bed file &#34;A&#34; (- for stdin)</p>
+
+<p>-b,
+--file-b &#60;path&#62; (or second positional argument) Path to sorted input .bed file &#34;B&#34; (- for stdin,
+note: not both &#34;A&#34; and &#34;B&#34; can be stdin)</p>
+
+<p>-o,
+--output-file &#60;path&#62; Output bed file for intersection results</p>
+
+<p>--miss-a &#60;path&#62; Write entries in A that are not in B (set difference,
+A\B) to &#60;path&#62;.</p>
+
+<p>--miss-b &#60;path&#62; Write entries in B that are not in A (set difference,
+B\A) to &#60;path&#62;.</p>
+
+<p>-F,
+--format Specify a format string for intersection output.
+The string consists of a space separated list of column specifiers:</p>
+
+<pre>    I - the actual intersection of the two bed entries (3 columns)
+    A - the complete entry from file &#39;A&#39;
+    B - the complete entry from file &#39;B&#39;
+
+    Additionally, you can select individual columns from A or B like so:
+
+    A3     - column 3 from A
+    A1,3   - columns 1 and 3 from A
+    A2-4,6 - columns 2 to 4, and 6 from A
+
+    A complete example is: --format &#34;I A B4&#34; which outputs the range of
+    the intersection, followed by the complete entry from A, and the 4th
+    column from B.</pre>
+
+<p>-f, --first-only Notice only the first thing in A to hit records in B, not the full intersection</p>
+
+<p>--output-both Concatenate the columns of A and B in the intersection output</p>
+
+<p>--exact-pos For indels, define intersection to mean an exact position match. The default considers any overlap a match.</p>
+
+<p>--exact-allele Require exact allele matching for intersection.</p>
+
+<p>--iub-match When using exact-allele, treat any overlap between an allele and an IUB code as a match (e.g., G &#38; K match).</p>
+
+<p>--dbsnp-match Undocumented. Should not be used.</p>
+
+<p>--adjacent-insertions When specified, insertions (specifically, features with 0 length) will be counted as intersecting adjacent features, e.g.: position 1 1 2 (snv or 1bp deletion at 1) will intersect position 1 2 2 (insertion at 2).</p>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="CHECK-REF_SUBCOMMAND"
+>CHECK-REF SUBCOMMAND</a></h1>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="SYNOPSIS"
+>SYNOPSIS</a></h2>
+
+<p>joinx check-ref [OPTIONS] -f ref.fasta -b variants.bed</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="DESCRIPTION"
+>DESCRIPTION</a></h2>
+
+<p>This subcommand can be used to check the reference information embedded in variant files against a FASTA file. This is useful when trying to determine whether or not a particular set of features are actually described relative to a particular reference sequence.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="OPTIONS"
+>OPTIONS</a></h2>
+
+<p>-h, --help Display usage information</p>
+
+<p>-b, --bed &#60;path&#62; Specifies the input .bed file to check</p>
+
+<p>-f, --fasta &#60;path&#62; Specifies the fasta file to check against</p>
+
+<p>-o, --report-file &#60;path&#62; Output file (empty or - means stdout, which is the default)</p>
+
+<p>-m, --miss-file &#60;path&#62; Output entries which do not match the reference to this file</p>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="CREATE-CONTIGS_SUBCOMMAND"
+>CREATE-CONTIGS SUBCOMMAND</a></h1>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="SYNOPSIS"
+>SYNOPSIS</a></h2>
+
+<p>joinx create-contigs [OPTIONS] -r ref.fasta -v variants.bed</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="DESCRIPTION"
+>DESCRIPTION</a></h2>
+
+<pre>    Generates FASTA format contigs from a variant file and a reference FASTA
+    file.</pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="OPTIONS"
+>OPTIONS</a></h2>
+
+<p>-h, --help Display usage information</p>
+
+<p>-r, --reference &#60;path&#62; Specifies the reference sequence to generate against (FASTA format)</p>
+
+<p>-v, --variants &#60;path&#62; Specifies the variants file to generate contigs from (.bed format)</p>
+
+<p>-o, --output-file &#60;path&#62; Output file (empty or - means stdout, which is the default)</p>
+
+<p>-f, --flank &#60;path&#62; Flank size on either end of the variant (default=99)</p>
+
+<p>-q, --quality &#60;path&#62; Minimum quality cutoff for variants (default=0)</p>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="SNV-CONCORDANCE_SUBCOMMAND"
+>SNV-CONCORDANCE SUBCOMMAND</a></h1>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="SYNOPSIS"
+>SYNOPSIS</a></h2>
+
+<p>joinx snv-concordance [OPTIONS] a.bed b.bed</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="DESCRIPTION"
+>DESCRIPTION</a></h2>
+
+<p>Generates basic concordance reports given 2 .bed files.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="OPTIONS"
+>OPTIONS</a></h2>
+
+<p>-h, --help Display usage information</p>
+
+<p>-a, --file-a &#60;path&#62; (or first positional argument) Path to sorted input .bed file &#34;A&#34; (- for stdin)</p>
+
+<p>-b, --file-b &#60;path&#62; (or second positional argument) Path to sorted input .bed file &#34;B&#34; (- for stdin, note: not both &#34;A&#34; and &#34;B&#34; can be stdin)</p>
+
+<p>-d, --depth Use read depth (bed column 5) instead of quality (column 4) in report</p>
+
+<p>--output-file &#60;path&#62; Output the report to the given path (stdout by default)</p>
+
+<p>--hits &#60;path&#62; Output the resulting intersection of &#34;A&#34; and &#34;B&#34; to &#34;path&#34; (discarded by default)</p>
+
+<p>--miss-a &#60;path&#62; Write entries in A that are not in B (set difference, A\B) to &#60;path&#62;.</p>
+
+<p>--miss-b &#60;path&#62; Write entries in B that are not in A (set difference, B\A) to &#60;path&#62;.</p>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="SORT_SUBCOMMAND"
+>SORT SUBCOMMAND</a></h1>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="SYNOPSIS"
+>SYNOPSIS</a></h2>
+
+<p>joinx sort [OPTIONS] a.bed b.bed c.bed ...</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="DESCRIPTION"
+>DESCRIPTION</a></h2>
+
+<p>Sort BED or VCF files by chromosome/sequence, start, end position.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="OPTIONS"
+>OPTIONS</a></h2>
+
+<p>-h, --help Display usage information</p>
+
+<p>-i, --input-file &#60;path&#62; Input file(s) to be sorted (positional arguments work also)</p>
+
+<p>-m, --merge-only Assume all input files are pre-sorted, merge only</p>
+
+<p>-o, --output-file The path of the sorted output file to write</p>
+
+<p>-M, --max-mem-lines (default=1000000) The maximum number of lines to hold in memory while sorting (before writing to tmp files)</p>
+
+<p>-s, --stable Perform a &#34;stable&#34; sort (equivalent records maintain their original order)</p>
+
+<p>-u, --unique Print only unique entries (applies to BED format only)</p>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="VCF-MERGE_SUBCOMMAND"
+>VCF-MERGE SUBCOMMAND</a></h1>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="SYNOPSIS"
+>SYNOPSIS</a></h2>
+
+<p>joinx vcf-merge [OPTIONS] file1.vcf file2.vcf [file3.vcf ...]</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="DESCRIPTION"
+>DESCRIPTION</a></h2>
+
+<p>This subcommand performs multi-sample merging of features contained in VCF files. By default, no two input files are allowed to contain data for the same sample. This behavior can be changed with the -s flag, which will attempt to merge per-sample data, favoring data from the first file.</p>
+
+<p>Merging of INFO fields can be controlled by specifying a merge strategy file. This is a simple KEY=VALUE file that specifies actions for particular info fields. Valid actions are:</p>
+
+<pre>    ignore
+        strip this info field out
+
+    first
+        retain the first value seen for this field
+
+    uniq-concat (variable length fields only)
+        unique values will be merged
+
+    enforce-equal
+        if an attempt is made to merge two records with different values for
+        this field, an error is raised
+
+    sum (numeric fields only)
+        sum the values for this field</pre>
+
+<p>An example merge strategy that by default takes info fields from the first entry, sums up DP (depth) values, and concatenates information in a field called caller is:</p>
+
+<pre> default=first
+ info.DP=sum
+ info.CALLER=uniq-concat</pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="OPTIONS"
+>OPTIONS</a></h2>
+
+<p>-h, --help Display usage information</p>
+
+<p>-i, --input-file &#60;path&#62; Input file(s) (positional arguments work also)</p>
+
+<p>-o, --output-file &#60;path&#62; Output file (empty or - means stdout, which is the default)</p>
+
+<p>-M, --merge-strategy-file &#60;path&#62; Merge strategy file for info fields.</p>
+
+<p>-s, --merge-samples Allow input files with overlapping sample data.</p>
+
+<p>-c, --clear-filters When set, merged entries will have FILTER data stripped out</p>
+
+<p>-P, --sample-priority &#60;o|u|f&#62; (default=o) Set the sample priority when merging samples (-s). When multiple files have data for the same sample at the same site, the source with the highest priority is chosen. The valid values, o, u, and f are short for order, unfiltered, and filtered. Prioritization by order grants files listed earlier on the command line a higher priority, while unfiltered and filtered rank sources first by filter status, and then by order.</p>
+
+<p>-R, --require-consensus &#34;ratio,FilterName,Filter description&#34; When merging samples, require a certain degree of consensus among the sample sources, filtering sites that fail with FilterName (which will be added to the vcf header if needed). So for example: -R &#34;1.0,ConsensusFilter,Sample consensus filter&#34; means that for any given sample/site, if all files containing the sample do not agree, then the ConsensusFilter will be applied to the sample/site.</p>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="AUTHOR"
+>AUTHOR</a></h1>
+
+<p>Joinx was written by Travis Abbott &#60;tabbott@genome.wustl.edu&#62;, and is maintained on Github at: <a href="https://github.com/genome/joinx/" class="podlinkurl"
+>https://github.com/genome/joinx/</a>.</p>
+
+<h1><a class='u' href='#___top' title='click to go to top of document'
+name="COPYRIGHT"
+>COPYRIGHT</a></h1>
+
+<p>Joinx is free software, distributed under the terms of the GNU GPL v3 or later: <a href="http://gnu.org/licenses/gpl.html" class="podlinkurl"
+>http://gnu.org/licenses/gpl.html</a>.</p>
+<br/>
+</body></html>
