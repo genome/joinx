@@ -11,7 +11,7 @@ public:
 
     std::string name() const { return "vcf-normalize-indels"; }
     std::string description() const {
-        return "merge vcf files";
+        return "normalize indels (by left-shifting) in vcf files";
     }
 
     void configureOptions();

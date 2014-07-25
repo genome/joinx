@@ -57,7 +57,9 @@ void CommandBase::parseCommandLine(std::vector<std::string> const& args) {
 void CommandBase::checkHelp() const {
     if (_varMap.count("help")) {
         stringstream ss;
-        ss << _opts;
+        ss << "Command: " << name() << "\n\n"
+            << "Description:\n" << description() << "\n\n"
+            << "Options:\n" << _opts;
         throw CmdlineHelpException(ss.str());
     }
 }
