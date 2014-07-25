@@ -1,4 +1,4 @@
-##fileformat=VCFv4.1
+##fileformat=VCFv4.2
 ##INFO=<ID=TEST,Number=1,Type=String,Description="Test field">
 ##INFO=<ID=TESTA,Number=A,Type=String,Description="Test field">
 ##INFO=<ID=TESTR,Number=R,Type=String,Description="Test field">
