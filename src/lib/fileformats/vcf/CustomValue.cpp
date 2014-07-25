@@ -107,18 +107,32 @@ bool CustomValue::empty() const {
     return _values.empty();
 }
 
+// This gets called to notify existing values how many alleles there are.
+// This gives them the opportunity to throw an exception if there are more
+// values than there are supposed to be
 void CustomValue::setNumAlts(uint32_t n) {
+    uint32_t maxValue = std::numeric_limits<uint32_t>::max();
     if (type().numberType() == CustomType::PER_ALLELE) {
-        if (_values.size() > n ) {
-            std::stringstream ss;
-            ss << (*this);
-            throw std::runtime_error(str(format(
-                "Too many values in per-alt value '%1%' for field '%2%', "
-                "expected at most %3%"
-                ) % ss.str() % type().id() % n));
-        }
+        maxValue = n;
+    }
+    else if (type().numberType() == CustomType::PER_ALLELE_REF) {
+        maxValue = n + 1;
+    }
 
+    if (_values.size() > maxValue) {
+        std::stringstream ss;
+        ss << (*this);
+        throw std::runtime_error(str(format(
+            "Too many values in per-alt value '%1%' for field '%2%', "
+            "expected at most %3%"
+            ) % ss.str() % type().id() % n));
+    }
+
+    if (type().numberType() == CustomType::PER_ALLELE) {
         _values.resize(n);
+    }
+    else if (type().numberType() == CustomType::PER_ALLELE_REF) {
+        _values.resize(n + 1);
     }
 }
 

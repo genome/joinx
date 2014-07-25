@@ -13,6 +13,7 @@ public:
     enum NumberType {
         FIXED_SIZE,
         PER_ALLELE,
+        PER_ALLELE_REF,
         PER_GENOTYPE,
         VARIABLE_SIZE
     };
@@ -39,6 +40,10 @@ public:
         DataType type,
         const std::string& description
         );
+
+    bool tiedToAlleles() const {
+        return numberType() == PER_ALLELE || numberType() == PER_ALLELE_REF;
+    }
 
     const std::string& id() const;
     NumberType numberType() const;

@@ -43,6 +43,14 @@ public:
     template<typename T>
     void set(SizeType idx, const T& value);
 
+    std::vector<ValueType> const& getRaw() const {
+        return _values;
+    }
+
+    void setRaw(std::vector<ValueType> values) {
+        _values.swap(values);
+    }
+
     std::string getString(SizeType idx) const;
     void toStream(std::ostream& s) const;
     std::string toString() const;

@@ -89,9 +89,10 @@ string CustomType::numberToString(NumberType t, uint32_t n) {
         case FIXED_SIZE:
             return lexical_cast<string>(n);
             break;
-        case PER_ALLELE:    return "A"; break;
-        case PER_GENOTYPE:  return "G"; break;
-        case VARIABLE_SIZE: return "."; break;
+        case PER_ALLELE:     return "A"; break;
+        case PER_ALLELE_REF: return "R"; break;
+        case PER_GENOTYPE:   return "G"; break;
+        case VARIABLE_SIZE:  return "."; break;
         default:
             throw runtime_error("Invalid custom VCF type!");
             break;
@@ -125,6 +126,8 @@ CustomType::NumberType CustomType::stringToNumber(const std::string& s, uint32_t
     n = 0;
     if (s == "A") {
         return PER_ALLELE;
+    } else if (s == "R") {
+        return PER_ALLELE_REF;
     } else if (s == "G") {
         return PER_GENOTYPE;
     } else if (s == ".") {

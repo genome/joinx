@@ -185,3 +185,56 @@ TEST(VcfCustomValue, fixedCharFromString) {
 //
 // CustomType alleleFlag("AF", CustomType::PER_ALLELE, 0, CustomType::FLAG, "allele filtered?");
 
+TEST(VcfCustomValue, perAltList) {
+    CustomType type("X", CustomType::PER_ALLELE, 0, CustomType::INTEGER, "numbers");
+    CustomValue value(&type, "1,2,3");
+    ASSERT_EQ(3u, value.size());
+
+    int64_t const* result = 0;
+    ASSERT_TRUE((result = value.get<int64_t>(0)));
+    EXPECT_EQ(1, *result);
+
+    ASSERT_TRUE((result = value.get<int64_t>(1)));
+    EXPECT_EQ(2, *result);
+
+    ASSERT_TRUE((result = value.get<int64_t>(2)));
+    EXPECT_EQ(3, *result);
+
+    ASSERT_FALSE(value.get<int64_t>(3));
+
+    ASSERT_THROW(value.setNumAlts(2), runtime_error);
+    ASSERT_NO_THROW(value.setNumAlts(3));
+    ASSERT_EQ(3u, value.size());
+    ASSERT_NO_THROW(value.setNumAlts(5));
+    ASSERT_EQ(5u, value.size());
+
+    ASSERT_FALSE(value.get<int64_t>(3));
+    ASSERT_FALSE(value.get<int64_t>(4));
+}
+
+TEST(VcfCustomValue, perAltRefList) {
+    CustomType type("X", CustomType::PER_ALLELE_REF, 0, CustomType::INTEGER, "numbers");
+    CustomValue value(&type, "1,2,3");
+    ASSERT_EQ(3u, value.size());
+
+    int64_t const* result = 0;
+    ASSERT_TRUE((result = value.get<int64_t>(0)));
+    EXPECT_EQ(1, *result);
+
+    ASSERT_TRUE((result = value.get<int64_t>(1)));
+    EXPECT_EQ(2, *result);
+
+    ASSERT_TRUE((result = value.get<int64_t>(2)));
+    EXPECT_EQ(3, *result);
+
+    ASSERT_FALSE(value.get<int64_t>(3));
+
+    ASSERT_THROW(value.setNumAlts(1), runtime_error);
+    ASSERT_NO_THROW(value.setNumAlts(2));
+    ASSERT_EQ(3u, value.size());
+    ASSERT_NO_THROW(value.setNumAlts(5));
+    ASSERT_EQ(6u, value.size());
+
+    ASSERT_FALSE(value.get<int64_t>(3));
+    ASSERT_FALSE(value.get<int64_t>(4));
+}

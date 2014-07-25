@@ -1,0 +1,13 @@
+##fileformat=VCFv4.1
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##annotation=annotation.vcf
+##INFO=<ID=TEST,Number=1,Type=String,Description="Test field">
+##INFO=<ID=TESTA,Number=A,Type=String,Description="Test field">
+##INFO=<ID=TESTR,Number=R,Type=String,Description="Test field">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE1
+1	100	id1	A	T	67	PASS	TEST=A;TESTA=T;TESTR=A,T	GT	0/1
+1	200	id2	A	T,G	67	PASS	TEST=C;TESTA=T,.;TESTR=.,T,.	GT	0/1
+1	200	id2	A	G,T	67	PASS	TEST=C;TESTA=.,T;TESTR=.,.,T	GT	0/1
+1	200	id2	A	C	67	PASS	TEST=C;TESTA=.;TESTR=.,.	GT	0/1
+1	300	id3	A	T,AG	67	PASS	TEST=AGG;TESTA=.,AG;TESTR=A,.,AG	GT	0/1
+1	300	id3	A	AGG,T	67	PASS	TEST=AGG;TESTA=AGG,.;TESTR=A,AGG,.	GT	0/1

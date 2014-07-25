@@ -117,7 +117,7 @@ void VcfAnnotateCommand::postProcessArguments(Vcf::Header& header, Vcf::Header c
 
         itxl.newType = header.infoType(id);
         _infoMap[oldType->id()] = itxl;
-    } 
+    }
 }
 
 

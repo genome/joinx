@@ -1,0 +1,9 @@
+##fileformat=VCFv4.1
+##INFO=<ID=TEST,Number=1,Type=String,Description="Test field">
+##INFO=<ID=TESTA,Number=A,Type=String,Description="Test field">
+##INFO=<ID=TESTR,Number=R,Type=String,Description="Test field">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT
+1	100	id1	A	T,C	67	PASS	TEST=A;TESTR=A,T,C;TESTA=T,C	.
+1	200	id2	A	C,T	67	PASS	TEST=C;TESTR=.,.,T;TESTA=.,T
+1	300	id3	A	AG,AGG	67	PASS	TEST=AGG;TESTR=A,AG,AGG;TESTA=AG,AGG	.

@@ -87,10 +87,35 @@ public:
                 }
             } 
             e.setInfo(txl.newType->id(), rv);
-        } else {
-            Vcf::CustomValue rv(v);
-            rv.setType(txl.newType);
-            e.setInfo(txl.newType->id(), rv);
+        }
+        else {
+            std::unique_ptr<Vcf::CustomValue> newValue;
+            if (v.type().tiedToAlleles()) {
+                newValue.reset(new Vcf::CustomValue(&v.type()));
+                auto const& raw = v.getRaw();
+                std::vector<Vcf::CustomValue::ValueType> newVec;
+                std::size_t offset = 0;
+
+                if (v.type().numberType() == Vcf::CustomType::PER_ALLELE_REF) {
+                    offset = 1;
+                    newVec.resize(e.alt().size() + offset);
+                    newVec[0] = raw[0];
+                }
+                else {
+                    newVec.resize(e.alt().size());
+                }
+
+                for (auto i = altMatches.begin(); i != altMatches.end(); ++i) {
+                    newVec[i->first + offset] = raw[i->second + offset];
+                }
+                newValue->setRaw(newVec);
+            }
+            else {
+                newValue.reset(new Vcf::CustomValue(v));
+            }
+
+            newValue->setType(txl.newType);
+            e.setInfo(txl.newType->id(), *newValue);
         }
     }
 
