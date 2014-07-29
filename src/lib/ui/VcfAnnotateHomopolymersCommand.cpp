@@ -1,4 +1,4 @@
-#include "VcfFilterHomopolymersCommand.hpp"
+#include "VcfAnnotateHomopolymersCommand.hpp"
 
 #include "common/Sequence.hpp"
 #include "fileformats/BedReader.hpp"
@@ -19,8 +19,8 @@ namespace {
             var.alt.find_first_not_of(a) == std::string::npos;
     }
 
-    struct HomopolymerFilter {
-        HomopolymerFilter(std::ostream& os, std::size_t maxLength, Vcf::CustomType const* infoType)
+    struct HomopolymerAnnotator {
+        HomopolymerAnnotator(std::ostream& os, std::size_t maxLength, Vcf::CustomType const* infoType)
             : os_(os)
             , maxLength_(maxLength)
             , infoType_(infoType)
@@ -75,10 +75,10 @@ namespace {
 }
 
 
-VcfFilterHomopolymersCommand::VcfFilterHomopolymersCommand() {
+VcfAnnotateHomopolymersCommand::VcfAnnotateHomopolymersCommand() {
 }
 
-void VcfFilterHomopolymersCommand::configureOptions() {
+void VcfAnnotateHomopolymersCommand::configureOptions() {
     _opts.add_options()
         ("bed-file,b",
             po::value<std::string>(&homopolymerBedFile_),
@@ -104,7 +104,7 @@ void VcfFilterHomopolymersCommand::configureOptions() {
     _posOpts.add("sequences", -1);
 }
 
-void VcfFilterHomopolymersCommand::exec() {
+void VcfAnnotateHomopolymersCommand::exec() {
     auto bedStream = _streams.openForReading(homopolymerBedFile_);
     auto vcfStream = _streams.openForReading(vcfFile_);
     auto bedReader = openBed(*bedStream, 1);
@@ -118,8 +118,8 @@ void VcfFilterHomopolymersCommand::exec() {
     newHeader.addInfoType(infoType);
     *outStream << newHeader;
 
-    HomopolymerFilter filter(*outStream, maxLength_, newHeader.infoType(infoFieldName_));
+    HomopolymerAnnotator annotator(*outStream, maxLength_, newHeader.infoType(infoFieldName_));
     bool adjacentInsertions = true;
-    auto intersector = makeFullIntersector(*bedReader, *vcfReader, filter, adjacentInsertions);
+    auto intersector = makeFullIntersector(*bedReader, *vcfReader, annotator, adjacentInsertions);
     intersector.execute();
 }

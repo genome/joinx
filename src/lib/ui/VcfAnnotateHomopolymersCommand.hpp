@@ -5,13 +5,13 @@
 #include <cstddef>
 #include <string>
 
-class VcfFilterHomopolymersCommand : public CommandBase {
+class VcfAnnotateHomopolymersCommand : public CommandBase {
 public:
-    VcfFilterHomopolymersCommand();
+    VcfAnnotateHomopolymersCommand();
 
-    std::string name() const { return "vcf-filter-homopolymers"; }
+    std::string name() const { return "vcf-annotate-homopolymers"; }
     std::string description() const {
-        return "filter small indels in homopolymer regions";
+        return "annotate small indels in homopolymer regions";
     }
 
     void configureOptions();

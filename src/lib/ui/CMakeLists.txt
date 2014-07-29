@@ -32,12 +32,12 @@ set(SOURCES
     Vcf2RawCommand.hpp
     VcfAnnotateCommand.cpp
     VcfAnnotateCommand.hpp
+    VcfAnnotateHomopolymersCommand.cpp
+    VcfAnnotateHomopolymersCommand.hpp
     VcfCompareGtCommand.cpp
     VcfCompareGtCommand.hpp
     VcfFilterCommand.cpp
     VcfFilterCommand.hpp
-    VcfFilterHomopolymersCommand.cpp
-    VcfFilterHomopolymersCommand.hpp
     VcfMergeCommand.cpp
     VcfMergeCommand.hpp
     VcfNormalizeIndelsCommand.cpp
