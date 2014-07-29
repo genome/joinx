@@ -36,6 +36,8 @@ set(SOURCES
     VcfCompareGtCommand.hpp
     VcfFilterCommand.cpp
     VcfFilterCommand.hpp
+    VcfFilterHomopolymersCommand.cpp
+    VcfFilterHomopolymersCommand.hpp
     VcfMergeCommand.cpp
     VcfMergeCommand.hpp
     VcfNormalizeIndelsCommand.cpp

@@ -190,3 +190,10 @@ protected:
     CacheType _cache;
     bool _adjacentInsertions;
 };
+
+template<typename StreamTypeA, typename StreamTypeB, typename OutType>
+IntersectFull<StreamTypeA, StreamTypeB, OutType>
+makeFullIntersector(StreamTypeA& sa, StreamTypeB& sb, OutType& out, bool adjacentInsertions = false) {
+    return IntersectFull<StreamTypeA, StreamTypeB, OutType>(sa, sb, out, adjacentInsertions);
+}
+

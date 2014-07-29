@@ -15,6 +15,7 @@
 #include "ui/VcfAnnotateCommand.hpp"
 #include "ui/VcfCompareGtCommand.hpp"
 #include "ui/VcfFilterCommand.hpp"
+#include "ui/VcfFilterHomopolymersCommand.hpp"
 #include "ui/VcfMergeCommand.hpp"
 #include "ui/VcfNormalizeIndelsCommand.hpp"
 #include "ui/VcfReportCommand.hpp"
@@ -52,6 +53,7 @@ JoinX::JoinX() {
     registerSubCommand(VcfAnnotateCommand::ptr(new VcfAnnotateCommand));
     registerSubCommand(VcfCompareGtCommand::ptr(new VcfCompareGtCommand));
     registerSubCommand(VcfFilterCommand::ptr(new VcfFilterCommand));
+    registerSubCommand(VcfFilterHomopolymersCommand::ptr(new VcfFilterHomopolymersCommand));
     registerSubCommand(VcfSiteFilterCommand::ptr(new VcfSiteFilterCommand));
     registerSubCommand(VcfMergeCommand::ptr(new VcfMergeCommand));
     registerSubCommand(VcfNormalizeIndelsCommand::ptr(new VcfNormalizeIndelsCommand));
