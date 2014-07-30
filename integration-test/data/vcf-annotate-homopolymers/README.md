@@ -17,22 +17,28 @@ Ref: TAGGGGGGGT
 # Examples that should be filtered
 ## Adjacent insertion on left
 ```
-Ref: TA-GGGGGGGT
-Alt: TAGGGGGGGGT
+Ref:  TA--GGGGGGGT
+Alt1: TAG-GGGGGGGT
+Alt2: TAGGGGGGGGGT
+
 1	2	.	A	AG,AGG	.	.	.	.	.
 ```
 
 ## Adjacent insertion on right
 ```
-Ref: TAGGGGGGG-T
-Alt: TAGGGGGGGGT
+Ref:  TAGGGGGGG--T
+Alt1: TAGGGGGGGG-T
+Alt2: TAGGGGGGGGGT
+
 1	9	.	G	GG,GGG	.	.	.	.	.
 ```
 
 ## Adjacent insertion explicit representation
 ```
-Ref: TA-GGGGGGGT
-Alt: TAGGGGGGGGT
+Ref:  TA--GGGGGGGT
+Alt1: TAG-GGGGGGGT
+Alt2: TAGGGGGGGGGT 
+
 1	2	.	AGGGGGGGT	AGGGGGGGGT,AGGGGGGGGGT	.	.	.	.	.
 ```
 
@@ -40,20 +46,25 @@ Alt: TAGGGGGGGGT
 ```
 Ref: TAGGGGGGGT
 Alt: TA-GGGGGGT
+
 1	2	.	AG	A	.	.	.	.	.
 ```
 
 ## Multiple Deletions
 ```
-Ref: TAGGGGGGGT
-Alt: TA-GGGGGGT
+Ref:  TAGGGGGGGT
+Alt1: TA-GGGGGGT
+Alt2: TA--GGGGGT
+
 1	2	.	AGG	AG,A	.	.	.	.	.
 ```
 
-## Multiple Deletions
+## Multiple Deletions (Reciprocal Representation)
 ```
-Ref: TAGGGGGGGT
-Alt: TA-GGGGGGT
+Ref:  TAGGGGGGGT
+Alt1: TA-GGGGGGT
+Alt2: TA--GGGGGT
+
 1	2	.	AGG	A,AG	.	.	.	.	.
 ```
 
@@ -61,6 +72,56 @@ Alt: TA-GGGGGGT
 ## SNP
 ```
 Ref: TAGGGGGGGT
-Alt: TA-GGGGGGT
+Alt: TAAGGGGGGT
 1	3	.	G	A	.	.	.	.	.
+```
+
+## Complete Removal of the homopolymer
+```
+Ref: TAGGGGGGGT
+Alt: TA-------T
+
+1	2	.	AGGGGGGGT	AT	.	.	.	.	.
+```
+
+## Insertions not matching the homopolymer
+```
+Ref: TAG-GGGGGGT
+Alt: TAGCGGGGGGT
+
+1	3	.	G	GC	.	.	.	.	.
+```
+
+## Deletions adjacent to the homopolymer
+### Before
+```
+Ref: TAGGGGGGGT
+Alt: T-GGGGGGGT
+
+1	1	.	TA	T	.	.	.	.	.
+```
+
+### After
+```
+Ref: TAGGGGGGGT
+Alt: TAGGGGGGG-
+
+1	9	.	GT	G	.	.	.	.	.
+```
+
+## Insertions adjacent to the homoplymer but not matching
+### Before
+```
+Ref: TA-GGGGGGGT
+Alt: TAAGGGGGGGT
+
+1	2	.	A	AA	.	.	.	.	.
+```
+
+### After
+```
+Ref: TAGGGGGGGCT
+Alt: TAGGGGGGG-T
+
+1	9	.	G	GT	.	.	.	.	.
 ```
