@@ -18,3 +18,22 @@ TEST(TestInteger, integerToBinary) {
         integerToBinary<int32_t>(std::numeric_limits<uint32_t>::max()));
 
 }
+
+TEST(TestInteger, unsignedDifference) {
+    std::size_t x(200);
+    std::size_t y(500);
+    uint8_t a(200);
+    uint16_t b(500);
+
+    EXPECT_EQ(300u, unsignedDifference(x, y));
+    EXPECT_EQ(300u, unsignedDifference(y, x));
+
+    EXPECT_EQ(300u, unsignedDifference(y, a));
+    EXPECT_EQ(300u, unsignedDifference(a, y));
+
+    EXPECT_EQ(300u, unsignedDifference(x, b));
+    EXPECT_EQ(300u, unsignedDifference(b, x));
+
+    EXPECT_EQ(300u, unsignedDifference(a, b));
+    EXPECT_EQ(300u, unsignedDifference(b, a));
+}
