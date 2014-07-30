@@ -6,8 +6,12 @@
 1	10	.	C	A,G	.	.	.	GT:FT	0/1:.
 1	20	.	C	A,G	.	.	.	GT:FT	0/1:PASS
 1	30	.	C	A,G	.	.	.	GT:FT	0/1:VBAD
+1	11012	.	A	AG,AT,AGG,AGGG	.	.	.	.	.
 1	11013	.	G	GG,T	.	.	.	.	.
 1	11014	.	GG	GGT,G	.	.	.	.	.
+1	11015	.	G	GGGG,GG	.	.	.	.	.
+1	11016	.	GGGG	G,GGG	.	.	.	.	.
+1	11017	.	G	GGG,A,GG	.	.	.	.	.
 2	10	.	C	A,G	.	.	.	GT:FT	0/1:VBAD
 2	20	.	C	A,G	.	.	.	GT:FT	0/1:VBAD
 2	30	.	C	A,G	.	.	.	GT:FT	0/1:PASS
