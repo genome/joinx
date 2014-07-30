@@ -1,5 +1,6 @@
 # Summary
 This tool should annotate out all indels in (or adjacent to) homopolymer runs where the alternate allele is:
+
 1. An indel
 2. Of length less than some assigned parameter
 3. Completely matches the homopolymer base
