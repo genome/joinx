@@ -48,7 +48,7 @@ namespace {
 
                 if (var.ref.size() != var.alt.size() && 
                         allBasesMatch(homopolymerBase, var) &&
-                        std::llabs(var.ref.size() - var.alt.size()) < maxLength_) {
+                        std::llabs(var.ref.size() - var.alt.size()) <= maxLength_) {
                     // do something
                     std::cerr << "FILTER: " << var.alt << "\n";
                     infoValues[i] = int64_t(1);
@@ -87,19 +87,19 @@ void VcfAnnotateHomopolymersCommand::configureOptions() {
     _opts.add_options()
         ("bed-file,b",
             po::value<std::string>(&homopolymerBedFile_),
-            "input homopolymer bed file (created with find-homopolymers command)")
+            "input homopolymer bed file (created with find-homopolymers command and should be padded by 1bp using bedtools slop or other command)")
 
         ("vcf-file,v",
             po::value<std::string>(&vcfFile_),
-            "input vcf file to add filters to")
+            "input vcf file to add annotation to")
 
         ("max-length,m",
-            po::value<size_t>(&maxLength_)->default_value(3),
-            "maximum homopolymer length to filter")
+            po::value<size_t>(&maxLength_)->default_value(2),
+            "maximum indel length to annotate as in the homopolymer")
 
         ("info-field-name,n",
             po::value<std::string>(&infoFieldName_)->default_value("HOMP_FILTER"),
-            "name of per-allele info field to use as a filter")
+            "name of per-allele info field to store the annotation")
 
         ("output-file,o",
             po::value<std::string>(&outputFile_)->default_value("-"),
