@@ -24,6 +24,12 @@ size_t hash_value(RawVariant::Vector const& vs) {
     return boost::hash_range(vs.begin(), vs.end());
 }
 
+enum FilterType {
+    eUNFILTERED = 1,
+    eFILTERED   = 2,
+    eBOTH       = 3
+};
+
 template<typename OutputWriter>
 class GenotypeComparator {
 public:
@@ -31,11 +37,13 @@ public:
     GenotypeComparator(
             std::vector<std::string> const& sampleNames,
             HeaderVector const& headers,
+            std::vector<FilterType> const& filterTypes,
             size_t numStreams,
             OutputWriter& outputWriter
             )
         : sampleNames_(sampleNames)
         , sampleIndices_(numStreams)
+        , filterTypes_(filterTypes)
         , numStreams_(numStreams)
         , entries_(numStreams)
         , out_(outputWriter)
@@ -89,10 +97,20 @@ private:
         return sequence_ == e->chrom() && region_.overlap(entryRegion) > 0;
     }
 
+    bool shouldSkip(size_t streamIdx, bool isFiltered) const {
+        // if the filter status doesn't agree with the command line input, skip it (true)
+        // otherwise return false
+        FilterType status = isFiltered ? eFILTERED : eUNFILTERED;
+        return (int(filterTypes_[streamIdx]) & int(status)) == 0;
+    }
+
     void processEntries(size_t streamIdx) {
         auto const& ents = entries_[streamIdx];
         for (auto e = ents.begin(); e != ents.end(); ++e) {
-            if (e->isFiltered()) {
+            bool siteFiltered = e->isFiltered();
+            if (siteFiltered && ((filterTypes_[streamIdx] & eFILTERED) == 0)) {
+                /* this for whole line/row FAIL (anything other than PASS or '.') means whole thing fails,
+                 * but PASS doesn't mean the whole thing passes, only certain parts */
                 continue;
             }
 
@@ -104,7 +122,8 @@ private:
 
             for (size_t sampleIdx = 0; sampleIdx < sampleNames_.size(); ++sampleIdx) {
                 RawVariant::Vector alleles;
-                if (sd.isSampleFiltered(sampleIdx)) {
+                bool sampleFiltered = sd.isSampleFiltered(sampleIdx);
+                if (shouldSkip(streamIdx, siteFiltered || sampleFiltered)) {
                     continue;
                 }
 
@@ -161,6 +180,7 @@ private:
 
     std::vector<std::string> const& sampleNames_;
     std::vector<std::vector<size_t>> sampleIndices_;
+    std::vector<FilterType> filterTypes_;
     size_t numStreams_;
     Region region_;
     std::string sequence_;
@@ -176,11 +196,12 @@ template<typename HeaderVector, typename OutputWriter>
 GenotypeComparator<OutputWriter> makeGenotypeComparator(
             std::vector<std::string> const& sampleNames,
             HeaderVector const& headers,
+            std::vector<FilterType> const& filterTypes,
             size_t numStreams,
             OutputWriter& out
             )
 {
-    return GenotypeComparator<OutputWriter>(sampleNames, headers, numStreams, out);
+    return GenotypeComparator<OutputWriter>(sampleNames, headers, filterTypes, numStreams, out);
 }
 
 END_NAMESPACE(Vcf)
