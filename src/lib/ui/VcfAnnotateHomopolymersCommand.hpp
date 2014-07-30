@@ -22,6 +22,6 @@ protected:
     std::string infoFieldName_;
     std::string vcfFile_;
     std::string outputFile_;
-    int maxLength_;
+    size_t maxLength_;
 };
 

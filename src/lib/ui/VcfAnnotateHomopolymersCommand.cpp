@@ -17,13 +17,19 @@ namespace po = boost::program_options;
 namespace {
     //Ensure that all bases in the variant match the passed base (i.e. the variant is a homopolymer)
     //TODO Add unit tests for this
+    bool isSimpleIndel(Vcf::RawVariant const& var, size_t const& maxLength) {
+        return var.ref.size() != var.alt.size() &&
+            (var.ref.size() == 0 || var.alt.size() == 0) &&
+            (var.ref.size() + var.alt.size()) <= maxLength;
+    }
+
     bool allBasesMatch(char a, Vcf::RawVariant const& var) {
         return var.ref.find_first_not_of(a) == std::string::npos &&
             var.alt.find_first_not_of(a) == std::string::npos;
     }
 
     struct HomopolymerAnnotator {
-        HomopolymerAnnotator(std::ostream& os, int maxLength, Vcf::CustomType const* infoType)
+        HomopolymerAnnotator(std::ostream& os, size_t maxLength, Vcf::CustomType const* infoType)
             : os_(os)
             , maxLength_(maxLength)
             , infoType_(infoType)
@@ -46,9 +52,7 @@ namespace {
             for (std::size_t i = 0; i != rawvs.size(); ++i) {
                 auto const& var = rawvs[i];
 
-                if (var.ref.size() != var.alt.size() && 
-                        allBasesMatch(homopolymerBase, var) &&
-                        std::llabs(var.ref.size() - var.alt.size()) <= maxLength_) {
+                if (isSimpleIndel(var, maxLength_) && allBasesMatch(homopolymerBase, var)) {
                     // do something
                     //std::cerr << "FILTER: " << var.alt << "\n";
                     infoValues[i] = int64_t(1);
@@ -76,7 +80,7 @@ namespace {
         }
 
         std::ostream& os_;
-        int maxLength_;
+        size_t maxLength_;
         Vcf::CustomType const* infoType_;
     };
 }
@@ -96,7 +100,7 @@ void VcfAnnotateHomopolymersCommand::configureOptions() {
             "input vcf file to add annotation to")
 
         ("max-length,m",
-            po::value<int>(&maxLength_)->default_value(2),
+            po::value<size_t>(&maxLength_)->default_value(2),
             "maximum indel length to annotate as in the homopolymer")
 
         ("info-field-name,n",
