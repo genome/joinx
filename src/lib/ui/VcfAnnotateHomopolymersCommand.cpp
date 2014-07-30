@@ -37,7 +37,7 @@ namespace {
         bool hit(T1 const& a, T2& b) {
             Vcf::RawVariant::Vector rawvs = Vcf::RawVariant::processEntry(b);
 
-            std::cerr << "HIT: " << a << "\t" << b << "\n";
+            //std::cerr << "HIT: " << a << "\t" << b << "\n";
             char homopolymerBase = a.extraFields()[0][0];
 
 
@@ -50,7 +50,7 @@ namespace {
                         allBasesMatch(homopolymerBase, var) &&
                         std::llabs(var.ref.size() - var.alt.size()) <= maxLength_) {
                     // do something
-                    std::cerr << "FILTER: " << var.alt << "\n";
+                    //std::cerr << "FILTER: " << var.alt << "\n";
                     infoValues[i] = int64_t(1);
                 }
                 else {
@@ -61,7 +61,8 @@ namespace {
             info.setRaw(infoValues);
             b.setInfo(info.type().id(), info);
 
-            os_ << "HIT: " << b << "\n";
+            //os_ << "HIT: " << b << "\n";
+            os_ << b << "\n";
 
 
             return true;
@@ -70,7 +71,8 @@ namespace {
         void missA(Bed& x) {}
 
         void missB(Vcf::Entry const& x) {
-            os_ << "MISS: " << x << "\n";
+            //os_ << "MISS: " << x << "\n";
+            os_ << x << "\n";
         }
 
         std::ostream& os_;
