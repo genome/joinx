@@ -8,12 +8,15 @@
 
 #include <boost/program_options.hpp>
 
+#include <cstdlib>
 #include <iostream>
 #include <vector>
 
 namespace po = boost::program_options;
 
 namespace {
+    //Ensure that all bases in the variant match the passed base (i.e. the variant is a homopolymer)
+    //TODO Add unit tests for this
     bool allBasesMatch(char a, Vcf::RawVariant const& var) {
         return var.ref.find_first_not_of(a) == std::string::npos &&
             var.alt.find_first_not_of(a) == std::string::npos;
@@ -43,7 +46,9 @@ namespace {
             for (std::size_t i = 0; i != rawvs.size(); ++i) {
                 auto const& var = rawvs[i];
 
-                if (var.ref.size() != var.alt.size() && allBasesMatch(homopolymerBase, var)) {
+                if (var.ref.size() != var.alt.size() && 
+                        allBasesMatch(homopolymerBase, var) &&
+                        std::llabs(var.ref.size() - var.alt.size()) < maxLength_) {
                     // do something
                     std::cerr << "FILTER: " << var.alt << "\n";
                     infoValues[i] = int64_t(1);
