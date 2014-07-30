@@ -23,7 +23,7 @@ namespace {
     }
 
     struct HomopolymerAnnotator {
-        HomopolymerAnnotator(std::ostream& os, std::size_t maxLength, Vcf::CustomType const* infoType)
+        HomopolymerAnnotator(std::ostream& os, int maxLength, Vcf::CustomType const* infoType)
             : os_(os)
             , maxLength_(maxLength)
             , infoType_(infoType)
@@ -74,7 +74,7 @@ namespace {
         }
 
         std::ostream& os_;
-        std::size_t maxLength_;
+        int maxLength_;
         Vcf::CustomType const* infoType_;
     };
 }
@@ -94,7 +94,7 @@ void VcfAnnotateHomopolymersCommand::configureOptions() {
             "input vcf file to add annotation to")
 
         ("max-length,m",
-            po::value<size_t>(&maxLength_)->default_value(2),
+            po::value<int>(&maxLength_)->default_value(2),
             "maximum indel length to annotate as in the homopolymer")
 
         ("info-field-name,n",
