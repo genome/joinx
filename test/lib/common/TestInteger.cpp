@@ -36,4 +36,17 @@ TEST(TestInteger, unsignedDifference) {
 
     EXPECT_EQ(300u, unsignedDifference(a, b));
     EXPECT_EQ(300u, unsignedDifference(b, a));
+
+    EXPECT_EQ(std::numeric_limits<size_t>::max() - 1,
+        unsignedDifference(std::numeric_limits<size_t>::max(), uint8_t(1)));
+
+    EXPECT_EQ(std::numeric_limits<size_t>::max() - 1,
+        unsignedDifference(uint8_t(1), std::numeric_limits<size_t>::max()));
+
+    EXPECT_EQ(0u,
+        unsignedDifference(
+              std::numeric_limits<size_t>::max()
+            , std::numeric_limits<size_t>::max()
+            )
+    );
 }
