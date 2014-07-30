@@ -2,7 +2,6 @@
 
 #include "fileformats/InputStream.hpp"
 #include "fileformats/VcfReader.hpp"
-#include "fileformats/vcf/GenotypeComparator.hpp"
 #include "processors/MergeSorted.hpp"
 #include "reports/VcfCompareGt.hpp"
 
@@ -17,12 +16,30 @@
 #include <set>
 #include <stdexcept>
 #include <vector>
+#include <unordered_map>
 
 namespace po = boost::program_options;
 using boost::format;
 using boost::scoped_ptr;
 namespace bfs = boost::filesystem;
-using Vcf::CustomType;
+
+namespace {
+    std::unordered_map<std::string, Vcf::FilterType> const FILTER_STRINGS_{
+          {"unfiltered", Vcf::eUNFILTERED}
+        , {"filtered", Vcf::eFILTERED}
+        , {"both", Vcf::eBOTH}
+        };
+
+    Vcf::FilterType filterTypeFromString(std::string const& name) {
+        auto iter = FILTER_STRINGS_.find(name);
+        if (iter == FILTER_STRINGS_.end()) {
+            throw std::runtime_error(str(format(
+                "Invalid filtering mode string '%1%'."
+                ) % name));
+        }
+        return iter->second;
+    }
+}
 
 VcfCompareGtCommand::VcfCompareGtCommand()
 {
@@ -38,6 +55,11 @@ void VcfCompareGtCommand::configureOptions() {
             po::value<vector<string>>(&names_),
             "meaningful names for each of the input files (given in the same order)")
 
+        ("filter-mode,F",
+            po::value<vector<std::string>>(&filterTypeStrings_),
+            "filtering mode for each input file (filtered, unfiltered, or both. may "
+            "be specified more than once)")
+
         ("sample-name,s",
             po::value<vector<string>>(&sampleNames_),
             "operate only on these samples (may specify multiple times)")
@@ -48,6 +70,14 @@ void VcfCompareGtCommand::configureOptions() {
         ;
 
     _posOpts.add("input-file", -1);
+}
+
+void VcfCompareGtCommand::finalizeOptions() {
+    filterTypes_.resize(filenames_.size());
+    std::fill(filterTypes_.begin(), filterTypes_.end(), Vcf::eUNFILTERED);
+
+    for (size_t i = 0; i < filterTypeStrings_.size(); ++i)
+        filterTypes_[i] = filterTypeFromString(filterTypeStrings_[i]);
 }
 
 void VcfCompareGtCommand::exec() {
@@ -91,7 +121,7 @@ void VcfCompareGtCommand::exec() {
 
     VcfCompareGt report(names_, sampleNames_, *out, outputDir_);
     MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
-    auto cmp = Vcf::makeGenotypeComparator(sampleNames_, headers, readers.size(), report);
+    auto cmp = Vcf::makeGenotypeComparator(sampleNames_, headers, filterTypes_, readers.size(), report);
     Vcf::Entry* e(new Vcf::Entry);
     while (merger.next(*e)) {
         cmp.push(e);
