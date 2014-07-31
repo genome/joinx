@@ -52,12 +52,16 @@ namespace {
             for (std::size_t i = 0; i != rawvs.size(); ++i) {
                 auto const& var = rawvs[i];
 
-                if (isSimpleIndel(var, maxLength_) && allBasesMatch(homopolymerBase, var)) {
+                if (isSimpleIndel(var, maxLength_) && 
+                        allBasesMatch(homopolymerBase, var) &&
+                        (var.pos - 1) >= a.start() && 
+                        (var.pos - 1) <= a.stop()) {
                     // do something
-                    //std::cerr << "FILTER: " << var.alt << "\n";
+                    //std::cerr << "FILTER: " << var << a.start() << "\t" << a.stop() <<  "\n";
                     infoValues[i] = int64_t(1);
                 }
                 else {
+                    //std::cerr << "RETAIN: " << var << "\n";
                     infoValues[i] = int64_t(0);
                 }
             }
