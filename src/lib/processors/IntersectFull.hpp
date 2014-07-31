@@ -75,8 +75,8 @@ public: // code
             return AFTER;
 
         // to handle adjacent/exact match insertions!
-        if ((a.length() == 0 && (a.start() == b.start() || a.start() == b.stop())) ||
-            (b.length() == 0 && (b.start() == a.start() || b.start() == a.stop())) )
+        if ((containsInsertions(a) && (a.stop() == b.start() || a.start() == b.stop())) ||
+            (containsInsertions(b) && (b.stop() == a.start() || b.start() == a.stop())) )
         {
             return INTERSECT;
         }
@@ -190,3 +190,10 @@ protected:
     CacheType _cache;
     bool _adjacentInsertions;
 };
+
+template<typename StreamTypeA, typename StreamTypeB, typename OutType>
+IntersectFull<StreamTypeA, StreamTypeB, OutType>
+makeFullIntersector(StreamTypeA& sa, StreamTypeB& sb, OutType& out, bool adjacentInsertions = false) {
+    return IntersectFull<StreamTypeA, StreamTypeB, OutType>(sa, sb, out, adjacentInsertions);
+}
+

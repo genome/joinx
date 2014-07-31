@@ -133,6 +133,20 @@ size_t hash_value(RawVariant const& v) {
 }
 
 inline
+bool isSimpleIndel(Vcf::RawVariant const& var, size_t maxLength) {
+    return var.ref.size() != var.alt.size() &&
+        (var.ref.size() == 0 || var.alt.size() == 0) &&
+        (var.ref.size() + var.alt.size()) <= maxLength;
+}
+
+//Ensure that all bases in the variant match the passed base (i.e. the variant is a homopolymer)
+inline
+bool allBasesMatch(char a, Vcf::RawVariant const& var) {
+    return var.ref.find_first_not_of(a) == std::string::npos &&
+        var.alt.find_first_not_of(a) == std::string::npos;
+}
+
+inline
 std::ostream& operator<<(std::ostream& s,  RawVariant const& rv) {
     s << rv.pos << "\t" << rv.ref << "\t" << rv.alt;
     return s;

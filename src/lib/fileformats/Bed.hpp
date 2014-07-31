@@ -131,5 +131,9 @@ inline void Bed::stop(int64_t stop) {
     _line.clear();
 }
 
+inline bool containsInsertions(Bed const& b) {
+    return b.length() == 0;
+}
+
 
 std::ostream& operator<<(std::ostream& s, const Bed& bed);

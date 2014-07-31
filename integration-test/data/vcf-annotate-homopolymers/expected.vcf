@@ -1,0 +1,22 @@
+##fileformat=VCFv4.1
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=FT,Number=.,Type=String,Description="Genotype filters">
+##FILTER=<ID=VBAD,Description="Very bad!">
+##INFO=<ID=TEST,Number=A,Type=Integer,Description="short (maximum of 2bp) homopolymer indel">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S1
+1	10	.	C	A,G	.	.	.	GT:FT	0/1:.
+1	20	.	C	A,G	.	.	.	GT:FT	0/1:PASS
+1	30	.	C	A,G	.	.	.	GT:FT	0/1:VBAD
+1	11010	.	TGA	TGGA,TGAG,TA	.	.	TEST=0,1,0	.	.
+1	11011	.	GA	GGA,GAG,G	.	.	TEST=0,1,0	.	.
+1	11012	.	A	AG,AT,AGG,AGGG	.	.	TEST=1,0,1,0	.	.
+1	11013	.	G	GG,T	.	.	TEST=1,0	.	.
+1	11014	.	GGGG	GGT,G,GGG,GG	.	.	TEST=0,0,1,1	.	.
+1	11015	.	G	GGGG,GG	.	.	TEST=0,1	.	.
+1	11017	.	GAG	GGGAG,GG,AAG,GGG,GA,GAGG	.	.	TEST=1,0,0,0,0,1	.	.
+1	11068	.	AGGGGGGT	AGGGGGGGT,AGGGGGGGGT,AGGGGGGGGGT	.	.	TEST=1,1,0	.	.
+1	11069	.	AGG	AG,A	.	.	TEST=1,1	.	.
+1	11228	.	GCCCCCT	GT	.	.	TEST=0	.	.
+2	10	.	C	A,G	.	.	.	GT:FT	0/1:VBAD
+2	20	.	C	A,G	.	.	.	GT:FT	0/1:VBAD
+2	30	.	C	A,G	.	.	.	GT:FT	0/1:PASS

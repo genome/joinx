@@ -145,8 +145,18 @@ protected:
     mutable SampleData _sampleData;
 };
 
+
 inline bool Entry::operator<(const Entry& rhs) const {
     return cmp(rhs) < 0;
+}
+
+inline bool containsInsertions(Vcf::Entry const& v) {
+    // no lambdas in gcc 4.4 :(
+    for (auto i = v.alt().begin(); i != v.alt().end(); ++i) {
+        if (i->size() > v.ref().size())
+            return true;
+    }
+    return false;
 }
 
 std::ostream& operator<<(std::ostream& s, const Entry& e);
