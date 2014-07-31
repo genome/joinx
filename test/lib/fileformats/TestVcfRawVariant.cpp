@@ -181,3 +181,35 @@ TEST_F(TestVcfRawVariant, combineRefAllelesGap) {
     std::string result = Vcf::RawVariant::combineRefAlleles(vars);
     EXPECT_EQ("AC.CG.GT", result);
 }
+
+TEST_F(TestVcfRawVariant, isSimpleIndel) {
+    RawVariant rv(10, "ACC", "");
+    for (int i = 0; i < 2; ++i) {
+        EXPECT_FALSE(isSimpleIndel(rv, 0));
+        EXPECT_FALSE(isSimpleIndel(rv, 1));
+        EXPECT_FALSE(isSimpleIndel(rv, 2));
+        EXPECT_TRUE(isSimpleIndel(rv, 3));
+        EXPECT_TRUE(isSimpleIndel(rv, 4));
+        rv.ref.swap(rv.alt);
+    }
+}
+
+TEST_F(TestVcfRawVariant, allBasesMatch) {
+    RawVariant mix(10, "CCA", "");
+    RawVariant match(10, "AAA", "");
+
+    for (int i = 0; i < 2; ++i) {
+        EXPECT_FALSE(allBasesMatch('A', mix));
+        EXPECT_FALSE(allBasesMatch('C', mix));
+        EXPECT_FALSE(allBasesMatch('G', mix));
+        EXPECT_FALSE(allBasesMatch('T', mix));
+
+        EXPECT_TRUE(allBasesMatch('A', match));
+        EXPECT_FALSE(allBasesMatch('C', match));
+        EXPECT_FALSE(allBasesMatch('G', match));
+        EXPECT_FALSE(allBasesMatch('T', match));
+
+        mix.ref.swap(mix.alt);
+        match.ref.swap(match.alt);
+    }
+}
