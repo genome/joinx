@@ -7,7 +7,7 @@ class TestVcfAnnotateHomopolymer(IntegrationTest, unittest.TestCase):
 
     def test_annotate_homopolymer(self):
         input_file = self.inputFiles("vcf-annotate-homopolymers/input.vcf")[0]
-        bed_file = self.inputFiles("vcf-annotate-homopolymers/homop.bed.slop")[0]
+        bed_file = self.inputFiles("vcf-annotate-homopolymers/homop.bed")[0]
         expected_file = self.inputFiles("vcf-annotate-homopolymers/expected.vcf")[0]
         output_file = self.tempFile("output.vcf")
 
