@@ -127,8 +127,11 @@ void VcfAnnotateHomopolymersCommand::exec() {
 
     std::ostream* outStream = _streams.get<std::ostream>(outputFile_);
 
+    std::stringstream description;
+    description << "short (maximum of " << maxLength_ << "bp) homopolymer indel";
+
     Vcf::CustomType infoType(infoFieldName_, Vcf::CustomType::PER_ALLELE, 0,
-                        Vcf::CustomType::INTEGER, "short homopolymer indel");
+                        Vcf::CustomType::INTEGER, description.str());
     Vcf::Header newHeader = vcfReader->header();
     newHeader.addInfoType(infoType);
     *outStream << newHeader;
