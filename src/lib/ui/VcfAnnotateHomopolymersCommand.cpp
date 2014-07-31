@@ -3,7 +3,9 @@
 #include "annotate/HomopolymerAnnotator.hpp"
 #include "common/Sequence.hpp"
 #include "fileformats/BedReader.hpp"
+#include "fileformats/OutputWriter.hpp"
 #include "fileformats/VcfReader.hpp"
+#include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/RawVariant.hpp"
 #include "processors/IntersectFull.hpp"
 
@@ -61,7 +63,10 @@ void VcfAnnotateHomopolymersCommand::exec() {
     newHeader.addInfoType(infoType);
     *outStream << newHeader;
 
-    HomopolymerAnnotator annotator(*outStream, maxLength_, newHeader.infoType(infoFieldName_));
+    OutputWriter<Vcf::Entry> out(*outStream);
+    auto annotator = makeHomopolymerAnnotator(out, maxLength_,
+            newHeader.infoType(infoFieldName_));
+
     bool adjacentInsertions = true;
     auto intersector = makeFullIntersector(*bedReader, *vcfReader, annotator, adjacentInsertions);
     intersector.execute();
