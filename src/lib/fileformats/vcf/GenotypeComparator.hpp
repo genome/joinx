@@ -33,6 +33,9 @@ enum FilterType {
 template<typename OutputWriter>
 class GenotypeComparator {
 public:
+    typedef std::size_t FileIndex;
+    typedef std::size_t SampleIndex;
+
     template<typename HeaderVector>
     GenotypeComparator(
             std::vector<std::string> const& sampleNames,
@@ -51,7 +54,7 @@ public:
         , gtmap_(sampleNames.size())
     {
         for (auto name = sampleNames_.begin(); name != sampleNames_.end(); ++name) {
-            for (size_t i = 0; i < headers.size(); ++i) {
+            for (FileIndex i = 0; i < headers.size(); ++i) {
                 auto const& hdr = headers[i];
                 sampleIndices_[i].push_back(hdr->sampleIndex(*name));
             }
@@ -79,7 +82,7 @@ public:
             }
         }
 
-        size_t streamIdx = e->header().sourceIndex();
+        FileIndex streamIdx = e->header().sourceIndex();
         entries_[streamIdx].push_back(e);
         region_.end = std::max(region_.end, e->stop());
     }
@@ -97,14 +100,14 @@ private:
         return sequence_ == e->chrom() && region_.overlap(entryRegion) > 0;
     }
 
-    bool shouldSkip(size_t streamIdx, bool isFiltered) const {
+    bool shouldSkip(FileIndex streamIdx, bool isFiltered) const {
         // if the filter status doesn't agree with the command line input, skip it (true)
         // otherwise return false
         FilterType status = isFiltered ? eFILTERED : eUNFILTERED;
         return (int(filterTypes_[streamIdx]) & int(status)) == 0;
     }
 
-    void processEntries(size_t streamIdx) {
+    void processEntries(FileIndex streamIdx) {
         auto const& ents = entries_[streamIdx];
         for (auto e = ents.begin(); e != ents.end(); ++e) {
             bool siteFiltered = e->isFiltered();
@@ -120,7 +123,7 @@ private:
                 continue;
             }
 
-            for (size_t sampleIdx = 0; sampleIdx < sampleNames_.size(); ++sampleIdx) {
+            for (FileIndex sampleIdx = 0; sampleIdx < sampleNames_.size(); ++sampleIdx) {
                 RawVariant::Vector alleles;
                 bool sampleFiltered = sd.isSampleFiltered(sampleIdx);
                 if (shouldSkip(streamIdx, siteFiltered || sampleFiltered)) {
@@ -156,11 +159,11 @@ private:
     }
 
     void process() {
-        for (size_t streamIdx = 0; streamIdx < entries_.size(); ++streamIdx) {
+        for (FileIndex streamIdx = 0; streamIdx < entries_.size(); ++streamIdx) {
             processEntries(streamIdx);
         }
 
-        for (size_t sampleIdx = 0; sampleIdx < gtmap_.size(); ++sampleIdx) {
+        for (SampleIndex sampleIdx = 0; sampleIdx < gtmap_.size(); ++sampleIdx) {
             auto& sd = gtmap_[sampleIdx];
             for (auto i = sd.begin(); i != sd.end(); ++i) {
                 auto const& rawvs = i->first;
@@ -170,7 +173,7 @@ private:
             sd.clear();
         }
 
-        for (size_t streamIdx = 0; streamIdx < entries_.size(); ++streamIdx) {
+        for (FileIndex streamIdx = 0; streamIdx < entries_.size(); ++streamIdx) {
             entries_[streamIdx].clear();
         }
     }
@@ -179,7 +182,7 @@ private:
     typedef boost::ptr_vector<Entry> EntryVector;
 
     std::vector<std::string> const& sampleNames_;
-    std::vector<std::vector<size_t>> sampleIndices_;
+    std::vector<std::vector<SampleIndex>> sampleIndices_;
     std::vector<FilterType> filterTypes_;
     size_t numStreams_;
     Region region_;
@@ -188,7 +191,7 @@ private:
     OutputWriter& out_;
     bool final_;
     std::vector<
-        boost::unordered_map<RawVariant::Vector, std::map<size_t, Entry const*>>
+        boost::unordered_map<RawVariant::Vector, std::map<FileIndex, Entry const*>>
         > gtmap_;
 };
 
