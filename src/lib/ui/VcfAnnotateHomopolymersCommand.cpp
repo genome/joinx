@@ -1,5 +1,6 @@
 #include "VcfAnnotateHomopolymersCommand.hpp"
 
+#include "annotate/HomopolymerAnnotator.hpp"
 #include "common/Sequence.hpp"
 #include "fileformats/BedReader.hpp"
 #include "fileformats/VcfReader.hpp"
@@ -13,101 +14,6 @@
 #include <vector>
 
 namespace po = boost::program_options;
-
-namespace {
-    //Ensure that all bases in the variant match the passed base (i.e. the variant is a homopolymer)
-    //TODO Add unit tests for this
-    bool isSimpleIndel(Vcf::RawVariant const& var, size_t const& maxLength) {
-        return var.ref.size() != var.alt.size() &&
-            (var.ref.size() == 0 || var.alt.size() == 0) &&
-            (var.ref.size() + var.alt.size()) <= maxLength;
-    }
-
-    bool allBasesMatch(char a, Vcf::RawVariant const& var) {
-        return var.ref.find_first_not_of(a) == std::string::npos &&
-            var.alt.find_first_not_of(a) == std::string::npos;
-    }
-
-    struct HomopolymerAnnotator {
-        HomopolymerAnnotator(std::ostream& os, size_t maxLength, Vcf::CustomType const* infoType)
-            : os_(os)
-            , maxLength_(maxLength)
-            , infoType_(infoType)
-        {
-        }
-
-        ~HomopolymerAnnotator() {
-            flush();
-        }
-
-        bool wantMissA() const { return false; }
-        bool wantMissB() const { return true; }
-
-        void reset(Vcf::Entry const& b) {
-            lastEntry_.reset(new Vcf::Entry(b));
-            infoValues_.swap(
-                std::vector<Vcf::CustomValue::ValueType>(b.alt().size(), int64_t(0))
-                );
-        }
-
-        template<typename T1, typename T2>
-        bool hit(T1 const& a, T2& b) {
-            Vcf::RawVariant::Vector rawvs = Vcf::RawVariant::processEntry(b);
-            char homopolymerBase = a.extraFields()[0][0];
-
-            if (lastEntry_) {
-                if (lastEntry_->toString() != b.toString()) {
-                    flush();
-                    reset(b);
-                }
-            }
-            else {
-                reset(b);
-            }
-
-            for (std::size_t i = 0; i != rawvs.size(); ++i) {
-                auto const& var = rawvs[i];
-
-                if (isSimpleIndel(var, maxLength_) &&
-                        allBasesMatch(homopolymerBase, var) &&
-                        (var.pos - 1) >= a.start() &&
-                        (var.pos - 1) <= a.stop()) {
-                    infoValues_[i] = int64_t(boost::get<int64_t>(infoValues_[i]) | 1);
-                }
-                else {
-                }
-            }
-
-            return true;
-        }
-
-        void flush() {
-            if (lastEntry_) {
-                Vcf::CustomValue info(infoType_);
-                info.setRaw(infoValues_);
-                lastEntry_->setInfo(info.type().id(), info);
-                os_ << *lastEntry_ << "\n";
-                lastEntry_.reset();
-            }
-        }
-
-        void missA(Bed& x) {}
-
-        void missB(Vcf::Entry const& x) {
-            flush();
-            //os_ << "MISS: " << x << "\n";
-            os_ << x << "\n";
-        }
-
-        std::ostream& os_;
-        size_t maxLength_;
-        Vcf::CustomType const* infoType_;
-
-        std::unique_ptr<Vcf::Entry> lastEntry_;
-        std::vector<Vcf::CustomValue::ValueType> infoValues_;
-    };
-}
-
 
 VcfAnnotateHomopolymersCommand::VcfAnnotateHomopolymersCommand() {
 }
