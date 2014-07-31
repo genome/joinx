@@ -54,7 +54,7 @@ namespace {
 
                 if (isSimpleIndel(var, maxLength_) && 
                         allBasesMatch(homopolymerBase, var) &&
-                        (var.pos - 1) >= a.start() && 
+                        (var.pos - 1) > a.start() && 
                         (var.pos - 1) <= a.stop()) {
                     // do something
                     //std::cerr << "FILTER: " << var << a.start() << "\t" << a.stop() <<  "\n";
