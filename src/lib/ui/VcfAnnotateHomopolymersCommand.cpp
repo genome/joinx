@@ -36,49 +36,65 @@ namespace {
         {
         }
 
+        ~HomopolymerAnnotator() {
+            flush();
+        }
+
         bool wantMissA() const { return false; }
         bool wantMissB() const { return true; }
+
+        void reset(Vcf::Entry const& b) {
+            lastEntry_.reset(new Vcf::Entry(b));
+            infoValues_.swap(
+                std::vector<Vcf::CustomValue::ValueType>(b.alt().size(), int64_t(0))
+                );
+        }
 
         template<typename T1, typename T2>
         bool hit(T1 const& a, T2& b) {
             Vcf::RawVariant::Vector rawvs = Vcf::RawVariant::processEntry(b);
-
-            //std::cerr << "HIT: " << a << "\t" << b << "\n";
             char homopolymerBase = a.extraFields()[0][0];
 
-
-            std::vector<Vcf::CustomValue::ValueType> infoValues(rawvs.size());
+            if (lastEntry_) {
+                if (lastEntry_->toString() != b.toString()) {
+                    flush();
+                    reset(b);
+                }
+            }
+            else {
+                reset(b);
+            }
 
             for (std::size_t i = 0; i != rawvs.size(); ++i) {
                 auto const& var = rawvs[i];
 
-                if (isSimpleIndel(var, maxLength_) && 
+                if (isSimpleIndel(var, maxLength_) &&
                         allBasesMatch(homopolymerBase, var) &&
-                        (var.pos - 1) > a.start() && 
+                        (var.pos - 1) >= a.start() &&
                         (var.pos - 1) <= a.stop()) {
-                    // do something
-                    //std::cerr << "FILTER: " << var << a.start() << "\t" << a.stop() <<  "\n";
-                    infoValues[i] = int64_t(1);
+                    infoValues_[i] = int64_t(boost::get<int64_t>(infoValues_[i]) | 1);
                 }
                 else {
-                    //std::cerr << "RETAIN: " << var << "\n";
-                    infoValues[i] = int64_t(0);
                 }
             }
-            Vcf::CustomValue info(infoType_);
-            info.setRaw(infoValues);
-            b.setInfo(info.type().id(), info);
-
-            //os_ << "HIT: " << b << "\n";
-            os_ << b << "\n";
-
 
             return true;
+        }
+
+        void flush() {
+            if (lastEntry_) {
+                Vcf::CustomValue info(infoType_);
+                info.setRaw(infoValues_);
+                lastEntry_->setInfo(info.type().id(), info);
+                os_ << *lastEntry_ << "\n";
+                lastEntry_.reset();
+            }
         }
 
         void missA(Bed& x) {}
 
         void missB(Vcf::Entry const& x) {
+            flush();
             //os_ << "MISS: " << x << "\n";
             os_ << x << "\n";
         }
@@ -86,6 +102,9 @@ namespace {
         std::ostream& os_;
         size_t maxLength_;
         Vcf::CustomType const* infoType_;
+
+        std::unique_ptr<Vcf::Entry> lastEntry_;
+        std::vector<Vcf::CustomValue::ValueType> infoValues_;
     };
 }
 
