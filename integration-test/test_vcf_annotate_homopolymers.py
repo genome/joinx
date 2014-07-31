@@ -12,9 +12,9 @@ class TestVcfAnnotateHomopolymer(IntegrationTest, unittest.TestCase):
         output_file = self.tempFile("output.vcf")
 
         params = ["vcf-annotate-homopolymers", "-o", output_file,
-                "-v", input_file, "-b", bed_file, "-m 2"
+                "-v", input_file, "-b", bed_file, "-m 2",
                 "-n", "TEST"]
-
+        print "Executing", " ".join(params)
         rv, err = self.execute(params)
         self.assertEqual(0, rv)
         self.assertEqual('', err)
