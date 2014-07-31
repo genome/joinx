@@ -1,7 +1,7 @@
 #include "VcfSiteFilterCommand.hpp"
 
 #include "fileformats/InputStream.hpp"
-#include "fileformats/OutputWriter.hpp"
+#include "fileformats/DefaultPrinter.hpp"
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
@@ -66,7 +66,7 @@ void VcfSiteFilterCommand::exec() {
     auto readerPtr = openVcf(*instream);
     auto& reader = *readerPtr;
 
-    OutputWriter<Vcf::Entry> writer(*out);
+    DefaultPrinter writer(*out);
     //create filter entry for header
     reader.header().addFilter(_filterName,_filterDescription);
 

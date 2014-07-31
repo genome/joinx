@@ -2,7 +2,7 @@
 #include "fileformats/Bed.hpp"
 #include "fileformats/InputStream.hpp"
 #include "fileformats/StreamFactory.hpp"
-#include "fileformats/OutputWriter.hpp"
+#include "fileformats/DefaultPrinter.hpp"
 
 #include <gtest/gtest.h>
 #include <cstddef>
@@ -38,8 +38,8 @@ TEST(BedDeduplicator, deduplicate) {
         ;
 
     stringstream result;
-    OutputWriter<Bed> out(result);
-    BedDeduplicator<OutputWriter<Bed> > bdd(out);
+    DefaultPrinter out(result);
+    BedDeduplicator<DefaultPrinter> bdd(out);
     BedHeader hdr;
     for (size_t i = 0; i < nBeds; ++i) {
         Bed b;

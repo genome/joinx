@@ -3,7 +3,7 @@
 #include "annotate/HomopolymerAnnotator.hpp"
 #include "common/Sequence.hpp"
 #include "fileformats/BedReader.hpp"
-#include "fileformats/OutputWriter.hpp"
+#include "fileformats/DefaultPrinter.hpp"
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/RawVariant.hpp"
@@ -63,7 +63,7 @@ void VcfAnnotateHomopolymersCommand::exec() {
     newHeader.addInfoType(infoType);
     *outStream << newHeader;
 
-    OutputWriter<Vcf::Entry> out(*outStream);
+    DefaultPrinter out(*outStream);
     auto annotator = makeHomopolymerAnnotator(out, maxLength_,
             newHeader.infoType(infoFieldName_));
 

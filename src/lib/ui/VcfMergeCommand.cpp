@@ -3,7 +3,7 @@
 #include "common/Tokenizer.hpp"
 #include "fileformats/Fasta.hpp"
 #include "fileformats/InputStream.hpp"
-#include "fileformats/OutputWriter.hpp"
+#include "fileformats/DefaultPrinter.hpp"
 #include "fileformats/StreamPump.hpp"
 #include "fileformats/TypedStream.hpp"
 #include "fileformats/VcfReader.hpp"
@@ -192,8 +192,6 @@ void VcfMergeCommand::exec() {
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
 
-    typedef OutputWriter<Vcf::Entry> PrinterType;
-
     vector<VcfReader::ptr> readers;
     VcfExtractor extractor = boost::bind(&Vcf::Entry::parseLine, _1, _2, _3);
 
@@ -224,9 +222,9 @@ void VcfMergeCommand::exec() {
         readers.back()->header().sourceIndex(_fileOrder[inputStreams[i]->name()]);
     }
 
-    PrinterType printer(*out);
+    DefaultPrinter printer(*out);
     auto writer = boost::bind(
-        &writeEntry<PrinterType, scoped_ptr<Vcf::AltNormalizer>, Vcf::Entry>,
+        &writeEntry<DefaultPrinter, scoped_ptr<Vcf::AltNormalizer>, Vcf::Entry>,
         printer, std::ref(normalizer), _1);
     scoped_ptr<Vcf::ConsensusFilter> cnsFilt;
     if (_consensusRatio > 0) {

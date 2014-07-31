@@ -3,15 +3,15 @@
 #include <ostream>
 #include <string>
 
-template<typename T>
-class OutputWriter {
+class DefaultPrinter {
 public:
-    explicit OutputWriter(std::ostream& s, const std::string& sep = "\n")
+    explicit DefaultPrinter(std::ostream& s, const std::string& sep = "\n")
         : _s(s)
         , _sep(sep)
     {
     }
 
+    template<typename T>
     void operator()(const T& value) {
         _s << value << _sep;
     }

@@ -4,7 +4,6 @@
 #include "fileformats/Bed.hpp"
 #include "fileformats/BedReader.hpp"
 #include "fileformats/InputStream.hpp"
-#include "fileformats/OutputWriter.hpp"
 #include "io/StreamJoin.hpp"
 
 #include <boost/format.hpp>

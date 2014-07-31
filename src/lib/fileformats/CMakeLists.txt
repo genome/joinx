@@ -21,7 +21,7 @@ set(SOURCES
     InferFileType.hpp
     InputStream.cpp
     InputStream.hpp
-    OutputWriter.hpp
+    DefaultPrinter.hpp
     StreamFactory.hpp
     StreamHandler.cpp
     StreamHandler.hpp

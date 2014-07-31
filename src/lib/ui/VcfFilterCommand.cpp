@@ -1,7 +1,7 @@
 #include "VcfFilterCommand.hpp"
 
 #include "fileformats/InputStream.hpp"
-#include "fileformats/OutputWriter.hpp"
+#include "fileformats/DefaultPrinter.hpp"
 #include "fileformats/TypedStream.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
@@ -51,10 +51,9 @@ void VcfFilterCommand::exec() {
     typedef boost::function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
     typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
     typedef boost::shared_ptr<ReaderType> ReaderPtr;
-    typedef OutputWriter<Vcf::Entry> WriterType;
 
     VcfExtractor extractor = boost::bind(&Vcf::Entry::parseLine, _1, _2, _3);
-    WriterType writer(*out);
+    DefaultPrinter writer(*out);
     ReaderType reader(extractor, *instream);
     Vcf::Entry e;
     *out << reader.header();

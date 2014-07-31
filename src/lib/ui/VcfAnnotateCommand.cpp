@@ -4,7 +4,7 @@
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/InputStream.hpp"
-#include "fileformats/OutputWriter.hpp"
+#include "fileformats/DefaultPrinter.hpp"
 #include "fileformats/vcf/Compare.hpp"
 #include "fileformats/vcf/CustomType.hpp"
 #include "fileformats/vcf/CustomValue.hpp"
@@ -122,8 +122,7 @@ void VcfAnnotateCommand::postProcessArguments(Vcf::Header& header, Vcf::Header c
 
 
 void VcfAnnotateCommand::exec() {
-    typedef OutputWriter<Vcf::Entry> Writer;
-    typedef SimpleVcfAnnotator<Writer> AnnoType;
+    typedef SimpleVcfAnnotator<DefaultPrinter> AnnoType;
 
     auto vcfIn = _streams.openForReading(_vcfFile);
     auto annoIn = _streams.openForReading(_annoFile);
@@ -140,7 +139,7 @@ void VcfAnnotateCommand::exec() {
 
     postProcessArguments(header, annoHeader);
 
-    Writer writer(*out);
+    DefaultPrinter writer(*out);
     AnnoType c(writer, !_noIdents, _infoMap, header);
     auto intersector = makeSimpleIntersector(*vcfReader, *annoReader, c);
     *out << vcfReader->header();

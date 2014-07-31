@@ -10,8 +10,9 @@
 
 #include <cstddef>
 #include <ostream>
-#include <vector>
 #include <string>
+#include <utility>
+#include <vector>
 
 template<typename Writer>
 class HomopolymerAnnotator {
@@ -99,9 +100,9 @@ HomopolymerAnnotator<Writer>::~HomopolymerAnnotator() {
 template<typename Writer>
 void HomopolymerAnnotator<Writer>::reset(Vcf::Entry const& b) {
     lastEntry_ = b;
-    infoValues_.swap(
-        std::vector<Vcf::CustomValue::ValueType>(b.alt().size(), int64_t(0))
-        );
+
+    std::vector<Vcf::CustomValue::ValueType> nv(b.alt().size(), int64_t(0));
+    infoValues_.swap(nv);
 }
 
 template<typename Writer>
@@ -110,7 +111,7 @@ void HomopolymerAnnotator<Writer>::flush() {
         Vcf::CustomValue info(infoType_);
         info.setRaw(infoValues_);
         lastEntry_->setInfo(info.type().id(), info);
-        writer_(*lastEntry_);
+        writer_(std::move(*lastEntry_));
         lastEntry_.reset();
     }
 }
