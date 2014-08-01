@@ -53,6 +53,11 @@ void VcfCompareGtCommand::configureOptions() {
             po::value<vector<string>>(&filenames_),
             "input file(s) (positional arguments work also)")
 
+
+        ("output-file,o",
+            po::value<std::string>(&outputFile_)->default_value("-"),
+            "Path to output report file (- for stdout)")
+
         ("name,n",
             po::value<vector<string>>(&names_),
             "meaningful names for each of the input files (given in the same order)")
@@ -79,7 +84,6 @@ void VcfCompareGtCommand::configureOptions() {
         ("rename-sample,R",
             po::value<std::vector<std::string>>(&sampleRenames_),
             "-R OLD=NEW will rename sample OLD to NEW")
-
         ;
 
     _posOpts.add("input-file", -1);
@@ -127,7 +131,7 @@ void VcfCompareGtCommand::exec() {
     }
 
     std::vector<InputStream::ptr> inputStreams = _streams.openForReading(filenames_);
-    ostream* out = &std::cout;
+    ostream* out = _streams.get<std::ostream>(outputFile_);
 
     if (names_.empty()) {
         names_ = filenames_;

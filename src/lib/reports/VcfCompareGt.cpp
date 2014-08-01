@@ -42,23 +42,25 @@ void VcfCompareGt::operator()(
     }
     ++counts_[sampleIdx][fileIndices];
 
-    auto& out = getOutputFile(sampleIdx, fileIndices);
+    if (!outputDir_.empty())  {
+        auto& out = getOutputFile(sampleIdx, fileIndices);
 
-    for (auto i = which.begin(); i != which.end(); ++i) {
-        if (which.size() > 1) {
-            out << "#" << fileNames_[i->first] << "\n";;
+        for (auto i = which.begin(); i != which.end(); ++i) {
+            if (which.size() > 1) {
+                out << "#" << fileNames_[i->first] << "\n";;
+            }
+            auto const& entry = *i->second;
+            entry.allButSamplesToStream(out);
+            out << "\t";
+            entry.sampleData().formatToStream(out);
+            out << "\t";
+            auto actualSampleIdx = entry.header().sampleIndex(sampleNames_[sampleIdx]);
+            entry.sampleData().sampleToStream(out, actualSampleIdx);
+            out << "\n";
         }
-        auto const& entry = *i->second;
-        entry.allButSamplesToStream(out);
-        out << "\t";
-        entry.sampleData().formatToStream(out);
-        out << "\t";
-        auto actualSampleIdx = entry.header().sampleIndex(sampleNames_[sampleIdx]);
-        entry.sampleData().sampleToStream(out, actualSampleIdx);
-        out << "\n";
-    }
-    if (which.size() > 1) {
-        out << "--\n";
+        if (which.size() > 1) {
+            out << "--\n";
+        }
     }
 }
 

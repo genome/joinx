@@ -25,6 +25,7 @@ protected:
     boost::unordered_map<std::string, std::string> sampleRenames();
 
 protected:
+    std::string outputFile_;
     std::string sampleRenameFile_;
     std::vector<std::string> sampleRenames_;
     std::vector<std::string> filenames_;
