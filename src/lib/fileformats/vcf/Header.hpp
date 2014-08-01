@@ -49,6 +49,21 @@ public:
         return fromStream(ss);
     }
 
+    template<typename Iter>
+    static Header mergePointers(Iter beg, Iter end, bool allowDuplicateSamples) {
+        Header rv;
+        if (beg != end)
+            rv.merge(**beg++, allowDuplicateSamples);
+        for (; beg != end; ++beg)
+            rv.merge(**beg, allowDuplicateSamples);
+        return rv;
+    }
+
+    template<typename Container>
+    static Header mergePointers(Container const& hdrs, bool allowDuplicateSamples) {
+        return mergePointers(hdrs.begin(), hdrs.end(), allowDuplicateSamples);
+    }
+
     Header();
     ~Header();
 
