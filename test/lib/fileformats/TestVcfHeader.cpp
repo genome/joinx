@@ -277,9 +277,8 @@ TEST(VcfHeader, renameSamples) {
     EXPECT_EQ("S2", *tag->get("ID"));
     EXPECT_EQ("y", *tag->get("Data"));
 
-    boost::unordered_map<std::string, std::string> renames{
-        {"S1", "SAMPLE1"}
-        };
+    boost::unordered_map<std::string, std::string> renames;
+    renames["S1"] = "SAMPLE1";
 
     h.renameSamples(renames);
     ASSERT_EQ(2u, h.sampleNames().size());
