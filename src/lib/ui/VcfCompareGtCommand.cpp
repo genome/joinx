@@ -3,13 +3,15 @@
 #include "io/InputStream.hpp"
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/GenotypeComparator.hpp"
+#include "parse/Kvp.hpp"
 #include "processors/MergeSorted.hpp"
 #include "reports/VcfCompareGt.hpp"
+#include "common/Tokenizer.hpp"
 
 #include <boost/filesystem.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -40,17 +42,56 @@ void VcfCompareGtCommand::configureOptions() {
 
         ("sample-name,s",
             po::value<vector<string>>(&sampleNames_),
-            "operate only on these samples (may specify multiple times)")
+            "operate only on these samples (applied after sample renaming. "
+            "may be specified multiple times)")
 
         ("result-dir,d",
             po::value<string>(&outputDir_),
             "put variant files here")
+
+        ("sample-rename-file,r",
+            po::value<std::string>(&sampleRenameFile_),
+            "File containing KEY=VALUE pairs of sample renames "
+            "(sample KEY will become VALUE)")
+
+        ("rename-sample,R",
+            po::value<std::vector<std::string>>(&sampleRenames_),
+            "-R OLD=NEW will rename sample OLD to NEW")
+
         ;
 
     _posOpts.add("input-file", -1);
 }
 
+boost::unordered_map<std::string, std::string>
+VcfCompareGtCommand::sampleRenames() {
+    boost::unordered_map<std::string, std::string> rv;
+
+    if (!sampleRenameFile_.empty()) {
+        auto in = _streams.openForReading(sampleRenameFile_);
+        parseKvp(*in, rv);
+    }
+
+    for (auto i = sampleRenames_.begin(); i != sampleRenames_.end(); ++i) {
+        Tokenizer<char> tok(*i, '=');
+        std::string oldName;
+        std::string newName;
+        if (!tok.extract(oldName) || (tok.remaining(newName), newName.empty())) {
+            throw std::runtime_error("invalid sample rename key-value pair: " + *i);
+        }
+        rv[oldName] = newName;
+    }
+
+    for (auto i = rv.begin(); i != rv.end(); ++i) {
+        std::cerr << "Renaming sample: " << i->first << " -> " << i->second << "\n";
+    }
+
+    return rv;
+}
+
 void VcfCompareGtCommand::exec() {
+    auto sampleRenameMap = sampleRenames();
+
     if (filenames_.size() < 2) {
         throw std::runtime_error("At least two input files are required");
     }
@@ -71,6 +112,9 @@ void VcfCompareGtCommand::exec() {
     std::vector<Vcf::Header const*> headers;
     std::set<std::string> sampleNameSet;
     for (auto i = readers.begin(); i != readers.end(); ++i) {
+        if (!sampleRenameMap.empty())
+            (*i)->header().renameSamples(sampleRenameMap);
+
         auto const& names = (*i)->header().sampleNames();
         std::copy(names.begin(), names.end(), std::inserter(sampleNameSet, sampleNameSet.begin()));
         headers.push_back(&(*i)->header());

@@ -2,6 +2,8 @@
 
 #include "ui/CommandBase.hpp"
 
+#include <boost/unordered_map.hpp>
+
 #include <string>
 #include <vector>
 
@@ -18,6 +20,11 @@ public:
     void exec();
 
 protected:
+    boost::unordered_map<std::string, std::string> sampleRenames();
+
+protected:
+    std::string sampleRenameFile_;
+    std::vector<std::string> sampleRenames_;
     std::vector<std::string> filenames_;
     std::vector<std::string> names_;
     std::vector<std::string> noSampleFilenames_;
