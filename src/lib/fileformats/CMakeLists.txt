@@ -19,12 +19,8 @@ set(SOURCES
     FastaIndexGenerator.hpp
     InferFileType.cpp
     InferFileType.hpp
-    InputStream.cpp
-    InputStream.hpp
     DefaultPrinter.hpp
     StreamFactory.hpp
-    StreamHandler.cpp
-    StreamHandler.hpp
     StreamPump.hpp
     TypedStream.hpp
     Variant.cpp

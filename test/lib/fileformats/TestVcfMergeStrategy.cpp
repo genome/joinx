@@ -2,7 +2,7 @@
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/vcf/ValueMergers.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 
 #include <boost/scoped_ptr.hpp>
 

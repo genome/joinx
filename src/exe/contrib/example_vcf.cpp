@@ -1,6 +1,6 @@
 #include "common/cstdint.hpp"
-#include "fileformats/InputStream.hpp"
-#include "fileformats/StreamHandler.hpp"
+#include "io/InputStream.hpp"
+#include "io/StreamHandler.hpp"
 #include "fileformats/vcf/CustomValue.hpp"
 #include "fileformats/vcf/GenotypeCall.hpp"
 #include "fileformats/vcf/Header.hpp"

@@ -6,6 +6,10 @@ set(SOURCES
     GZipLineSource.cpp
     GZipLineSource.hpp
     ILineSource.hpp
+    InputStream.cpp
+    InputStream.hpp
+    StreamHandler.cpp
+    StreamHandler.hpp
     StreamJoin.hpp
     StreamLineSource.cpp
     StreamLineSource.hpp

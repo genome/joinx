@@ -1,6 +1,6 @@
 #include "metrics/Metrics.hpp"
 #include "common/Sequence.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 

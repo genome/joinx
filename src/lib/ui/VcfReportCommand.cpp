@@ -2,8 +2,8 @@
 
 #include "common/Exceptions.hpp"
 #include "common/MutationSpectrum.hpp"
-#include "fileformats/InputStream.hpp"
-#include "fileformats/StreamHandler.hpp"
+#include "io/InputStream.hpp"
+#include "io/StreamHandler.hpp"
 #include "fileformats/vcf/CustomType.hpp"
 #include "fileformats/vcf/CustomValue.hpp"
 #include "fileformats/vcf/GenotypeCall.hpp"

@@ -1,5 +1,5 @@
 #include "fileformats/InferFileType.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 
 #include <sstream>
 #include <string>

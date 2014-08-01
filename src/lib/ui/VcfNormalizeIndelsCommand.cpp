@@ -2,7 +2,7 @@
 
 #include "common/UnknownSequenceError.hpp"
 #include "fileformats/Fasta.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"

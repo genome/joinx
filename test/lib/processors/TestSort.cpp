@@ -1,6 +1,6 @@
 #include "processors/Sort.hpp"
 #include "fileformats/Bed.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "fileformats/StreamFactory.hpp"
 #include "fileformats/BedReader.hpp"
 

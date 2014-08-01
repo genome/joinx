@@ -2,7 +2,7 @@
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/vcf/GenotypeMerger.hpp"
 
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 
 #include <functional>
 #include <sstream>

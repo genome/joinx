@@ -1,6 +1,6 @@
 #pragma once
 
-#include "InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "io/ILineSource.hpp"
 #include "common/cstdint.hpp"
 

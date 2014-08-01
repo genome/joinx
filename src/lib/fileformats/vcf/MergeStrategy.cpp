@@ -2,7 +2,7 @@
 #include "Entry.hpp"
 #include "Header.hpp"
 #include "CustomValue.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "common/Tokenizer.hpp"
 
 #include <boost/bind.hpp>

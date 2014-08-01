@@ -1,6 +1,6 @@
 #include "VcfCompareGtCommand.hpp"
 
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/GenotypeComparator.hpp"
 #include "processors/MergeSorted.hpp"

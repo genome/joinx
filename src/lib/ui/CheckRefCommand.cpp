@@ -3,7 +3,7 @@
 #include "fileformats/Bed.hpp"
 #include "fileformats/BedReader.hpp"
 #include "fileformats/Fasta.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "fileformats/Variant.hpp"
 
 #include <boost/assign/list_of.hpp>

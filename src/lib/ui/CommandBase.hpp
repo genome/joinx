@@ -2,7 +2,7 @@
 
 #include "common/Exceptions.hpp"
 #include "common/cstdint.hpp"
-#include "fileformats/StreamHandler.hpp"
+#include "io/StreamHandler.hpp"
 
 #include <boost/program_options.hpp>
 #include <boost/shared_ptr.hpp>

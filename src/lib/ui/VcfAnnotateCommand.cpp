@@ -3,7 +3,7 @@
 #include "common/Tokenizer.hpp"
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/Bed.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "fileformats/DefaultPrinter.hpp"
 #include "fileformats/vcf/Compare.hpp"
 #include "fileformats/vcf/CustomType.hpp"

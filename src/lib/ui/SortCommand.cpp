@@ -4,7 +4,7 @@
 #include "fileformats/BedReader.hpp"
 #include "fileformats/ChromPosReader.hpp"
 #include "fileformats/InferFileType.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "fileformats/DefaultPrinter.hpp"
 #include "fileformats/StreamFactory.hpp"
 #include "fileformats/VcfReader.hpp"

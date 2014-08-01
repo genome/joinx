@@ -1,6 +1,6 @@
 #include "processors/IntersectFull.hpp"
 #include "fileformats/Bed.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "fileformats/TypedStream.hpp"
 
 #include <boost/bind.hpp>

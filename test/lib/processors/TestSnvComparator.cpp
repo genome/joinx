@@ -1,6 +1,6 @@
 #include "processors/SnvComparator.hpp"
 #include "fileformats/Bed.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "fileformats/TypedStream.hpp"
 
 #include "MockResultCollector.hpp"

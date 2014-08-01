@@ -1,6 +1,6 @@
 #include "Fasta.hpp"
 #include "FastaIndexGenerator.hpp"
-#include "InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "common/Exceptions.hpp"
 #include "common/Tokenizer.hpp"
 #include "common/UnknownSequenceError.hpp"

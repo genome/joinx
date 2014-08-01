@@ -1,7 +1,7 @@
 #include "fileformats/vcf/RawVariant.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "common/VariantType.hpp"
 
 #include <gtest/gtest.h>

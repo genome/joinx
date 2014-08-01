@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/TempFile.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "fileformats/StreamFactory.hpp"
 
 #include <boost/shared_ptr.hpp>

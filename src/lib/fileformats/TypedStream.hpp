@@ -1,6 +1,6 @@
 #pragma once
 
-#include "InputStream.hpp"
+#include "io/InputStream.hpp"
 
 #include <boost/format.hpp>
 #include <boost/shared_ptr.hpp>

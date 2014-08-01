@@ -3,7 +3,7 @@
 #include "common/cstdint.hpp"
 #include "fileformats/Bed.hpp"
 #include "fileformats/BedReader.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "io/StreamJoin.hpp"
 
 #include <boost/format.hpp>

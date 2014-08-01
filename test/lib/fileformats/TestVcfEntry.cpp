@@ -1,7 +1,7 @@
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/vcf/VariantAdaptor.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 
 #include <boost/assign/list_of.hpp>
 

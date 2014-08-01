@@ -2,7 +2,7 @@
 
 #include "Bed.hpp"
 #include "ChromPos.hpp"
-#include "InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "TypedStream.hpp"
 #include "vcf/Entry.hpp"
 #include "vcf/Header.hpp"

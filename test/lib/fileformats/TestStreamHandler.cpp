@@ -1,5 +1,5 @@
-#include "fileformats/StreamHandler.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/StreamHandler.hpp"
+#include "io/InputStream.hpp"
 
 #include "common/TempFile.hpp"
 

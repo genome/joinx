@@ -1,7 +1,7 @@
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/vcf/Compare.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 
 #include <functional>
 #include <sstream>

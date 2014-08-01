@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fileformats/StreamHandler.hpp"
+#include "io/StreamHandler.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/RawVariant.hpp"
 

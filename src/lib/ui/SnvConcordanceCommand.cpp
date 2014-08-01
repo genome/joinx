@@ -2,7 +2,7 @@
 
 #include "fileformats/Bed.hpp"
 #include "fileformats/BedReader.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "processors/IntersectFull.hpp"
 #include "reports/SnvConcordance.hpp"
 

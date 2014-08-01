@@ -1,6 +1,6 @@
 #include "common/Timer.hpp"
-#include "fileformats/InputStream.hpp"
-#include "fileformats/StreamHandler.hpp"
+#include "io/InputStream.hpp"
+#include "io/StreamHandler.hpp"
 #include "fileformats/VcfReader.hpp"
 
 #include <boost/ptr_container/ptr_vector.hpp>

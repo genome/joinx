@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Bed.hpp"
-#include "InputStream.hpp"
+#include "io/InputStream.hpp"
 
 #include <string>
 

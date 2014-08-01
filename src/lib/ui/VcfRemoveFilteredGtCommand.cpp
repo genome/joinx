@@ -1,6 +1,6 @@
 #include "VcfRemoveFilteredGtCommand.hpp"
 
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "fileformats/VcfReader.hpp"
 
 #include <boost/program_options.hpp>

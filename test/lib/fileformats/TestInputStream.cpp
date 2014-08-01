@@ -1,4 +1,4 @@
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "io/GZipLineSource.hpp"
 #include "common/TempFile.hpp"
 

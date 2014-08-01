@@ -1,6 +1,6 @@
 #include "VcfSiteFilterCommand.hpp"
 
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "fileformats/DefaultPrinter.hpp"
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/Entry.hpp"

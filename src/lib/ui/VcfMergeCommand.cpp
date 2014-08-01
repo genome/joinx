@@ -2,7 +2,7 @@
 
 #include "common/Tokenizer.hpp"
 #include "fileformats/Fasta.hpp"
-#include "fileformats/InputStream.hpp"
+#include "io/InputStream.hpp"
 #include "fileformats/DefaultPrinter.hpp"
 #include "fileformats/StreamPump.hpp"
 #include "fileformats/TypedStream.hpp"
