@@ -4,7 +4,8 @@
 #include "common/cstdint.hpp"
 
 #include <boost/format.hpp>
-#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/qi_numeric.hpp>
+#include <boost/spirit/include/qi_parse.hpp>
 
 #include <algorithm>
 #include <cstdlib>
@@ -15,11 +16,63 @@
 
 using namespace std;
 
-// Implemented because C++ iostreams, boost::tokenizer, and boost::split were
-// too general purpose (i.e., slow).
-template<typename DelimType>
-class Tokenizer {
-private: // details...
+namespace detail {
+    template<typename T, typename Enable = void>
+    struct extractor_;
+
+    template<>
+    struct extractor_<std::string> {
+        template<typename Iter>
+        bool operator()(Iter beg, Iter end, std::string& attr) {
+            attr.assign(beg, end);
+            return true;
+        }
+    };
+
+    template<typename T>
+    struct extractor_<
+          T
+        , typename std::enable_if<std::is_integral<T>::value>::type
+        >
+    {
+        template<typename Iter>
+        bool operator()(Iter beg, Iter end, T& attr) {
+            boost::spirit::qi::any_int_parser<T> parser;
+            if (boost::spirit::qi::parse(beg, end, parser, attr)) {
+                return beg == end;
+            }
+            return false;
+        }
+    };
+
+    template<typename T>
+    struct extractor_<
+          T
+        , typename std::enable_if<std::is_floating_point<T>::value>::type
+        >
+    {
+        template<typename Iter>
+        bool operator()(Iter beg, Iter end, T& attr) {
+            boost::spirit::qi::any_real_parser<T> parser;
+            if (boost::spirit::qi::parse(beg, end, parser, attr)) {
+                return beg == end;
+            }
+            return false;
+        }
+    };
+
+    template<>
+    struct extractor_<char> {
+        template<typename Iter>
+        bool operator()(Iter beg, Iter end, char& attr) {
+            bool rv = end - beg == 1;
+            if (rv) {
+                attr = *beg;
+            }
+            return rv;
+        }
+    };
+
     // Get value type from normal iterators
     template<typename IterType, typename ValueType>
     struct IteratorValue_impl {
@@ -40,7 +93,12 @@ private: // details...
                 >::value_type
                 value_type;
     };
+}
 
+// Implemented because C++ iostreams, boost::tokenizer, and boost::split were
+// too general purpose (i.e., slow).
+template<typename DelimType>
+class Tokenizer {
 public:
     Tokenizer(std::string const& s, DelimType const& delim = '\t')
         : _sbeg(s.data())
@@ -111,7 +169,7 @@ public:
         )
     {
         Tokenizer<DelimType> t(beg, end, delim);
-        typedef typename IteratorValue<IterType>::value_type ValueType;
+        typedef typename detail::IteratorValue<IterType>::value_type ValueType;
         ValueType tmp;
 
         while (t.extract(tmp))
@@ -151,68 +209,18 @@ public:
 protected:
     template<typename T>
     bool _extract(T& value) {
-        std::string s;
-        if (!extract(s))
-            return false;
-        value = std::move(s);
-        return true;
-    }
+        auto beg = &_sbeg[_pos];
+        auto end = &_sbeg[_end];
 
-    // special case for casting string to char
-    bool _extract(char& value) {
-        bool rv = _end - _pos == 1;
-        if (rv) {
-            value = _sbeg[_pos];
+        detail::extractor_<T> ex;
+        if (ex(beg, end, value)) {
             advance();
+            return true;
         }
-        return rv;
+        return false;
     }
-
-    bool _extract(std::string& value);
-
-    template<typename T, typename V>
-    bool _extractNumeric(T& parser, V& value);
-
 
     bool _extract(const char** begin, const char** end);
-
-
-    bool _extract(int16_t& value) {
-        return _extractNumeric(boost::spirit::qi::short_, value);
-    }
-
-    bool _extract(int32_t& value) {
-        return _extractNumeric(boost::spirit::qi::int_, value);
-    }
-
-    bool _extract(int64_t& value) {
-        return _extractNumeric(boost::spirit::qi::long_, value);
-    }
-
-    bool _extract(uint16_t& value) {
-        return _extractNumeric(boost::spirit::qi::ushort_, value);
-    }
-
-    bool _extract(uint32_t& value) {
-        return _extractNumeric(boost::spirit::qi::uint_, value);
-    }
-
-    bool _extract(uint64_t& value) {
-        return _extractNumeric(boost::spirit::qi::ulong_, value);
-    }
-
-
-    bool _extract(float& value) {
-        return _extractNumeric(boost::spirit::qi::float_, value);
-    }
-
-    bool _extract(double& value) {
-        return _extractNumeric(boost::spirit::qi::double_, value);
-    }
-
-    bool _extract(long double& value) {
-        return _extractNumeric(boost::spirit::qi::long_double, value);
-    }
 
     size_t nextDelim();
 
@@ -245,14 +253,6 @@ inline bool Tokenizer<DelimType>::_extract(const char** begin, const char** end)
     *begin = _sbeg + _pos;
     *end = _sbeg + _end;
     return advance();
-}
-
-template<typename DelimType>
-inline bool Tokenizer<DelimType>::_extract(std::string& value) {
-    std::string::size_type len = _end-_pos;
-    value.assign(_sbeg+_pos, len);
-    advance();
-    return true;
 }
 
 template<typename DelimType>
@@ -323,22 +323,6 @@ inline bool Tokenizer<std::string>::eof() const {
     }
 
     return false;
-}
-
-template<typename DelimType>
-template<typename T, typename V>
-inline bool Tokenizer<DelimType>::_extractNumeric(T& parser, V& value) {
-    namespace qi = boost::spirit::qi;
-    auto beg = &_sbeg[_pos];
-    auto end = &_sbeg[_end];
-
-    qi::parse(beg, end, parser, value);
-
-    //value = func(&_sbeg[_pos], &realEnd);
-    bool rv = beg == end;
-    if (rv)
-        advance();
-    return rv;
 }
 
 template<>
