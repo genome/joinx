@@ -1,10 +1,13 @@
 #include "fileformats/vcf/Header.hpp"
 
+#include <gtest/gtest.h>
+
+#include <boost/unordered_map.hpp>
+
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <gtest/gtest.h>
 
 using namespace std;
 using namespace Vcf;
@@ -245,4 +248,59 @@ TEST(VcfHeader, sampleMirroring) {
     EXPECT_FALSE(h.isReflection(1));
     EXPECT_FALSE(h.isReflection(2));
     EXPECT_TRUE(h.isReflection(3));
+}
+
+TEST(VcfHeader, renameSamples) {
+    std::stringstream hdrss(
+        "##fileformat=VCFv4.2\n"
+        "##SAMPLE=<ID=S1,Data=x>\n"
+        "##SAMPLE=<ID=S2,Data=y>\n"
+        "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\tS2\n"
+        );
+
+    auto h = Header::fromStream(hdrss);
+    ASSERT_EQ(2u, h.sampleNames().size());
+    EXPECT_EQ("S1", h.sampleNames()[0]);
+    EXPECT_EQ("S2", h.sampleNames()[1]);
+
+    EXPECT_THROW(h.sampleIndex("SAMPLE1"), SampleNotFoundError);
+    EXPECT_EQ(0u, h.sampleIndex("S1"));
+    EXPECT_EQ(1u, h.sampleIndex("S2"));
+
+    SampleTag const* tag = h.sampleTag("S1");
+    ASSERT_TRUE(tag);
+    EXPECT_EQ("S1", *tag->get("ID"));
+    EXPECT_EQ("x", *tag->get("Data"));
+
+    tag = h.sampleTag("S2");
+    ASSERT_TRUE(tag);
+    EXPECT_EQ("S2", *tag->get("ID"));
+    EXPECT_EQ("y", *tag->get("Data"));
+
+    boost::unordered_map<std::string, std::string> renames{
+        {"S1", "SAMPLE1"}
+        };
+
+    h.renameSamples(renames);
+    ASSERT_EQ(2u, h.sampleNames().size());
+    EXPECT_EQ("SAMPLE1", h.sampleNames()[0]);
+    EXPECT_EQ("S2", h.sampleNames()[1]);
+
+    EXPECT_THROW(h.sampleIndex("S1"), SampleNotFoundError);
+    EXPECT_EQ(0u, h.sampleIndex("SAMPLE1"));
+    EXPECT_EQ(1u, h.sampleIndex("S2"));
+
+    tag = h.sampleTag("S1");
+    ASSERT_FALSE(tag);
+
+    tag = h.sampleTag("SAMPLE1");
+    ASSERT_TRUE(tag);
+
+    EXPECT_EQ("SAMPLE1", *tag->get("ID"));
+    EXPECT_EQ("x", *tag->get("Data"));
+
+    tag = h.sampleTag("S2");
+    ASSERT_TRUE(tag);
+    EXPECT_EQ("S2", *tag->get("ID"));
+    EXPECT_EQ("y", *tag->get("Data"));
 }

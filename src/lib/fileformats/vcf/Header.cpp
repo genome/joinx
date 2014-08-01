@@ -311,6 +311,38 @@ bool Header::isReflection(size_t sampleIdx) const {
     return iter != _mirroredSamples.end();
 }
 
+void Header::renameSamples(boost::unordered_map<std::string, std::string> const& nameMap) {
+    for (auto i = _sampleNames.begin(); i != _sampleNames.end(); ++i) {
+        auto found = nameMap.find(*i);
+        if (found != nameMap.end()) {
+            *i = found->second;
+        }
+    }
+
+    decltype(_sampleTags) newSampleTags;
+    for (auto i = _sampleTags.begin(); i != _sampleTags.end(); ++i) {
+        auto found = nameMap.find(i->first);
+        if (found != nameMap.end()) {
+            auto tag = i->second;
+            tag.set("ID", found->second);
+            newSampleTags[found->second] = tag;
+        }
+        else {
+            newSampleTags.insert(*i);
+        }
+    }
+    _sampleTags.swap(newSampleTags);
+
+    rebuildSampleIndex();
+}
+
+void Header::rebuildSampleIndex() {
+    _sampleIndices.clear();
+    std::size_t idx = 0;
+    for (auto i = _sampleNames.begin(); i != _sampleNames.end(); ++i) {
+        _sampleIndices[*i] = idx++;
+    }
+}
 
 END_NAMESPACE(Vcf)
 

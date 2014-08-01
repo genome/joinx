@@ -32,6 +32,7 @@ struct HeaderMap {
 
 class Header {
 public:
+    typedef std::string SampleName;
     typedef std::pair<std::string, std::string> RawLine;
 
     template<typename T>
@@ -52,6 +53,7 @@ public:
     Header();
     ~Header();
 
+    void renameSamples(boost::unordered_map<std::string, std::string> const& nameMap);
     void add(std::string const& line);
     void addFilter(std::string const& name, std::string const& desc);
     void addInfoType(CustomType const& type);
@@ -102,6 +104,7 @@ public:
 protected:
     void parseHeaderLine(std::string const& line);
     size_t addSample(std::string const& name);
+    void rebuildSampleIndex();
 
 protected:
     HeaderMap<std::string, CustomType>::type _infoTypes;
@@ -109,8 +112,8 @@ protected:
     // filters = name -> description
     HeaderMap<std::string, std::string>::type _filters;
     std::vector<RawLine> _metaInfoLines;
-    std::vector<std::string> _sampleNames;
-    HeaderMap<std::string, SampleTag>::type _sampleTags;
+    std::vector<SampleName> _sampleNames;
+    HeaderMap<SampleName, SampleTag>::type _sampleTags;
     bool _headerSeen;
     uint32_t _sourceIndex;
 
@@ -122,7 +125,7 @@ protected:
     // maps sample idx -> # of times it is mirrored
     HeaderMap<size_t, bool>::type _hasReflections;
 
-    HeaderMap<std::string, size_t>::type _sampleIndices;
+    HeaderMap<SampleName, size_t>::type _sampleIndices;
     bool _hasDuplicateSamples;
 };
 
