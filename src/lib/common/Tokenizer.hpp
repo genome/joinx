@@ -4,8 +4,8 @@
 #include "common/cstdint.hpp"
 
 #include <boost/format.hpp>
-#include <boost/spirit/include/qi_numeric.hpp>
-#include <boost/spirit/include/qi_parse.hpp>
+#include <boost/spirit/home/qi/numeric.hpp>
+#include <boost/spirit/home/qi/parse.hpp>
 
 #include <algorithm>
 #include <cstdlib>
@@ -24,6 +24,15 @@ namespace detail {
     struct extractor_<std::string> {
         template<typename Iter>
         bool operator()(Iter beg, Iter end, std::string& attr) {
+            attr.assign(beg, end);
+            return true;
+        }
+    };
+
+    template<>
+    struct extractor_<StringView> {
+        template<typename Iter>
+        bool operator()(Iter beg, Iter end, StringView& attr) {
             attr.assign(beg, end);
             return true;
         }
@@ -146,16 +155,6 @@ public:
 
     template<typename T>
     bool extract(T& value);
-
-    bool extract(StringView& s) {
-        char const* beg;
-        char const* end;
-        bool rv = _extract(&beg, &end);
-        if (rv)
-            s.assign(beg, end);
-        return rv;
-    }
-
     bool extract(char const** beg, char const** end) {
         return _extract(beg, end);
     }
