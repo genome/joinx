@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ui/CommandBase.hpp"
+#include "fileformats/vcf/GenotypeComparator.hpp"
 
 #include <boost/unordered_map.hpp>
 
@@ -17,6 +18,7 @@ public:
     }
 
     void configureOptions();
+    void finalizeOptions();
     void exec();
 
 protected:
@@ -27,6 +29,8 @@ protected:
     std::vector<std::string> sampleRenames_;
     std::vector<std::string> filenames_;
     std::vector<std::string> names_;
+    std::vector<Vcf::FilterType> filterTypes_;
+    std::vector<std::string> filterTypeStrings_;
     std::vector<std::string> noSampleFilenames_;
     std::vector<std::string> sampleNames_;
     std::string outputDir_;
