@@ -173,6 +173,8 @@ private:
             sd.clear();
         }
 
+        out_.flush();
+
         for (FileIndex streamIdx = 0; streamIdx < entries_.size(); ++streamIdx) {
             entries_[streamIdx].clear();
         }

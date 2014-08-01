@@ -119,9 +119,12 @@ void VcfCompareGtCommand::exec() {
         }
     }
 
-    VcfCompareGt report(names_, sampleNames_, *out, outputDir_);
+    auto mergedHeader = Vcf::Header::mergePointers(headers, true);
+    VcfCompareGt report(names_, sampleNames_, *out, outputDir_, mergedHeader);
     MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
-    auto cmp = Vcf::makeGenotypeComparator(sampleNames_, headers, filterTypes_, readers.size(), report);
+    auto cmp = Vcf::makeGenotypeComparator(sampleNames_, headers, filterTypes_,
+            readers.size(), report);
+
     Vcf::Entry* e(new Vcf::Entry);
     while (merger.next(*e)) {
         cmp.push(e);

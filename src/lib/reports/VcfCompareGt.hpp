@@ -1,7 +1,10 @@
 #pragma once
 
 #include "fileformats/StreamHandler.hpp"
+#include "fileformats/vcf/CustomType.hpp"
 #include "fileformats/vcf/Entry.hpp"
+#include "fileformats/vcf/Header.hpp"
+#include "fileformats/vcf/MergeStrategy.hpp"
 #include "fileformats/vcf/RawVariant.hpp"
 
 #include <boost/scoped_ptr.hpp>
@@ -16,10 +19,12 @@
 class VcfCompareGt {
 public:
     VcfCompareGt(
-        std::vector<std::string> const& fileNames,
-        std::vector<std::string> const& sampleNames,
-        std::ostream& out,
-        std::string const& outputDir);
+            std::vector<std::string> const& fileNames,
+            std::vector<std::string> const& sampleNames,
+            std::ostream& out,
+            std::string const& outputDir,
+            Vcf::Header const& mergedHeader
+            );
 
     void operator()(
             size_t sampleIdx,
@@ -29,6 +34,11 @@ public:
             );
 
     void finalize();
+    void flush();
+
+    void writeMergedOutput(
+            std::set<size_t> const& fileIndices,
+            std::map<size_t, Vcf::Entry const*> const& which);
 
     std::vector<size_t> orderedCountsForSample(size_t sampleIdx) const;
 
@@ -46,6 +56,11 @@ private:
         > counts_;
     std::ostream& reportOut_;
     std::string const& outputDir_;
+    Vcf::Header mergedHeader_;
     StreamHandler streams_;
     std::set<std::string> openPaths_;
+    Vcf::MergeStrategy mergeStrategy_;
+    Vcf::CustomType const* infoType_;
+
+    std::ostream* mergedOut_;
 };

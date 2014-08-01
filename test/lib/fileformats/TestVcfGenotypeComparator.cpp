@@ -22,6 +22,8 @@ namespace {
     size_t nStreams = 3;
 
     struct Collector {
+        void flush() {}
+
         void operator()(
                 size_t sampleIdx,
                 std::string const& sequence,
