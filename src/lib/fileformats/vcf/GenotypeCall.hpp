@@ -24,6 +24,10 @@ struct GenotypeIndex : ValueBasedRelOps<GenotypeIndex>  {
         : value(value)
     {}
 
+    bool null() const {
+        return *this == Null;
+    }
+
     value_type value;
 };
 
@@ -39,6 +43,7 @@ public:
     explicit GenotypeCall(const std::string& call);
 
     bool empty() const;
+    bool null() const;
     size_type size() const;
     const_iterator begin() const;
     const_iterator end() const;

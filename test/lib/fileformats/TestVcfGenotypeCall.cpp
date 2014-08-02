@@ -28,6 +28,15 @@ TEST(GenotypeCall, emptyString) {
     EXPECT_TRUE(gt.indices().empty());
 }
 
+TEST(GenotypeCall, nullString) {
+    GenotypeCall gt(".");
+    EXPECT_TRUE(gt.empty());
+    EXPECT_EQ(0u, gt.size());
+    EXPECT_EQ(0u, distance(gt.begin(), gt.end()));
+    EXPECT_FALSE(gt.phased());
+    EXPECT_TRUE(gt.indices().empty());
+}
+
 TEST(GenotypeCall, phased) {
     GenotypeCall gt("0|1");
     EXPECT_TRUE(gt.phased());
@@ -71,9 +80,12 @@ TEST(GenotypeCall, missingData) {
     EXPECT_TRUE(gt.heterozygous());
 }
 
-TEST(GenotypeCall, missingZygosity) {
+TEST(GenotypeCall, bothNull) {
     GenotypeCall twoMissing("./.");
-    EXPECT_TRUE(twoMissing.homozygous());
+    EXPECT_TRUE(twoMissing.diploid());
+    EXPECT_TRUE(twoMissing.null());
+    EXPECT_FALSE(twoMissing.empty());
+    EXPECT_FALSE(twoMissing.homozygous());
     EXPECT_FALSE(twoMissing.heterozygous());
 }
 

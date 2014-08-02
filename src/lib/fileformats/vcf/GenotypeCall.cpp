@@ -21,6 +21,11 @@ GenotypeCall::GenotypeCall(const std::string& call)
     : _phased(false)
     , _string(call)
 {
+    // special case: a lone null (".") is treated as empty
+    if (call == ".") {
+        return;
+    }
+
     Tokenizer<std::string> tok(call, "|/");
     GenotypeIndex idx;
 
@@ -49,6 +54,10 @@ bool GenotypeCall::empty() const {
     return _indices.empty();
 }
 
+bool GenotypeCall::null() const {
+    return _indexSet.size() == 1 && _indexSet.begin()->null();
+}
+
 GenotypeCall::size_type GenotypeCall::size() const {
     return _indices.size();
 }
@@ -70,7 +79,7 @@ bool GenotypeCall::heterozygous() const {
 }
 
 bool GenotypeCall::homozygous() const {
-    return diploid() && _indexSet.size() == 1;   //if only one unique allele then homozygous
+    return diploid() && !null() && _indexSet.size() == 1;
 }
 
 bool GenotypeCall::diploid() const {
