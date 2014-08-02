@@ -71,6 +71,12 @@ TEST(GenotypeCall, missingData) {
     EXPECT_TRUE(gt.heterozygous());
 }
 
+TEST(GenotypeCall, missingZygosity) {
+    GenotypeCall twoMissing("./.");
+    EXPECT_TRUE(twoMissing.homozygous());
+    EXPECT_FALSE(twoMissing.heterozygous());
+}
+
 TEST(GenotypeCall, genotypeIndex) {
     std::stringstream ss;
     GenotypeIndex idx{1};
