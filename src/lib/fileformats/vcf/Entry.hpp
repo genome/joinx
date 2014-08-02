@@ -86,6 +86,7 @@ public:
     const std::set<std::string>& identifiers() const { return _identifiers; }
     const std::string& ref() const { return _ref; }
     const std::vector<std::string>& alt() const { return _alt; }
+    const std::string& alt(GenotypeIndex const& idx) const;
     double qual() const { return _qual; }
     const std::set<std::string>& failedFilters() const { return _failedFilters; }
     const CustomValueMap& info() const { return _info; }

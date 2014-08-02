@@ -2,9 +2,15 @@
 
 #include "common/Tokenizer.hpp"
 
+#include <boost/format.hpp>
+#include <limits>
+
+using boost::format;
+
 BEGIN_NAMESPACE(Vcf)
 
 GenotypeCall GenotypeCall::Null;
+GenotypeIndex GenotypeIndex::Null{std::numeric_limits<GenotypeIndex::value_type>::max()};
 
 GenotypeCall::GenotypeCall()
     : _phased(false)
@@ -16,19 +22,26 @@ GenotypeCall::GenotypeCall(const std::string& call)
     , _string(call)
 {
     Tokenizer<std::string> tok(call, "|/");
-    uint32_t idx(0);
-    // TODO this doesn't seem to handle partially missing data yet
+    GenotypeIndex idx;
+
     // note: a delimiter of | denotes phased data
-    // we only pay attention to the first such delimiter
-    if (tok.extract(idx)) {
-        _phased = tok.lastDelim() == '|';
+    // if anything is phased, we treat the whole genotype as phased
+    // hopefully, mixing of phased and unphased data in a single
+    // call isn't meaningful...
+    while (!tok.eof()) {
+        if (tok.nextTokenMatches(".")) {
+            idx = GenotypeIndex::Null;
+            tok.advance();
+        }
+        else if (!tok.extract(idx.value)) {
+            throw std::runtime_error(str(format("Genotype parse error "
+                "(GT=%1%): expected a number or '.'"
+                ) % call));
+        }
+
+        _phased |= tok.lastDelim() == '|';
         _indices.push_back(idx);
         _indexSet.insert(idx);
-        // now read the rest
-        while (tok.extract(idx)) {
-            _indices.push_back(idx);
-            _indexSet.insert(idx);
-        }
     }
 }
 
@@ -65,18 +78,18 @@ bool GenotypeCall::diploid() const {
 }
 
 bool GenotypeCall::reference() const {
-    return _indexSet.size() == 1 && _indexSet.count(0);
+    return _indexSet.size() == 1 && _indexSet.count(GenotypeIndex{0});
 }
 
-const uint32_t& GenotypeCall::operator[](size_type idx) const {
+const GenotypeIndex& GenotypeCall::operator[](size_type idx) const {
     return _indices[idx];
 }
 
-const vector<uint32_t>& GenotypeCall::indices() const {
+const vector<GenotypeIndex>& GenotypeCall::indices() const {
     return _indices;
 }
 
-const set<uint32_t>& GenotypeCall::indexSet() const {
+const set<GenotypeIndex>& GenotypeCall::indexSet() const {
     return _indexSet;
 }
 
@@ -134,7 +147,15 @@ bool GenotypeCall::operator<(const GenotypeCall& rhs) const {
 
 END_NAMESPACE(Vcf)
 
-std::ostream& operator<<(std::ostream& s, Vcf::GenotypeCall const& gt) {
-    s << gt.string();
-    return s;
+std::ostream& operator<<(std::ostream& os, Vcf::GenotypeIndex const& gtidx) {
+    if (gtidx == Vcf::GenotypeIndex::Null)
+        os << '.';
+    else
+        os << gtidx.value;
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, Vcf::GenotypeCall const& gt) {
+    os << gt.string();
+    return os;
 }

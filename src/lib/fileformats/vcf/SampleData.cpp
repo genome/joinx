@@ -412,7 +412,13 @@ void SampleData::renumberGT(std::map<size_t, size_t> const& altMap) {
         for (auto alt = old.begin(); alt != old.end(); ++alt) {
             if (alt != old.begin())
                 newss << delim;
-            auto remapped = altMap.find(*alt);
+
+            if (*alt == GenotypeIndex::Null) {
+                newss << *alt;
+                continue;
+            }
+
+            auto remapped = altMap.find(alt->value);
             if (remapped == altMap.end()) {
                 newss << *alt;
             } else {

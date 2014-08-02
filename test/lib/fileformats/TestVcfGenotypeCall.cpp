@@ -1,7 +1,9 @@
 #include "fileformats/vcf/GenotypeCall.hpp"
 
 #include <gtest/gtest.h>
+
 #include <iterator>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -10,40 +12,66 @@ using namespace Vcf;
 
 TEST(GenotypeCall, empty) {
     GenotypeCall gt;
-    ASSERT_TRUE(gt.empty());
-    ASSERT_EQ(0u, gt.size());
-    ASSERT_EQ(0u, distance(gt.begin(), gt.end()));
-    ASSERT_FALSE(gt.phased());
-    ASSERT_TRUE(gt.indices().empty());
+    EXPECT_TRUE(gt.empty());
+    EXPECT_EQ(0u, gt.size());
+    EXPECT_EQ(0u, distance(gt.begin(), gt.end()));
+    EXPECT_FALSE(gt.phased());
+    EXPECT_TRUE(gt.indices().empty());
 }
 
 TEST(GenotypeCall, emptyString) {
     GenotypeCall gt("");
-    ASSERT_TRUE(gt.empty());
-    ASSERT_EQ(0u, gt.size());
-    ASSERT_EQ(0u, distance(gt.begin(), gt.end()));
-    ASSERT_FALSE(gt.phased());
-    ASSERT_TRUE(gt.indices().empty());
+    EXPECT_TRUE(gt.empty());
+    EXPECT_EQ(0u, gt.size());
+    EXPECT_EQ(0u, distance(gt.begin(), gt.end()));
+    EXPECT_FALSE(gt.phased());
+    EXPECT_TRUE(gt.indices().empty());
 }
 
 TEST(GenotypeCall, phased) {
     GenotypeCall gt("0|1");
-    ASSERT_TRUE(gt.phased());
-    ASSERT_FALSE(gt.empty());
-    ASSERT_EQ(2u, gt.size());
-    ASSERT_EQ(2u, distance(gt.begin(), gt.end()));
-    ASSERT_EQ(0u, gt[0]);
-    ASSERT_EQ(1u, gt[1]);
+    EXPECT_TRUE(gt.phased());
+    EXPECT_TRUE(gt.diploid());
+    EXPECT_FALSE(gt.empty());
+    EXPECT_EQ(2u, gt.size());
+    EXPECT_EQ(2u, distance(gt.begin(), gt.end()));
+    EXPECT_EQ(0u, gt[0]);
+    EXPECT_EQ(1u, gt[1]);
 }
 
 TEST(GenotypeCall, unphased) {
     GenotypeCall gt("0/1/2/3");
-    ASSERT_FALSE(gt.phased());
-    ASSERT_FALSE(gt.empty());
-    ASSERT_EQ(4u, gt.size());
-    ASSERT_EQ(4u, distance(gt.begin(), gt.end()));
-    ASSERT_EQ(0u, gt[0]);
-    ASSERT_EQ(1u, gt[1]);
-    ASSERT_EQ(2u, gt[2]);
-    ASSERT_EQ(3u, gt[3]);
+    EXPECT_FALSE(gt.phased());
+    EXPECT_FALSE(gt.empty());
+    EXPECT_FALSE(gt.diploid());
+    EXPECT_EQ(4u, gt.size());
+    EXPECT_EQ(4u, distance(gt.begin(), gt.end()));
+    EXPECT_EQ(0u, gt[0]);
+    EXPECT_EQ(1u, gt[1]);
+    EXPECT_EQ(2u, gt[2]);
+    EXPECT_EQ(3u, gt[3]);
+}
+
+TEST(GenotypeCall, missingData) {
+    GenotypeCall gt("./1");
+    EXPECT_TRUE(gt.diploid());
+    EXPECT_EQ(2u, gt.size());
+    EXPECT_EQ(gt, gt);
+    EXPECT_EQ(2u, gt.indices().size());
+    EXPECT_EQ(2u, gt.indexSet().size());
+
+    std::stringstream ss;
+    ss << gt;
+    EXPECT_EQ("./1", ss.str());
+
+    EXPECT_FALSE(gt.homozygous());
+    EXPECT_TRUE(gt.heterozygous());
+}
+
+TEST(GenotypeCall, genotypeIndex) {
+    std::stringstream ss;
+    GenotypeIndex idx{1};
+    ss << idx << '/' << GenotypeIndex::Null;
+    EXPECT_EQ("1/.", ss.str());
+    EXPECT_TRUE(idx == 1u);
 }

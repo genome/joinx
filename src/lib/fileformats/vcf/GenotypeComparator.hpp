@@ -130,8 +130,11 @@ private:
                 GenotypeCall const& call = sd.genotype(sampleIndices_[streamIdx][sampleIdx]);
                 bool hasRef = false;
                 for (auto idx = call.indices().begin(); idx != call.indices().end(); ++idx) {
-                    if (*idx > 0) {
-                        alleles.push_back(new RawVariant(rawvs[*idx - 1]));
+                    if (*idx == GenotypeIndex::Null) {
+                        continue;
+                    }
+                    else if (*idx > 0) {
+                        alleles.push_back(new RawVariant(rawvs[idx->value - 1]));
                     }
                     else {
                         hasRef = true;

@@ -16,11 +16,15 @@ using namespace std;
 
 BEGIN_NAMESPACE(Metrics)
 namespace {
-bool customTypeIdMatches(string const& id, Vcf::CustomType const* type) {
-    return type && type->id() == id;
-}
+    bool customTypeIdMatches(string const& id, Vcf::CustomType const* type) {
+        return type && type->id() == id;
+    }
 
-bool minorAlleleSort (int i,int j) { return (i != 0 && i<j); }
+    bool minorAlleleSort (int i,int j) { return (i != 0 && i<j); }
+
+    bool isRefOrNull(Vcf::GenotypeIndex const& gtidx) {
+        return gtidx == Vcf::GenotypeIndex::Null || gtidx.value == 0;
+    }
 }
 
 EntryMetrics::EntryMetrics(Vcf::Entry const& entry, std::vector<std::string> const& novelInfoFields)
@@ -68,8 +72,12 @@ void EntryMetrics::calculateGenotypeDistribution() {
 }
 
 bool EntryMetrics::singleton(const Vcf::GenotypeCall* geno) const {
-    for( auto i = geno->indexSet().begin(); i != geno->indexSet().end(); ++i) {
-        if(_allelicDistributionBySample[(*i)] == 1) {
+    for (auto i = geno->indexSet().begin(); i != geno->indexSet().end(); ++i) {
+        // FIXME: should we count these too?
+        if (*i == Vcf::GenotypeIndex::Null)
+            continue;
+
+        if(_allelicDistributionBySample[i->value] == 1) {
             //at least one of the alleles is a singleton
             return true;
         }
@@ -99,7 +107,10 @@ void EntryMetrics::calculateAllelicDistribution() {
     auto const& gtd = _genotypeDistribution;
     for( auto i = gtd.begin(); i != gtd.end(); ++i) {
         for(auto j = i->first.begin(); j != i->first.end(); ++j) {
-            _allelicDistribution[*j] += i->second;
+            if (*j == Vcf::GenotypeIndex::Null)
+                continue; // FIXME: should we count these too?
+
+            _allelicDistribution[j->value] += i->second;
         }
     }
 }
@@ -108,7 +119,10 @@ void EntryMetrics::calculateAllelicDistributionBySample() {
     _allelicDistributionBySample.resize(_maxGtIdx + 1);
     for( auto geno = _genotypeDistribution.begin(); geno != _genotypeDistribution.end(); ++geno) {
         for(auto i = (geno->first).indexSet().begin(); i != (geno->first).indexSet().end(); ++i) {
-            _allelicDistributionBySample[*i] += geno->second;
+            if (*i == Vcf::GenotypeIndex::Null)
+                continue; // FIXME: should we count these too?
+
+            _allelicDistributionBySample[i->value] += geno->second;
         }
     }
 }
@@ -132,13 +146,14 @@ void EntryMetrics::calculateMutationSpectrum() {
 
         for(auto geno = _genotypeDistribution.begin(); geno != _genotypeDistribution.end(); ++geno) {
             for(auto i = (geno->first).indexSet().begin(); i != (geno->first).indexSet().end(); ++i) {
-                if(*i == 0) //it's ref
+                if (isRefOrNull(*i))
                     continue;
 
-                std::string variant( _entry.alt()[*i - 1] );
+                std::string variant( _entry.alt()[i->value - 1] );
                 if (variant.size() != 1)
                     //it's an indel and we want to skip it. Not freak out
                     continue;
+
                 toupper(variant[0],loc);
                 if(complement) {
                     variant = Sequence::reverseComplement(variant);
@@ -152,10 +167,10 @@ void EntryMetrics::calculateMutationSpectrum() {
                 //enter into by Allele array
                 if( (ref[0] == 'A' && variant[0] == 'G') || (ref[0] == 'C' && variant[0] == 'T')) {
                     //it's a transition
-                    _transitionByAlt[*i-1] = true;
+                    _transitionByAlt[i->value - 1] = true;
                 }
                 else {
-                    _transitionByAlt[*i-1] = false;
+                    _transitionByAlt[i->value - 1] = false;
                 }
             }
         }
@@ -338,9 +353,9 @@ void SampleMetrics::processEntry(Vcf::Entry& e, EntryMetrics& m) {
 
             if(canCalcSpectrum) {
                 for(auto j = gt.indexSet().begin(); j != gt.indexSet().end(); ++j) {
-                    if(*j == 0) //it's ref
+                    if(isRefOrNull(*j))
                         continue;
-                    std::string variant( e.alt()[*j - 1] );
+                    std::string variant( e.alt()[j->value - 1] );
                     if (variant.size() != 1)
                         //throw runtime_error(str(format("Invalid variant for ref entry %1%: %2%") %ref %variant));
                         continue;
@@ -357,7 +372,7 @@ void SampleMetrics::processEntry(Vcf::Entry& e, EntryMetrics& m) {
             for(auto j = gt.indexSet().begin(); j != gt.indexSet().end(); ++j) {
                 if(*j == 0)
                     continue;
-                if(novelByAlt[*j - 1]) {    //need to subtract one because reference is not an Alt
+                if(novelByAlt[j->value - 1]) {    //need to subtract one because reference is not an Alt
                     ++_perSampleNovelVariants[sampleIdx];
                 }
                 else {
