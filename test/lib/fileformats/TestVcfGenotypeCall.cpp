@@ -56,6 +56,9 @@ TEST(GenotypeCall, missingData) {
     GenotypeCall gt("./1");
     EXPECT_TRUE(gt.diploid());
     EXPECT_EQ(2u, gt.size());
+    EXPECT_EQ(GenotypeIndex::Null, gt[0]);
+    EXPECT_EQ(1, gt[1].value);
+
     EXPECT_EQ(gt, gt);
     EXPECT_EQ(2u, gt.indices().size());
     EXPECT_EQ(2u, gt.indexSet().size());
