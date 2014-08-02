@@ -71,7 +71,7 @@ protected:
     std::string _string;
 };
 
-END_NAMESPACE(Vcf)
+std::ostream& operator<<(std::ostream& os, GenotypeIndex const& gtidx);
+std::ostream& operator<<(std::ostream& os, GenotypeCall const& gt);
 
-std::ostream& operator<<(std::ostream& os, Vcf::GenotypeIndex const& gtidx);
-std::ostream& operator<<(std::ostream& os, Vcf::GenotypeCall const& gt);
+END_NAMESPACE(Vcf)

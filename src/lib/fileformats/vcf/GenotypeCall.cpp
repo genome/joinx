@@ -154,9 +154,7 @@ bool GenotypeCall::operator<(const GenotypeCall& rhs) const {
     return false;
 }
 
-END_NAMESPACE(Vcf)
-
-std::ostream& operator<<(std::ostream& os, Vcf::GenotypeIndex const& gtidx) {
+std::ostream& operator<<(std::ostream& os, GenotypeIndex const& gtidx) {
     if (gtidx == Vcf::GenotypeIndex::Null)
         os << '.';
     else
@@ -164,7 +162,12 @@ std::ostream& operator<<(std::ostream& os, Vcf::GenotypeIndex const& gtidx) {
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, Vcf::GenotypeCall const& gt) {
-    os << gt.string();
+std::ostream& operator<<(std::ostream& os, GenotypeCall const& gt) {
+    if (gt.empty())
+        os << ".";
+    else
+        os << gt.string();
     return os;
 }
+
+END_NAMESPACE(Vcf)

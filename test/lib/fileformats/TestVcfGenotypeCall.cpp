@@ -1,9 +1,9 @@
 #include "fileformats/vcf/GenotypeCall.hpp"
 
+#include <boost/lexical_cast.hpp>
 #include <gtest/gtest.h>
 
 #include <iterator>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -17,6 +17,8 @@ TEST(GenotypeCall, empty) {
     EXPECT_EQ(0u, distance(gt.begin(), gt.end()));
     EXPECT_FALSE(gt.phased());
     EXPECT_TRUE(gt.indices().empty());
+
+    EXPECT_EQ(".", boost::lexical_cast<std::string>(gt));
 }
 
 TEST(GenotypeCall, emptyString) {
@@ -26,6 +28,8 @@ TEST(GenotypeCall, emptyString) {
     EXPECT_EQ(0u, distance(gt.begin(), gt.end()));
     EXPECT_FALSE(gt.phased());
     EXPECT_TRUE(gt.indices().empty());
+
+    EXPECT_EQ(".", boost::lexical_cast<std::string>(gt));
 }
 
 TEST(GenotypeCall, nullString) {
@@ -35,6 +39,8 @@ TEST(GenotypeCall, nullString) {
     EXPECT_EQ(0u, distance(gt.begin(), gt.end()));
     EXPECT_FALSE(gt.phased());
     EXPECT_TRUE(gt.indices().empty());
+
+    EXPECT_EQ(".", boost::lexical_cast<std::string>(gt));
 }
 
 TEST(GenotypeCall, phased) {
@@ -46,6 +52,8 @@ TEST(GenotypeCall, phased) {
     EXPECT_EQ(2u, distance(gt.begin(), gt.end()));
     EXPECT_EQ(0u, gt[0]);
     EXPECT_EQ(1u, gt[1]);
+
+    EXPECT_EQ("0|1", boost::lexical_cast<std::string>(gt));
 }
 
 TEST(GenotypeCall, unphased) {
@@ -59,6 +67,8 @@ TEST(GenotypeCall, unphased) {
     EXPECT_EQ(1u, gt[1]);
     EXPECT_EQ(2u, gt[2]);
     EXPECT_EQ(3u, gt[3]);
+
+    EXPECT_EQ("0/1/2/3", boost::lexical_cast<std::string>(gt));
 }
 
 TEST(GenotypeCall, missingData) {
@@ -78,15 +88,19 @@ TEST(GenotypeCall, missingData) {
 
     EXPECT_FALSE(gt.homozygous());
     EXPECT_TRUE(gt.heterozygous());
+
+    EXPECT_EQ("./1", boost::lexical_cast<std::string>(gt));
 }
 
 TEST(GenotypeCall, bothNull) {
-    GenotypeCall twoMissing("./.");
-    EXPECT_TRUE(twoMissing.diploid());
-    EXPECT_TRUE(twoMissing.null());
-    EXPECT_FALSE(twoMissing.empty());
-    EXPECT_FALSE(twoMissing.homozygous());
-    EXPECT_FALSE(twoMissing.heterozygous());
+    GenotypeCall gt("./.");
+    EXPECT_TRUE(gt.diploid());
+    EXPECT_TRUE(gt.null());
+    EXPECT_FALSE(gt.empty());
+    EXPECT_FALSE(gt.homozygous());
+    EXPECT_FALSE(gt.heterozygous());
+
+    EXPECT_EQ("./.", boost::lexical_cast<std::string>(gt));
 }
 
 TEST(GenotypeCall, genotypeIndex) {
