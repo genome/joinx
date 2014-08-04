@@ -71,25 +71,37 @@ TEST(GenotypeCall, unphased) {
     EXPECT_EQ("0/1/2/3", boost::lexical_cast<std::string>(gt));
 }
 
-TEST(GenotypeCall, missingData) {
-    GenotypeCall gt("./1");
+void testMissing(std::string const& data, std::vector<GenotypeIndex> const& expected) {
+    GenotypeCall gt(data);
+
     EXPECT_TRUE(gt.diploid());
     EXPECT_EQ(2u, gt.size());
-    EXPECT_EQ(GenotypeIndex::Null, gt[0]);
-    EXPECT_EQ(1, gt[1].value);
-
-    EXPECT_EQ(gt, gt);
     EXPECT_EQ(2u, gt.indices().size());
     EXPECT_EQ(2u, gt.indexSet().size());
+    EXPECT_EQ(1u, gt.indexSet().count(GenotypeIndex::Null));
+    EXPECT_EQ(1u, gt.indexSet().count(GenotypeIndex{1}));
 
-    std::stringstream ss;
-    ss << gt;
-    EXPECT_EQ("./1", ss.str());
-
+    EXPECT_TRUE(gt.partial());
+    EXPECT_FALSE(gt.null());
+    EXPECT_FALSE(gt.empty());
+    EXPECT_FALSE(gt.heterozygous());
     EXPECT_FALSE(gt.homozygous());
-    EXPECT_TRUE(gt.heterozygous());
 
-    EXPECT_EQ("./1", boost::lexical_cast<std::string>(gt));
+    EXPECT_EQ(gt.indices(), expected);
+    EXPECT_EQ(data, boost::lexical_cast<std::string>(gt));
+}
+
+
+TEST(GenotypeCall, missingData) {
+    {
+        SCOPED_TRACE("Missing gt: ./1");
+        testMissing("./1", std::vector<GenotypeIndex>{GenotypeIndex::Null, GenotypeIndex{1}});
+    }
+
+    {
+        SCOPED_TRACE("Missing gt: 1/.");
+        testMissing("1/.", std::vector<GenotypeIndex>{GenotypeIndex{1}, GenotypeIndex::Null});
+    }
 }
 
 TEST(GenotypeCall, bothNull) {

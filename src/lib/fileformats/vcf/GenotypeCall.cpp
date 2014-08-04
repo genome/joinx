@@ -14,11 +14,13 @@ GenotypeIndex GenotypeIndex::Null{std::numeric_limits<GenotypeIndex::value_type>
 
 GenotypeCall::GenotypeCall()
     : _phased(false)
+    , _partial(false)
 {
 }
 
 GenotypeCall::GenotypeCall(const std::string& call)
     : _phased(false)
+    , _partial(false)
     , _string(call)
 {
     // special case: a lone null (".") is treated as empty
@@ -28,6 +30,7 @@ GenotypeCall::GenotypeCall(const std::string& call)
 
     Tokenizer<std::string> tok(call, "|/");
     GenotypeIndex idx;
+    size_t nullCount = 0;
 
     // note: a delimiter of | denotes phased data
     // if anything is phased, we treat the whole genotype as phased
@@ -35,6 +38,7 @@ GenotypeCall::GenotypeCall(const std::string& call)
     // call isn't meaningful...
     while (!tok.eof()) {
         if (tok.nextTokenMatches(".")) {
+            ++nullCount;
             idx = GenotypeIndex::Null;
             tok.advance();
         }
@@ -48,6 +52,9 @@ GenotypeCall::GenotypeCall(const std::string& call)
         _indices.push_back(idx);
         _indexSet.insert(idx);
     }
+
+    if (nullCount > 0 && nullCount < _indices.size())
+        _partial = true;
 }
 
 bool GenotypeCall::empty() const {
@@ -56,6 +63,10 @@ bool GenotypeCall::empty() const {
 
 bool GenotypeCall::null() const {
     return _indexSet.size() == 1 && _indexSet.begin()->null();
+}
+
+bool GenotypeCall::partial() const {
+    return _partial;
 }
 
 GenotypeCall::size_type GenotypeCall::size() const {
@@ -75,7 +86,7 @@ bool GenotypeCall::phased() const {
 }
 
 bool GenotypeCall::heterozygous() const {
-    return diploid() && _indexSet.size() == 2;
+    return diploid() && !partial() && _indexSet.size() == 2;
 }
 
 bool GenotypeCall::homozygous() const {

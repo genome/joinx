@@ -44,6 +44,7 @@ public:
 
     bool empty() const;
     bool null() const;
+    bool partial() const;
     size_type size() const;
     const_iterator begin() const;
     const_iterator end() const;
@@ -66,6 +67,7 @@ public:
 
 protected:
     bool _phased;
+    bool _partial;
     std::vector<GenotypeIndex> _indices;
     std::set<GenotypeIndex> _indexSet;
     std::string _string;
