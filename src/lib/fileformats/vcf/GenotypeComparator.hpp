@@ -74,6 +74,7 @@ public:
         else if (!want(e)) {
             process();
             region_.begin = e->start();
+            region_.end = e->stop();
             if (sequence_ != e->chrom()) {
                 sequence_ = e->chrom();
             }
