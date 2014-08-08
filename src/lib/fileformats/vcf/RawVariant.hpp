@@ -133,6 +133,11 @@ size_t hash_value(RawVariant const& v) {
 }
 
 inline
+size_t hash_value(RawVariant::Vector const& vs) {
+    return boost::hash_range(vs.begin(), vs.end());
+}
+
+inline
 bool isSimpleIndel(Vcf::RawVariant const& var, size_t maxLength) {
     return var.ref.size() != var.alt.size() &&
         (var.ref.size() == 0 || var.alt.size() == 0) &&

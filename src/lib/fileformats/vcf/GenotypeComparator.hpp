@@ -19,11 +19,6 @@
 
 BEGIN_NAMESPACE(Vcf)
 
-inline
-size_t hash_value(RawVariant::Vector const& vs) {
-    return boost::hash_range(vs.begin(), vs.end());
-}
-
 enum FilterType {
     eUNFILTERED = 1,
     eFILTERED   = 2,
