@@ -19,9 +19,11 @@ namespace {
     }
 }
 
-template<typename ValueType, typename StreamPtr>
+template<typename ValueType_, typename StreamPtr>
 class MergeSorted {
 public:
+    typedef ValueType_ ValueType;
+
     MergeSorted(const std::vector<StreamPtr>& sortedInputs)
         : sortedInputs_(&streamLessThan<StreamPtr>)
     {
