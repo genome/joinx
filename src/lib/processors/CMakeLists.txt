@@ -19,6 +19,8 @@ set(SOURCES
     TypeFilter.hpp
     VariantContig.cpp
     VariantContig.hpp
+    VcfGenotypeMatcher.cpp
+    VcfGenotypeMatcher.hpp
     VcfToRaw.hpp
 )
 
