@@ -3,6 +3,7 @@
 #include "common/Region.hpp"
 
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
