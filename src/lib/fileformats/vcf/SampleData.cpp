@@ -197,6 +197,27 @@ void SampleData::swap(SampleData& other) {
     _values.swap(other._values);
 }
 
+void SampleData::setSampleField(uint32_t sampleIdx, Vcf::CustomValue&& value) {
+    if (sampleIdx > header().sampleCount()) {
+        throw std::runtime_error(str(boost::format(
+            "Attempted to add sample field %1% to out-of-bounds sample %2%"
+            ) % value.type().id() % sampleIdx));
+    }
+
+    int ftIdx = appendFormatFieldIfNotExists(value.type().id());
+
+    ValueVector*& values = _values[sampleIdx];
+    if (values == 0) {
+        values = new ValueVector(ftIdx + 1);
+    }
+    else if (values->size() <= ftIdx) {
+        values->resize(ftIdx + 1);
+    }
+
+    (*values)[ftIdx] = std::move(value);
+}
+
+
 void SampleData::addFilter(uint32_t sampleIdx, std::string const& filterName) {
     auto sampleIter = _values.find(sampleIdx);
     if (sampleIter == _values.end() || sampleIter->second == 0) {
@@ -211,19 +232,10 @@ void SampleData::addFilter(uint32_t sampleIdx, std::string const& filterName) {
                 "no FT FORMAT tag appears in header") %sampleIdx %filterName));
     }
 
-    auto ftIter = find_if(_format.begin(), _format.end(),
-            boost::bind(&customTypeIdMatches, "FT", _1));
+    int ftIdx = appendFormatFieldIfNotExists("FT");
+    assert(ftIdx != -1);
 
-    size_t ftIdx(0);
-    if (ftIter == _format.end()) {
-        _format.push_back(FT);
-        ftIdx = _format.size()-1;
-    } else {
-        ftIdx = ftIter - _format.begin();
-    }
-
-
-    if (sampleIter->second->size() <= ftIdx) {
+    if (int(sampleIter->second->size()) <= ftIdx) {
         sampleIter->second->resize(ftIdx+1);
     }
 
@@ -487,18 +499,21 @@ void SampleData::sampleToStream(std::ostream& s, size_t sampleIdx) const {
     }
 }
 
-void SampleData::appendFormatFieldIfNotExists(std::string const& key) {
-    if (formatKeyIndex(key) == -1) {
-        appendFormatField(key);
+int SampleData::appendFormatFieldIfNotExists(std::string const& key) {
+    int idx = formatKeyIndex(key);
+    if (idx == -1) {
+        return appendFormatField(key);
     }
+    return idx;
 }
 
-void SampleData::appendFormatField(std::string const& key) {
+int SampleData::appendFormatField(std::string const& key) {
     auto type = header().formatType(key);
     if (!type) {
         throw runtime_error(str(boost::format("Unknown id in FORMAT field: %1%") % key));
     }
     _format.push_back(type);
+    return _format.size() - 1;
 }
 
 void SampleData::formatToStream(std::ostream& s) const {

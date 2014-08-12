@@ -9,6 +9,7 @@
 #include <boost/assign/list_of.hpp>
 
 #include <cstdlib>
+#include <sstream>
 #include <string>
 
 using boost::assign::list_of;
@@ -36,6 +37,7 @@ namespace {
         "##FORMAT=<ID=FT,Number=1,Type=String,Description=\"Sample Filtering\">\n"
         "##FORMAT=<ID=FPV,Number=1,Type=Float,Description=\"Floating point value\">\n"
         "##FORMAT=<ID=VLSL,Number=.,Type=String,Description=\"Variable length string list\">\n"
+        "##FORMAT=<ID=foo,Number=.,Type=String,Description=\"Variable length string list of foo\">\n"
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\tS2\tS3\tS4\tS5\n"
         );
 }
@@ -45,7 +47,7 @@ public:
     void SetUp() {
         header = Vcf::Header::fromString(headerText);
         format = "GT:GQ:DP:HQ:FPV:VLSL";
-        oneSample = "0/1:34:120:31:1e-6:A,B,C";
+        oneSample = "0/1:34:120:31:1e-06:A,B,C";
     }
 
 protected:
@@ -53,6 +55,62 @@ protected:
     std::string oneSample;
     Vcf::Header header;
 };
+
+TEST_F(TestVcfSampleData, appendFormatFieldIfNotExists) {
+    std::string text = format + "\t" + oneSample;
+    Vcf::SampleData sd(&header, text);
+    EXPECT_EQ(-1, sd.formatKeyIndex("foo"));
+    size_t oldSize = sd.format().size();
+
+    // add foo
+    EXPECT_EQ(oldSize, sd.appendFormatFieldIfNotExists("foo"));
+    EXPECT_EQ(oldSize + 1, sd.format().size());
+
+    // test idempotency
+    EXPECT_EQ(oldSize, sd.appendFormatFieldIfNotExists("foo"));
+    EXPECT_EQ(oldSize + 1, sd.format().size());
+
+    EXPECT_EQ(oldSize, sd.formatKeyIndex("foo"));
+    EXPECT_EQ(0, sd.appendFormatFieldIfNotExists("GT"));
+}
+
+TEST_F(TestVcfSampleData, setSampleField) {
+    std::string fmt = "GT:DP";
+    std::string s1 = "0/1:12";
+    std::string text = fmt + "\t" + s1;
+
+    Vcf::SampleData sd(&header, text);
+    std::stringstream ss;
+    sd.sampleToStream(ss, 0);
+    EXPECT_EQ(s1, ss.str());
+
+    ss.str("");
+    sd.sampleToStream(ss, 1);
+    EXPECT_EQ(".", ss.str());
+
+    std::vector<Vcf::CustomValue::ValueType> rawValues{
+          std::string{"one"}
+        , std::string{"two"}
+        , std::string{"three"}
+        };
+
+    Vcf::CustomValue value(header.formatType("foo"));
+    value.setRaw(std::move(rawValues));
+    sd.setSampleField(1, std::move(value));
+
+    ss.str("");
+    sd.sampleToStream(ss, 1);
+    EXPECT_EQ(".:.:one,two,three", ss.str());
+
+    EXPECT_FALSE(sd.get(0, "foo"));
+    auto foo = sd.get(1, "foo");
+    ASSERT_TRUE(foo);
+
+    ASSERT_EQ(3, foo->size());
+    EXPECT_EQ("one", *foo->get<std::string>(0));
+    EXPECT_EQ("two", *foo->get<std::string>(1));
+    EXPECT_EQ("three", *foo->get<std::string>(2));
+}
 
 TEST_F(TestVcfSampleData, removeFilteredWhitelist) {
     std::set<std::string> keep{"OK", "ForcedGenotype"};
