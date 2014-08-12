@@ -172,4 +172,5 @@ void VcfCompareCommand::exec() {
     VcfGenotypeMatcher matcher(filenames_.size(), sampleNames_.size());
     auto overlap = makeGroupOverlapping(merger, matcher);
     overlap.execute();
+    matcher.finalize();
 }

@@ -3,6 +3,7 @@
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/RawVariant.hpp"
 
+#include <boost/container/flat_set.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
@@ -10,17 +11,27 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <set>
 #include <vector>
 
 class GenotypeDictionary {
 public:
-    typedef boost::unordered_map<size_t, size_t> LocationCounts;
-    typedef boost::unordered_map<Vcf::RawVariant::Vector, LocationCounts> ExactMapType;
+    typedef size_t EntryIndex;
+    typedef size_t Count;
+
+    typedef boost::unordered_map<EntryIndex, Count> LocationCounts;
+    typedef boost::container::flat_set<EntryIndex> Locations;
+
+    typedef boost::unordered_map<Vcf::RawVariant::Vector, Locations> ExactMapType;
     typedef boost::unordered_map<Vcf::RawVariant, LocationCounts> PartialMapType;
 
-    void add(Vcf::RawVariant const& gt, size_t count, size_t entryIdx);
-    LocationCounts const* match(Vcf::RawVariant const& gt) const;
+    void add(Vcf::RawVariant::Vector const& gt, size_t entryIdx);
     void clear();
+
+    Locations const* exactMatches(Vcf::RawVariant::Vector const& gt) const;
+    LocationCounts const* allMatches(Vcf::RawVariant const& gt) const;
+
+    PartialMapType copyPartialMatches() const { return partialMap_; }
 
 private:
     ExactMapType exactMap_;
@@ -30,9 +41,9 @@ private:
 class VcfGenotypeMatcher {
 public:
     typedef std::vector<std::unique_ptr<Vcf::Entry>> EntryList;
-    typedef boost::unordered_map<Vcf::RawVariant, size_t> AlleleCounts;
-    typedef std::vector<AlleleCounts> SampleAlleleCounts;
-    typedef std::vector<SampleAlleleCounts> EntryAlleleCounts;
+    typedef std::vector<Vcf::RawVariant::Vector> SampleGenotypes;
+    typedef std::vector<SampleGenotypes> EntryGenotypes;
+    typedef boost::unordered_map<std::set<size_t>, size_t> SampleCounter;
 
     VcfGenotypeMatcher(uint32_t numFiles, uint32_t numSamples);
 
@@ -44,11 +55,16 @@ public:
     void getCounts();
     void reset();
 
+    void finalize();
+
 private:
     uint32_t numFiles_;
     uint32_t numSamples_;
 
     EntryList entries_;
     std::vector<GenotypeDictionary> gtDicts_;
-    EntryAlleleCounts entryAlleleCounts_;
+
+    EntryGenotypes entryGenotypes_;
+
+    std::vector<SampleCounter> sampleCounters_;
 };
