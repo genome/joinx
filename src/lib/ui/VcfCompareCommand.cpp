@@ -223,5 +223,5 @@ void VcfCompareCommand::exec() {
 
     auto overlap = makeGroupOverlapping(merger, matcher);
     overlap.execute();
-    matcher.finalize();
+    matcher.reportCounts(*out);
 }

@@ -240,14 +240,14 @@ void VcfGenotypeMatcher::reset() {
     entries_.clear();
 }
 
-void VcfGenotypeMatcher::finalize() {
+void VcfGenotypeMatcher::reportCounts(std::ostream& os) {
     for (size_t rawSampleIdx = 0; rawSampleIdx < numSamples_; ++rawSampleIdx) {
-        std::cout << "Sample " << sampleNames_[rawSampleIdx] << "\n";
+        os << "Sample " << sampleNames_[rawSampleIdx] << "\n";
         auto const& counts = sampleCounters_[rawSampleIdx];
         for (auto ci = counts.begin(); ci != counts.end(); ++ci) {
             auto const& fileSet = ci->first;
             size_t count = ci->second;
-            std::cout << streamJoin(fileSet) << ": " << count << "\n";
+            os << streamJoin(fileSet) << ": " << count << "\n";
         }
     }
 }

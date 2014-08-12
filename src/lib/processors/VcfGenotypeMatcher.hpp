@@ -64,7 +64,7 @@ public:
     void updateCounts();
     void reset();
 
-    void finalize();
+    void reportCounts(std::ostream& os);
     void writeEntries();
 
     std::ostream& getStream(size_t idx);
