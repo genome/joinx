@@ -244,7 +244,7 @@ void VcfGenotypeMatcher::reset() {
 
 void VcfGenotypeMatcher::finalize() {
     for (size_t rawSampleIdx = 0; rawSampleIdx < numSamples_; ++rawSampleIdx) {
-        std::cout << "Sample " << rawSampleIdx << "\n";
+        std::cout << "Sample " << sampleNames_[rawSampleIdx] << "\n";
         auto const& counts = sampleCounters_[rawSampleIdx];
         for (auto ci = counts.begin(); ci != counts.end(); ++ci) {
             auto const& fileSet = ci->first;
