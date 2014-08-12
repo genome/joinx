@@ -37,8 +37,6 @@ namespace {
         }
     }
 
-
-
     template<typename Container>
     Container difference_(Container const& s1, Container const& s2) {
         Container rv;
