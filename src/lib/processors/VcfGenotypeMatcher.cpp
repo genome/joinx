@@ -217,7 +217,15 @@ void VcfGenotypeMatcher::operator()(EntryList&& entries) {
     reset();
 }
 
-void VcfGenotypeMatcher::writeEntries() {
+void VcfGenotypeMatcher::reset() {
+    for (auto di = gtDicts_.begin(); di != gtDicts_.end(); ++di)
+        di->clear();
+
+    entryGenotypes_.clear();
+    entries_.clear();
+}
+
+void VcfGenotypeMatcher::writeEntries() const {
     for (auto ei = entries_.begin(); ei != entries_.end(); ++ei) {
         auto const& entry = **ei;
         size_t fileIdx = entry.header().sourceIndex();
@@ -232,15 +240,7 @@ void VcfGenotypeMatcher::writeEntries() {
     }
 }
 
-void VcfGenotypeMatcher::reset() {
-    for (auto di = gtDicts_.begin(); di != gtDicts_.end(); ++di)
-        di->clear();
-
-    entryGenotypes_.clear();
-    entries_.clear();
-}
-
-void VcfGenotypeMatcher::reportCounts(std::ostream& os) {
+void VcfGenotypeMatcher::reportCounts(std::ostream& os) const {
     for (size_t rawSampleIdx = 0; rawSampleIdx < numSamples_; ++rawSampleIdx) {
         os << "Sample " << sampleNames_[rawSampleIdx] << "\n";
         auto const& counts = sampleCounters_[rawSampleIdx];
@@ -252,7 +252,7 @@ void VcfGenotypeMatcher::reportCounts(std::ostream& os) {
     }
 }
 
-std::ostream& VcfGenotypeMatcher::getStream(size_t idx) {
+std::ostream& VcfGenotypeMatcher::getStream(size_t idx) const {
     // FIXME: real filenames please
     std::stringstream ss;
     ss << outputDir_ << "/";

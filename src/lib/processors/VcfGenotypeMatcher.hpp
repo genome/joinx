@@ -64,14 +64,14 @@ public:
     void updateCounts();
     void reset();
 
-    void reportCounts(std::ostream& os);
-    void writeEntries();
+    void writeEntries() const;
+    void reportCounts(std::ostream& os) const;
 
-    std::ostream& getStream(size_t idx);
+    std::ostream& getStream(size_t idx) const;
 
 private:
-    uint32_t numFiles_;
-    uint32_t numSamples_;
+    uint32_t const numFiles_;
+    uint32_t const numSamples_;
     std::string const& exactFieldName_;
     std::string const& partialFieldName_;
     std::vector<std::string> const& sampleNames_;
@@ -80,11 +80,9 @@ private:
 
     EntryList entries_;
     std::vector<GenotypeDictionary> gtDicts_;
-
     EntryGenotypes entryGenotypes_;
-
     std::vector<SampleCounter> sampleCounters_;
-    StreamHandler streams_;
 
-    std::vector<bool> wroteHeader_;
+    mutable std::vector<bool> wroteHeader_;
+    mutable StreamHandler streams_;
 };
