@@ -2,6 +2,7 @@
 
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/RawVariant.hpp"
+#include "io/StreamHandler.hpp"
 
 #include <boost/container/flat_set.hpp>
 #include <boost/functional/hash.hpp>
@@ -11,6 +12,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <ostream>
 #include <set>
 #include <vector>
 
@@ -45,21 +47,35 @@ public:
     typedef std::vector<SampleGenotypes> EntryGenotypes;
     typedef boost::unordered_map<std::set<size_t>, size_t> SampleCounter;
 
-    VcfGenotypeMatcher(uint32_t numFiles, uint32_t numSamples);
+    VcfGenotypeMatcher(
+          uint32_t numFiles
+        , uint32_t numSamples
+        , std::string const& exactFieldName
+        , std::string const& partialFieldName
+        , std::vector<std::string> const& streamNames
+        , std::string const& outputDir
+        );
 
     void operator()(EntryList&& entries);
 
     void collectEntry(size_t entryIdx);
     void annotateEntry(size_t idx);
 
-    void getCounts();
+    void updateCounts();
     void reset();
 
     void finalize();
+    void writeEntries();
+
+    std::ostream& getStream(size_t idx);
 
 private:
     uint32_t numFiles_;
     uint32_t numSamples_;
+    std::string const& exactFieldName_;
+    std::string const& partialFieldName_;
+    std::vector<std::string> const& streamNames_;
+    std::string const& outputDir_;
 
     EntryList entries_;
     std::vector<GenotypeDictionary> gtDicts_;
@@ -67,4 +83,7 @@ private:
     EntryGenotypes entryGenotypes_;
 
     std::vector<SampleCounter> sampleCounters_;
+    StreamHandler streams_;
+
+    std::vector<bool> wroteHeader_;
 };

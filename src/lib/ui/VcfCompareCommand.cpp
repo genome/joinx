@@ -65,17 +65,17 @@ void VcfCompareCommand::configureOptions() {
 
         ("filter-mode,F",
             po::value<vector<std::string>>(&filterTypeStrings_),
-            "filtering mode for each input file (filtered, unfiltered, or both. may "
+            "Filtering mode for each input file (filtered, unfiltered, or both. may "
             "be specified more than once)")
 
         ("sample-name,s",
             po::value<vector<string>>(&sampleNames_),
-            "operate only on these samples (applied after sample renaming. "
+            "Operate only on these samples (applied after sample renaming. "
             "may be specified multiple times)")
 
         ("result-dir,d",
             po::value<string>(&outputDir_),
-            "put variant files here")
+            "Put variant files here")
 
         ("sample-rename-file,r",
             po::value<std::string>(&sampleRenameFile_),
@@ -85,6 +85,14 @@ void VcfCompareCommand::configureOptions() {
         ("rename-sample,R",
             po::value<std::vector<std::string>>(&sampleRenames_),
             "-R OLD=NEW will rename sample OLD to NEW")
+
+        ("exact-format,e",
+            po::value<std::string>(&exactFormatField_)->default_value("EXSEC"),
+            "Exact match format field name")
+
+        ("partial-format,p",
+            po::value<std::string>(&partialFormatField_)->default_value("PXSEC"),
+            "Partial match format field name")
         ;
 
     _posOpts.add("input-file", -1);
@@ -146,13 +154,24 @@ void VcfCompareCommand::exec() {
     auto readers = openVcfs(inputStreams);
     std::vector<Vcf::Header const*> headers;
     std::set<std::string> sampleNameSet;
-    for (auto i = readers.begin(); i != readers.end(); ++i) {
-        if (!sampleRenameMap.empty())
-            (*i)->header().renameSamples(sampleRenameMap);
 
-        auto const& names = (*i)->header().sampleNames();
+    Vcf::CustomType exact(exactFormatField_, Vcf::CustomType::FIXED_SIZE,
+        filenames_.size(), Vcf::CustomType::INTEGER, "Exact match indicator");
+
+    Vcf::CustomType partial(partialFormatField_, Vcf::CustomType::FIXED_SIZE,
+        filenames_.size(), Vcf::CustomType::INTEGER, "Partial match indicator");
+
+
+    for (auto i = readers.begin(); i != readers.end(); ++i) {
+        auto& header = (*i)->header();
+        header.addFormatType(exact);
+        header.addFormatType(partial);
+        if (!sampleRenameMap.empty())
+            header.renameSamples(sampleRenameMap);
+
+        auto const& names = header.sampleNames();
         std::copy(names.begin(), names.end(), std::inserter(sampleNameSet, sampleNameSet.begin()));
-        headers.push_back(&(*i)->header());
+        headers.push_back(&header);
     }
     if (sampleNames_.empty()) {
         sampleNames_.resize(sampleNameSet.size());
@@ -169,7 +188,8 @@ void VcfCompareCommand::exec() {
     }
 
     MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
-    VcfGenotypeMatcher matcher(filenames_.size(), sampleNames_.size());
+    VcfGenotypeMatcher matcher(filenames_.size(), sampleNames_.size(),
+        exactFormatField_, partialFormatField_, names_, outputDir_);
     auto overlap = makeGroupOverlapping(merger, matcher);
     overlap.execute();
     matcher.finalize();

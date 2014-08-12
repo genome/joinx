@@ -35,4 +35,6 @@ protected:
     std::vector<std::string> noSampleFilenames_;
     std::vector<std::string> sampleNames_;
     std::string outputDir_;
+    std::string exactFormatField_;
+    std::string partialFormatField_;
 };

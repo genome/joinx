@@ -1,26 +1,43 @@
 #include "VcfGenotypeMatcher.hpp"
 
+#include "fileformats/vcf/CustomType.hpp"
+#include "fileformats/vcf/CustomValue.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "io/StreamJoin.hpp"
 
+#include <boost/format.hpp>
 
 #include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <iterator>
+#include <stdexcept>
 
 using namespace Vcf;
 using boost::container::flat_set;
+using boost::format;
 
 
 namespace {
-    template<typename Container>
-    Container intersect_(Container const& s1, Container const& s2) {
-        Container rv;
-        std::set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(),
-            std::inserter(rv, rv.begin()));
-        return rv;
+    Vcf::CustomType const* getType(Vcf::Header const& header, std::string const& id) {
+        Vcf::CustomType const* type = header.formatType(id);
+        if (!type) {
+            throw std::runtime_error(str(format(
+                "Format field %1% not found in vcf header for file %2%"
+                ) % id % header.sourceIndex()));
+        }
+        return type;
     }
+
+    template<typename VecType, typename SetType>
+    void setValues(VecType& v, SetType const& s) {
+        for (auto i = s.begin(); i != s.end(); ++i) {
+            assert(v.size() > *i);
+            v[*i] = int64_t{1};
+        }
+    }
+
+
 
     template<typename Container>
     Container difference_(Container const& s1, Container const& s2) {
@@ -60,11 +77,23 @@ void GenotypeDictionary::clear() {
 }
 
 
-VcfGenotypeMatcher::VcfGenotypeMatcher(uint32_t numFiles, uint32_t numSamples)
+VcfGenotypeMatcher::VcfGenotypeMatcher(
+          uint32_t numFiles
+        , uint32_t numSamples
+        , std::string const& exactFieldName
+        , std::string const& partialFieldName
+        , std::vector<std::string> const& streamNames
+        , std::string const& outputDir
+        )
     : numFiles_(numFiles)
     , numSamples_(numSamples)
+    , exactFieldName_(exactFieldName)
+    , partialFieldName_(partialFieldName)
+    , streamNames_(streamNames)
+    , outputDir_(outputDir)
     , gtDicts_(numSamples)
     , sampleCounters_(numSamples)
+    , wroteHeader_(numFiles, false)
 {
 }
 
@@ -97,7 +126,7 @@ void VcfGenotypeMatcher::collectEntry(size_t entryIdx) {
     entryGenotypes_.push_back(std::move(sampleGenotypes));
 }
 
-void VcfGenotypeMatcher::getCounts() {
+void VcfGenotypeMatcher::updateCounts() {
 
     for (size_t sampleIdx = 0; sampleIdx < numSamples_; ++sampleIdx) {
         auto alleleMatches = gtDicts_[sampleIdx].copyPartialMatches();
@@ -124,8 +153,11 @@ void VcfGenotypeMatcher::getCounts() {
 
 void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
     Entry& entry = *entries_[entryIdx];
+    auto exactType = getType(entry.header(), exactFieldName_);
+    auto partialType = getType(entry.header(), partialFieldName_);
 
     auto const& sampleGenotypes = entryGenotypes_[entryIdx];
+    auto& sampleData = entry.sampleData();
 
     for (uint32_t sampleIdx = 0; sampleIdx < numSamples_; ++sampleIdx) {
         auto const& dict = gtDicts_[sampleIdx];
@@ -152,9 +184,19 @@ void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
                 }
             }
         }
+
+        std::vector<Vcf::CustomValue::ValueType> exactValues(numFiles_, int64_t{0});
+        std::vector<Vcf::CustomValue::ValueType> partialValues(numFiles_, int64_t{0});
+
         if (exactMatches) {
             partials = difference_(partials, *exactMatches);
+            setValues(exactValues, *exactMatches);
         }
+
+        setValues(partialValues, partials);
+
+        sampleData.setSampleField(sampleIdx, Vcf::CustomValue(exactType, std::move(exactValues)));
+        sampleData.setSampleField(sampleIdx, Vcf::CustomValue(partialType, std::move(partialValues)));
     }
 }
 
@@ -169,8 +211,24 @@ void VcfGenotypeMatcher::operator()(EntryList&& entries) {
     for (size_t i = 0; i < entries_.size(); ++i)
         annotateEntry(i);
 
-    getCounts();
+    updateCounts();
+    writeEntries();
     reset();
+}
+
+void VcfGenotypeMatcher::writeEntries() {
+    for (auto ei = entries_.begin(); ei != entries_.end(); ++ei) {
+        auto const& entry = **ei;
+        size_t fileIdx = entry.header().sourceIndex();
+        std::ostream& os = getStream(fileIdx);
+
+        assert(fileIdx < wroteHeader_.size());
+        if (!wroteHeader_[fileIdx]) {
+            os << entry.header();
+            wroteHeader_[fileIdx] = true;
+        }
+        os << entry << "\n";
+    }
 }
 
 void VcfGenotypeMatcher::reset() {
@@ -191,4 +249,19 @@ void VcfGenotypeMatcher::finalize() {
             std::cout << streamJoin(fileSet) << ": " << count << "\n";
         }
     }
+}
+
+std::ostream& VcfGenotypeMatcher::getStream(size_t idx) {
+    // FIXME: real filenames please
+    std::stringstream ss;
+    ss << outputDir_ << "/";
+
+    if (idx < streamNames_.size() && !streamNames_[idx].empty())
+        ss << streamNames_[idx];
+    else
+        ss << idx;
+
+    ss << ".vcf";
+
+    return* streams_.get<std::ostream>(ss.str());
 }
