@@ -79,20 +79,21 @@ void GenotypeDictionary::clear() {
 
 VcfGenotypeMatcher::VcfGenotypeMatcher(
           uint32_t numFiles
-        , uint32_t numSamples
         , std::string const& exactFieldName
         , std::string const& partialFieldName
+        , std::vector<std::string> const& sampleNames
         , std::vector<std::string> const& streamNames
         , std::string const& outputDir
         )
     : numFiles_(numFiles)
-    , numSamples_(numSamples)
+    , numSamples_(sampleNames.size())
     , exactFieldName_(exactFieldName)
     , partialFieldName_(partialFieldName)
+    , sampleNames_(sampleNames)
     , streamNames_(streamNames)
     , outputDir_(outputDir)
-    , gtDicts_(numSamples)
-    , sampleCounters_(numSamples)
+    , gtDicts_(numSamples_)
+    , sampleCounters_(numSamples_)
     , wroteHeader_(numFiles, false)
 {
 }
@@ -104,7 +105,9 @@ void VcfGenotypeMatcher::collectEntry(size_t entryIdx) {
 
     SampleGenotypes sampleGenotypes(numSamples_);
 
-    for (uint32_t sampleIdx = 0; sampleIdx < numSamples_; ++sampleIdx) {
+    for (uint32_t rawSampleIdx = 0; rawSampleIdx < numSamples_; ++rawSampleIdx) {
+        uint32_t sampleIdx = entry.header().sampleIndex(sampleNames_[rawSampleIdx]);
+
         GenotypeCall const& call = sampleData.genotype(sampleIdx);
         if (call == GenotypeCall::Null)
             continue;
@@ -119,17 +122,16 @@ void VcfGenotypeMatcher::collectEntry(size_t entryIdx) {
         }
 
         gtvec.sort();
-        gtDicts_[sampleIdx].add(gtvec, entryIdx);
-        sampleGenotypes[sampleIdx] = std::move(gtvec);
+        gtDicts_[rawSampleIdx].add(gtvec, entryIdx);
+        sampleGenotypes[rawSampleIdx] = std::move(gtvec);
     }
 
     entryGenotypes_.push_back(std::move(sampleGenotypes));
 }
 
 void VcfGenotypeMatcher::updateCounts() {
-
-    for (size_t sampleIdx = 0; sampleIdx < numSamples_; ++sampleIdx) {
-        auto alleleMatches = gtDicts_[sampleIdx].copyPartialMatches();
+    for (size_t rawSampleIdx = 0; rawSampleIdx < numSamples_; ++rawSampleIdx) {
+        auto alleleMatches = gtDicts_[rawSampleIdx].copyPartialMatches();
         for (auto al = alleleMatches.begin(); al != alleleMatches.end(); ++al) {
             auto& locationCounts = al->second;
             std::set<size_t> files;
@@ -146,7 +148,7 @@ void VcfGenotypeMatcher::updateCounts() {
                     lc = locationCounts.erase(lc);
                 }
             }
-            ++sampleCounters_[sampleIdx][files];
+            ++sampleCounters_[rawSampleIdx][files];
         }
     }
 }
@@ -159,13 +161,13 @@ void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
     auto const& sampleGenotypes = entryGenotypes_[entryIdx];
     auto& sampleData = entry.sampleData();
 
-    for (uint32_t sampleIdx = 0; sampleIdx < numSamples_; ++sampleIdx) {
-        auto const& dict = gtDicts_[sampleIdx];
-        auto const& genotype = sampleGenotypes[sampleIdx];
+    for (uint32_t rawSampleIdx = 0; rawSampleIdx < numSamples_; ++rawSampleIdx) {
+        auto const& dict = gtDicts_[rawSampleIdx];
+        auto const& genotype = sampleGenotypes[rawSampleIdx];
 
         flat_set<size_t> partials;
 
-        auto const* exactMatches = dict.exactMatches(sampleGenotypes[sampleIdx]);
+        auto const* exactMatches = dict.exactMatches(sampleGenotypes[rawSampleIdx]);
 
         // FIXME: don't copy vars; make and use a pointer hasher
         boost::unordered_set<RawVariant> seen;
@@ -195,6 +197,7 @@ void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
 
         setValues(partialValues, partials);
 
+        uint32_t sampleIdx = entry.header().sampleIndex(sampleNames_[rawSampleIdx]);
         sampleData.setSampleField(sampleIdx, Vcf::CustomValue(exactType, std::move(exactValues)));
         sampleData.setSampleField(sampleIdx, Vcf::CustomValue(partialType, std::move(partialValues)));
     }
@@ -240,9 +243,9 @@ void VcfGenotypeMatcher::reset() {
 }
 
 void VcfGenotypeMatcher::finalize() {
-    for (size_t sampleIdx = 0; sampleIdx < numSamples_; ++sampleIdx) {
-        std::cout << "Sample " << sampleIdx << "\n";
-        auto const& counts = sampleCounters_[sampleIdx];
+    for (size_t rawSampleIdx = 0; rawSampleIdx < numSamples_; ++rawSampleIdx) {
+        std::cout << "Sample " << rawSampleIdx << "\n";
+        auto const& counts = sampleCounters_[rawSampleIdx];
         for (auto ci = counts.begin(); ci != counts.end(); ++ci) {
             auto const& fileSet = ci->first;
             size_t count = ci->second;

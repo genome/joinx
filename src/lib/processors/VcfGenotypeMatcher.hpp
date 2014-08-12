@@ -49,9 +49,9 @@ public:
 
     VcfGenotypeMatcher(
           uint32_t numFiles
-        , uint32_t numSamples
         , std::string const& exactFieldName
         , std::string const& partialFieldName
+        , std::vector<std::string> const& sampleNames
         , std::vector<std::string> const& streamNames
         , std::string const& outputDir
         );
@@ -74,6 +74,7 @@ private:
     uint32_t numSamples_;
     std::string const& exactFieldName_;
     std::string const& partialFieldName_;
+    std::vector<std::string> const& sampleNames_;
     std::vector<std::string> const& streamNames_;
     std::string const& outputDir_;
 

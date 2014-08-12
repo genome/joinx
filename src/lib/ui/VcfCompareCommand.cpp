@@ -153,7 +153,6 @@ void VcfCompareCommand::exec() {
 
     auto readers = openVcfs(inputStreams);
     std::vector<Vcf::Header const*> headers;
-    std::set<std::string> sampleNameSet;
 
     Vcf::CustomType exact(exactFormatField_, Vcf::CustomType::FIXED_SIZE,
         filenames_.size(), Vcf::CustomType::INTEGER, "Exact match indicator");
@@ -161,6 +160,9 @@ void VcfCompareCommand::exec() {
     Vcf::CustomType partial(partialFormatField_, Vcf::CustomType::FIXED_SIZE,
         filenames_.size(), Vcf::CustomType::INTEGER, "Partial match indicator");
 
+    auto const& firstNames = readers.front()->header().sampleNames();
+    std::set<std::string> sampleIntersection;
+    std::set<std::string> sampleNameSet;
 
     for (auto i = readers.begin(); i != readers.end(); ++i) {
         auto& header = (*i)->header();
@@ -169,13 +171,35 @@ void VcfCompareCommand::exec() {
         if (!sampleRenameMap.empty())
             header.renameSamples(sampleRenameMap);
 
-        auto const& names = header.sampleNames();
-        std::copy(names.begin(), names.end(), std::inserter(sampleNameSet, sampleNameSet.begin()));
+        auto names = header.sampleNames();
+        std::sort(names.begin(), names.end());
+
+        sampleNameSet.insert(names.begin(), names.end());
+
+        if (i == readers.begin()) {
+            // first time
+            sampleIntersection.insert(names.begin(), names.end());
+        }
+        else {
+            std::set<std::string> tmp;
+            std::set_intersection(
+                  sampleIntersection.begin()
+                , sampleIntersection.end()
+                , names.begin()
+                , names.end()
+                , std::inserter(tmp, tmp.begin())
+                );
+            sampleIntersection.swap(tmp);
+        }
         headers.push_back(&header);
     }
+
     if (sampleNames_.empty()) {
-        sampleNames_.resize(sampleNameSet.size());
-        std::copy(sampleNameSet.begin(), sampleNameSet.end(), sampleNames_.begin());
+        if (sampleIntersection.empty()) {
+            throw std::runtime_error("No intersecting samples found in input files!");
+        }
+
+        sampleNames_.assign(sampleIntersection.begin(), sampleIntersection.end());
     }
     else {
         for (auto i = sampleNames_.begin(); i != sampleNames_.end(); ++i) {
@@ -188,8 +212,15 @@ void VcfCompareCommand::exec() {
     }
 
     MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
-    VcfGenotypeMatcher matcher(filenames_.size(), sampleNames_.size(),
-        exactFormatField_, partialFormatField_, names_, outputDir_);
+    VcfGenotypeMatcher matcher(
+          filenames_.size()
+        , exactFormatField_
+        , partialFormatField_
+        , sampleNames_
+        , names_
+        , outputDir_
+        );
+
     auto overlap = makeGroupOverlapping(merger, matcher);
     overlap.execute();
     matcher.finalize();
