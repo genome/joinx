@@ -160,7 +160,6 @@ void VcfCompareCommand::exec() {
     Vcf::CustomType partial(partialFormatField_, Vcf::CustomType::FIXED_SIZE,
         filenames_.size(), Vcf::CustomType::INTEGER, "Partial match indicator");
 
-    auto const& firstNames = readers.front()->header().sampleNames();
     std::set<std::string> sampleIntersection;
     std::set<std::string> sampleNameSet;
 
