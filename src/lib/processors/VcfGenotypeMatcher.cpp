@@ -164,7 +164,15 @@ void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
 
         flat_set<size_t> partials;
 
-        auto const* exactMatches = dict.exactMatches(sampleGenotypes[rawSampleIdx]);
+        flat_set<size_t> exactMatches;
+        auto const* exactMatchesEntries = dict.exactMatches(sampleGenotypes[rawSampleIdx]);
+        // exactMatchesEntries is a set of entry indices; we want to convert
+        // such to file indices
+        if (exactMatchesEntries) {
+            for (auto i = exactMatchesEntries->begin(); i != exactMatchesEntries->end(); ++i) {
+                exactMatches.insert(entries_[*i]->header().sourceIndex());
+            }
+        }
 
         // FIXME: don't copy vars; make and use a pointer hasher
         boost::unordered_set<RawVariant> seen;
@@ -179,7 +187,8 @@ void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
             if (xsec) {
                 for (auto j = xsec->begin(); j != xsec->end(); ++j) {
                     size_t whichEntry = j->first;
-                    partials.insert(whichEntry);
+                    size_t fileIdx = entries_[whichEntry]->header().sourceIndex();
+                    partials.insert(fileIdx);
                 }
             }
         }
@@ -187,10 +196,8 @@ void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
         std::vector<Vcf::CustomValue::ValueType> exactValues(numFiles_, int64_t{0});
         std::vector<Vcf::CustomValue::ValueType> partialValues(numFiles_, int64_t{0});
 
-        if (exactMatches) {
-            partials = difference_(partials, *exactMatches);
-            setValues(exactValues, *exactMatches);
-        }
+        partials = difference_(partials, exactMatches);
+        setValues(exactValues, exactMatches);
 
         setValues(partialValues, partials);
 
