@@ -6,6 +6,7 @@
 #include "io/StreamJoin.hpp"
 
 #include <boost/format.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -13,6 +14,7 @@
 #include <iterator>
 #include <stdexcept>
 
+namespace bfs = boost::filesystem;
 using namespace Vcf;
 using boost::container::flat_set;
 using boost::format;
@@ -263,10 +265,14 @@ std::ostream& VcfGenotypeMatcher::getStream(size_t idx) const {
     std::stringstream ss;
     ss << outputDir_ << "/";
 
-    if (idx < streamNames_.size() && !streamNames_[idx].empty())
-        ss << streamNames_[idx];
-    else
+    if (idx < streamNames_.size() && !streamNames_[idx].empty()) {
+        bfs::path p(streamNames_[idx]);
+        std::string leaf = p.leaf().string();
+        ss << leaf;
+    }
+    else {
         ss << idx;
+    }
 
     ss << ".vcf";
 
