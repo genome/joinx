@@ -179,11 +179,12 @@ void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
         // FIXME: don't copy vars; make and use a pointer hasher
         boost::unordered_set<RawVariant> seen;
         for (auto ai = genotype.begin(); ai != genotype.end(); ++ai) {
-            auto inserted = seen.insert(*ai);
+            auto const& allele = *ai;
+
+            auto inserted = seen.insert(allele);
             if (!inserted.second)
                 continue; // already processed this allele
 
-            auto const& allele = *ai;
 
             auto const* xsec = dict.allMatches(allele);
             if (xsec) {
