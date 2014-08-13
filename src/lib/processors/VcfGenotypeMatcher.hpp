@@ -48,11 +48,10 @@ public:
     typedef boost::unordered_map<std::set<size_t>, size_t> SampleCounter;
 
     VcfGenotypeMatcher(
-          uint32_t numFiles
+          std::vector<std::string> const& streamNames
+        , std::vector<std::string> const& sampleNames
         , std::string const& exactFieldName
         , std::string const& partialFieldName
-        , std::vector<std::string> const& sampleNames
-        , std::vector<std::string> const& streamNames
         , std::string const& outputDir
         );
 

@@ -29,7 +29,7 @@ protected:
     std::string sampleRenameFile_;
     std::vector<std::string> sampleRenames_;
     std::vector<std::string> filenames_;
-    std::vector<std::string> names_;
+    std::vector<std::string> streamNames_;
     std::vector<Vcf::FilterType> filterTypes_;
     std::vector<std::string> filterTypeStrings_;
     std::vector<std::string> noSampleFilenames_;

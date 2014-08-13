@@ -60,7 +60,7 @@ void VcfCompareCommand::configureOptions() {
             "Path to output report file (- for stdout)")
 
         ("name,n",
-            po::value<vector<string>>(&names_),
+            po::value<vector<string>>(&streamNames_),
             "meaningful names for each of the input files (given in the same order)")
 
         ("filter-mode,F",
@@ -142,10 +142,10 @@ void VcfCompareCommand::exec() {
     std::vector<InputStream::ptr> inputStreams = _streams.openForReading(filenames_);
     ostream* out = _streams.get<std::ostream>(outputFile_);
 
-    if (names_.empty()) {
-        names_ = filenames_;
+    if (streamNames_.empty()) {
+        streamNames_ = filenames_;
     }
-    else if (names_.size() != filenames_.size()) {
+    else if (streamNames_.size() != filenames_.size()) {
         throw std::runtime_error(
             "Mismatch between the number of input files and the number "
             "of names (-n) given");
@@ -212,11 +212,10 @@ void VcfCompareCommand::exec() {
 
     MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
     VcfGenotypeMatcher matcher(
-          filenames_.size()
+          streamNames_
+        , sampleNames_
         , exactFormatField_
         , partialFormatField_
-        , sampleNames_
-        , names_
         , outputDir_
         );
 

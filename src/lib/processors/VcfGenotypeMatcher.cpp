@@ -76,14 +76,13 @@ void GenotypeDictionary::clear() {
 
 
 VcfGenotypeMatcher::VcfGenotypeMatcher(
-          uint32_t numFiles
+          std::vector<std::string> const& streamNames
+        , std::vector<std::string> const& sampleNames
         , std::string const& exactFieldName
         , std::string const& partialFieldName
-        , std::vector<std::string> const& sampleNames
-        , std::vector<std::string> const& streamNames
         , std::string const& outputDir
         )
-    : numFiles_(numFiles)
+    : numFiles_(streamNames.size())
     , numSamples_(sampleNames.size())
     , exactFieldName_(exactFieldName)
     , partialFieldName_(partialFieldName)
@@ -92,7 +91,7 @@ VcfGenotypeMatcher::VcfGenotypeMatcher(
     , outputDir_(outputDir)
     , gtDicts_(numSamples_)
     , sampleCounters_(numSamples_)
-    , wroteHeader_(numFiles, false)
+    , wroteHeader_(numFiles_, false)
 {
 }
 
