@@ -1,15 +1,18 @@
 #include "VcfCompareCommand.hpp"
 
-#include "io/InputStream.hpp"
-#include "fileformats/VcfReader.hpp"
-#include "parse/Kvp.hpp"
-#include "processors/MergeSorted.hpp"
-#include "processors/GroupOverlapping.hpp"
-#include "processors/VcfGenotypeMatcher.hpp"
 #include "common/Tokenizer.hpp"
+#include "fileformats/VcfReader.hpp"
+#include "fileformats/vcf/MultiWriter.hpp"
+#include "io/InputStream.hpp"
+#include "parse/Kvp.hpp"
+#include "processors/GroupOverlapping.hpp"
+#include "processors/MergeSorted.hpp"
+#include "processors/VcfGenotypeMatcher.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
+#include <boost/function.hpp>
 #include <boost/program_options.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -42,6 +45,8 @@ namespace {
         }
         return iter->second;
     }
+
+    void nullOutput(Vcf::Entry const&) {}
 }
 
 VcfCompareCommand::VcfCompareCommand()
@@ -199,6 +204,8 @@ void VcfCompareCommand::exec() {
         }
 
         sampleNames_.assign(sampleIntersection.begin(), sampleIntersection.end());
+        std::cerr << "Found " << sampleIntersection.size() << " (of "
+            << sampleNameSet.size() << " total) intersecting samples.\n";
     }
     else {
         for (auto i = sampleNames_.begin(); i != sampleNames_.end(); ++i) {
@@ -210,13 +217,26 @@ void VcfCompareCommand::exec() {
         }
     }
 
+    std::vector<std::string> outputFiles;
+    std::unique_ptr<Vcf::MultiWriter> entryWriter;
+    boost::function<void(Vcf::Entry const&)> entryCb = &nullOutput;
+    if (!outputDir_.empty()) {
+        for (auto i = streamNames_.begin(); i != streamNames_.end(); ++i) {
+            outputFiles.push_back(outputDir_ + "/" + *i);
+        }
+        entryWriter.reset(new Vcf::MultiWriter(outputFiles));
+
+        entryCb = boost::bind(&Vcf::MultiWriter::write, *entryWriter, _1);
+        std::cerr << "Writing output to " << outputDir_ << "\n";
+    }
+
     MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
     VcfGenotypeMatcher matcher(
           streamNames_
         , sampleNames_
         , exactFormatField_
         , partialFormatField_
-        , outputDir_
+        , entryCb
         );
 
     auto overlap = makeGroupOverlapping(merger, matcher);
