@@ -344,8 +344,6 @@ void Header::rebuildSampleIndex() {
     }
 }
 
-END_NAMESPACE(Vcf)
-
 std::ostream& operator<<(std::ostream& s, const Vcf::Header& h) {
     const vector<Vcf::Header::RawLine>& mlines = h.metaInfoLines();
     for (auto i = mlines.begin(); i != mlines.end(); ++i)
@@ -356,3 +354,5 @@ std::ostream& operator<<(std::ostream& s, const Vcf::Header& h) {
 
     return s;
 }
+
+END_NAMESPACE(Vcf)
