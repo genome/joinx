@@ -5,14 +5,15 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 set(TEST_SOURCES
     TestBedDeduplicator.cpp
+    TestGroupOverlapping.cpp
     TestIntersectFull.cpp
     TestMergeSorted.cpp
     TestNoReferenceFilter.cpp
-    TestGroupOverlapping.cpp
     TestRefStats.cpp
     TestSnvComparator.cpp
     TestSort.cpp
     TestVariantContig.cpp
+    TestVcfGenotypeMatcher.cpp
 )
 
 add_unit_tests(TestProcessors ${TEST_SOURCES})
