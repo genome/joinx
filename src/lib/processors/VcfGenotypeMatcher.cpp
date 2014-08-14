@@ -54,6 +54,7 @@ VcfGenotypeMatcher::VcfGenotypeMatcher(
         , std::vector<std::string> const& sampleNames
         , std::string const& exactFieldName
         , std::string const& partialFieldName
+        , std::vector<Vcf::FilterType> const& filterTypes
         , EntryOutput& entryOutput
         )
     : numFiles_(streamNames.size())
@@ -63,6 +64,7 @@ VcfGenotypeMatcher::VcfGenotypeMatcher(
     , streamNames_(streamNames)
     , sampleNames_(sampleNames)
     , entryOutput_(entryOutput)
+    , filterTypes_(filterTypes)
     , gtDicts_(numSamples_)
     , sampleCounters_(numSamples_)
 {
@@ -78,6 +80,9 @@ void VcfGenotypeMatcher::collectEntry(size_t entryIdx) {
 
     for (uint32_t rawSampleIdx = 0; rawSampleIdx < numSamples_; ++rawSampleIdx) {
         uint32_t sampleIdx = entry.header().sampleIndex(sampleNames_[rawSampleIdx]);
+        bool filtered = entry.isFiltered() || sampleData.isSampleFiltered(sampleIdx);
+        if (shouldSkip(fileIdx, filtered))
+            continue;
 
         GenotypeCall const& call = sampleData.genotype(sampleIdx);
         if (call == GenotypeCall::Null)
@@ -245,4 +250,11 @@ void VcfGenotypeMatcher::reportCounts(std::ostream& os) const {
         }
         os << "\n";
     }
+}
+
+bool VcfGenotypeMatcher::shouldSkip(size_t streamIdx, bool isFiltered) const {
+    // if the filter status doesn't agree with the command line input, skip it (true)
+    // otherwise return false
+    FilterType status = isFiltered ? Vcf::eFILTERED : Vcf::eUNFILTERED;
+    return (int(filterTypes_[streamIdx]) & int(status)) == 0;
 }

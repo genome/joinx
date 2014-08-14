@@ -2,6 +2,9 @@
 
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/GenotypeDictionary.hpp"
+// FIXME: we're borrowing the FilterType enum from here
+// eventually, this may replace GenotypeComparator
+#include "fileformats/vcf/GenotypeComparator.hpp"
 #include "fileformats/vcf/RawVariant.hpp"
 #include "io/StreamHandler.hpp"
 
@@ -35,6 +38,7 @@ public:
         , std::vector<std::string> const& sampleNames
         , std::string const& exactFieldName
         , std::string const& partialFieldName
+        , std::vector<Vcf::FilterType> const& filterTypes
         , EntryOutput& entryOutput
         );
 
@@ -46,6 +50,8 @@ public:
           GenotypeDict const& dict
         , Vcf::RawVariant::Vector const& genotype
         );
+
+    bool shouldSkip(size_t streamIdx, bool isFiltered) const;
 
     void collectEntry(size_t entryIdx);
     void annotateEntry(size_t idx);
@@ -63,6 +69,7 @@ private:
     std::string const& partialFieldName_;
     std::vector<std::string> const& streamNames_;
     std::vector<std::string> const& sampleNames_;
+    std::vector<Vcf::FilterType> const& filterTypes_;
     EntryOutput& entryOutput_;
 
     EntryList entries_;

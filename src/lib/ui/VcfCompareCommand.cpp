@@ -236,6 +236,7 @@ void VcfCompareCommand::exec() {
         , sampleNames_
         , exactFormatField_
         , partialFormatField_
+        , filterTypes_
         , entryCb
         );
 
