@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fileformats/vcf/Entry.hpp"
+#include "fileformats/vcf/GenotypeDictionary.hpp"
 #include "fileformats/vcf/RawVariant.hpp"
 #include "io/StreamHandler.hpp"
 
@@ -16,36 +17,15 @@
 #include <set>
 #include <vector>
 
-class GenotypeDictionary {
-public:
-    typedef size_t EntryIndex;
-    typedef size_t Count;
-
-    typedef boost::unordered_map<EntryIndex, Count> LocationCounts;
-    typedef boost::container::flat_set<EntryIndex> Locations;
-
-    typedef boost::unordered_map<Vcf::RawVariant::Vector, Locations> ExactMapType;
-    typedef boost::unordered_map<Vcf::RawVariant, LocationCounts> PartialMapType;
-
-    void add(Vcf::RawVariant::Vector const& gt, size_t entryIdx);
-    void clear();
-
-    Locations const* exactMatches(Vcf::RawVariant::Vector const& gt) const;
-    LocationCounts const* allMatches(Vcf::RawVariant const& gt) const;
-
-    PartialMapType copyPartialMatches() const { return partialMap_; }
-
-private:
-    ExactMapType exactMap_;
-    PartialMapType partialMap_;
-};
-
 class VcfGenotypeMatcher {
 public:
+    typedef size_t FileIndex;
+    typedef Vcf::GenotypeDictionary<FileIndex> GenotypeDict;
+
     typedef std::vector<std::unique_ptr<Vcf::Entry>> EntryList;
     typedef std::vector<Vcf::RawVariant::Vector> SampleGenotypes;
     typedef std::vector<SampleGenotypes> EntryGenotypes;
-    typedef boost::unordered_map<std::set<size_t>, size_t> SampleCounter;
+    typedef boost::unordered_map<std::set<FileIndex>, size_t> SampleCounter;
 
     VcfGenotypeMatcher(
           std::vector<std::string> const& streamNames
@@ -56,6 +36,13 @@ public:
         );
 
     void operator()(EntryList&& entries);
+
+    // Add the file indices of partial matches found in dict for the alleles
+    // in genotype to the set partials.
+    boost::container::flat_set<FileIndex> partialMatchingFiles(
+          GenotypeDict const& dict
+        , Vcf::RawVariant::Vector const& genotype
+        );
 
     void collectEntry(size_t entryIdx);
     void annotateEntry(size_t idx);
@@ -78,7 +65,7 @@ private:
     std::string const& outputDir_;
 
     EntryList entries_;
-    std::vector<GenotypeDictionary> gtDicts_;
+    std::vector<GenotypeDict> gtDicts_;
     EntryGenotypes entryGenotypes_;
     std::vector<SampleCounter> sampleCounters_;
 

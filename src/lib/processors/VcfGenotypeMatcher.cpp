@@ -21,8 +21,8 @@ using boost::format;
 
 
 namespace {
-    Vcf::CustomType const* getType(Vcf::Header const& header, std::string const& id) {
-        Vcf::CustomType const* type = header.formatType(id);
+    CustomType const* getType(Vcf::Header const& header, std::string const& id) {
+        CustomType const* type = header.formatType(id);
         if (!type) {
             throw std::runtime_error(str(format(
                 "Format field %1% not found in vcf header for file %2%"
@@ -48,35 +48,6 @@ namespace {
     }
 }
 
-void GenotypeDictionary::add(Vcf::RawVariant::Vector const& gt, size_t entryIdx) {
-    exactMap_[gt].insert(entryIdx);
-    for (auto x = gt.begin(); x != gt.end(); ++x) {
-        ++partialMap_[*x][entryIdx];
-    }
-}
-
-auto GenotypeDictionary::allMatches(Vcf::RawVariant const& gt) const -> LocationCounts const* {
-    auto iter = partialMap_.find(gt);
-    if (iter != partialMap_.end()) {
-        return &iter->second;
-    }
-    return 0;
-}
-
-auto GenotypeDictionary::exactMatches(Vcf::RawVariant::Vector const& gt) const -> Locations const* {
-    auto iter = exactMap_.find(gt);
-    if (iter != exactMap_.end()) {
-        return &iter->second;
-    }
-    return 0;
-}
-
-void GenotypeDictionary::clear() {
-    partialMap_.clear();
-    exactMap_.clear();
-}
-
-
 VcfGenotypeMatcher::VcfGenotypeMatcher(
           std::vector<std::string> const& streamNames
         , std::vector<std::string> const& sampleNames
@@ -99,6 +70,7 @@ VcfGenotypeMatcher::VcfGenotypeMatcher(
 
 void VcfGenotypeMatcher::collectEntry(size_t entryIdx) {
     Vcf::Entry const& entry = *entries_[entryIdx];
+    size_t fileIdx = entry.header().sourceIndex();
     auto rawvs = RawVariant::processEntry(entry);
     auto const& sampleData = entry.sampleData();
 
@@ -121,7 +93,7 @@ void VcfGenotypeMatcher::collectEntry(size_t entryIdx) {
         }
 
         gtvec.sort();
-        gtDicts_[rawSampleIdx].add(gtvec, entryIdx);
+        gtDicts_[rawSampleIdx].add(gtvec, fileIdx);
         sampleGenotypes[rawSampleIdx] = std::move(gtvec);
     }
 
@@ -135,8 +107,7 @@ void VcfGenotypeMatcher::updateCounts() {
             auto& locationCounts = al->second;
             std::set<size_t> files;
             for (auto lc = locationCounts.begin(); lc != locationCounts.end(); ) {
-                size_t entryIdx = lc->first;
-                size_t fileIdx = entries_[entryIdx]->header().sourceIndex();
+                size_t fileIdx = lc->first;
                 size_t& count = lc->second;
                 if (count > 0) {
                     files.insert(fileIdx);
@@ -152,6 +123,32 @@ void VcfGenotypeMatcher::updateCounts() {
     }
 }
 
+auto VcfGenotypeMatcher::partialMatchingFiles(
+      GenotypeDict const& dict
+    , Vcf::RawVariant::Vector const& genotype
+    )
+    -> boost::container::flat_set<FileIndex>
+{
+    flat_set<size_t> partials;
+    boost::unordered_set<RawVariant> seen;
+    for (auto ai = genotype.begin(); ai != genotype.end(); ++ai) {
+        auto const& allele = *ai;
+
+        auto inserted = seen.insert(allele);
+        if (!inserted.second)
+            continue; // already processed this allele
+
+        auto const& xsec = dict.allMatches(allele);
+        for (auto j = xsec.begin(); j != xsec.end(); ++j) {
+            size_t fileIdx = j->first;
+            partials.insert(fileIdx);
+        }
+    }
+
+    return partials;
+}
+
+
 void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
     Entry& entry = *entries_[entryIdx];
     auto exactType = getType(entry.header(), exactFieldName_);
@@ -164,44 +161,14 @@ void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
         auto const& dict = gtDicts_[rawSampleIdx];
         auto const& genotype = sampleGenotypes[rawSampleIdx];
 
-        flat_set<size_t> partials;
-
-        flat_set<size_t> exactMatches;
-        auto const* exactMatchesEntries = dict.exactMatches(sampleGenotypes[rawSampleIdx]);
-        // exactMatchesEntries is a set of entry indices; we want to convert
-        // such to file indices
-        if (exactMatchesEntries) {
-            for (auto i = exactMatchesEntries->begin(); i != exactMatchesEntries->end(); ++i) {
-                exactMatches.insert(entries_[*i]->header().sourceIndex());
-            }
-        }
-
-        // FIXME: don't copy vars; make and use a pointer hasher
-        boost::unordered_set<RawVariant> seen;
-        for (auto ai = genotype.begin(); ai != genotype.end(); ++ai) {
-            auto const& allele = *ai;
-
-            auto inserted = seen.insert(allele);
-            if (!inserted.second)
-                continue; // already processed this allele
-
-
-            auto const* xsec = dict.allMatches(allele);
-            if (xsec) {
-                for (auto j = xsec->begin(); j != xsec->end(); ++j) {
-                    size_t whichEntry = j->first;
-                    size_t fileIdx = entries_[whichEntry]->header().sourceIndex();
-                    partials.insert(fileIdx);
-                }
-            }
-        }
+        flat_set<size_t> partials = partialMatchingFiles(dict, genotype);
+        auto const& exactMatches = dict.exactMatches(sampleGenotypes[rawSampleIdx]);
 
         std::vector<Vcf::CustomValue::ValueType> exactValues(numFiles_, int64_t{0});
         std::vector<Vcf::CustomValue::ValueType> partialValues(numFiles_, int64_t{0});
 
         partials = difference_(partials, exactMatches);
         setValues(exactValues, exactMatches);
-
         setValues(partialValues, partials);
 
         uint32_t sampleIdx = entry.header().sampleIndex(sampleNames_[rawSampleIdx]);
