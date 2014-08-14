@@ -224,7 +224,6 @@ void VcfCompareCommand::exec() {
         for (size_t i = 0; i < streamNames_.size(); ++i) {
             bfs::path name(streamNames_[i]);
             outputFiles.push_back(str(format("%1%/%2%-%3%") % outputDir_ % i % name.leaf().string()));
-            std::cerr << "\tOUT: " << outputFiles.back() << "\n";
         }
         entryWriter.reset(new Vcf::MultiWriter(outputFiles));
 
