@@ -7,7 +7,6 @@
 #include "io/StreamJoin.hpp"
 
 #include <boost/format.hpp>
-#include <boost/filesystem/path.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -15,7 +14,6 @@
 #include <iterator>
 #include <stdexcept>
 
-namespace bfs = boost::filesystem;
 using namespace Vcf;
 using boost::container::flat_set;
 using boost::format;
@@ -63,8 +61,8 @@ VcfGenotypeMatcher::VcfGenotypeMatcher(
     , partialFieldName_(partialFieldName)
     , streamNames_(streamNames)
     , sampleNames_(sampleNames)
-    , entryOutput_(entryOutput)
     , filterTypes_(filterTypes)
+    , entryOutput_(entryOutput)
     , gtDicts_(numSamples_)
     , sampleCounters_(numSamples_)
 {

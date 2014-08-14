@@ -10,7 +10,7 @@
 #include "processors/VcfGenotypeMatcher.hpp"
 
 #include <boost/bind.hpp>
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/format.hpp>
 #include <boost/function.hpp>
 #include <boost/program_options.hpp>
@@ -24,10 +24,10 @@
 #include <vector>
 #include <unordered_map>
 
+namespace bfs = boost::filesystem;
 namespace po = boost::program_options;
 using boost::format;
 using boost::scoped_ptr;
-namespace bfs = boost::filesystem;
 
 namespace {
     std::unordered_map<std::string, Vcf::FilterType> const FILTER_STRINGS_{
@@ -221,8 +221,10 @@ void VcfCompareCommand::exec() {
     std::unique_ptr<Vcf::MultiWriter> entryWriter;
     boost::function<void(Vcf::Entry const&)> entryCb = &nullOutput;
     if (!outputDir_.empty()) {
-        for (auto i = streamNames_.begin(); i != streamNames_.end(); ++i) {
-            outputFiles.push_back(outputDir_ + "/" + *i);
+        for (size_t i = 0; i < streamNames_.size(); ++i) {
+            bfs::path name(streamNames_[i]);
+            outputFiles.push_back(str(format("%1%/%2%-%3%") % outputDir_ % i % name.leaf().string()));
+            std::cerr << "\tOUT: " << outputFiles.back() << "\n";
         }
         entryWriter.reset(new Vcf::MultiWriter(outputFiles));
 
