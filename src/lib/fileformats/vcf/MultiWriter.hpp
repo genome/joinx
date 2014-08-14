@@ -9,7 +9,7 @@
 #include <vector>
 #include <string>
 
-BEGIN_NAMESPACE(Vcf);
+BEGIN_NAMESPACE(Vcf)
 
 class MultiWriter {
 public:
@@ -23,4 +23,4 @@ private:
     StreamHandler streams_;
 };
 
-END_NAMESPACE(Vcf);
+END_NAMESPACE(Vcf)
