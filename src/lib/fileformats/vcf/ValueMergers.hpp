@@ -130,6 +130,19 @@ namespace ValueMergers {
         std::string name() const { return "enforce-equal"; }
     };
 
+    /// Enforce equality of two lists that may be in different order
+    /// (i.e., the elements must match but do not have to be in the same order)
+    struct EnforceEqualityUnordered : public Base {
+        CustomValue operator()(
+            CustomType const* type,
+            FetchFunc func,
+            Entry const* begin,
+            Entry const* end,
+            AltIndices const& newAltIndices
+            ) const;
+        std::string name() const { return "enforce-equal-unordered"; }
+    };
+
     /// Returns the summation of the input values. This is only meaningful for
     /// non-variable length numeric data.
     struct Sum : public Base {

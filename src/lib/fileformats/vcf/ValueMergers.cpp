@@ -6,6 +6,7 @@
 #include "common/Tokenizer.hpp"
 #include "io/StreamJoin.hpp"
 
+#include <boost/unordered_set.hpp>
 #include <boost/format.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -19,6 +20,16 @@ using namespace std;
 
 BEGIN_NAMESPACE(Vcf)
 
+namespace {
+    boost::unordered_set<std::string> valueToHash(CustomValue const& v) {
+        boost::unordered_set<std::string> values;
+        for (size_t i = 0; i < v.size(); ++i) {
+            values.insert(v.getString(i));
+        }
+        return values;
+    }
+}
+
 namespace ValueMergers {
 
 boost::scoped_ptr<Registry> Registry::_instance;
@@ -27,6 +38,7 @@ Registry::Registry() {
     registerMerger(Base::const_ptr(new UseFirst));
     registerMerger(Base::const_ptr(new UseEarliest));
     registerMerger(Base::const_ptr(new EnforceEquality));
+    registerMerger(Base::const_ptr(new EnforceEqualityUnordered));
     registerMerger(Base::const_ptr(new Ignore));
     registerMerger(Base::const_ptr(new Sum));
     registerMerger(Base::const_ptr(new UniqueConcat));
@@ -135,6 +147,33 @@ CustomValue EnforceEquality::operator()(
             rv = *v;
         else if (rv != *v) {
             throw runtime_error(str(format("Equality condition failed for field %1%: %2% vs %3%")
+                %type->id() %rv.toString() %v->toString()));
+        }
+    }
+    return rv;
+}
+
+CustomValue EnforceEqualityUnordered::operator()(
+    CustomType const* type,
+    FetchFunc fetch,
+    Entry const* begin,
+    Entry const* end,
+    AltIndices const& newAltIndices
+    ) const
+{
+    CustomValue rv;
+    boost::unordered_set<std::string> values;
+    for (Entry const* e = begin; e != end; ++e) {
+        const CustomValue* v = fetch(e);
+        if (!v)
+            continue;
+
+        if (rv.empty()) {
+            rv = *v;
+            values = valueToHash(*v);
+        }
+        else if (values != valueToHash(*v)) {
+            throw runtime_error(str(format("Unordered equality condition failed for field %1%: %2% vs %3%")
                 %type->id() %rv.toString() %v->toString()));
         }
     }
