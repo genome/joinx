@@ -23,8 +23,9 @@
 
 class VcfGenotypeMatcher {
 public:
+    typedef size_t EntryIndex;
     typedef size_t FileIndex;
-    typedef Vcf::GenotypeDictionary<FileIndex> GenotypeDict;
+    typedef Vcf::GenotypeDictionary<EntryIndex> GenotypeDict;
 
     typedef std::vector<std::unique_ptr<Vcf::Entry>> EntryList;
     typedef std::vector<Vcf::RawVariant::Vector> SampleGenotypes;
@@ -62,6 +63,25 @@ public:
     void writeEntries() const;
     void reportCounts(std::ostream& os) const;
 
+    FileIndex entryToFileIndex(EntryIndex idx) const;
+
+    template<typename Container>
+    Container entryToFileIndices(Container const& c) {
+        Container rv;
+        for (auto i = c.begin(); i != c.end(); ++i) {
+            rv.insert(rv.end(), entryToFileIndex(*i);
+        }
+        return rv;
+    }
+
+protected:
+    void printCounts_(
+            std::ostream& os,
+            std::vector<SampleCounter> const& counts
+            , std::string const& type
+            ) const;
+
+
 private:
     uint32_t const numFiles_;
     uint32_t const numSamples_;
@@ -75,5 +95,8 @@ private:
     EntryList entries_;
     std::vector<GenotypeDict> gtDicts_;
     EntryGenotypes entryGenotypes_;
-    std::vector<SampleCounter> sampleCounters_;
+    std::vector<SampleCounter> partialSampleCounters_;
+    std::vector<SampleCounter> exactSampleCounters_;
+    std::vector<SampleCounter> partialMissSampleCounters_;
+    std::vector<SampleCounter> completeMissSampleCounters_;
 };

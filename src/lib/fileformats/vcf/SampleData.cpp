@@ -210,7 +210,7 @@ void SampleData::setSampleField(uint32_t sampleIdx, Vcf::CustomValue&& value) {
     if (values == 0) {
         values = new ValueVector(ftIdx + 1);
     }
-    else if (values->size() <= ftIdx) {
+    else if (int(values->size()) <= ftIdx) {
         values->resize(ftIdx + 1);
     }
 

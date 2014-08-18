@@ -28,7 +28,8 @@ public:
     Locations const& exactMatches(Vcf::RawVariant::Vector const& gt) const;
     LocationCounts const& allMatches(Vcf::RawVariant const& gt) const;
 
-    PartialMapType copyPartialMatches() const { return partialMap_; }
+    PartialMapType const& partialMatches() const { return partialMap_; }
+    ExactMapType const& exactMatches() const { return exactMap_; }
 
 private:
     ExactMapType exactMap_;

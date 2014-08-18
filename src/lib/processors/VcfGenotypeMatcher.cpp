@@ -64,7 +64,10 @@ VcfGenotypeMatcher::VcfGenotypeMatcher(
     , filterTypes_(filterTypes)
     , entryOutput_(entryOutput)
     , gtDicts_(numSamples_)
-    , sampleCounters_(numSamples_)
+    , partialSampleCounters_(numSamples_)
+    , exactSampleCounters_(numSamples_)
+    , partialMissSampleCounters_(numSamples_)
+    , completeMissSampleCounters_(numSamples_)
 {
 }
 
@@ -96,35 +99,78 @@ void VcfGenotypeMatcher::collectEntry(size_t entryIdx) {
         }
 
         gtvec.sort();
-        gtDicts_[rawSampleIdx].add(gtvec, fileIdx);
+        gtDicts_[rawSampleIdx].add(gtvec, entryIdx);
         sampleGenotypes[rawSampleIdx] = std::move(gtvec);
     }
 
     entryGenotypes_.push_back(std::move(sampleGenotypes));
 }
 
+auto VcfGenotypeMatcher::entryToFileIndex(EntryIndex idx) const -> FileIndex{
+    return entries_[idx]->header().sourceIndex();
+}
+
 void VcfGenotypeMatcher::updateCounts() {
     for (size_t rawSampleIdx = 0; rawSampleIdx < numSamples_; ++rawSampleIdx) {
+        std::vector<size_t> singletons(entries_.size(), 0u);
+        std::set<EntryIndex> entriesWithMatches;
         // alleleMatches: allele -> (fileIndex -> count)
-        auto alleleMatches = gtDicts_[rawSampleIdx].copyPartialMatches();
+        auto const& alleleMatches = gtDicts_[rawSampleIdx].partialMatches();
         for (auto al = alleleMatches.begin(); al != alleleMatches.end(); ++al) {
             auto& locationCounts = al->second;
-            while (!locationCounts.empty()) {
-                std::set<size_t> files;
-                for (auto lc = locationCounts.begin(); lc != locationCounts.end(); ) {
-                    size_t fileIdx = lc->first;
-                    size_t& count = lc->second;
-                    if (count > 0) {
-                        files.insert(fileIdx);
-                        --count;
-                    }
+            std::set<FileIndex> files;
+            std::set<EntryIndex> entries;
+            for (auto lc = locationCounts.begin(); lc != locationCounts.end(); ++lc) {
+                size_t entryIdx = lc->first;
+                entries.insert(entryIdx);
 
-                    if (count == 0)
-                        lc = locationCounts.erase(lc);
-                    else
-                        ++lc;
-                }
-                ++sampleCounters_[rawSampleIdx][files];
+                size_t fileIdx = entries_[entryIdx]->header().sourceIndex();
+                files.insert(fileIdx);
+            }
+
+            if (entries.size() == 1) {
+                ++singletons[*entries.begin()];
+            }
+            else {
+                std::copy(entries.begin(), entries.end(),
+                    std::inserter(entriesWithMatches, entriesWithMatches.begin()));
+            }
+
+            ++partialSampleCounters_[rawSampleIdx][files];
+        }
+
+        auto const& gtMatches = gtDicts_[rawSampleIdx].exactMatches();
+        for (auto gt = gtMatches.begin(); gt != gtMatches.end(); ++gt) {
+            std::set<FileIndex> files;
+            std::set<EntryIndex> entries;
+            auto const& locations = gt->second;
+            for (auto loc = locations.begin(); loc != locations.end(); ++loc) {
+                size_t entryIdx = *loc;
+                entries.insert(entryIdx);
+
+                size_t fileIdx = entries_[entryIdx]->header().sourceIndex();
+                files.insert(fileIdx);
+            }
+
+            if (locations.size() > 1) {
+                std::copy(entries.begin(), entries.end(),
+                    std::inserter(entriesWithMatches, entriesWithMatches.begin()));
+            }
+
+            ++exactSampleCounters_[rawSampleIdx][files];
+        }
+
+        for (size_t entryIdx = 0; entryIdx < singletons.size(); ++entryIdx) {
+            if (singletons[entryIdx] == 0)
+                continue;
+
+            size_t fileIdx = entries_[entryIdx]->header().sourceIndex();
+            std::set<FileIndex> idx{fileIdx};
+            if (entriesWithMatches.count(entryIdx)) {
+                partialMissSampleCounters_[rawSampleIdx][idx] += singletons[entryIdx];
+            }
+            else {
+                completeMissSampleCounters_[rawSampleIdx][idx] += singletons[entryIdx];
             }
         }
     }
@@ -147,7 +193,8 @@ auto VcfGenotypeMatcher::partialMatchingFiles(
 
         auto const& xsec = dict.allMatches(allele);
         for (auto j = xsec.begin(); j != xsec.end(); ++j) {
-            size_t fileIdx = j->first;
+            size_t entryIdx = j->first;
+            size_t fileIdx = entries_[entryIdx]->header().sourceIndex();
             partials.insert(fileIdx);
         }
     }
@@ -169,7 +216,11 @@ void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
         auto const& genotype = sampleGenotypes[rawSampleIdx];
 
         flat_set<size_t> partials = partialMatchingFiles(dict, genotype);
-        auto const& exactMatches = dict.exactMatches(sampleGenotypes[rawSampleIdx]);
+        auto const& exactMatchEntries = dict.exactMatches(sampleGenotypes[rawSampleIdx]);
+        flat_set<size_t> exactMatches;
+        for (auto ei = exactMatchEntries.begin(); ei != exactMatchEntries.end(); ++ei) {
+            exactMatches.insert(entries_[*ei]->header().sourceIndex());
+        }
 
         std::vector<Vcf::CustomValue::ValueType> exactValues(numFiles_, int64_t{0});
         std::vector<Vcf::CustomValue::ValueType> partialValues(numFiles_, int64_t{0});
@@ -224,10 +275,12 @@ std::set<size_t> intToSet(uint32_t x) {
     return rv;
 }
 
-void VcfGenotypeMatcher::reportCounts(std::ostream& os) const {
-    os << streamJoin(reversed(streamNames_)).delimiter("\t")
-        << "\t" << streamJoin(sampleNames_).delimiter("\t") << "\n";
-
+void VcfGenotypeMatcher::printCounts_(
+        std::ostream& os,
+        std::vector<SampleCounter> const& counts
+        , std::string const& type
+        ) const
+{
     uint32_t numRows = (1 << numFiles_) - 1;
     std::vector<char> zeros(numFiles_, '0');
 
@@ -235,19 +288,30 @@ void VcfGenotypeMatcher::reportCounts(std::ostream& os) const {
         std::string indicator = integerToBinary(row);
         indicator = indicator.substr(indicator.size() - numFiles_);
 
-        os << streamJoin(indicator).delimiter("\t");
-
+        os << streamJoin(indicator).delimiter("\t") << "\t" << type;
         for (size_t rawSampleIdx = 0; rawSampleIdx < numSamples_; ++rawSampleIdx) {
-            auto const& counts = sampleCounters_[rawSampleIdx];
+            auto const& sampleCounts = counts[rawSampleIdx];
             auto indices = intToSet(row);
-            auto found = counts.find(indices);
+            auto found = sampleCounts.find(indices);
             size_t count = 0;
-            if (found != counts.end())
+            if (found != sampleCounts.end())
                 count = found->second;
             os << "\t" << count;
         }
         os << "\n";
     }
+}
+
+void VcfGenotypeMatcher::reportCounts(std::ostream& os) const {
+    os << streamJoin(reversed(streamNames_)).delimiter("\t")
+        << "\t" << "match_type"
+        << "\t" << streamJoin(sampleNames_).delimiter("\t")
+        << "\n";
+
+    printCounts_(os, partialSampleCounters_, "partial_hit");
+    printCounts_(os, exactSampleCounters_, "exact_hit");
+    printCounts_(os, partialMissSampleCounters_, "partial_miss");
+    printCounts_(os, completeMissSampleCounters_, "complete_miss");
 }
 
 bool VcfGenotypeMatcher::shouldSkip(size_t streamIdx, bool isFiltered) const {
