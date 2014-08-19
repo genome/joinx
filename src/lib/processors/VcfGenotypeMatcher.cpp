@@ -272,16 +272,6 @@ void VcfGenotypeMatcher::writeEntries() const {
     }
 }
 
-std::set<size_t> intToSet(uint32_t x) {
-    std::set<size_t> rv;
-    for (size_t i = 0; i < 8 * sizeof(x); ++i) {
-        uint32_t bit = 1 << i;
-        if (x & bit)
-            rv.insert(i);
-    }
-    return rv;
-}
-
 void VcfGenotypeMatcher::printCounts_(
         std::ostream& os,
         std::vector<SampleCounter> const& counts
