@@ -92,7 +92,10 @@ void VcfGenotypeMatcher::collectEntry(size_t entryIdx) {
         // FIXME: try to copy the RawVariants less
         RawVariant::Vector gtvec;
         for (auto idx = call.indices().begin(); idx != call.indices().end(); ++idx) {
-            if (*idx != Vcf::GenotypeIndex::Null && idx->value > 0) {
+            if (*idx == Vcf::GenotypeIndex::Null) {
+                gtvec.push_back(new RawVariant(0, ".", ""));
+            }
+            else if (idx->value > 0) {
                 auto const& allele = rawvs[idx->value - 1];
                 gtvec.push_back(new RawVariant(allele));
             }
@@ -113,7 +116,7 @@ auto VcfGenotypeMatcher::entryToFileIndex(EntryIndex idx) const -> FileIndex{
 void VcfGenotypeMatcher::updateCounts() {
     for (size_t rawSampleIdx = 0; rawSampleIdx < numSamples_; ++rawSampleIdx) {
         std::vector<size_t> partialMisses(entries_.size(), 0u);
-        std::set<EntryIndex> entriesWithMatches;
+        flat_set<EntryIndex> entriesWithMatches;
         // alleleMatches: allele -> (fileIndex -> count)
         auto const& alleleMatches = gtDicts_[rawSampleIdx].partialMatches();
         for (auto al = alleleMatches.begin(); al != alleleMatches.end(); ++al) {
@@ -131,7 +134,8 @@ void VcfGenotypeMatcher::updateCounts() {
             else
                 entriesWithMatches.insert(entries.begin(), entries.end());
 
-            ++partialSampleCounters_[rawSampleIdx][files];
+            uint64_t fileBits = setBits<uint64_t>(files);
+            ++partialSampleCounters_[rawSampleIdx][fileBits];
         }
 
         auto const& gtMatches = gtDicts_[rawSampleIdx].exactMatches();
@@ -145,17 +149,17 @@ void VcfGenotypeMatcher::updateCounts() {
             }
             entryToFileIndices(entries, files);
 
-            if (locations.size() > 1) {
+            if (locations.size() > 1)
                 entriesWithMatches.insert(entries.begin(), entries.end());
-            }
 
-            ++exactSampleCounters_[rawSampleIdx][files];
+            uint64_t fileBits = setBits<uint64_t>(files);
+            ++exactSampleCounters_[rawSampleIdx][fileBits];
         }
 
         for (size_t entryIdx = 0; entryIdx < partialMisses.size(); ++entryIdx) {
             if (partialMisses[entryIdx] > 0) {
                 size_t fileIdx = entries_[entryIdx]->header().sourceIndex();
-                std::set<FileIndex> idx{fileIdx};
+                uint64_t idx = 1 << fileIdx;
                 if (entriesWithMatches.count(entryIdx))
                     partialMissSampleCounters_[rawSampleIdx][idx] += partialMisses[entryIdx];
                 else
@@ -191,9 +195,18 @@ auto VcfGenotypeMatcher::partialMatchingFiles(
     return partials;
 }
 
+bool VcfGenotypeMatcher::hasNullAllele(EntryIndex entryIdx, size_t sampleIdx) const {
+    auto const& genotype = entryGenotypes_[entryIdx][sampleIdx];
+    for (auto i = genotype.begin(); i != genotype.end(); ++i) {
+        if (i->pos == 0 && i->ref == ".")
+            return true;
+    }
+    return false;
+}
 
 void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
     Entry& entry = *entries_[entryIdx];
+    FileIndex fileIdx = entryToFileIndex(entryIdx);
     auto exactType = getType(entry.header(), exactFieldName_);
     auto partialType = getType(entry.header(), partialFieldName_);
 
@@ -205,7 +218,14 @@ void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
         auto const& genotype = sampleGenotypes[rawSampleIdx];
 
         flat_set<size_t> partials = partialMatchingFiles(dict, genotype);
-        auto const& exactMatchEntries = dict.exactMatches(sampleGenotypes[rawSampleIdx]);
+        auto exactMatchEntries = dict.exactMatches(sampleGenotypes[rawSampleIdx]);
+        // Don't allow genotypes with null alleles to be exact matches with
+        // anything other than themselves
+        if (hasNullAllele(entryIdx, rawSampleIdx)) {
+            exactMatchEntries.clear();
+            exactMatchEntries.insert(fileIdx);
+        }
+
         flat_set<size_t> exactMatches;
         for (auto ei = exactMatchEntries.begin(); ei != exactMatchEntries.end(); ++ei) {
             exactMatches.insert(entries_[*ei]->header().sourceIndex());
@@ -280,8 +300,7 @@ void VcfGenotypeMatcher::printCounts_(
         os << streamJoin(indicator).delimiter("\t") << "\t" << type;
         for (size_t rawSampleIdx = 0; rawSampleIdx < numSamples_; ++rawSampleIdx) {
             auto const& sampleCounts = counts[rawSampleIdx];
-            auto indices = intToSet(row);
-            auto found = sampleCounts.find(indices);
+            auto found = sampleCounts.find(row);
             size_t count = 0;
             if (found != sampleCounts.end())
                 count = found->second;

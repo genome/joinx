@@ -25,12 +25,15 @@ class VcfGenotypeMatcher {
 public:
     typedef size_t EntryIndex;
     typedef size_t FileIndex;
+
+    typedef uint64_t FileIndexSet;
+
     typedef Vcf::GenotypeDictionary<EntryIndex> GenotypeDict;
 
     typedef std::vector<std::unique_ptr<Vcf::Entry>> EntryList;
     typedef std::vector<Vcf::RawVariant::Vector> SampleGenotypes;
     typedef std::vector<SampleGenotypes> EntryGenotypes;
-    typedef boost::unordered_map<std::set<FileIndex>, size_t> SampleCounter;
+    typedef boost::unordered_map<FileIndexSet, size_t> SampleCounter;
 
     typedef boost::function<void(Vcf::Entry const&)> EntryOutput;
 
@@ -63,6 +66,8 @@ public:
     void writeEntries() const;
     void reportCounts(std::ostream& os) const;
 
+    bool hasNullAllele(EntryIndex entryIdx, size_t sampleIdx) const;
+
     FileIndex entryToFileIndex(EntryIndex idx) const;
 
     template<typename Source, typename Dest>
@@ -73,6 +78,8 @@ public:
     }
 
 protected:
+    void updatePartialCounts(size_t sampleIdx);
+
     void printCounts_(
             std::ostream& os,
             std::vector<SampleCounter> const& counts
@@ -91,6 +98,7 @@ private:
     EntryOutput& entryOutput_;
 
     EntryList entries_;
+
     std::vector<GenotypeDict> gtDicts_;
     EntryGenotypes entryGenotypes_;
     std::vector<SampleCounter> partialSampleCounters_;
