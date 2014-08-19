@@ -20,6 +20,8 @@ using boost::format;
 
 
 namespace {
+    RawVariant const NullAllele(0, ".", ".");
+
     CustomType const* getType(Vcf::Header const& header, std::string const& id) {
         CustomType const* type = header.formatType(id);
         if (!type) {
@@ -93,7 +95,7 @@ void VcfGenotypeMatcher::collectEntry(size_t entryIdx) {
         RawVariant::Vector gtvec;
         for (auto idx = call.indices().begin(); idx != call.indices().end(); ++idx) {
             if (*idx == Vcf::GenotypeIndex::Null) {
-                gtvec.push_back(new RawVariant(0, ".", ""));
+                gtvec.push_back(new RawVariant(NullAllele));
             }
             else if (idx->value > 0) {
                 auto const& allele = rawvs[idx->value - 1];
@@ -197,11 +199,7 @@ auto VcfGenotypeMatcher::partialMatchingFiles(
 
 bool VcfGenotypeMatcher::hasNullAllele(EntryIndex entryIdx, size_t sampleIdx) const {
     auto const& genotype = entryGenotypes_[entryIdx][sampleIdx];
-    for (auto i = genotype.begin(); i != genotype.end(); ++i) {
-        if (i->pos == 0 && i->ref == ".")
-            return true;
-    }
-    return false;
+    return std::find(genotype.begin(), genotype.end(), NullAllele) != genotype.end();
 }
 
 void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
