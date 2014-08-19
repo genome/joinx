@@ -65,13 +65,11 @@ public:
 
     FileIndex entryToFileIndex(EntryIndex idx) const;
 
-    template<typename Container>
-    Container entryToFileIndices(Container const& c) {
-        Container rv;
+    template<typename Source, typename Dest>
+    void entryToFileIndices(Source const& c, Dest& dst) {
         for (auto i = c.begin(); i != c.end(); ++i) {
-            rv.insert(rv.end(), entryToFileIndex(*i));
+            dst.insert(dst.end(), entryToFileIndex(*i));
         }
-        return rv;
     }
 
 protected:
