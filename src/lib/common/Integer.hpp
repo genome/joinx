@@ -1,7 +1,23 @@
 #pragma once
 
+#include <cassert>
 #include <string>
 #include <type_traits>
+
+template<typename IntType, typename Iter>
+IntType setBits(Iter beg, Iter end) {
+    IntType rv{0};
+    for (; beg != end; ++beg) {
+        assert(*beg < sizeof(IntType)*8);
+        rv |= 1 << *beg;
+    }
+    return rv;
+}
+
+template<typename IntType, typename Container>
+IntType setBits(Container const& bits) {
+    return setBits<IntType>(bits.begin(), bits.end());
+}
 
 template<typename T>
 std::string integerToBinary(T x, bool leadingZeros = true) {
