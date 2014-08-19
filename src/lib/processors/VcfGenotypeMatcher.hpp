@@ -69,7 +69,7 @@ public:
     Container entryToFileIndices(Container const& c) {
         Container rv;
         for (auto i = c.begin(); i != c.end(); ++i) {
-            rv.insert(rv.end(), entryToFileIndex(*i);
+            rv.insert(rv.end(), entryToFileIndex(*i));
         }
         return rv;
     }
