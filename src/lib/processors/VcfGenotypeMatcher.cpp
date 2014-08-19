@@ -300,12 +300,12 @@ void VcfGenotypeMatcher::printCounts_(
 
 void VcfGenotypeMatcher::reportCounts(std::ostream& os) const {
     os << streamJoin(reversed(streamNames_)).delimiter("\t")
-        << "\t" << "match_type"
+        << "\t" << "type"
         << "\t" << streamJoin(sampleNames_).delimiter("\t")
         << "\n";
 
-    printCounts_(os, partialSampleCounters_, "partial_hit");
-    printCounts_(os, exactSampleCounters_, "exact_hit");
+    printCounts_(os, partialSampleCounters_, "partial_match");
+    printCounts_(os, exactSampleCounters_, "exact_match");
     printCounts_(os, partialMissSampleCounters_, "partial_miss");
     printCounts_(os, completeMissSampleCounters_, "complete_miss");
 }
