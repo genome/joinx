@@ -14,6 +14,7 @@
 #include <set>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
 using boost::format;
 using namespace std;
@@ -138,6 +139,12 @@ CustomValue EnforceEquality::operator()(
     AltIndices const& newAltIndices
     ) const
 {
+    if (type->numberType() == CustomType::PER_ALLELE)
+        return handlePerAllele(type, fetch, begin, end, newAltIndices);
+
+    if (type->numberType() == CustomType::PER_ALLELE_REF)
+        return handlePerAlleleRef(type, fetch, begin, end, newAltIndices);
+
     CustomValue rv;
     for (Entry const* e = begin; e != end; ++e) {
         const CustomValue* v = fetch(e);
@@ -152,6 +159,61 @@ CustomValue EnforceEquality::operator()(
     }
     return rv;
 }
+
+CustomValue EnforceEquality::handlePerAllele(
+    CustomType const* type,
+    FetchFunc fetch,
+    Entry const* begin,
+    Entry const* end,
+    AltIndices const& newAltIndices
+    ) const
+{
+    CustomValue rv(type);
+    boost::unordered_map<size_t, CustomValue::ValueType const*> values;
+    std::vector<CustomValue::ValueType> rawValues;
+
+    size_t i = 0;
+    size_t maxIndex = 0;
+    for (Entry const* e = begin; e != end; ++e, ++i) {
+        const CustomValue* v = fetch(e);
+        if (!v)
+            continue;
+
+        for (size_t j = 0; j < v->size(); ++j) {
+            auto idx = newAltIndices[i][j];
+            maxIndex = std::max(idx, maxIndex);
+            auto const* thisValue = v->getAny(j);
+            if (!thisValue)
+                continue;
+
+            auto inserted = values.insert(std::make_pair(idx, thisValue));
+            // no operator != for boost::variant apparently
+            if (!inserted.second && !(*inserted.first->second == *thisValue)) {
+                throw runtime_error(str(format("Equality condition failed for field %1%: %2% vs %3%")
+                    % type->id() % *inserted.first->second % *thisValue));
+            }
+        }
+    }
+    rawValues.resize(maxIndex + 1);
+    for (auto i = values.begin(); i != values.end(); ++i) {
+        rawValues[i->first] = *i->second;
+    }
+    rv.setRaw(std::move(rawValues));
+    return rv;
+}
+
+CustomValue EnforceEquality::handlePerAlleleRef(
+    CustomType const* type,
+    FetchFunc fetch,
+    Entry const* begin,
+    Entry const* end,
+    AltIndices const& newAltIndices
+    ) const
+{
+    throw std::runtime_error("not implemented for type R yet");
+}
+
+
 
 CustomValue EnforceEqualityUnordered::operator()(
     CustomType const* type,

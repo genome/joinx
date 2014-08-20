@@ -127,6 +127,23 @@ namespace ValueMergers {
             Entry const* end,
             AltIndices const& newAltIndices
             ) const;
+
+        CustomValue handlePerAllele(
+            CustomType const* type,
+            FetchFunc fetch,
+            Entry const* begin,
+            Entry const* end,
+            AltIndices const& newAltIndices
+            ) const;
+
+        CustomValue handlePerAlleleRef(
+            CustomType const* type,
+            FetchFunc fetch,
+            Entry const* begin,
+            Entry const* end,
+            AltIndices const& newAltIndices
+            ) const;
+
         std::string name() const { return "enforce-equal"; }
     };
 
