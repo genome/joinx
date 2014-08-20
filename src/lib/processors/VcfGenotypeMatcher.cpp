@@ -20,8 +20,6 @@ using boost::format;
 
 
 namespace {
-    RawVariant const NullAllele(0, ".", ".");
-
     CustomType const* getType(Vcf::Header const& header, std::string const& id) {
         CustomType const* type = header.formatType(id);
         if (!type) {
@@ -93,9 +91,11 @@ void VcfGenotypeMatcher::collectEntry(size_t entryIdx) {
 
         // FIXME: try to copy the RawVariants less
         RawVariant::Vector gtvec;
+        bool hasNull = false;
         for (auto idx = call.indices().begin(); idx != call.indices().end(); ++idx) {
             if (*idx == Vcf::GenotypeIndex::Null) {
-                gtvec.push_back(new RawVariant(NullAllele));
+                gtvec.push_back(new RawVariant(RawVariant::None));
+                hasNull = true;
             }
             else if (idx->value > 0) {
                 auto const& allele = rawvs[idx->value - 1];
@@ -104,7 +104,14 @@ void VcfGenotypeMatcher::collectEntry(size_t entryIdx) {
         }
 
         gtvec.sort();
-        gtDicts_[rawSampleIdx].add(gtvec, entryIdx);
+
+        // If a null allele is present, we don't add the whole genotype
+        // for exact matching, just the alleles for partial matching.
+        if (hasNull)
+            gtDicts_[rawSampleIdx].addAlleles(gtvec, entryIdx);
+        else
+            gtDicts_[rawSampleIdx].add(gtvec, entryIdx);
+
         sampleGenotypes[rawSampleIdx] = std::move(gtvec);
     }
 
@@ -199,7 +206,7 @@ auto VcfGenotypeMatcher::partialMatchingFiles(
 
 bool VcfGenotypeMatcher::hasNullAllele(EntryIndex entryIdx, size_t sampleIdx) const {
     auto const& genotype = entryGenotypes_[entryIdx][sampleIdx];
-    return std::find(genotype.begin(), genotype.end(), NullAllele) != genotype.end();
+    return std::find(genotype.begin(), genotype.end(), RawVariant::None) != genotype.end();
 }
 
 void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
