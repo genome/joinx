@@ -211,7 +211,6 @@ bool VcfGenotypeMatcher::hasNullAllele(EntryIndex entryIdx, size_t sampleIdx) co
 
 void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
     Entry& entry = *entries_[entryIdx];
-    FileIndex fileIdx = entryToFileIndex(entryIdx);
     auto exactType = getType(entry.header(), exactFieldName_);
     auto partialType = getType(entry.header(), partialFieldName_);
 
@@ -228,7 +227,7 @@ void VcfGenotypeMatcher::annotateEntry(size_t entryIdx) {
         // anything other than themselves
         if (hasNullAllele(entryIdx, rawSampleIdx)) {
             exactMatchEntries.clear();
-            exactMatchEntries.insert(fileIdx);
+            exactMatchEntries.insert(entryIdx);
         }
 
         flat_set<size_t> exactMatches;
