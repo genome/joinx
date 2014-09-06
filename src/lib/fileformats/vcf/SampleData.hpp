@@ -40,7 +40,7 @@ public:
     void clear();
     void swap(SampleData& other);
     void addFilter(uint32_t sampleIdx, std::string const& filterName);
-
+    void setSampleField(uint32_t sampleIdx, Vcf::CustomValue&& value);
 
     FormatType const& format() const;
     const_iterator begin() const;
@@ -70,10 +70,11 @@ public:
     void sampleToStream(std::ostream& s, size_t sampleIdx) const;
 
     void parse(Header const* h, std::string const& raw);
-protected:
-    void appendFormatField(std::string const& key);
-    void appendFormatFieldIfNotExists(std::string const& key);
 
+    int appendFormatFieldIfNotExists(std::string const& key);
+
+protected:
+    int appendFormatField(std::string const& key);
     void freeValues();
 
 protected:

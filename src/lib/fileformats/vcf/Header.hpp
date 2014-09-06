@@ -129,6 +129,7 @@ protected:
     bool _hasDuplicateSamples;
 };
 
+std::ostream& operator<<(std::ostream& s, Header const& h);
+
 END_NAMESPACE(Vcf)
 
-std::ostream& operator<<(std::ostream& s, Vcf::Header const& h);

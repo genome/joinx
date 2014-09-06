@@ -34,6 +34,8 @@ set(SOURCES
     VcfAnnotateCommand.hpp
     VcfAnnotateHomopolymersCommand.cpp
     VcfAnnotateHomopolymersCommand.hpp
+    VcfCompareCommand.cpp
+    VcfCompareCommand.hpp
     VcfCompareGtCommand.cpp
     VcfCompareGtCommand.hpp
     VcfFilterCommand.cpp

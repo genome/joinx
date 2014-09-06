@@ -21,6 +21,10 @@ using boost::format;
 using boost::lexical_cast;
 using namespace std;
 
+namespace {
+    std::string const MISSING_STRING = ".";
+}
+
 BEGIN_NAMESPACE(Vcf)
 namespace {
     const static char* entryFieldNames[] = {
@@ -406,11 +410,19 @@ int64_t Entry::stop() const {
     return _pos-1 + _ref.size();
 }
 
+const std::string& Entry::alt(GenotypeIndex const& idx) const {
+        if (idx == GenotypeIndex::Null)
+            return MISSING_STRING;
+        else
+            return alt()[idx.value];
+}
+
 std::vector<std::string> Entry::allelesForSample(size_t sampleIdx) const {
     GenotypeCall const& call = sampleData().genotype(sampleIdx);
     vector<string> rv;
-    for (auto i = call.begin(); i != call.end(); ++i)
-        rv.push_back(alt()[*i]);
+    for (auto i = call.begin(); i != call.end(); ++i) {
+        rv.push_back(alt(*i));
+    }
     return rv;
 }
 

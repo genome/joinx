@@ -2,38 +2,71 @@
 
 #include "common/Tokenizer.hpp"
 
+#include <boost/format.hpp>
+#include <limits>
+
+using boost::format;
+
 BEGIN_NAMESPACE(Vcf)
 
 GenotypeCall GenotypeCall::Null;
+GenotypeIndex GenotypeIndex::Null{std::numeric_limits<GenotypeIndex::value_type>::max()};
 
 GenotypeCall::GenotypeCall()
     : _phased(false)
+    , _partial(false)
 {
 }
 
 GenotypeCall::GenotypeCall(const std::string& call)
     : _phased(false)
+    , _partial(false)
     , _string(call)
 {
+    // special case: a lone null (".") is treated as empty
+    if (call == ".") {
+        return;
+    }
+
     Tokenizer<std::string> tok(call, "|/");
-    uint32_t idx(0);
-    // TODO this doesn't seem to handle partially missing data yet
+    GenotypeIndex idx;
+    size_t nullCount = 0;
+
     // note: a delimiter of | denotes phased data
-    // we only pay attention to the first such delimiter
-    if (tok.extract(idx)) {
-        _phased = tok.lastDelim() == '|';
+    // if anything is phased, we treat the whole genotype as phased
+    // hopefully, mixing of phased and unphased data in a single
+    // call isn't meaningful...
+    while (!tok.eof()) {
+        if (tok.nextTokenMatches(".")) {
+            ++nullCount;
+            idx = GenotypeIndex::Null;
+            tok.advance();
+        }
+        else if (!tok.extract(idx.value)) {
+            throw std::runtime_error(str(format("Genotype parse error "
+                "(GT=%1%): expected a number or '.'"
+                ) % call));
+        }
+
+        _phased |= tok.lastDelim() == '|';
         _indices.push_back(idx);
         _indexSet.insert(idx);
-        // now read the rest
-        while (tok.extract(idx)) {
-            _indices.push_back(idx);
-            _indexSet.insert(idx);
-        }
     }
+
+    if (nullCount > 0 && nullCount < _indices.size())
+        _partial = true;
 }
 
 bool GenotypeCall::empty() const {
     return _indices.empty();
+}
+
+bool GenotypeCall::null() const {
+    return _indexSet.size() == 1 && _indexSet.begin()->null();
+}
+
+bool GenotypeCall::partial() const {
+    return _partial;
 }
 
 GenotypeCall::size_type GenotypeCall::size() const {
@@ -53,11 +86,11 @@ bool GenotypeCall::phased() const {
 }
 
 bool GenotypeCall::heterozygous() const {
-    return diploid() && _indexSet.size() == 2;
+    return diploid() && !partial() && _indexSet.size() == 2;
 }
 
 bool GenotypeCall::homozygous() const {
-    return diploid() && _indexSet.size() == 1;   //if only one unique allele then homozygous
+    return diploid() && !null() && _indexSet.size() == 1;
 }
 
 bool GenotypeCall::diploid() const {
@@ -65,18 +98,18 @@ bool GenotypeCall::diploid() const {
 }
 
 bool GenotypeCall::reference() const {
-    return _indexSet.size() == 1 && _indexSet.count(0);
+    return _indexSet.size() == 1 && _indexSet.count(GenotypeIndex{0});
 }
 
-const uint32_t& GenotypeCall::operator[](size_type idx) const {
+const GenotypeIndex& GenotypeCall::operator[](size_type idx) const {
     return _indices[idx];
 }
 
-const vector<uint32_t>& GenotypeCall::indices() const {
+const vector<GenotypeIndex>& GenotypeCall::indices() const {
     return _indices;
 }
 
-const set<uint32_t>& GenotypeCall::indexSet() const {
+const set<GenotypeIndex>& GenotypeCall::indexSet() const {
     return _indexSet;
 }
 
@@ -132,9 +165,20 @@ bool GenotypeCall::operator<(const GenotypeCall& rhs) const {
     return false;
 }
 
-END_NAMESPACE(Vcf)
-
-std::ostream& operator<<(std::ostream& s, Vcf::GenotypeCall const& gt) {
-    s << gt.string();
-    return s;
+std::ostream& operator<<(std::ostream& os, GenotypeIndex const& gtidx) {
+    if (gtidx == Vcf::GenotypeIndex::Null)
+        os << '.';
+    else
+        os << gtidx.value;
+    return os;
 }
+
+std::ostream& operator<<(std::ostream& os, GenotypeCall const& gt) {
+    if (gt.empty())
+        os << ".";
+    else
+        os << gt.string();
+    return os;
+}
+
+END_NAMESPACE(Vcf)

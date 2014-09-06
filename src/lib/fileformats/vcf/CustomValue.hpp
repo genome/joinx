@@ -30,6 +30,7 @@ public:
 
     explicit CustomValue(const CustomType* type);
     CustomValue(const CustomType* type, const std::string& value);
+    CustomValue(const CustomType* type, const std::vector<ValueType>&& values);
 
     void setType(const CustomType* type) { _type = type; }
     const CustomType& type() const;

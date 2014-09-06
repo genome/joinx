@@ -11,6 +11,7 @@ set(SOURCES
     ChromPos.hpp
     ChromPosReader.cpp
     ChromPosReader.hpp
+    DefaultPrinter.hpp
     Fasta.cpp
     Fasta.hpp
     FastaIndex.cpp
@@ -19,7 +20,6 @@ set(SOURCES
     FastaIndexGenerator.hpp
     InferFileType.cpp
     InferFileType.hpp
-    DefaultPrinter.hpp
     StreamFactory.hpp
     StreamPump.hpp
     TypedStream.hpp
@@ -50,6 +50,7 @@ set(SOURCES
     vcf/GenotypeCall.cpp
     vcf/GenotypeCall.hpp
     vcf/GenotypeComparator.hpp
+    vcf/GenotypeDictionary.hpp
     vcf/GenotypeMerger.cpp
     vcf/GenotypeMerger.hpp
     vcf/Header.cpp
@@ -58,6 +59,8 @@ set(SOURCES
     vcf/Map.hpp
     vcf/MergeStrategy.cpp
     vcf/MergeStrategy.hpp
+    vcf/MultiWriter.cpp
+    vcf/MultiWriter.hpp
     vcf/RawVariant.cpp
     vcf/RawVariant.hpp
     vcf/SampleData.cpp

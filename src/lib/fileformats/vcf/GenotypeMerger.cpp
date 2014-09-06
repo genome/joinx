@@ -100,14 +100,17 @@ string GenotypeMerger::renumberGT(
         if (i > oldGT.begin())
             newGT << delim;
 
-        // index > 0 => non-ref
-        if (*i > 0) {
+        if (*i == GenotypeIndex::Null) {
+            newGT << *i;
+        }
+        else if (*i > 0) { // index > 0 => non-ref
             // the index in the alt array will be *i - 1, since 0 denotes ref
-            assert(*i-1 < alleleIndices.size());
-            uint32_t newIdx = alleleIndices[*i-1];
+            assert(i->value - 1 < alleleIndices.size());
+            auto newIdx = alleleIndices[i->value - 1];
             assert(newIdx <= _alleles.size());
-            newGT << newIdx+1;
-        } else {
+            newGT << newIdx + 1;
+        }
+        else {
             // this is the ref allele
             newGT << 0;
         }
@@ -117,7 +120,7 @@ string GenotypeMerger::renumberGT(
 }
 
 bool GenotypeMerger::areGenotypesDisjoint(const std::string& str1, const std::string& str2) {
-    set<uint32_t> values;
+    set<GenotypeIndex> values;
     GenotypeCall gt1(str1);
     GenotypeCall gt2(str2);
     copy(gt1.begin(), gt1.end(), inserter(values, values.begin()));

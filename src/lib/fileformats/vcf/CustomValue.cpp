@@ -28,6 +28,12 @@ CustomValue::CustomValue(CustomValue&& other)
 {
 }
 
+CustomValue::CustomValue(const CustomType* type, const std::vector<ValueType>&& values)
+    : _type(type)
+    , _values(std::move(values))
+{
+}
+
 CustomValue& CustomValue::operator=(CustomValue const& other) {
     _type = other._type;
     _values = other._values;
