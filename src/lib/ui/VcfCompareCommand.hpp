@@ -37,4 +37,5 @@ protected:
     std::string outputDir_;
     std::string exactFormatField_;
     std::string partialFormatField_;
+    bool includeRefAlleles_;
 };

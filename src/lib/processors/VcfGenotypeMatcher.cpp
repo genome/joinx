@@ -54,6 +54,7 @@ VcfGenotypeMatcher::VcfGenotypeMatcher(
         , std::string const& partialFieldName
         , std::vector<Vcf::FilterType> const& filterTypes
         , EntryOutput& entryOutput
+        , bool includeRefAlleles
         )
     : numFiles_(streamNames.size())
     , numSamples_(sampleNames.size())
@@ -63,6 +64,7 @@ VcfGenotypeMatcher::VcfGenotypeMatcher(
     , sampleNames_(sampleNames)
     , filterTypes_(filterTypes)
     , entryOutput_(entryOutput)
+    , includeRefAlleles_(includeRefAlleles)
     , gtDicts_(numSamples_)
     , partialSampleCounters_(numSamples_)
     , exactSampleCounters_(numSamples_)
@@ -86,7 +88,7 @@ void VcfGenotypeMatcher::collectEntry(size_t entryIdx) {
             continue;
 
         GenotypeCall const& call = sampleData.genotype(sampleIdx);
-        if (call == GenotypeCall::Null)
+        if (call == GenotypeCall::Null || (!includeRefAlleles_ && call.reference()))
             continue;
 
         // FIXME: try to copy the RawVariants less
@@ -100,6 +102,9 @@ void VcfGenotypeMatcher::collectEntry(size_t entryIdx) {
             else if (idx->value > 0) {
                 auto const& allele = rawvs[idx->value - 1];
                 gtvec.push_back(new RawVariant(allele));
+            }
+            else if (includeRefAlleles_) {
+                gtvec.push_back(new RawVariant(entry.pos(), "", ""));
             }
         }
 

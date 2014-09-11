@@ -44,6 +44,7 @@ public:
         , std::string const& partialFieldName
         , std::vector<Vcf::FilterType> const& filterTypes
         , EntryOutput& entryOutput
+        , bool includeRefAlleles
         );
 
     void operator()(EntryList&& entries);
@@ -96,6 +97,7 @@ private:
     std::vector<std::string> const& sampleNames_;
     std::vector<Vcf::FilterType> const& filterTypes_;
     EntryOutput& entryOutput_;
+    bool includeRefAlleles_;
 
     EntryList entries_;
 

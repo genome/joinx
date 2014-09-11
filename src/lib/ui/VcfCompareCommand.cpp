@@ -98,6 +98,10 @@ void VcfCompareCommand::configureOptions() {
         ("partial-format,p",
             po::value<std::string>(&partialFormatField_)->default_value("PXSEC"),
             "Partial match format field name")
+
+        ("include-ref,I",
+            po::bool_switch(&includeRefAlleles_)->default_value(false),
+            "Include reference alleles in counts")
         ;
 
     _posOpts.add("input-file", -1);
@@ -239,6 +243,7 @@ void VcfCompareCommand::exec() {
         , partialFormatField_
         , filterTypes_
         , entryCb
+        , includeRefAlleles_
         );
 
     auto overlap = makeGroupOverlapping(merger, matcher);
