@@ -63,14 +63,14 @@ TEST_F(TestVcfSampleData, appendFormatFieldIfNotExists) {
     size_t oldSize = sd.format().size();
 
     // add foo
-    EXPECT_EQ(oldSize, sd.appendFormatFieldIfNotExists("foo"));
+    EXPECT_EQ(int(oldSize), sd.appendFormatFieldIfNotExists("foo"));
     EXPECT_EQ(oldSize + 1, sd.format().size());
 
     // test idempotency
-    EXPECT_EQ(oldSize, sd.appendFormatFieldIfNotExists("foo"));
+    EXPECT_EQ(int(oldSize), sd.appendFormatFieldIfNotExists("foo"));
     EXPECT_EQ(oldSize + 1, sd.format().size());
 
-    EXPECT_EQ(oldSize, sd.formatKeyIndex("foo"));
+    EXPECT_EQ(int(oldSize), sd.formatKeyIndex("foo"));
     EXPECT_EQ(0, sd.appendFormatFieldIfNotExists("GT"));
 }
 
@@ -106,7 +106,7 @@ TEST_F(TestVcfSampleData, setSampleField) {
     auto foo = sd.get(1, "foo");
     ASSERT_TRUE(foo);
 
-    ASSERT_EQ(3, foo->size());
+    ASSERT_EQ(3u, foo->size());
     EXPECT_EQ("one", *foo->get<std::string>(0));
     EXPECT_EQ("two", *foo->get<std::string>(1));
     EXPECT_EQ("three", *foo->get<std::string>(2));
