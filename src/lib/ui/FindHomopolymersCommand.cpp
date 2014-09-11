@@ -9,6 +9,7 @@
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 
+#include <cstring>
 #include <iostream>
 #include <stdexcept>
 
@@ -83,6 +84,12 @@ void FindHomopolymersCommand::finalizeOptions() {
     }
 }
 
+namespace {
+    bool strversLessThan(std::string const& x, std::string const& y) {
+        return strverscmp(x.c_str(), y.c_str()) < 0;
+    }
+}
+
 void FindHomopolymersCommand::exec() {
     Fasta fa(fasta_);
     auto faIndex = fa.index();
@@ -91,6 +98,7 @@ void FindHomopolymersCommand::exec() {
 
     if (sequences_.empty()) {
         sequences_ = faIndex.sequenceOrder();
+        sort(sequences_.begin(), sequences_.end(), strversLessThan);
     }
 
     for (auto i = sequences_.begin(); i != sequences_.end(); ++i) {
