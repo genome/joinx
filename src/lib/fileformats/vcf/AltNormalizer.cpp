@@ -29,9 +29,8 @@ void AltNormalizer::normalize(Entry& e) {
     }
 
     RawVariant::Vector rawVariants(RawVariant::processEntry(e));
-    size_t minRefPos = numeric_limits<size_t>::max();
-    size_t maxRefPos = 0;
-    bool haveIndel = false;
+    int64_t minRefPos = numeric_limits<int64_t>::max();
+    int64_t maxRefPos = 0;
     size_t numVariantsProcessed(0);
     for (auto var = rawVariants.begin(); var != rawVariants.end(); ++var) {
         size_t refLen = var->ref.size();
@@ -41,29 +40,39 @@ void AltNormalizer::normalize(Entry& e) {
         if (altLen == 0 && refLen == 0)
             continue;
 
-        ++numVariantsProcessed;
-
         // Process pure indels only (alts with substitutions are normalized
         // by RawVariant already).
         if ((altLen == 0 || refLen == 0)) {
-            haveIndel = true;
-            normalizeRaw(*var, _sequence);
+            if (normalizeRaw(*var, _sequence) != 0u)
+                ++numVariantsProcessed;
         }
 
-        minRefPos = min(size_t(var->pos), minRefPos);
-        maxRefPos = max(size_t(var->lastRefPos()), maxRefPos);
+        minRefPos = min(var->pos, minRefPos);
+        maxRefPos = max(var->lastRefPos(), maxRefPos);
     }
 
     if (!numVariantsProcessed)
         return;
 
     assert(minRefPos >= 1);
-    if (haveIndel && minRefPos > 1) {
+
+    std::size_t refLen = maxRefPos - minRefPos + 1;
+
+    bool haveEmpty = false;
+    for (auto var = rawVariants.begin(); var != rawVariants.end(); ++var) {
+        bool eitherEmpty = var->ref.empty() || var->alt.empty();
+        if (eitherEmpty && var->pos == minRefPos && refLen == var->ref.size()) {
+            haveEmpty = true;
+            break;
+        }
+    }
+
+    if (haveEmpty && minRefPos > 1) {
         --minRefPos;
     }
 
     // Fetch new reference bases if they changed
-    if (minRefPos != e.pos() || maxRefPos != e.pos() + e.ref().size()) {
+    if (minRefPos != int64_t(e.pos()) || maxRefPos != int64_t(e.pos() + e.ref().size())) {
         e._ref = _sequence.substr(minRefPos-1, maxRefPos-minRefPos+1);
     }
 
@@ -104,7 +113,7 @@ void AltNormalizer::normalize(Entry& e) {
         e.sampleData().renumberGT(altIndices);
     }
 
-    if (haveIndel && minRefPos == 1) {
+    if (haveEmpty && minRefPos == 1) {
         // append a base to ref and all alts
         size_t pos = e.pos() + e.ref().size();
         char base = _sequence[pos-1];
