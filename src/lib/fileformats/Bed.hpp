@@ -9,6 +9,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 class InputStream;
@@ -52,7 +53,7 @@ public:
     int64_t length() const;
     const std::string& toString() const;
 
-    void start(std::string const& chrom);
+    void chrom(std::string chrom);
     void start(int64_t start);
     void stop(int64_t stop);
 
@@ -73,7 +74,6 @@ protected:
     std::string _chrom;
     int64_t _start;
     int64_t _stop;
-    int64_t _length;
     ExtraFieldsType _extraFields;
 
     mutable std::string _line;
@@ -92,7 +92,7 @@ inline int64_t Bed::stop() const {
 }
 
 inline int64_t Bed::length() const {
-    return _length;
+    return stop() - start();
 }
 
 inline bool Bed::operator<(const Bed& rhs) const {
@@ -116,8 +116,8 @@ inline void Bed::setExtra(size_t idx, T const& value, std::string const& filler 
     _extraFields[idx] = boost::lexical_cast<std::string>(value);
 }
 
-inline void Bed::start(std::string const& chrom) {
-    _chrom = chrom;
+inline void Bed::chrom(std::string chrom) {
+    _chrom = std::move(chrom);
     _line.clear();
 }
 
