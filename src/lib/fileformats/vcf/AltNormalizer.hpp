@@ -67,24 +67,28 @@ public:
 protected:
     class Impl {
     public:
-        Impl(RawVariant::Vector& rawvs, std::string const& refSequence);
+        Impl(Entry& entry, std::string const& refSequence);
 
-        std::size_t normalizeRawVariants();
-        bool needPadding() const;
-
-    public: // data
-        int64_t minRefPos;
-        int64_t maxRefPos;
+        void normalize();
 
     private:
-        RawVariant::Vector& rawvs_;
+        std::size_t normalizeRawVariants();
+        bool needPadding() const;
+        void addPadding();
+        void editEntry();
+
+    private:
+        Entry& entry_;
+        RawVariant::Vector rawvs_;
         std::string const& refSequence_;
+        int64_t minRefPos;
+        int64_t maxRefPos;
     };
 
 protected:
-    RefSeq const& _ref;
-    std::string _seqName;
-    std::string _sequence;
+    RefSeq const& ref_;
+    std::string seqName_;
+    std::string sequence_;
 };
 
 END_NAMESPACE(Vcf)

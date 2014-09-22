@@ -262,37 +262,3 @@ TEST_F(TestVcfAltNormalizer, pre_and_post_padding_bug) {
     ASSERT_EQ(1u, e.alt().size());
     EXPECT_EQ("A", e.alt()[0]);
 }
-
-TEST_F(TestVcfAltNormalizer, alts_equivalent_to_ref_are_removed) {
-    string ref = _ref.sequence("1", 4, 6);
-    EXPECT_EQ("CGCGCG", ref);
-    Entry e = makeEntry("1", 4, ref, "CGCGCG,CGCG", "0/1\t1/2");
-    AltNormalizer n(_ref);
-    cout << "BEFORE: " << e << "\n";
-    n.normalize(e);
-    cout << " AFTER: " << e << "\n";
-
-    EXPECT_EQ(3u, e.pos());
-    EXPECT_EQ("TCG", e.ref());
-    EXPECT_EQ(1u, e.alt().size());
-    EXPECT_EQ("T", e.alt()[0]);
-    EXPECT_EQ("0/0", e.sampleData().genotype(0).string());
-    EXPECT_EQ("0/1", e.sampleData().genotype(1).string());
-}
-
-TEST_F(TestVcfAltNormalizer, duplicate_alts_are_collapsed) {
-    std::string refStr(">1\nATATTATG");
-    Fasta ref("test", refStr.data(), refStr.size());
-    Entry e = makeEntry("1", 4, "TTATG", "TG,TG", "0/1\t1/2");
-    AltNormalizer n(ref);
-    cout << "BEFORE: " << e << "\n";
-    n.normalize(e);
-    cout << " AFTER: " << e << "\n";
-
-    EXPECT_EQ(1u, e.pos());
-    EXPECT_EQ("ATAT", e.ref());
-    EXPECT_EQ(1u, e.alt().size());
-    EXPECT_EQ("A", e.alt()[0]);
-    EXPECT_EQ("0/1", e.sampleData().genotype(0).string());
-    EXPECT_EQ("1/1", e.sampleData().genotype(1).string());
-}
