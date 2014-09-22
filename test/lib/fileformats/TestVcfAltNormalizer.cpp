@@ -46,147 +46,151 @@ protected:
 
 TEST_F(TestVcfAltNormalizer, equivalentAlts) {
     string ref = _ref.sequence("1", 4, 6);
-    ASSERT_EQ("CGCGCG", ref);
+    EXPECT_EQ("CGCGCG", ref);
     Entry e = makeEntry("1", 4, ref, "CGCGCG,CGCG", "0/1\t1/2");
     AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(3u, e.pos());
-    ASSERT_EQ("TCG", e.ref());
-    ASSERT_EQ(1u, e.alt().size());
-    ASSERT_EQ("T", e.alt()[0]);
-    ASSERT_EQ("0/0", e.sampleData().genotype(0).string());
-    ASSERT_EQ("0/1", e.sampleData().genotype(1).string());
+    EXPECT_EQ(3u, e.pos());
+    EXPECT_EQ("TCG", e.ref());
+    EXPECT_EQ(1u, e.alt().size());
+    EXPECT_EQ("T", e.alt()[0]);
+    EXPECT_EQ("0/0", e.sampleData().genotype(0).string());
+    EXPECT_EQ("0/1", e.sampleData().genotype(1).string());
 }
 
 // single alt cases
 TEST_F(TestVcfAltNormalizer, insertion) {
     cout << "   REF: " << _ref.sequence("1", 1, 13) << "\n";
     string ref = _ref.sequence("1", 11, 3);
-    ASSERT_EQ("GCG", ref);
+    EXPECT_EQ("GCG", ref);
     Entry e = makeEntry("1", 11, ref, "GCGCG");
     AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(3u, e.pos());
-    ASSERT_EQ("T", e.ref());
-    ASSERT_EQ(1u, e.alt().size());
-    ASSERT_EQ("TCG", e.alt()[0]);
+    EXPECT_EQ(3u, e.pos());
+    EXPECT_EQ("T", e.ref());
+    EXPECT_EQ(1u, e.alt().size());
+    EXPECT_EQ("TCG", e.alt()[0]);
 }
 
 TEST_F(TestVcfAltNormalizer, insertionWithTrailingRepeatMatch) {
     string ref = _ref.sequence("1", 11, 3);
-    ASSERT_EQ("GCG", ref);
+    EXPECT_EQ("GCG", ref);
     Entry e = makeEntry("1", 11, ref, "GAGCG");
     AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(10u, e.pos());
-    ASSERT_EQ("C", e.ref());
-    ASSERT_EQ(1u, e.alt().size());
-    ASSERT_EQ("CGA", e.alt()[0]);
+    EXPECT_EQ(10u, e.pos());
+    EXPECT_EQ("C", e.ref());
+    EXPECT_EQ(1u, e.alt().size());
+    EXPECT_EQ("CGA", e.alt()[0]);
 }
 
 TEST_F(TestVcfAltNormalizer, immovableInsertion) {
     string ref = _ref.sequence("1", 11, 3);
-    ASSERT_EQ("GCG", ref);
+    EXPECT_EQ("GCG", ref);
     Entry e = makeEntry("1", 11, ref, "GAATT");
     AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(12u, e.pos());
-    ASSERT_EQ("CG", e.ref());
-    ASSERT_EQ(1u, e.alt().size());
-    ASSERT_EQ("AATT", e.alt()[0]);
+    // We no longer strip padding from things that don't move.
+    EXPECT_EQ(11u, e.pos());
+    EXPECT_EQ("GCG", e.ref());
+    EXPECT_EQ(1u, e.alt().size());
+    EXPECT_EQ("GAATT", e.alt()[0]);
 }
 
 TEST_F(TestVcfAltNormalizer, deletion) {
     string ref = _ref.sequence("1", 11, 3);
-    ASSERT_EQ("GCG", ref);
+    EXPECT_EQ("GCG", ref);
     Entry e = makeEntry("1", 11, ref, "G");
     AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(3u, e.pos());
-    ASSERT_EQ("TCG", e.ref());
-    ASSERT_EQ(1u, e.alt().size());
-    ASSERT_EQ("T", e.alt()[0]);
+    EXPECT_EQ(3u, e.pos());
+    EXPECT_EQ("TCG", e.ref());
+    EXPECT_EQ(1u, e.alt().size());
+    EXPECT_EQ("T", e.alt()[0]);
 }
 
 TEST_F(TestVcfAltNormalizer, deletionWithSubstitution) {
     string ref = _ref.sequence("1", 9, 5);
-    ASSERT_EQ("GCGCG", ref);
+    EXPECT_EQ("GCGCG", ref);
     Entry e = makeEntry("1", 9, ref, "GAG");
     AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(10u, e.pos());
-    ASSERT_EQ("CGC", e.ref());
-    ASSERT_EQ(1u, e.alt().size());
-    ASSERT_EQ("A", e.alt()[0]);
+    // We no longer strip padding from things that aren't moved.
+    EXPECT_EQ(9u, e.pos());
+    EXPECT_EQ("GCGCG", e.ref());
+    EXPECT_EQ(1u, e.alt().size());
+    EXPECT_EQ("GAG", e.alt()[0]);
 }
 
 TEST_F(TestVcfAltNormalizer, immovableDeletion) {
     string ref = _ref.sequence("1", 9, 5);
-    ASSERT_EQ("GCGCG", ref);
+    EXPECT_EQ("GCGCG", ref);
     Entry e = makeEntry("1", 9, ref, "GAT");
     AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(10u, e.pos());
-    ASSERT_EQ("CGCG", e.ref());
-    ASSERT_EQ(1u, e.alt().size());
-    ASSERT_EQ("AT", e.alt()[0]);
+    // We no longer strip padding from things that don't move.
+    EXPECT_EQ(9u, e.pos());
+    EXPECT_EQ("GCGCG", e.ref());
+    EXPECT_EQ(1u, e.alt().size());
+    EXPECT_EQ("GAT", e.alt()[0]);
 }
 
 TEST_F(TestVcfAltNormalizer, testSubstitution) {
     string ref = _ref.sequence("1", 9, 1);
-    ASSERT_EQ("G", ref);
+    EXPECT_EQ("G", ref);
     Entry e = makeEntry("1", 9, ref, "C");
     AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(9u, e.pos());
-    ASSERT_EQ("G", e.ref());
-    ASSERT_EQ(1u, e.alt().size());
-    ASSERT_EQ("C", e.alt()[0]);
+    EXPECT_EQ(9u, e.pos());
+    EXPECT_EQ("G", e.ref());
+    EXPECT_EQ(1u, e.alt().size());
+    EXPECT_EQ("C", e.alt()[0]);
 }
 
 TEST_F(TestVcfAltNormalizer, testSubstitutionWithPadding) {
     string ref = _ref.sequence("1", 9, 5);
-    ASSERT_EQ("GCGCG", ref);
+    EXPECT_EQ("GCGCG", ref);
     Entry e = makeEntry("1", 9, ref, "GCGCA");
     AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    ASSERT_EQ(13u, e.pos());
-    ASSERT_EQ("G", e.ref());
-    ASSERT_EQ(1u, e.alt().size());
-    ASSERT_EQ("A", e.alt()[0]);
+    // We no longer strip padding from things that aren't moved.
+    EXPECT_EQ(9u, e.pos());
+    EXPECT_EQ("GCGCG", e.ref());
+    EXPECT_EQ(1u, e.alt().size());
+    EXPECT_EQ("GCGCA", e.alt()[0]);
 }
 
 // multi alt cases
 TEST_F(TestVcfAltNormalizer, insertionAndDeletion) {
     string ref = _ref.sequence("1", 11, 3);
-    ASSERT_EQ("GCG", ref);
+    EXPECT_EQ("GCG", ref);
     Entry e = makeEntry("1", 11, ref, "GCGCG,GC");
     AltNormalizer n(_ref);
     cout << "BEFORE: " << e << "\n";
@@ -202,10 +206,11 @@ TEST_F(TestVcfAltNormalizer, messyInsertionAndDeletion) {
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
-    ASSERT_EQ(13u, e.pos());
-    ASSERT_EQ("TCCTCGCTC", e.ref());
-    ASSERT_EQ("TCCTCGCT", e.alt()[0]);
-    ASSERT_EQ("TCCTCGCTCCCTCGCTC", e.alt()[1]);
+    EXPECT_EQ(14u, e.pos());
+    EXPECT_EQ(2u, e.alt().size());
+    EXPECT_EQ("CCTCGCTC", e.ref());
+    EXPECT_EQ("CCTCGCT", e.alt()[0]);
+    EXPECT_EQ("CCTCGCTCCCTCGCTC", e.alt()[1]);
 }
 
 TEST_F(TestVcfAltNormalizer, indelAtPos1) {
@@ -216,8 +221,8 @@ TEST_F(TestVcfAltNormalizer, indelAtPos1) {
     cout << "BEFORE: " << e << "\n";
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
-    ASSERT_EQ(1u, e.pos());
-    ASSERT_EQ("AGA", e.ref());
-    ASSERT_EQ("A", e.alt()[0]);
+    EXPECT_EQ(1u, e.pos());
+    EXPECT_EQ("AGA", e.ref());
+    EXPECT_EQ("A", e.alt()[0]);
 
 }
