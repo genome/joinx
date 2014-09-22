@@ -4,7 +4,7 @@
 #include "common/VariantType.hpp"
 #include "common/namespaces.hpp"
 #include "common/CyclicIterator.hpp"
-#include "common/Sequence.hpp"
+#include "common/String.hpp"
 #include "common/cstdint.hpp"
 
 #include <algorithm>
@@ -42,7 +42,7 @@ size_t normalizeRaw(RawVariant& var, RefStringType const& refseq) {
 
     // Compute the max distance that the alt can be cyclically left shifted
     // while remaining equal to the sequence it overlaps.
-    size_t shift = Sequence::commonPrefix(altCycleBeg, altCycleEnd, revRefBegin, revRefEnd);
+    size_t shift = commonPrefix(altCycleBeg, altCycleEnd, revRefBegin, revRefEnd);
 
     // Apply the shift we just calculated.
     var.pos -= shift;

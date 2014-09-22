@@ -1,5 +1,6 @@
 #include "RawVariant.hpp"
 #include "fileformats/Fasta.hpp"
+#include "common/String.hpp"
 
 #include <algorithm>
 #include <stdexcept>
@@ -13,7 +14,7 @@ RawVariant RawVariant::None(0, "", "");
 
 void RawVariant::normalize() {
     // find leading bases in the alt that match the reference
-    string::size_type varBegin = Sequence::commonPrefix(
+    string::size_type varBegin = commonPrefix(
         ref.begin(), ref.end(),
         alt.begin(), alt.end()
     );
@@ -24,7 +25,7 @@ void RawVariant::normalize() {
     string::const_reverse_iterator revAltEnd(alt.begin()+varBegin);
 
     // find trailing bases in the alt that match the reference
-    string::size_type csuff = Sequence::commonPrefix(
+    string::size_type csuff = commonPrefix(
         revRefBeg, revRefEnd,
         revAltBeg, revAltEnd
     );
@@ -56,7 +57,7 @@ std::pair<RawVariant, RawVariant> RawVariant::splitIndelWithSubstitution() const
     // insertion with substitution
     typedef string::const_reverse_iterator RevIter;
     string::const_iterator substEnd = altStr->begin() + refStr->size();
-    size_t substCommonSuffix = Sequence::commonPrefix(
+    size_t substCommonSuffix = commonPrefix(
         RevIter(substEnd), altStr->rend(),
         refStr->rbegin(), refStr->rend()
         );
@@ -64,7 +65,7 @@ std::pair<RawVariant, RawVariant> RawVariant::splitIndelWithSubstitution() const
     size_t substLen = refStr->size() - substCommonSuffix;
     RawVariant substVar(pos, refStr->substr(0, substLen), altStr->substr(0, substLen));
 
-    size_t indelCommonPrefix = Sequence::commonPrefix(
+    size_t indelCommonPrefix = commonPrefix(
         altStr->begin() + substLen, altStr->end(),
         refStr->begin() + substLen, refStr->end()
     );

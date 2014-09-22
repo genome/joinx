@@ -15,8 +15,10 @@ set(SOURCES
     ProgramDetails.hpp
     Region.cpp
     Region.hpp
+    RelOps.hpp
     Sequence.cpp
     Sequence.hpp
+    String.hpp
     StringView.hpp
     TempFile.cpp
     TempFile.hpp

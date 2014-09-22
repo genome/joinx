@@ -11,6 +11,7 @@ set(TEST_SOURCES
     TestMutationSpectrum.cpp
     TestRegion.cpp
     TestSequence.cpp
+    TestString.cpp
     TestTokenizer.cpp
     )
 

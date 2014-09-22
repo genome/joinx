@@ -1,6 +1,7 @@
 #include "FindHomopolymersCommand.hpp"
 
 #include "common/Sequence.hpp"
+#include "common/String.hpp"
 #include "fileformats/Fasta.hpp"
 #include "fileformats/Bed.hpp"
 
@@ -106,6 +107,6 @@ void FindHomopolymersCommand::exec() {
         auto data = fa.sequence(*i, 1, indexEntry->len);
         Reporter reporter(*i, *out, ignoreArray_);
         std::cerr << "Loaded " << data.size() << " bp for sequence " << *i << "\n";
-        Sequence::findHomopolymers(data, reporter, minLength_);
+        findHomopolymers(data, reporter, minLength_);
     }
 }
