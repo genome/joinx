@@ -3,15 +3,48 @@
 #include <gtest/gtest.h>
 
 #include <string>
+#include <vector>
 
-TEST(String, commonPrefix) {
+TEST(TestString, commonPrefixMulti) {
+    std::string a("abcdefGh");
+    std::string b("abcdeFGh");
+    std::string c("abcdEfGh");
+    std::string d("abcDefGh");
+
+    std::vector<std::string> xs{a, b, c, d};
+    EXPECT_EQ(3u, commonPrefixMulti(xs));
+    EXPECT_EQ(2u, commonSuffixMulti(xs));
+}
+
+TEST(TestString, commonPrefixMultiEmpty) {
+    std::string a("abcdefGh");
+    std::string b("abcdeFGh");
+    std::string c("abcdEfGh");
+    std::string d("");
+
+    std::vector<std::string> xs{a, b, c, d};
+    EXPECT_EQ(0u, commonPrefixMulti(xs));
+    EXPECT_EQ(0u, commonSuffixMulti(xs));
+}
+
+TEST(TestString, commonPrefix) {
     std::string a("abcDef");
     std::string b("abcdef");
 
     EXPECT_EQ(3u, commonPrefix(a, b));
+    EXPECT_EQ(a.size(), commonPrefix(a, a));
+    EXPECT_EQ(b.size(), commonPrefix(b, b));
 }
 
-TEST(String, commonPrefixReverseIterators) {
+TEST(TestString, commonPrefixEmpty) {
+    std::string a("abcDef");
+    std::string b("");
+
+    EXPECT_EQ(0u, commonPrefix(a, b));
+    EXPECT_EQ(0u, commonPrefix(b, b));
+}
+
+TEST(TestString, commonPrefixReverseIterators) {
     std::string a("GCC");
     std::string b("GA");
     EXPECT_EQ(0u, commonPrefix(
@@ -58,7 +91,7 @@ struct HomopolymerCollector {
 };
 
 
-TEST(String, findHomopolymers) {
+TEST(TestString, findHomopolymers) {
     std::string testSequence = "ACGTAAAACCACTGGGATT";
     HomopolymerCollector c;
     findHomopolymers(testSequence, c, 2);
@@ -69,7 +102,7 @@ TEST(String, findHomopolymers) {
         {17, 19, 'T'}
         };
 
-    EXPECT_EQ(4, c.records.size());
+    EXPECT_EQ(4u, c.records.size());
     EXPECT_EQ(expected, c.records);
 
     c.records.clear();
@@ -79,6 +112,6 @@ TEST(String, findHomopolymers) {
         {13, 16, 'G'},
         };
 
-    EXPECT_EQ(2, c.records.size());
+    EXPECT_EQ(2u, c.records.size());
     EXPECT_EQ(expected, c.records);
 }
