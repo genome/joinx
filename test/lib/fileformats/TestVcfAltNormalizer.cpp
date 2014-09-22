@@ -44,23 +44,6 @@ protected:
     Header _header;
 };
 
-TEST_F(TestVcfAltNormalizer, equivalentAlts) {
-    string ref = _ref.sequence("1", 4, 6);
-    EXPECT_EQ("CGCGCG", ref);
-    Entry e = makeEntry("1", 4, ref, "CGCGCG,CGCG", "0/1\t1/2");
-    AltNormalizer n(_ref);
-    cout << "BEFORE: " << e << "\n";
-    n.normalize(e);
-    cout << " AFTER: " << e << "\n";
-
-    EXPECT_EQ(3u, e.pos());
-    EXPECT_EQ("TCG", e.ref());
-    EXPECT_EQ(1u, e.alt().size());
-    EXPECT_EQ("T", e.alt()[0]);
-    EXPECT_EQ("0/0", e.sampleData().genotype(0).string());
-    EXPECT_EQ("0/1", e.sampleData().genotype(1).string());
-}
-
 // single alt cases
 TEST_F(TestVcfAltNormalizer, insertion) {
     cout << "   REF: " << _ref.sequence("1", 1, 13) << "\n";
@@ -133,7 +116,7 @@ TEST_F(TestVcfAltNormalizer, deletionWithSubstitution) {
     n.normalize(e);
     cout << " AFTER: " << e << "\n";
 
-    // We no longer strip padding from things that aren't moved.
+    // We no longer strip padding from things that don't move.
     EXPECT_EQ(9u, e.pos());
     EXPECT_EQ("GCGCG", e.ref());
     EXPECT_EQ(1u, e.alt().size());
@@ -224,5 +207,92 @@ TEST_F(TestVcfAltNormalizer, indelAtPos1) {
     EXPECT_EQ(1u, e.pos());
     EXPECT_EQ("AGA", e.ref());
     EXPECT_EQ("A", e.alt()[0]);
+}
 
+TEST_F(TestVcfAltNormalizer, superfluousPaddingOmitted) {
+    string refStr(">1\nCTTTTT");
+    Fasta ref("test", refStr.data(), refStr.size());
+    Entry e = makeEntry("1", 1, "CTT", "CAT,CTTTT");
+
+    AltNormalizer n(ref);
+    cout << "BEFORE: " << e << "\n";
+    n.normalize(e);
+    cout << " AFTER: " << e << "\n";
+
+    EXPECT_EQ(2u, e.pos());
+    EXPECT_EQ("T", e.ref());
+    ASSERT_EQ(2u, e.alt().size());
+    EXPECT_EQ("A", e.alt()[0]);
+    EXPECT_EQ("TTT", e.alt()[1]);
+}
+
+TEST_F(TestVcfAltNormalizer, trailingPadding) {
+    string refStr(">1\nTATTATG");
+    Fasta ref("test", refStr.data(), refStr.size());
+    Entry e = makeEntry("1", 4, "TATG", "G");
+
+    AltNormalizer n(ref);
+    cout << "BEFORE: " << e << "\n";
+    n.normalize(e);
+    cout << " AFTER: " << e << "\n";
+
+    EXPECT_EQ(1u, e.pos());
+    EXPECT_EQ("TATT", e.ref());
+    ASSERT_EQ(1u, e.alt().size());
+    EXPECT_EQ("T", e.alt()[0]);
+}
+
+TEST_F(TestVcfAltNormalizer, pre_and_post_padding_bug) {
+    // The bug was that when a variant at position 2 needs padding, it would
+    // get it at both ends. (It gets added to the front first, which makes
+    // its position 1, then the "need padding" flag was still set later and
+    // oh look we're at position 1, better put the padding at the end)
+
+    string refStr(">1\nATATTATG");
+    Fasta ref("test", refStr.data(), refStr.size());
+    Entry e = makeEntry("1", 3, "ATTA", "A");
+
+    AltNormalizer n(ref);
+    cout << "BEFORE: " << e << "\n";
+    n.normalize(e);
+    cout << " AFTER: " << e << "\n";
+
+    EXPECT_EQ(1u, e.pos());
+    EXPECT_EQ("ATAT", e.ref());
+    ASSERT_EQ(1u, e.alt().size());
+    EXPECT_EQ("A", e.alt()[0]);
+}
+
+TEST_F(TestVcfAltNormalizer, alts_equivalent_to_ref_are_removed) {
+    string ref = _ref.sequence("1", 4, 6);
+    EXPECT_EQ("CGCGCG", ref);
+    Entry e = makeEntry("1", 4, ref, "CGCGCG,CGCG", "0/1\t1/2");
+    AltNormalizer n(_ref);
+    cout << "BEFORE: " << e << "\n";
+    n.normalize(e);
+    cout << " AFTER: " << e << "\n";
+
+    EXPECT_EQ(3u, e.pos());
+    EXPECT_EQ("TCG", e.ref());
+    EXPECT_EQ(1u, e.alt().size());
+    EXPECT_EQ("T", e.alt()[0]);
+    EXPECT_EQ("0/0", e.sampleData().genotype(0).string());
+    EXPECT_EQ("0/1", e.sampleData().genotype(1).string());
+}
+
+TEST_F(TestVcfAltNormalizer, duplicate_alts_are_collapsed) {
+    std::string refStr(">1\nATATTATG");
+    Fasta ref("test", refStr.data(), refStr.size());
+    Entry e = makeEntry("1", 4, "TTATG", "TG,TG", "0/1\t1/2");
+    AltNormalizer n(ref);
+    cout << "BEFORE: " << e << "\n";
+    n.normalize(e);
+    cout << " AFTER: " << e << "\n";
+
+    EXPECT_EQ(1u, e.pos());
+    EXPECT_EQ("ATAT", e.ref());
+    EXPECT_EQ(1u, e.alt().size());
+    EXPECT_EQ("A", e.alt()[0]);
+    EXPECT_EQ("0/1", e.sampleData().genotype(0).string());
+    EXPECT_EQ("1/1", e.sampleData().genotype(1).string());
 }

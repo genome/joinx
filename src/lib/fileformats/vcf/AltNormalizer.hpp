@@ -18,7 +18,7 @@ BEGIN_NAMESPACE(Vcf)
 class Entry;
 
 template<typename RefStringType>
-size_t normalizeRaw(RawVariant& var, RefStringType const& refseq) {
+std::size_t normalizeRaw(RawVariant& var, RefStringType const& refseq) {
     // Process only pure indels (not those with substitutions or empty calls).
     if ((!var.ref.empty() && !var.alt.empty())
         || (var.ref.empty() && var.alt.empty()))
@@ -42,7 +42,7 @@ size_t normalizeRaw(RawVariant& var, RefStringType const& refseq) {
 
     // Compute the max distance that the alt can be cyclically left shifted
     // while remaining equal to the sequence it overlaps.
-    size_t shift = commonPrefix(altCycleBeg, altCycleEnd, revRefBegin, revRefEnd);
+    std::size_t shift = commonPrefix(altCycleBeg, altCycleEnd, revRefBegin, revRefEnd);
 
     // Apply the shift we just calculated.
     var.pos -= shift;
@@ -58,24 +58,28 @@ size_t normalizeRaw(RawVariant& var, RefStringType const& refseq) {
 class AltNormalizer {
 public:
     typedef Fasta RefSeq;
-    struct RefEdit {
-        RefEdit() : pos(0), len(0) {}
-
-        RefEdit(uint64_t pos, uint64_t len, uint64_t lastRef, std::string bases, VariantType type)
-            : pos(pos), len(len), lastRef(lastRef), bases(bases), type(type)
-        {}
-
-        uint64_t pos;
-        uint64_t len;
-        uint64_t lastRef;
-        std::string bases;
-        VariantType type;
-    };
-
 
     AltNormalizer(RefSeq const& ref);
 
     void normalize(Entry& e);
+    void loadReferenceSequence(std::string const& seq);
+
+protected:
+    class Impl {
+    public:
+        Impl(RawVariant::Vector& rawvs, std::string const& refSequence);
+
+        std::size_t normalizeRawVariants();
+        bool needPadding() const;
+
+    public: // data
+        int64_t minRefPos;
+        int64_t maxRefPos;
+
+    private:
+        RawVariant::Vector& rawvs_;
+        std::string const& refSequence_;
+    };
 
 protected:
     RefSeq const& _ref;
