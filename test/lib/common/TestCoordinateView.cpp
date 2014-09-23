@@ -34,4 +34,3 @@ TEST(TestCoordinateView, unpadded_coordinate_view) {
     EXPECT_EQ(-10, view.start(obj));
     EXPECT_EQ(-20, view.stop(obj));
 }
-

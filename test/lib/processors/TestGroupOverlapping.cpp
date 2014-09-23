@@ -1,4 +1,5 @@
 #include "processors/GroupOverlapping.hpp"
+#include "common/CoordinateView.hpp"
 
 #include <gtest/gtest.h>
 
