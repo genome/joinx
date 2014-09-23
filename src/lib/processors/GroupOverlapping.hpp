@@ -15,7 +15,8 @@ template<
         >
 class GroupOverlapping {
 public:
-    typedef std::vector<std::unique_ptr<ValueType>> OutputType;
+    typedef std::unique_ptr<ValueType> ValuePtr;
+    typedef std::vector<ValuePtr> ValuePtrVector;
 
     GroupOverlapping(OutputFunc& out, CoordView coordView = CoordView())
         : out_(out)
@@ -34,7 +35,12 @@ public:
         , bundle_(std::move(rhs.bundle_))
     {}
 
-    void operator()(std::unique_ptr<ValueType> entry) {
+    void operator()(ValuePtrVector entries) {
+        for (auto i = entries.begin(); i != entries.end(); ++i)
+            (*this)(std::move(*i));
+    }
+
+    void operator()(ValuePtr entry) {
         if (!overlaps(*entry)) {
             assignRegion(*entry);
             if (!bundle_.empty()) {
@@ -74,7 +80,7 @@ private:
     std::string sequence_;
     Region region_;
     CoordView coordView_;
-    OutputType bundle_;
+    ValuePtrVector bundle_;
 };
 
 

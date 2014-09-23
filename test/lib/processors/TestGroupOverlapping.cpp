@@ -16,6 +16,9 @@ namespace {
         int64_t stop() const { return stop_; }
         uint32_t source() const { return source_; }
 
+        int64_t startWithoutPadding() const { return -start_; }
+        int64_t stopWithoutPadding() const { return -stop_; }
+
         bool operator==(MockEntry const& rhs) const {
             return chrom_ == rhs.chrom_ &&
                 start_ == rhs.start_ &&
@@ -60,24 +63,33 @@ namespace {
     };
 }
 
-TEST(TestGroupOverlapping, read) {
-    std::deque<MockEntry> entries{
-        // First group {chrom, start, stop, file index}
-        {"1", 10, 15, 0},
-        {"1", 14, 17, 1},
-        {"1", 16, 19, 2},
+class TestGroupOverlapping : public ::testing::Test {
+public:
 
-        // Second
-        {"1", 20, 22, 1},
+    void SetUp() {
+        entries = {
+            // First group {chrom, start, stop, file index}
+            {"1", 10, 15, 0},
+            {"1", 14, 17, 1},
+            {"1", 16, 19, 2},
 
-        // Third
-        {"2", 20, 22, 0},
+            // Second
+            {"1", 20, 22, 1},
 
-        // Fourth
-        {"2", 50, 60, 1},
-        {"2", 55, 61, 2},
-        };
+            // Third
+            {"2", 20, 22, 0},
 
+            // Fourth
+            {"2", 50, 60, 1},
+            {"2", 55, 61, 2},
+            };
+    }
+
+protected:
+    std::deque<MockEntry> entries;
+};
+
+TEST_F(TestGroupOverlapping, read) {
     MockReader reader{entries};
 
     Collector collector;
@@ -85,6 +97,42 @@ TEST(TestGroupOverlapping, read) {
     auto oer = makeGroupOverlapping<MockEntry>(collector);
     auto pump = makePointerStreamPump(reader, oer);
     pump.execute();
+
+    auto const& result = collector.entries;
+    ASSERT_EQ(4u, result.size()); // should get all four groups in output
+
+    // Check first group
+    ASSERT_EQ(3u, result[0].size());
+    EXPECT_EQ(entries[0], *result[0][0]);
+    EXPECT_EQ(entries[1], *result[0][1]);
+    EXPECT_EQ(entries[2], *result[0][2]);
+
+    // Second group
+    ASSERT_EQ(1u, result[1].size());
+    EXPECT_EQ(entries[3], *result[1][0]);
+
+    // Third group
+    ASSERT_EQ(1u, result[2].size());
+    EXPECT_EQ(entries[4], *result[2][0]);
+
+    // Fourth group
+    ASSERT_EQ(2u, result[3].size());
+    EXPECT_EQ(entries[5], *result[3][0]);
+    EXPECT_EQ(entries[6], *result[3][1]);
+}
+
+
+TEST_F(TestGroupOverlapping, accept_vector) {
+    std::vector<std::unique_ptr<MockEntry>> entry_ptrs;
+    for (auto i = entries.begin(); i != entries.end(); ++i) {
+        entry_ptrs.emplace_back(new MockEntry(*i));
+    }
+
+    Collector collector;
+
+    auto oer = makeGroupOverlapping<MockEntry>(collector);
+    oer(std::move(entry_ptrs));
+    oer.flush();
 
     auto const& result = collector.entries;
     ASSERT_EQ(4u, result.size()); // should get all four groups in output
