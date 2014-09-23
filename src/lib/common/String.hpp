@@ -40,7 +40,7 @@ struct CommonPrefixMultiImpl {
 
     uint64_t operator()() {
         uint64_t rv{0};
-        if (anyDone())
+        if (begs.empty() || anyDone())
             return rv;
 
         do {

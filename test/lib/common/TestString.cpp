@@ -5,6 +5,23 @@
 #include <string>
 #include <vector>
 
+TEST(TestString, commonPrefixMulti_all_empty) {
+    std::string a("");
+    std::string b("");
+    std::string c("");
+    std::string d("");
+
+    std::vector<std::string> xs{a, b, c, d};
+    EXPECT_EQ(0u, commonPrefixMulti(xs));
+    EXPECT_EQ(0u, commonSuffixMulti(xs));
+}
+
+TEST(TestString, commonPrefixMulti_no_strings) {
+    std::vector<std::string> xs;
+    EXPECT_EQ(0u, commonPrefixMulti(xs));
+    EXPECT_EQ(0u, commonSuffixMulti(xs));
+}
+
 TEST(TestString, commonPrefixMulti) {
     std::string a("abcdefGh");
     std::string b("abcdeFGh");
