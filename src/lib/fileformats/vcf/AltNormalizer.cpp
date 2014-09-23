@@ -36,32 +36,28 @@ void AltNormalizer::Impl::normalize() {
 void AltNormalizer::Impl::editEntry() {
     int64_t origPos = entry_.pos();
     int64_t origEnd = origPos + entry_.ref().size();
-    bool refChanged = minRefPos != origPos || maxRefPos != origEnd;
 
     // Fetch new reference bases if they changed
-    if (refChanged)
-        entry_._ref = refSequence_.substr(minRefPos-1, maxRefPos-minRefPos+1);
-
-    entry_._pos = minRefPos;
+    std::string refBases = refSequence_.substr(minRefPos-1, maxRefPos-minRefPos+1);
 
     // add the required padding to make each raw variant's ref allele match
     // that of the final entry.
     vector<string> newAlt(entry_.alt().size());
     for (std::size_t i = 0; i < rawvs_.size(); ++i) {
         auto const& var = rawvs_[i];
-        assert(uint64_t(var.pos) >= entry_.pos());
+        assert(uint64_t(var.pos) >= minRefPos);
 
         int64_t headGap = var.pos - minRefPos;
-        string alt(entry_.ref().substr(0, headGap) + var.alt);
+        string alt(refBases.substr(0, headGap) + var.alt);
 
         size_t lastRefIdx = var.pos - minRefPos + var.ref.size();
-        if (lastRefIdx < entry_.ref().size())
-            alt += entry_.ref().substr(lastRefIdx);
+        if (lastRefIdx < refBases.size())
+            alt += refBases.substr(lastRefIdx);
 
         newAlt[i] = std::move(alt);
     }
 
-    entry_._alt.swap(newAlt);
+    entry_.replaceAlts(minRefPos, refBases, newAlt);
 }
 
 std::size_t AltNormalizer::Impl::normalizeRawVariants() {

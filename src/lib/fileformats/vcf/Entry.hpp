@@ -21,8 +21,6 @@ class Header;
 
 class Entry {
 public:
-    friend class AltNormalizer;
-
     static bool isInvalidFilterId (char c) {
         return (c == ';' || isspace(c));
     }
@@ -58,9 +56,9 @@ public:
 
     // member functions
     Entry();
-    Entry(Entry const& e) throw();
+    Entry(Entry const& e);
     // for move semantics
-    Entry(Entry&& e) throw();
+    Entry(Entry&& e);
     explicit Entry(const Header* h);
     Entry(EntryMerger&& merger);
     Entry(const Header* h, const std::string& s);
@@ -115,6 +113,9 @@ public:
 
     int64_t start() const;
     int64_t stop() const;
+    int64_t startWithoutPadding() const;
+    int64_t stopWithoutPadding() const;
+
     int64_t length() const { return stop() - start(); }
 
     // -1 if not found
@@ -131,10 +132,15 @@ public:
     void allButSamplesToStream(std::ostream& s) const;
     void samplesToStream(std::ostream& s) const;
 
+    void replaceAlts(uint64_t pos, std::string ref, std::vector<std::string> alt);
+    void computeStartStop();
+
 protected:
     const Header* _header;
     std::string _chrom;
     uint64_t _pos;
+    int64_t _startWithoutPadding;
+    int64_t _stopWithoutPadding;
     std::set<std::string> _identifiers;
     std::string _ref;
     std::vector<std::string> _alt;

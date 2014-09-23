@@ -3,7 +3,7 @@
 #include "CustomValue.hpp"
 #include "Header.hpp"
 #include "MergeStrategy.hpp"
-#include "common/Sequence.hpp"
+#include "common/String.hpp"
 #include "io/StreamJoin.hpp"
 
 #include <boost/format.hpp>
@@ -77,15 +77,19 @@ Entry::FieldName Entry::fieldFromString(const char* name) {
 Entry::Entry()
     : _header(0)
     , _pos(0)
+    , _startWithoutPadding(0)
+    , _stopWithoutPadding(0)
     , _qual(MISSING_QUALITY)
     , _parsedSamples(false)
 {
 }
 
-Entry::Entry(Entry const& e) throw ()
+Entry::Entry(Entry const& e)
     : _header(e._header)
     , _chrom(e._chrom)
     , _pos(e._pos)
+    , _startWithoutPadding(e._startWithoutPadding)
+    , _stopWithoutPadding(e._stopWithoutPadding)
     , _identifiers(e._identifiers)
     , _ref(e._ref)
     , _alt(e._alt)
@@ -98,10 +102,12 @@ Entry::Entry(Entry const& e) throw ()
 {
 }
 
-Entry::Entry(Entry&& e) throw ()
+Entry::Entry(Entry&& e)
     : _header(e._header)
     , _chrom(std::move(e._chrom))
     , _pos(e._pos)
+    , _startWithoutPadding(e._startWithoutPadding)
+    , _stopWithoutPadding(e._stopWithoutPadding)
     , _identifiers(std::move(e._identifiers))
     , _ref(std::move(e._ref))
     , _alt(std::move(e._alt))
@@ -118,6 +124,8 @@ Entry& Entry::operator=(Entry const& e) {
     _header = e._header;
     _chrom = e._chrom;
     _pos = e._pos;
+    _startWithoutPadding = e._startWithoutPadding;
+    _stopWithoutPadding = e._stopWithoutPadding;
     _identifiers = e._identifiers;
     _ref = e._ref;
     _alt = e._alt;
@@ -133,7 +141,9 @@ Entry& Entry::operator=(Entry const& e) {
 Entry& Entry::operator=(Entry&& e) {
     _header = std::move(e._header);
     _chrom = std::move(e._chrom);
-    _pos = std::move(e._pos);
+    _pos = e._pos;
+    _startWithoutPadding = e._startWithoutPadding;
+    _stopWithoutPadding = e._stopWithoutPadding;
     _identifiers = std::move(e._identifiers);
     _ref = std::move(e._ref);
     _alt = std::move(e._alt);
@@ -149,6 +159,8 @@ Entry& Entry::operator=(Entry&& e) {
 Entry::Entry(const Header* h)
     : _header(h)
     , _pos(0)
+    , _startWithoutPadding(0)
+    , _stopWithoutPadding(0)
     , _qual(MISSING_QUALITY)
     , _parsedSamples(false)
 {
@@ -156,6 +168,8 @@ Entry::Entry(const Header* h)
 
 Entry::Entry(const Header* h, const string& s)
     : _header(h)
+    , _startWithoutPadding(0)
+    , _stopWithoutPadding(0)
     , _qual(MISSING_QUALITY)
     , _parsedSamples(false)
 {
@@ -172,13 +186,6 @@ Entry::Entry(EntryMerger&& merger)
     , _failedFilters(std::move(merger.failedFilters()))
     , _parsedSamples(true)
 {
-/*
-    if (merger.entryCount() < 2) {
-        throw runtime_error(str(format(
-            "Logic error: attempted to merge a single entry: %1%"
-            ) %merger.entries()->toString()));
-    }
-*/
     if (!merger.merged()) {
         stringstream ss;
         for (size_t i = 0; i < merger.entryCount(); ++i) {
@@ -189,6 +196,8 @@ Entry::Entry(EntryMerger&& merger)
 
     merger.setAltAndGenotypeData(_alt, _sampleData);
     merger.setInfo(_info);
+
+    computeStartStop();
 }
 
 void Entry::reheader(const Header* newHeader) {
@@ -297,6 +306,7 @@ void Entry::parse(const Header* h, const string& s) {
 
     tok.remaining(_sampleString);
     _parsedSamples = false;
+    computeStartStop();
 }
 
 void Entry::addIdentifier(const std::string& id) {
@@ -344,6 +354,8 @@ int Entry::cmp(const Entry& rhs) const {
 void Entry::swap(Entry& other) {
     _chrom.swap(other._chrom);
     std::swap(_pos, other._pos);
+    std::swap(_startWithoutPadding, other._startWithoutPadding);
+    std::swap(_stopWithoutPadding, other._stopWithoutPadding);
     _identifiers.swap(other._identifiers);
     _ref.swap(other._ref);
     _alt.swap(other._alt);
@@ -403,11 +415,20 @@ const SampleData& Entry::sampleData() const {
 }
 
 int64_t Entry::start() const {
-    return _pos-1;
+    return _pos - 1;
+    return _startWithoutPadding;
 }
 
 int64_t Entry::stop() const {
-    return _pos-1 + _ref.size();
+    return _pos - 1 + _ref.size();
+}
+
+int64_t Entry::startWithoutPadding() const {
+    return _startWithoutPadding;
+}
+
+int64_t Entry::stopWithoutPadding() const {
+    return _stopWithoutPadding;
 }
 
 const std::string& Entry::alt(GenotypeIndex const& idx) const {
@@ -463,6 +484,21 @@ void Entry::allButSamplesToStream(std::ostream& s) const {
             }
         }
     }
+}
+
+void Entry::replaceAlts(uint64_t pos, std::string ref, std::vector<std::string> alt) {
+    _pos = pos;
+    _ref = std::move(ref);
+    _alt = std::move(alt);
+}
+
+void Entry::computeStartStop() {
+    // FIXME: don't copy alleles.
+    std::vector<std::string> alleles(_alt.size() + 1);
+    alleles[0] = _ref;
+    std::copy(_alt.begin(), _alt.end(), alleles.begin() + 1);
+    _startWithoutPadding = _pos - 1 + commonPrefixMulti(alleles);
+    _stopWithoutPadding = _startWithoutPadding + _ref.size() - commonSuffixMulti(alleles);
 }
 
 ostream& operator<<(ostream& s, const Entry& e) {

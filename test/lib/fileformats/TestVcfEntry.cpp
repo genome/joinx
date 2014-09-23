@@ -105,6 +105,12 @@ protected:
     vector<Entry> v;
 };
 
+TEST_F(TestVcfEntry, start_and_stop_without_padding) {
+    auto const& entry = v[4];
+    EXPECT_EQ(entry.startWithoutPadding(), 1234567);
+    EXPECT_EQ(entry.stopWithoutPadding(), 1234570);
+}
+
 TEST_F(TestVcfEntry, parse) {
     stringstream ss(vcfLines);
     for (auto i = v.begin(); i != v.end(); ++i) {
