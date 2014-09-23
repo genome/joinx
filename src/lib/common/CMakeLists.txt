@@ -10,6 +10,7 @@ set(SOURCES
     Exceptions.hpp
     Integer.hpp
     Iub.hpp
+    LocusCompare.hpp
     MultiType.hpp
     MutationSpectrum.cpp
     MutationSpectrum.hpp

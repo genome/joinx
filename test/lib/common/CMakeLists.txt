@@ -8,6 +8,7 @@ set(TEST_SOURCES
     TestCoordinateView.cpp
     TestInteger.cpp
     TestIub.cpp
+    TestLocusCompare.cpp
     TestMutationSpectrum.cpp
     TestRegion.cpp
     TestSequence.cpp

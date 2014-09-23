@@ -22,6 +22,7 @@ TEST(TestCoordinateView, default_coordinate_view) {
     DefaultCoordinateView view;
     TestObject obj{"X", 10, 20};
     EXPECT_EQ("X", view.chrom(obj));
+    EXPECT_EQ(&view.chrom(obj), &obj.chrom_);
     EXPECT_EQ(10, view.start(obj));
     EXPECT_EQ(20, view.stop(obj));
 }
@@ -31,6 +32,7 @@ TEST(TestCoordinateView, unpadded_coordinate_view) {
     UnpaddedCoordinateView view;
     TestObject obj{"X", 10, 20};
     EXPECT_EQ("X", view.chrom(obj));
+    EXPECT_EQ(&view.chrom(obj), &obj.chrom_);
     EXPECT_EQ(-10, view.start(obj));
     EXPECT_EQ(-20, view.stop(obj));
 }
