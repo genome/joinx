@@ -28,6 +28,8 @@ namespace {
             beds.push_back(value);
         }
 
+        void flush() {}
+
         vector<Bed> beds;
     };
 }
@@ -81,7 +83,7 @@ TEST_F(TestMergeSorted, execute) {
 
     Collector c;
     MergeSorted<Bed, BedReader::ptr> merger(bedStreams);
-    auto pump = makeStreamPump<Bed>(merger, c);
+    auto pump = makeStreamPump(merger, c);
     pump.execute();
     ASSERT_EQ(_expectedBeds.size(), c.beds.size());
     for (unsigned i = 0; i < c.beds.size(); ++i)

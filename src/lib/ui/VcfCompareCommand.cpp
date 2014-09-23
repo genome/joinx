@@ -1,6 +1,7 @@
 #include "VcfCompareCommand.hpp"
 
 #include "common/Tokenizer.hpp"
+#include "fileformats/StreamPump.hpp"
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/MultiWriter.hpp"
 #include "io/InputStream.hpp"
@@ -246,7 +247,8 @@ void VcfCompareCommand::exec() {
         , includeRefAlleles_
         );
 
-    auto overlap = makeGroupOverlapping(merger, matcher);
-    overlap.execute();
+    auto overlap = makeGroupOverlapping<Vcf::Entry>(matcher);
+    auto pump = makePointerStreamPump(merger, overlap);
+    pump.execute();
     matcher.reportCounts(*out);
 }

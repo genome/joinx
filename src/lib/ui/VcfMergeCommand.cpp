@@ -250,7 +250,6 @@ void VcfMergeCommand::exec() {
     Vcf::Builder builder(mergeStrategy, &mergedHeader, writer);
     *out << mergedHeader;
     MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
-    auto pump = makeStreamPump<Vcf::Entry>(merger, builder);
+    auto pump = makeStreamPump(merger, builder);
     pump.execute();
-    builder.flush();
 }

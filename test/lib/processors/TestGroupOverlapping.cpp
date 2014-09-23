@@ -1,5 +1,6 @@
 #include "processors/GroupOverlapping.hpp"
-#include "common/CoordinateView.hpp"
+
+#include "fileformats/StreamPump.hpp"
 
 #include <gtest/gtest.h>
 
@@ -81,11 +82,12 @@ TEST(TestGroupOverlapping, read) {
 
     Collector collector;
 
-    auto oer = makeGroupOverlapping(reader, collector);
-    oer.execute();
+    auto oer = makeGroupOverlapping<MockEntry>(collector);
+    auto pump = makePointerStreamPump(reader, oer);
+    pump.execute();
 
     auto const& result = collector.entries;
-    EXPECT_EQ(4, result.size()); // should get all four groups in output
+    ASSERT_EQ(4, result.size()); // should get all four groups in output
 
     // Check first group
     ASSERT_EQ(3, result[0].size());
