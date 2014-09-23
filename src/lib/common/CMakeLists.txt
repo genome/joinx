@@ -5,6 +5,7 @@ project(common)
 set(SOURCES
     CigarString.cpp
     CigarString.hpp
+    CoordinateView.hpp
     CyclicIterator.hpp
     Exceptions.hpp
     Integer.hpp
