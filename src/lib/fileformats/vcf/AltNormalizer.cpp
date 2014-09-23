@@ -34,9 +34,6 @@ void AltNormalizer::Impl::normalize() {
 }
 
 void AltNormalizer::Impl::editEntry() {
-    int64_t origPos = entry_.pos();
-    int64_t origEnd = origPos + entry_.ref().size();
-
     // Fetch new reference bases if they changed
     std::string refBases = refSequence_.substr(minRefPos-1, maxRefPos-minRefPos+1);
 
@@ -45,7 +42,7 @@ void AltNormalizer::Impl::editEntry() {
     vector<string> newAlt(entry_.alt().size());
     for (std::size_t i = 0; i < rawvs_.size(); ++i) {
         auto const& var = rawvs_[i];
-        assert(uint64_t(var.pos) >= minRefPos);
+        assert(var.pos >= minRefPos);
 
         int64_t headGap = var.pos - minRefPos;
         string alt(refBases.substr(0, headGap) + var.alt);

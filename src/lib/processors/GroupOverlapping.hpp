@@ -23,6 +23,17 @@ public:
     {
     }
 
+    // GCC 4.4 requires writing these explicitly :(
+    GroupOverlapping(GroupOverlapping const&) = delete;
+    GroupOverlapping& operator=(GroupOverlapping const&) = delete;
+    GroupOverlapping(GroupOverlapping&& rhs)
+        : out_(rhs.out_)
+        , sequence_(std::move(rhs.sequence_))
+        , region_(std::move(rhs.region_))
+        , coordView_(std::move(rhs.coordView_))
+        , bundle_(std::move(rhs.bundle_))
+    {}
+
     void operator()(std::unique_ptr<ValueType> entry) {
         if (!overlaps(*entry)) {
             assignRegion(*entry);

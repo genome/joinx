@@ -87,24 +87,24 @@ TEST(TestGroupOverlapping, read) {
     pump.execute();
 
     auto const& result = collector.entries;
-    ASSERT_EQ(4, result.size()); // should get all four groups in output
+    ASSERT_EQ(4u, result.size()); // should get all four groups in output
 
     // Check first group
-    ASSERT_EQ(3, result[0].size());
+    ASSERT_EQ(3u, result[0].size());
     EXPECT_EQ(entries[0], *result[0][0]);
     EXPECT_EQ(entries[1], *result[0][1]);
     EXPECT_EQ(entries[2], *result[0][2]);
 
     // Second group
-    ASSERT_EQ(1, result[1].size());
+    ASSERT_EQ(1u, result[1].size());
     EXPECT_EQ(entries[3], *result[1][0]);
 
     // Third group
-    ASSERT_EQ(1, result[2].size());
+    ASSERT_EQ(1u, result[2].size());
     EXPECT_EQ(entries[4], *result[2][0]);
 
     // Fourth group
-    ASSERT_EQ(2, result[3].size());
+    ASSERT_EQ(2u, result[3].size());
     EXPECT_EQ(entries[5], *result[3][0]);
     EXPECT_EQ(entries[6], *result[3][1]);
 }
