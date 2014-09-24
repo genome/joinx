@@ -2,6 +2,8 @@
 
 #include "CustomValue.hpp"
 #include "SampleData.hpp"
+#include "common/CoordinateView.hpp"
+#include "common/LocusCompare.hpp"
 #include "common/Tokenizer.hpp"
 #include "common/cstdint.hpp"
 #include "common/namespaces.hpp"
@@ -21,10 +23,11 @@ class Header;
 
 class Entry {
 public:
+    typedef LocusCompare<DefaultCoordinateView, StartOnly> DefaultCompare;
+
     static bool isInvalidFilterId (char c) {
         return (c == ';' || isspace(c));
     }
-
 
     enum FieldName {
         CHROM,
@@ -39,6 +42,7 @@ public:
         SAMPLE_DATA,
         UNDEFINED
     };
+
     typedef Header HeaderType;
     typedef std::map<std::string, CustomValue> CustomValueMap;
 
@@ -124,9 +128,6 @@ public:
     std::string toString() const;
     std::vector<std::string> allelesForSample(size_t sampleIdx) const;
 
-    int cmp(const Entry& rhs) const;
-    bool operator<(const Entry& rhs) const;
-
     void swap(Entry& other);
 
     void allButSamplesToStream(std::ostream& s) const;
@@ -151,11 +152,6 @@ protected:
     mutable bool _parsedSamples;
     mutable SampleData _sampleData;
 };
-
-
-inline bool Entry::operator<(const Entry& rhs) const {
-    return cmp(rhs) < 0;
-}
 
 inline bool containsInsertions(Vcf::Entry const& v) {
     // no lambdas in gcc 4.4 :(

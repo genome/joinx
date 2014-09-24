@@ -100,7 +100,11 @@ TEST_F(TestSort, unstable) {
     Collector<Bed> out;
     SortType sorter(_bedReaders, bedOpener, out, hdr, _expectedBeds.size()/10, false);
     sorter.execute();
-    ASSERT_EQ(_expectedStr.str(), out.out.str());
+    ASSERT_EQ(_expectedStr.str(), out.out.str())
+        << "Expected:\n" << _expectedStr.str()
+        << "\n\n"
+        << "Actual:\n" << out.out.str()
+        ;
 }
 
 TEST_F(TestSort, gzip) {

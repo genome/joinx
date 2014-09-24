@@ -2,9 +2,10 @@
 
 #include "common/LocusCompare.hpp"
 
-#include <set>
+#include <algorithm>
 #include <vector>
 #include <functional>
+#include <set>
 #include <utility>
 
 namespace {
@@ -32,7 +33,7 @@ namespace {
 template<
           typename ValueType_
         , typename StreamPtr
-        , typename LessThanCmp = CompareToLessThan<LocusCompare<>>
+        , typename LessThanCmp = CompareToLessThan<typename ValueType_::DefaultCompare>
         >
 class MergeSorted {
 public:
@@ -40,14 +41,11 @@ public:
 
     MergeSorted(const std::vector<StreamPtr>& sortedInputs, LessThanCmp cmp = LessThanCmp())
         : sortedInputs_(StreamLessThan<StreamPtr, LessThanCmp>(cmp))
-        , cmp_(cmp)
     {
         for (auto i = sortedInputs.begin(); i != sortedInputs.end(); ++i)
             if (!(*i)->eof())
                 sortedInputs_.insert(*i);
     }
-
-    virtual ~MergeSorted() {}
 
     bool next(ValueType& next) {
         using namespace std;
@@ -70,5 +68,4 @@ public:
 
 protected:
     std::multiset<StreamPtr, StreamLessThan<StreamPtr, LessThanCmp>> sortedInputs_;
-    LessThanCmp cmp_;
 };

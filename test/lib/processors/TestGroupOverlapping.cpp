@@ -33,7 +33,8 @@ namespace {
     };
 
     std::ostream& operator<<(std::ostream& os, MockEntry const& me) {
-        os << me.chrom() << "\t" << me.start() << "\t" << me.stop() << "\t" << me.source();
+        os << "[" << me.chrom() << "\t" << me.start() << "\t"
+            << me.stop() << "\t" << me.source() << "]";
         return os;
     }
 
@@ -134,25 +135,67 @@ TEST_F(TestGroupOverlapping, accept_vector) {
     oer(std::move(entry_ptrs));
     oer.flush();
 
-    auto const& result = collector.entries;
-    ASSERT_EQ(4u, result.size()); // should get all four groups in output
+    auto const& xs = collector.entries;
+    ASSERT_EQ(4u, xs.size()); // should get all four groups in output
 
     // Check first group
-    ASSERT_EQ(3u, result[0].size());
-    EXPECT_EQ(entries[0], *result[0][0]);
-    EXPECT_EQ(entries[1], *result[0][1]);
-    EXPECT_EQ(entries[2], *result[0][2]);
+    ASSERT_EQ(3u, xs[0].size());
+    EXPECT_EQ(entries[0], *xs[0][0]);
+    EXPECT_EQ(entries[1], *xs[0][1]);
+    EXPECT_EQ(entries[2], *xs[0][2]);
 
     // Second group
-    ASSERT_EQ(1u, result[1].size());
-    EXPECT_EQ(entries[3], *result[1][0]);
+    ASSERT_EQ(1u, xs[1].size());
+    EXPECT_EQ(entries[3], *xs[1][0]);
 
     // Third group
-    ASSERT_EQ(1u, result[2].size());
-    EXPECT_EQ(entries[4], *result[2][0]);
+    ASSERT_EQ(1u, xs[2].size());
+    EXPECT_EQ(entries[4], *xs[2][0]);
 
     // Fourth group
-    ASSERT_EQ(2u, result[3].size());
-    EXPECT_EQ(entries[5], *result[3][0]);
-    EXPECT_EQ(entries[6], *result[3][1]);
+    ASSERT_EQ(2u, xs[3].size());
+    EXPECT_EQ(entries[5], *xs[3][0]);
+    EXPECT_EQ(entries[6], *xs[3][1]);
+}
+
+TEST_F(TestGroupOverlapping, sort) {
+    MockReader reader{entries};
+
+    Collector collector;
+    CompareToGreaterThan<LocusCompare<>> cmp;
+
+    //auto sorter = makeGroupSorter(collector, cmp);
+    GroupSorter<MockEntry, decltype(collector), decltype(cmp)> sorter(collector);
+    auto oer = makeGroupOverlapping<MockEntry>(sorter);
+    auto pump = makePointerStreamPump(reader, oer);
+    pump.execute();
+
+    auto const& xs = collector.entries;
+    for (auto i = xs.begin(); i != xs.end(); ++i) {
+        std::cout << "<===== begin group =====>\n";
+        for (auto j = i->begin(); j != i->end(); ++j) {
+            std::cout << **j << "\n";
+        }
+        std::cout << "<=====  end group  =====>\n";
+    }
+
+    // Each group should now be sorted largest to smallest
+    // Check first group
+    ASSERT_EQ(3u, xs[0].size());
+    EXPECT_EQ(entries[2], *xs[0][0]);
+    EXPECT_EQ(entries[1], *xs[0][1]);
+    EXPECT_EQ(entries[0], *xs[0][2]);
+
+    // Second group
+    ASSERT_EQ(1u, xs[1].size());
+    EXPECT_EQ(entries[3], *xs[1][0]);
+
+    // Third group
+    ASSERT_EQ(1u, xs[2].size());
+    EXPECT_EQ(entries[4], *xs[2][0]);
+
+    // Fourth group
+    ASSERT_EQ(2u, xs[3].size());
+    EXPECT_EQ(entries[6], *xs[3][0]);
+    EXPECT_EQ(entries[5], *xs[3][1]);
 }

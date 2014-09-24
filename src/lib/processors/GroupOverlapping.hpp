@@ -1,12 +1,62 @@
 #pragma once
 
 #include "common/CoordinateView.hpp"
+#include "common/LocusCompare.hpp"
 #include "common/Region.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
+
+template<
+          typename ValueType
+        , typename OutputFunc
+        , typename Compare
+        >
+class GroupSorter {
+public:
+    GroupSorter(OutputFunc& out, Compare cmp = Compare())
+        : out(out)
+        , cmp(cmp)
+    {}
+
+    typedef std::unique_ptr<ValueType> ValuePtr;
+    typedef std::vector<ValuePtr> ValuePtrVector;
+
+    void operator()(ValuePtrVector entries) {
+        // OMG gcc4.4 stdlibc++ you are going to make me die
+        // Why can't you sort a container of unique_ptrs??!
+        DerefCompare<Compare> dcmp(cmp);
+
+// FIXME: ifdef this only for old compilers that can't sort unique_ptrs
+        std::vector<ValueType*> rawPtrs(entries.size());
+        for (std::size_t i = 0; i < entries.size(); ++i) {
+            rawPtrs[i] = entries[i].release();
+        }
+        std::sort(rawPtrs.begin(), rawPtrs.end(), dcmp);
+        for (std::size_t i = 0; i < entries.size(); ++i) {
+            entries[i].reset(rawPtrs[i]);
+        }
+
+        out(std::move(entries));
+    }
+
+    OutputFunc& out;
+    Compare cmp;
+};
+
+template<
+          typename ValueType
+        , typename OutputFunc
+        , typename Compare
+        >
+GroupSorter<ValueType, OutputFunc, Compare>
+makeGroupSorter(OutputFunc& out, Compare cmp = Compare()) {
+    return GroupSorter<ValueType, OutputFunc, Compare>(out, cmp);
+}
+
 
 template<
           typename ValueType
@@ -89,7 +139,7 @@ template<
         , typename OutputFunc
         , typename CoordView = DefaultCoordinateView
         >
-GroupOverlapping<ValueType, OutputFunc>
+GroupOverlapping<ValueType, OutputFunc, CoordView>
 makeGroupOverlapping(OutputFunc& out, CoordView coordView = CoordView()) {
     return GroupOverlapping<ValueType, OutputFunc, CoordView>(out, coordView);
 }

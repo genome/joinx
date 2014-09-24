@@ -2,7 +2,9 @@
 
 #include <string>
 
-struct DefaultCoordinateView {
+struct CoordinateViewBaseTag {};
+
+struct DefaultCoordinateView : CoordinateViewBaseTag {
     template<typename T>
     auto chrom(T const& x) const -> decltype(x.chrom()) {
         return x.chrom();
@@ -19,7 +21,7 @@ struct DefaultCoordinateView {
     }
 };
 
-struct UnpaddedCoordinateView {
+struct UnpaddedCoordinateView : CoordinateViewBaseTag {
     template<typename T>
     auto chrom(T const& x) const -> decltype(x.chrom()) {
         return x.chrom();

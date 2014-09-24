@@ -314,11 +314,13 @@ void Entry::addIdentifier(const std::string& id) {
 }
 
 void Entry::addFilter(const std::string& filterName) {
-    //filters cannot contain whitespace or semicolons
-    std::string::const_iterator it = find_if(filterName.begin(),filterName.end(),isInvalidFilterId);
-    if( it != filterName.end()) {
-        //then it is invalid
-        throw runtime_error(str(format("Invalid filter name %1%. Contains whitespace or a semicolon.") %filterName ));
+    // filters cannot contain whitespace or semicolons
+    auto it = find_if(filterName.begin(), filterName.end(), isInvalidFilterId);
+    if (it != filterName.end()) {
+        // then it is invalid
+        throw runtime_error(str(format(
+            "Invalid filter name %1%. Contains whitespace or a semicolon."
+            ) % filterName));
     }
 
     if (_failedFilters.find("PASS") != _failedFilters.end()) {
@@ -336,19 +338,6 @@ string Entry::toString() const {
     stringstream ss;
     ss << *this;
     return ss.str();
-}
-
-int Entry::cmp(const Entry& rhs) const {
-    int rv = strverscmp(_chrom.c_str(), rhs._chrom.c_str());
-    if (rv != 0)
-        return rv;
-
-    if (_pos < rhs._pos)
-        return -1;
-    if (rhs._pos < _pos)
-        return 1;
-
-    return 0;
 }
 
 void Entry::swap(Entry& other) {

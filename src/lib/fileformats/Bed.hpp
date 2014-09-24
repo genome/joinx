@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/CoordinateView.hpp"
+#include "common/LocusCompare.hpp"
 #include "common/cstdint.hpp"
 
 #include <boost/lexical_cast.hpp>
@@ -28,6 +30,7 @@ class Bed {
 public:
     typedef BedHeader HeaderType;
     typedef std::vector<std::string> ExtraFieldsType;
+    typedef LocusCompare<DefaultCoordinateView, StartAndStop> DefaultCompare;
 
     enum Type {
         SNV,

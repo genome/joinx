@@ -65,19 +65,6 @@ void ChromPos::swap(ChromPos& rhs) {
     _line.swap(rhs._line);
 }
 
-int ChromPos::cmp(const ChromPos& rhs) const {
-    int rv = strverscmp(_chrom.c_str(), rhs._chrom.c_str());
-    if (rv != 0)
-        return rv;
-
-    if (_start < rhs._start)
-        return -1;
-    if (rhs._start < _start)
-        return 1;
-
-    return 0;
-}
-
 const std::string& ChromPos::toString() const {
     return _line;
 }

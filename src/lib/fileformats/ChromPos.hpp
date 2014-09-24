@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/CoordinateView.hpp"
+#include "common/LocusCompare.hpp"
 #include "common/cstdint.hpp"
 
 #include <algorithm>
@@ -23,6 +25,7 @@ std::ostream& operator<<(std::ostream& s, const ChromPosHeader& h);
 
 class ChromPos {
 public:
+    typedef LocusCompare<DefaultCoordinateView, StartOnly> DefaultCompare;
     typedef ChromPosHeader HeaderType;
 
     ChromPos();
@@ -42,10 +45,6 @@ public:
     int64_t stop() const;
     const std::string& toString() const;
 
-    int cmp(const ChromPos& rhs) const;
-    bool operator<(const ChromPos& rhs) const;
-    bool operator==(const ChromPos& rhs) const;
-
 protected:
     std::string _chrom;
     int64_t _start;
@@ -63,14 +62,6 @@ inline int64_t ChromPos::start() const {
 
 inline int64_t ChromPos::stop() const {
     return _start;
-}
-
-inline bool ChromPos::operator<(const ChromPos& rhs) const {
-    return cmp(rhs) < 0;
-}
-
-inline bool ChromPos::operator==(const ChromPos& rhs) const {
-    return cmp(rhs) == 0;
 }
 
 std::ostream& operator<<(std::ostream& s, const ChromPos& bed);
