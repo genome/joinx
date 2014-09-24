@@ -1,6 +1,7 @@
-#include "fileformats/Fasta.hpp"
-#include "fileformats/Bed.hpp"
+#include "common/LocusCompare.hpp"
 #include "common/cstdint.hpp"
+#include "fileformats/Bed.hpp"
+#include "fileformats/Fasta.hpp"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -36,8 +37,9 @@ public:
 
     // write out fasta and remap data for this transcript
     void write(ostream& outFa, ostream& outRm) {
+        CompareToLessThan<LocusCompare<>> cmp;
         // oops, my file was not sorted properly
-        sort(_regions.begin(), _regions.end());
+        sort(_regions.begin(), _regions.end(), cmp);
         if (_regions.empty()) {
             throw runtime_error("Empty regions for tx " + _name);
         }

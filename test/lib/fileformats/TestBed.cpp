@@ -1,4 +1,5 @@
 #include "fileformats/Bed.hpp"
+#include "common/LocusCompare.hpp"
 
 #include <stdexcept>
 #include <string>
@@ -88,24 +89,25 @@ TEST(Bed, cmp) {
     TestableBed b = a;
     b._stop++;
 
-    ASSERT_EQ(0, a.cmp(a)) << "bed chromosome sort: 1 == 1";
-    ASSERT_GT(0, a.cmp(b)) << "bed chromosome sort: 1 < 2";
-    ASSERT_LT(0, b.cmp(a));
+    LocusCompare<> cmp;
+    ASSERT_EQ(0, cmp(a, a)) << "bed chromosome sort: 1 == 1";
+    ASSERT_GT(0, cmp(a, b)) << "bed chromosome sort: 1 < 2";
+    ASSERT_LT(0, cmp(b, a));
 
     b = a;
     b._start++;
-    ASSERT_GT(0, a.cmp(b));
-    ASSERT_LT(0, b.cmp(a));
+    ASSERT_GT(0, cmp(a, b));
+    ASSERT_LT(0, cmp(b, a));
 
     b = a;
     b._chrom = "2";
-    ASSERT_GT(0, a.cmp(b));
-    ASSERT_LT(0, b.cmp(a));
+    ASSERT_GT(0, cmp(a, b));
+    ASSERT_LT(0, cmp(b, a));
 
     a._chrom = "22";
     b = a;
     b._chrom = "X";
-    ASSERT_GT(0, a.cmp(b)) << "bed chromosome sort: 22 < X";
-    ASSERT_LT(0, b.cmp(a)) << "bed chromosome sort: X > 22";
+    ASSERT_GT(0, cmp(a, b)) << "bed chromosome sort: 22 < X";
+    ASSERT_LT(0, cmp(b, a)) << "bed chromosome sort: X > 22";
 }
 

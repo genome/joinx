@@ -57,10 +57,6 @@ public:
     void start(int64_t start);
     void stop(int64_t stop);
 
-    int cmp(const Bed& rhs) const;
-    bool operator<(const Bed& rhs) const;
-    bool operator==(const Bed& rhs) const;
-
     bool type() const {
         return (_stop == _start+1) ? SNV : INDEL;
     }
@@ -69,6 +65,14 @@ public:
 
     template<typename T>
     void setExtra(size_t idx, T const& value, std::string const& filler = ".");
+
+    bool operator==(Bed const& rhs) const {
+        return _chrom == rhs._chrom &&
+            _start == rhs._start &&
+            _stop == rhs._stop &&
+            _extraFields == rhs._extraFields
+            ;
+    }
 
 protected:
     std::string _chrom;
@@ -93,14 +97,6 @@ inline int64_t Bed::stop() const {
 
 inline int64_t Bed::length() const {
     return stop() - start();
-}
-
-inline bool Bed::operator<(const Bed& rhs) const {
-    return cmp(rhs) < 0;
-}
-
-inline bool Bed::operator==(const Bed& rhs) const {
-    return cmp(rhs) == 0;
 }
 
 inline const Bed::ExtraFieldsType& Bed::extraFields() const {

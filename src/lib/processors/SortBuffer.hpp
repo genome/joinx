@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/LocusCompare.hpp"
 #include "common/TempFile.hpp"
 #include "io/InputStream.hpp"
 #include "fileformats/StreamFactory.hpp"
@@ -15,7 +16,12 @@
 #include <memory>
 #include <stdexcept>
 
-template<typename StreamType, typename StreamOpener, typename OutputFunc>
+template<
+          typename StreamType
+        , typename StreamOpener
+        , typename OutputFunc
+        , typename LessThanCmp = CompareToLessThan<LocusCompare<>>
+        >
 class SortBuffer {
 public:
     typedef typename boost::shared_ptr<StreamType> StreamPtr;
@@ -23,12 +29,19 @@ public:
     typedef typename ValueType::HeaderType HeaderType;
     typedef typename std::deque<ValueType*>::size_type size_type;
 
-    SortBuffer(StreamOpener& streamOpener, const HeaderType& h, bool stable, CompressionType compression)
+    SortBuffer(
+              StreamOpener& streamOpener
+            , const HeaderType& h
+            , bool stable
+            , CompressionType compression
+            , LessThanCmp cmp = LessThanCmp()
+            )
         : _streamOpener(streamOpener)
         , _header(h)
         , _stable(stable)
         , _compression(compression)
         , _inputStream("anon", _in)
+        , _cmp(cmp)
     {}
 
     ~SortBuffer() {
@@ -42,9 +55,9 @@ public:
 
     void sort() {
         if (_stable)
-            std::stable_sort(_buf.begin(), _buf.end(), cmp);
+            std::stable_sort(_buf.begin(), _buf.end(), _cmp);
         else
-            std::sort(_buf.begin(), _buf.end(), cmp);
+            std::sort(_buf.begin(), _buf.end(), _cmp);
     }
 
     size_type size() const {
@@ -135,11 +148,6 @@ public:
     }
 
 protected:
-    static bool cmp(const ValueType* a, const ValueType* b) {
-        return *a < *b;
-    }
-
-protected:
     StreamOpener& _streamOpener;
     const HeaderType& _header;
     bool _stable;
@@ -152,4 +160,5 @@ protected:
     boost::iostreams::filtering_stream<boost::iostreams::input> _in;
     boost::iostreams::gzip_decompressor _gzipDecompressor;
     InputStream _inputStream;
+    LessThanCmp _cmp;
 };
