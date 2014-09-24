@@ -1,5 +1,6 @@
 #pragma once
 
+#include "RelOps.hpp"
 #include "CoordinateView.hpp"
 
 #include <boost/tti/has_type.hpp>
@@ -18,25 +19,6 @@ namespace {
     struct StartOnly;
 }
 
-template<typename Compare>
-struct DerefCompare {
-    explicit DerefCompare(Compare cmp = Compare())
-        : cmp(cmp)
-    {}
-
-    // FIXME: gcc4.4 can't figure out
-    // decltype(boost::declval<Compare>()(x, y) for the return value which
-    // might not be bool in general
-    template<typename ValueType>
-    bool operator()(ValueType const& x, ValueType const& y)
-    {
-        return cmp(*x, *y);
-    }
-
-    Compare cmp;
-};
-
-
 template<
           typename CoordView = DefaultCoordinateView
         , typename Method = StartAndStop
@@ -52,6 +34,7 @@ struct LocusCompare<
             std::is_base_of<CoordinateViewBaseTag, CoordView>::value
             >::type
         >
+    : CompareBase
 {
     explicit LocusCompare(CoordView cv = CoordView())
         : cv(cv)
@@ -90,6 +73,7 @@ struct LocusCompare<
             std::is_base_of<CoordinateViewBaseTag, CoordView>::value
             >::type
         >
+    : CompareBase
 {
     explicit LocusCompare(CoordView cv = CoordView())
         : cv(cv)
@@ -123,35 +107,6 @@ struct LocusCompare<
 
 private:
     CoordView cv;
-};
-
-// FIXME: move somewhere else
-template<typename T>
-struct CompareToLessThan {
-    CompareToLessThan(T cmp = T())
-        : cmp(cmp)
-    {}
-
-    template<typename U>
-    bool operator()(U const& x, U const& y) const {
-        return cmp(x, y) < 0;
-    }
-
-    T cmp;
-};
-
-template<typename T>
-struct CompareToGreaterThan {
-    CompareToGreaterThan(T cmp = T())
-        : cmp(cmp)
-    {}
-
-    template<typename U>
-    bool operator()(U const& x, U const& y) const {
-        return cmp(x, y) > 0;
-    }
-
-    T cmp;
 };
 
 template<typename T>

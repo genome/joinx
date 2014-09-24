@@ -28,7 +28,7 @@ public:
     void operator()(ValuePtrVector entries) {
         // OMG gcc4.4 stdlibc++ you are going to make me die
         // Why can't you sort a container of unique_ptrs??!
-        DerefCompare<Compare> dcmp(cmp);
+        DerefBinaryOp<Compare> dcmp(cmp);
 
 // FIXME: ifdef this only for old compilers that can't sort unique_ptrs
         std::vector<ValueType*> rawPtrs(entries.size());
