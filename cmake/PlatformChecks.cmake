@@ -19,14 +19,14 @@ function(find_cxx11_flags FLAGS FOUND)
             unset(CXX11_FLAG${COUNTER} CACHE)
             set(__CXX11_FLAG ${elt})
             set(__CXX11_FLAG_FOUND True BOOL)
-            message("-- C++11 support enabled via ${elt}")
+            message(STATUS "C++11 support enabled via ${elt}")
             break()
         endif()
         math(EXPR COUNTER "${COUNTER} + 1")
     endforeach()
 
     if(NOT __CXX11_FLAG_FOUND)
-        message("Failed to find C++11 compiler flag, perhaps one is not needed.")
+        message(WARNING "Failed to find C++11 compiler flag, perhaps one is not needed.")
     endif(NOT __CXX11_FLAG_FOUND)
 
     set(SAVE_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
@@ -57,7 +57,7 @@ function(find_cxx11_flags FLAGS FOUND)
             unset(CXX11_STDLIB_FLAG${COUNTER} CACHE)
             set(${FLAGS} "${__CXX11_FLAG} ${elt}" PARENT_SCOPE)
             set(${FOUND} True BOOL PARENT_SCOPE)
-            message("-- Sufficient C++11 library support found with flag '${elt}'")
+            message(STATUS "Sufficient C++11 library support found with flag '${elt}'")
             break()
         endif (CXX11_STDLIB_FLAG${COUNTER})
 
@@ -75,7 +75,7 @@ function(find_library_providing func FOUND LIB)
         set(CMAKE_REQUIRED_LIBRARIES ${ORIG_CMAKE_REQUIRED_LIBRARIES} ${lib})
         check_function_exists(${func} ${FOUND})
         if (${FOUND})
-            message("-- * clock_gettime found in library ${lib}")
+            message(STATUS "* clock_gettime found in library ${lib}")
             set(${LIB} ${lib} PARENT_SCOPE)
             break()
         endif (${FOUND})
@@ -83,7 +83,7 @@ function(find_library_providing func FOUND LIB)
     set(CMAKE_REQUIRED_LIBRARIES ${ORIG_CMAKE_REQUIRED_LIBRARIES})
 endfunction(find_library_providing func FOUND LIB)
 
-function(check_cxx11_can_sort_unique_ptrs CXX_CAN_SORT_UNIQUE_PTRS)
+function(check_cxx11_can_sort_unique_ptrs FLAG)
     check_cxx_source_runs("
         #include <algorithm>
         #include <vector>
@@ -102,7 +102,18 @@ function(check_cxx11_can_sort_unique_ptrs CXX_CAN_SORT_UNIQUE_PTRS)
             std::sort(xs.begin(), xs.end(), intptrless);
             return !(*xs[0] == 1 && *xs[1] == 2);
         }
-        " RESULT)
-    message("-- * Can sort std::unique_ptr? [${RESULT}]")
-    set(CXX_CAN_SORT_UNIQUE_PTRS ${RESULT} PARENT_SCOPE)
-endfunction(check_cxx11_can_sort_unique_ptrs CXX_CAN_SORT_UNIQUE_PTRS)
+        " _CAN_SORT_UNIQUE_PTR)
+    set(${FLAG} ${_CAN_SORT_UNIQUE_PTR} PARENT_SCOPE)
+endfunction(check_cxx11_can_sort_unique_ptrs FLAG)
+
+function(check_cxx14_has_make_unique FLAG)
+    check_cxx_source_runs("
+        #include <memory>
+
+        int main() {
+            auto x = std::make_unique<int>(5);
+            return *x != 5;
+        }
+        " _HAS_MAKE_UNIQUE)
+    set(${FLAG} ${_HAS_MAKE_UNIQUE} PARENT_SCOPE)
+endfunction(check_cxx14_has_make_unique FLAG)

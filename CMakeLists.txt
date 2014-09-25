@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 2.8)
 project(joinx)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    message("No CMAKE_INSTALL_PREFIX specified, defaulting to /usr")
+    message(STATUS "No CMAKE_INSTALL_PREFIX specified, defaulting to /usr")
     set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "joinx install prefix" FORCE)
 endif()
 
 if(DEFINED JOINX_DEBUG_VCF_MERGE)
-    message("Vcf merge debugging output enabled")
+    message(STATUS "Vcf merge debugging output enabled")
     add_definitions("-DDEBUG_VCF_MERGE")
 endif()
 
@@ -22,9 +22,9 @@ include(BuildDeps)
 
 set(INSTALL_SHARE_PATH "share/joinx${EXE_VERSION_SUFFIX}")
 set(INSTALL_DOC_PATH share/doc/joinx${EXE_VERSION_SUFFIX})
-message("Install path: ${CMAKE_INSTALL_PREFIX}")
-message("Share path: ${INSTALL_SHARE_PATH}")
-message("Doc path: ${INSTALL_DOC_PATH}")
+message(STATUS "Install path: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "Share path: ${INSTALL_SHARE_PATH}")
+message(STATUS "Doc path: ${INSTALL_DOC_PATH}")
 
 
 find_package(Threads REQUIRED)
@@ -66,6 +66,12 @@ if(NOT CXX_CAN_SORT_UNIQUE_PTRS)
     add_definitions("-DCXX11_CANT_SORT_UNIQUE_PTR")
 endif()
 
+check_cxx14_has_make_unique(CXX_HAS_MAKE_UNIQUE)
+message("MAKE_UNIQUE: ${CXX_HAS_MAKE_UNIQUE}")
+if(NOT CXX_HAS_MAKE_UNIQUE)
+    add_definitions("-DCXX14_NO_MAKE_UNIQUE")
+endif()
+
 
 # Find clock_gettime function
 find_library_providing(clock_gettime CLOCK_GETTIME_FOUND CLOCK_GETTIME_LIB rt)
@@ -76,8 +82,6 @@ endif(NOT CLOCK_GETTIME_FOUND)
 if (CLOCK_GETTIME_LIB)
     link_libraries(${CLOCK_GETTIME_LIB})
 endif (CLOCK_GETTIME_LIB)
-
-
 
 
 check_include_file_cxx(cstdint HAVE_CSTDINT)
@@ -122,3 +126,7 @@ add_subdirectory(integration-test)
 add_subdirectory(doc)
 
 include(PackageInfo.cmake)
+
+message(STATUS "CXX FLAGS: ${CMAKE_CXX_FLAGS}")
+get_directory_property(defs COMPILE_DEFINITIONS)
+message(STATUS "Compile definitions: ${defs}")
