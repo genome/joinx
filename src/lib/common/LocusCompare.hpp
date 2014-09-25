@@ -109,6 +109,8 @@ private:
     CoordView cv;
 };
 
+// For types with a nested DefaultCompare typedef, enable operators
+// < and >
 template<typename T>
 typename std::enable_if<
           has_type_DefaultCompare<T>::value
