@@ -59,6 +59,13 @@ if(NOT CXX11_FOUND)
         "Failed to find C++11 support with compiler:
          ${CMAKE_CXX_COMPILER} (${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}).")
 endif(NOT CXX11_FOUND)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAGS}")
+
+check_cxx11_can_sort_unique_ptrs(CXX_CAN_SORT_UNIQUE_PTRS)
+if(NOT CXX_CAN_SORT_UNIQUE_PTRS)
+    add_definitions("-DCXX11_CANT_SORT_UNIQUE_PTR")
+endif()
+
 
 # Find clock_gettime function
 find_library_providing(clock_gettime CLOCK_GETTIME_FOUND CLOCK_GETTIME_LIB rt)
@@ -71,7 +78,7 @@ if (CLOCK_GETTIME_LIB)
 endif (CLOCK_GETTIME_LIB)
 
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAGS}")
+
 
 check_include_file_cxx(cstdint HAVE_CSTDINT)
 check_include_file_cxx(stdint.h HAVE_STDINT_H)

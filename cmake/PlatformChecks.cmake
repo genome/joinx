@@ -82,3 +82,27 @@ function(find_library_providing func FOUND LIB)
     endforeach(lib ${POTENTIAL_LIBRARIES})
     set(CMAKE_REQUIRED_LIBRARIES ${ORIG_CMAKE_REQUIRED_LIBRARIES})
 endfunction(find_library_providing func FOUND LIB)
+
+function(check_cxx11_can_sort_unique_ptrs CXX_CAN_SORT_UNIQUE_PTRS)
+    check_cxx_source_runs("
+        #include <algorithm>
+        #include <vector>
+        #include <memory>
+
+        typedef std::unique_ptr<int> IntPtr;
+
+        bool intptrless(IntPtr const& x, IntPtr const& y) {
+            return *x < *y;
+        }
+
+        int main() {
+            std::vector<IntPtr> xs;
+            xs.emplace_back(new int(2));
+            xs.emplace_back(new int(1));
+            std::sort(xs.begin(), xs.end(), intptrless);
+            return !(*xs[0] == 1 && *xs[1] == 2);
+        }
+        " RESULT)
+    message("-- * Can sort std::unique_ptr? [${RESULT}]")
+    set(CXX_CAN_SORT_UNIQUE_PTRS ${RESULT} PARENT_SCOPE)
+endfunction(check_cxx11_can_sort_unique_ptrs CXX_CAN_SORT_UNIQUE_PTRS)

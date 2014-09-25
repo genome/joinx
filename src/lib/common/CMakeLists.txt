@@ -29,8 +29,10 @@ set(SOURCES
     UnknownSequenceError.hpp
     UnsortedDataError.hpp
     VariantType.hpp
+    compat.hpp
     cstdint.hpp
     namespaces.hpp
+    traits.hpp
 )
 
 add_library(common ${SOURCES})

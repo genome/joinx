@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/compat.hpp"
 #include "common/CoordinateView.hpp"
 #include "common/LocusCompare.hpp"
 #include "common/Region.hpp"
@@ -26,20 +27,8 @@ public:
     typedef std::vector<ValuePtr> ValuePtrVector;
 
     void operator()(ValuePtrVector entries) {
-        // OMG gcc4.4 stdlibc++ you are going to make me die
-        // Why can't you sort a container of unique_ptrs??!
         DerefBinaryOp<Compare> dcmp(cmp);
-
-// FIXME: ifdef this only for old compilers that can't sort unique_ptrs
-        std::vector<ValueType*> rawPtrs(entries.size());
-        for (std::size_t i = 0; i < entries.size(); ++i) {
-            rawPtrs[i] = entries[i].release();
-        }
-        std::sort(rawPtrs.begin(), rawPtrs.end(), dcmp);
-        for (std::size_t i = 0; i < entries.size(); ++i) {
-            entries[i].reset(rawPtrs[i]);
-        }
-
+        compat::sort(entries.begin(), entries.end(), dcmp);
         out(std::move(entries));
     }
 
