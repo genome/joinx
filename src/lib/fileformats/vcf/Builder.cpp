@@ -36,6 +36,13 @@ Builder::~Builder() {
     flush();
 }
 
+// FIXME: Entry isn't the cheapest thing to move. Might want to look at
+// making this pointer based to see if that helps performance
+void Builder::operator()(std::vector<std::unique_ptr<Entry>> entries) {
+    for (auto i = entries.begin(); i != entries.end(); ++i)
+        (*this)(std::move(**i));
+}
+
 void Builder::operator()(const Entry& e) {
     e.header();
     if (_entries.empty()

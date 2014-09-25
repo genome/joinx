@@ -1,9 +1,10 @@
 #include "VcfMergeCommand.hpp"
 
+#include "common/CoordinateView.hpp"
+#include "common/LocusCompare.hpp"
 #include "common/Tokenizer.hpp"
-#include "fileformats/Fasta.hpp"
-#include "io/InputStream.hpp"
 #include "fileformats/DefaultPrinter.hpp"
+#include "fileformats/Fasta.hpp"
 #include "fileformats/StreamPump.hpp"
 #include "fileformats/TypedStream.hpp"
 #include "fileformats/VcfReader.hpp"
@@ -14,6 +15,8 @@
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/vcf/SampleTag.hpp"
+#include "io/InputStream.hpp"
+#include "processors/GroupOverlapping.hpp"
 #include "processors/MergeSorted.hpp"
 
 #include <boost/bind.hpp>
@@ -247,9 +250,18 @@ void VcfMergeCommand::exec() {
     mergeStrategy.mergeSamples(_mergeSamples);
     mergeStrategy.primarySampleStreamIndex(0);
 
-    Vcf::Builder builder(mergeStrategy, &mergedHeader, writer);
     *out << mergedHeader;
     MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
-    auto pump = makeStreamPump(merger, builder);
+
+    LocusCompare<UnpaddedCoordinateView> cmp;
+    Vcf::Builder builder(mergeStrategy, &mergedHeader, writer);
+    auto finalGrouper = makeGroupOverlapping<Vcf::Entry>(builder, UnpaddedCoordinateView{});
+    auto sorter = makeGroupSorter<Vcf::Entry>(finalGrouper, cmp);
+    auto initialGrouper = makeGroupOverlapping<Vcf::Entry>(sorter);
+    auto pump = makePointerStreamPump(merger, initialGrouper);
+
     pump.execute();
+    initialGrouper.flush();
+    finalGrouper.flush();
+    builder.flush();
 }

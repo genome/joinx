@@ -4,8 +4,9 @@
 
 #include <boost/function.hpp>
 
-#include <vector>
+#include <memory>
 #include <string>
+#include <vector>
 
 BEGIN_NAMESPACE(Vcf)
 
@@ -23,6 +24,7 @@ public:
         );
     ~Builder();
 
+    void operator()(std::vector<std::unique_ptr<Entry>> entries);
     void operator()(const Entry& e);
     void operator()(Entry&& e);
     void flush();
