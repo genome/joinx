@@ -6,12 +6,12 @@
 // filter entries with no data for the reference sequence allele
 class TypeFilter : public TypedStreamFilterBase<Bed> {
 public:
-    TypeFilter(Bed::Type t) : _type(t) {}
+    TypeFilter(Bed::Type t) : type_(t) {}
 
-    bool _exclude(const Bed& snv) {
-        return _type != snv.type();
+    bool exclude_(const Bed& snv) {
+        return type_ != snv.type();
     }
 
 protected:
-    Bed::Type _type;
+    Bed::Type type_;
 };
