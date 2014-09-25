@@ -10,40 +10,11 @@
 #include <string>
 #include <vector>
 
-//TODO Needs accessor for lineNum
-template<typename ValueClass>
-class TypedStreamFilterBase {
-public:
-    typedef ValueClass ValueType;
-
-    TypedStreamFilterBase() : filtered_(0) {}
-    virtual ~TypedStreamFilterBase() {}
-
-    uint64_t filtered() {
-        return filtered_;
-    }
-
-    bool exclude(const ValueType& snv) {
-        if (exclude_(snv)) {
-            ++filtered_;
-            return true;
-        }
-        return false;
-    }
-
-protected:
-    virtual bool exclude_(const ValueType& snv) = 0;
-
-protected:
-    uint64_t filtered_;
-};
-
 template<typename ValueClass, typename Extractor>
 class TypedStream {
 public:
     typedef typename ValueClass::HeaderType HeaderType;
     typedef ValueClass ValueType;
-    typedef TypedStreamFilterBase<ValueType> FilterType;
     typedef boost::shared_ptr<TypedStream<ValueClass, Extractor> > ptr;
 
     TypedStream(Extractor& extractor, InputStream& in)
@@ -72,12 +43,9 @@ public:
         return header_;
     }
 
-    void addFilter(FilterType* filter);
-
     std::string const& name() const;
     bool eof() const;
     bool peek(ValueType** value);
-    bool exclude(const ValueType& value) const;
     bool next(ValueType& value);
     uint64_t valueCount() const;
     void checkEof() const;
@@ -98,8 +66,6 @@ protected:
     bool cached_;
     bool cachedRv_;
     ValueType cachedValue_;
-
-    std::vector<FilterType*> filters_;
 };
 
 template<typename ValueType, typename Extractor>
@@ -139,16 +105,6 @@ inline bool TypedStream<ValueType, Extractor>::peek(ValueType** value) {
 }
 
 template<typename ValueType, typename Extractor>
-inline bool TypedStream<ValueType, Extractor>::exclude(const ValueType& value) const {
-    for (auto iter = filters_.begin(); iter != filters_.end(); ++iter) {
-        if ((*iter)->exclude(value))
-            return true;
-    }
-
-    return false;
-}
-
-template<typename ValueType, typename Extractor>
 inline bool TypedStream<ValueType, Extractor>::next(ValueType& value) {
     if (cached_) {
         value.swap(cachedValue_);
@@ -156,21 +112,19 @@ inline bool TypedStream<ValueType, Extractor>::next(ValueType& value) {
         return cachedRv_;
     }
 
-    do {
-        std::string line = nextLine();
-        if (line.empty())
-            return false;
+    std::string line = nextLine();
+    if (line.empty())
+        return false;
 
-        try {
-            extractor_(&header_, line, value);
-        }
-        catch (const std::exception& e) {
-            using boost::format;
-            throw std::runtime_error(
-                str(format("Error at %1%:%2%: %3%"
-                    ) % name() % in_.lineNum() % e.what()));
-        }
-    } while (exclude(value));
+    try {
+        extractor_(&header_, line, value);
+    }
+    catch (std::exception const& e) {
+        using boost::format;
+        throw std::runtime_error(
+            str(format("Error at %1%:%2%: %3%"
+                ) % name() % in_.lineNum() % e.what()));
+    }
     ++valueCount_;
     return true;
 }
@@ -199,9 +153,3 @@ template<typename ValueType, typename Extractor>
 inline uint64_t TypedStream<ValueType, Extractor>::lineNum() const {
     return in_.lineNum();
 }
-
-template<typename ValueType, typename Extractor>
-inline void TypedStream<ValueType, Extractor>::addFilter(FilterType* filter) {
-    filters_.push_back(filter);
-}
-

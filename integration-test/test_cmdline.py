@@ -19,8 +19,7 @@ class TestCmdline(IntegrationTest, unittest.TestCase):
 
     def test_command_help(self):
         cmds = ['bed-merge', 'check-ref', 'create-contigs', 'intersect',
-                'ref-stats', 'snv-concordance', 'snv-concordance-by-quality',
-                'sort', 'vcf-annotate', 'vcf-filter', 'vcf-merge',
+                'ref-stats', 'sort', 'vcf-annotate', 'vcf-filter', 'vcf-merge',
                 'vcf-normalize-indels', 'vcf-report', 'vcf-site-filter',
                 'vcf2raw', 'wig2bed']
 

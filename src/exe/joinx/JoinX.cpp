@@ -8,8 +8,6 @@
 #include "ui/IntersectCommand.hpp"
 #include "ui/RefStatsCommand.hpp"
 #include "ui/RemapCigarCommand.hpp"
-#include "ui/SnvConcordanceByQualityCommand.hpp"
-#include "ui/SnvConcordanceCommand.hpp"
 #include "ui/SortCommand.hpp"
 #include "ui/Vcf2RawCommand.hpp"
 #include "ui/VcfAnnotateCommand.hpp"
@@ -47,8 +45,6 @@ JoinX::JoinX() {
     registerSubCommand(IntersectCommand::ptr(new IntersectCommand));
     registerSubCommand(RefStatsCommand::ptr(new RefStatsCommand));
     registerSubCommand(RemapCigarCommand::ptr(new RemapCigarCommand));
-    registerSubCommand(SnvConcordanceByQualityCommand::ptr(new SnvConcordanceByQualityCommand));
-    registerSubCommand(SnvConcordanceCommand::ptr(new SnvConcordanceCommand));
     registerSubCommand(SortCommand::ptr(new SortCommand));
     registerSubCommand(Vcf2RawCommand::ptr(new Vcf2RawCommand));
     registerSubCommand(VcfAnnotateCommand::ptr(new VcfAnnotateCommand));

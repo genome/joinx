@@ -22,10 +22,6 @@ set(SOURCES
     RefStatsCommand.hpp
     RemapCigarCommand.cpp
     RemapCigarCommand.hpp
-    SnvConcordanceByQualityCommand.cpp
-    SnvConcordanceByQualityCommand.hpp
-    SnvConcordanceCommand.cpp
-    SnvConcordanceCommand.hpp
     SortCommand.cpp
     SortCommand.hpp
     Vcf2RawCommand.cpp

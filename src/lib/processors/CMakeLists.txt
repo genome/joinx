@@ -9,14 +9,12 @@ set(SOURCES
     IntersectionOutputFormatter.cpp
     IntersectionOutputFormatter.hpp
     MergeSorted.hpp
-    NoReferenceFilter.hpp
     RefStats.cpp
     RefStats.hpp
     RemapContig.hpp
     SnvComparator.hpp
     Sort.hpp
     SortBuffer.hpp
-    TypeFilter.hpp
     VariantContig.cpp
     VariantContig.hpp
     VcfGenotypeMatcher.cpp
