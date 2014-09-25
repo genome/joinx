@@ -1,4 +1,5 @@
 #include "fileformats/VcfReader.hpp"
+
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "io/InputStream.hpp"
@@ -65,7 +66,6 @@ namespace {
             return true;
         }
 
-
         size_t maxEntries;
         std::vector<Vcf::Entry> entries;
     };
@@ -109,27 +109,4 @@ TEST_F(TestVcfReader, read) {
     EXPECT_EQ(1110696u, v[2].pos());
     EXPECT_EQ(1230237u, v[3].pos());
     EXPECT_EQ(1234567u, v[4].pos());
-}
-
-TEST_F(TestVcfReader, foreachEntryUnlimited) {
-    Collector unlimited;
-    // gcc 4.4 (ubuntu 10.04) can't handle std::ref(collector)(), so use bind.
-    _reader->foreachEntry(boost::bind(&Collector::operator(), &unlimited, _1));
-
-    ASSERT_EQ(5u, unlimited.entries.size());
-    EXPECT_EQ(14370u, unlimited.entries[0].pos());
-    EXPECT_EQ(17330u, unlimited.entries[1].pos());
-    EXPECT_EQ(1110696u, unlimited.entries[2].pos());
-    EXPECT_EQ(1230237u, unlimited.entries[3].pos());
-    EXPECT_EQ(1234567u, unlimited.entries[4].pos());
-}
-
-TEST_F(TestVcfReader, foreachEntryLimited) {
-    Collector first3(3u);
-    _reader->foreachEntry(boost::bind(&Collector::operator(), &first3, _1));
-
-    ASSERT_EQ(3u, first3.entries.size());
-    EXPECT_EQ(14370u, first3.entries[0].pos());
-    EXPECT_EQ(17330u, first3.entries[1].pos());
-    EXPECT_EQ(1110696u, first3.entries[2].pos());
 }
