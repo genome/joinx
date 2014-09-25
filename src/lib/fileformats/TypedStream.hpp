@@ -63,8 +63,6 @@ public:
         }
     }
 
-    virtual ~TypedStream() {}
-
     const HeaderType& header() const {
         return _header;
     }

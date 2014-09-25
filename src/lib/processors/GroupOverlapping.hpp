@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+// FIXME: split GroupSorter into its own header
 template<
           typename ValueType
         , typename OutputFunc
@@ -45,7 +46,6 @@ GroupSorter<ValueType, OutputFunc, Compare>
 makeGroupSorter(OutputFunc& out, Compare cmp = Compare()) {
     return GroupSorter<ValueType, OutputFunc, Compare>(out, cmp);
 }
-
 
 template<
           typename ValueType
