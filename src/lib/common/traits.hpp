@@ -21,7 +21,7 @@ static_assert(!is_unique_ptr<int>::value, "is not a unique ptr");
 static_assert(is_unique_ptr<std::unique_ptr<int>>::value, "is a unique ptr");
 static_assert(
       is_unique_ptr<
-        typename std::iterator_traits<std::vector<std::unique_ptr<int>>::iterator>::value_type
+        std::iterator_traits<std::vector<std::unique_ptr<int>>::iterator>::value_type
         >::value
     , "is a unique ptr");
 
