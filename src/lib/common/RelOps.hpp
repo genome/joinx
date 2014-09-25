@@ -14,32 +14,18 @@ struct CompareBase {};
 // (cf. std::less)
 struct ComparePredBase {};
 
-namespace detail {
-    // workaround for gcc4.4 being gcc4.4
-    template<typename ValueType, typename CompareType>
-    struct DeduceDerefReturn_ {
-        typedef decltype(boost::declval<CompareType>()(
-              *boost::declval<ValueType>()
-            , *boost::declval<ValueType>()
-            )) type;
-    };
-}
-
 template<typename Op>
 struct DerefBinaryOp {
+    Op op;
+
     explicit DerefBinaryOp(Op op = Op())
         : op(op)
     {}
 
-    // gcc4.4 can't handle the required decltype() for the return
-    // value here so we use a helper.
     template<typename ValueType>
-    typename detail::DeduceDerefReturn_<ValueType, Op>::type
-    operator()(ValueType const& x, ValueType const& y) {
+    auto operator()(ValueType const& x, ValueType const& y) -> decltype(op(*x, *y)) {
         return op(*x, *y);
     }
-
-    Op op;
 };
 
 // Given a "Compare" function, convert it to a less than predicate.
