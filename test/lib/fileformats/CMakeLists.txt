@@ -23,6 +23,7 @@ set(TEST_SOURCES
     TestVcfGenotypeDictionary.cpp
     TestVcfGenotypeMerger.cpp
     TestVcfHeader.cpp
+    TestVcfLazyValue.cpp
     TestVcfMap.cpp
     TestVcfMatcher.cpp
     TestVcfMergeStrategy.cpp

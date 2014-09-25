@@ -2,6 +2,7 @@
 
 #include "CustomValue.hpp"
 #include "InfoFields.hpp"
+#include "LazyValue.hpp"
 #include "SampleData.hpp"
 #include "common/CoordinateView.hpp"
 #include "common/LocusCompare.hpp"
@@ -92,7 +93,7 @@ public:
     const std::string& alt(GenotypeIndex const& idx) const;
     double qual() const { return _qual; }
     const std::set<std::string>& failedFilters() const { return _failedFilters; }
-    const CustomValueMap& info() const { return _info.get(header()); }
+    const CustomValueMap& info() const { return getInfo_(); }
     const CustomValue* info(std::string const& key) const;
     void setInfo(std::string const& key, CustomValue const& value);
     const SampleData& sampleData() const;
@@ -137,6 +138,10 @@ public:
     void replaceAlts(uint64_t pos, std::string ref, std::vector<std::string> alt);
     void computeStartStop();
 
+private:
+    InfoFields::MapType const& getInfo_() const;
+    InfoFields::MapType& getInfo_();
+
 protected:
     const Header* _header;
     std::string _chrom;
@@ -148,7 +153,7 @@ protected:
     std::vector<std::string> _alt;
     double _qual;
     std::set<std::string> _failedFilters;
-    InfoFields _info;
+    LazyValue<InfoFields> _info;
     std::string _sampleString;
     mutable bool _parsedSamples;
     mutable SampleData _sampleData;

@@ -195,7 +195,7 @@ Entry::Entry(EntryMerger&& merger)
     }
 
     merger.setAltAndGenotypeData(_alt, _sampleData);
-    merger.setInfo(_info.get(*_header));
+    merger.setInfo(getInfo_());
 
     computeStartStop();
 }
@@ -280,7 +280,7 @@ void Entry::parse(const Header* h, const string& s) {
     if (!tok.extract(&beg, &end))
         throw runtime_error("Failed to extract info from vcf entry: " + s);
 
-    _info.fromString(beg, end);
+    _info = decltype(_info)(std::string(beg, end));
 
     tok.remaining(_sampleString);
     _parsedSamples = false;
@@ -343,7 +343,7 @@ int32_t Entry::altIdx(const string& alt) const {
 }
 
 const CustomValue* Entry::info(const string& key) const {
-    auto const& inf = _info.get(*_header);
+    auto const& inf = getInfo_();
     auto i = inf.find(key);
     if (i == inf.end())
         return 0;
@@ -356,7 +356,7 @@ bool Entry::isFiltered() const {
 }
 
 void Entry::setInfo(std::string const& key, CustomValue const& value) {
-    auto& inf = _info.get(*_header);
+    auto& inf = getInfo_();
     auto i = inf.find(key);
     if (i == inf.end()) {
         inf.insert(make_pair(key, value));
@@ -456,6 +456,14 @@ void Entry::computeStartStop() {
     std::copy(_alt.begin(), _alt.end(), alleles.begin() + 1);
     _startWithoutPadding = _pos - 1 + commonPrefixMulti(alleles);
     _stopWithoutPadding = _startWithoutPadding + _ref.size() - commonSuffixMulti(alleles);
+}
+
+InfoFields::MapType const& Entry::getInfo_() const {
+    return *_info.get(*_header, _alt.size());
+}
+
+InfoFields::MapType& Entry::getInfo_() {
+    return *_info.get(*_header, _alt.size());
 }
 
 ostream& operator<<(ostream& s, const Entry& e) {
