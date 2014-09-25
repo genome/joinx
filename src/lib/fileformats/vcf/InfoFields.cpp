@@ -21,6 +21,7 @@ InfoFields::InfoFields(Header const& h, std::string const& s, std::size_t numAlt
     if (beg != end && s != ".")
         Tokenizer<char>::split(beg, end, ';', std::back_inserter(infoStrings));
 
+
     for (auto i = infoStrings.begin(); i != infoStrings.end(); ++i) {
         if (i->empty())
             continue;
@@ -39,6 +40,7 @@ InfoFields::InfoFields(Header const& h, std::string const& s, std::size_t numAlt
 
         CustomValue cv(type, value);
         cv.setNumAlts(numAlts);
+
         auto inserted = data_.insert(make_pair(key, cv));
         if (!inserted.second)
             throw std::runtime_error(str(format(

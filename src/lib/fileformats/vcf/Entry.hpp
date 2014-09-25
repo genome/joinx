@@ -46,7 +46,7 @@ public:
     };
 
     typedef Header HeaderType;
-    typedef std::map<std::string, CustomValue> CustomValueMap;
+    typedef InfoFields::MapType CustomValueMap;
 
     // static data
     static const double MISSING_QUALITY;

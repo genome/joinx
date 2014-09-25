@@ -3,6 +3,8 @@
 #include "CustomValue.hpp"
 #include "common/namespaces.hpp"
 
+#include <boost/container/flat_map.hpp>
+
 #include <cassert>
 #include <map>
 #include <memory>

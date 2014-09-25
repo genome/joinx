@@ -1,8 +1,9 @@
 #pragma once
 
 #include "AlleleMerger.hpp"
-#include "common/namespaces.hpp"
+#include "InfoFields.hpp"
 #include "common/cstdint.hpp"
+#include "common/namespaces.hpp"
 
 #include <map>
 #include <set>
@@ -20,7 +21,7 @@ class SampleData;
 
 class EntryMerger {
 public:
-    typedef std::map<std::string, CustomValue> CustomValueMap;
+    typedef InfoFields::MapType CustomValueMap;
 
     EntryMerger(
         MergeStrategy const& mergeStrategy,
