@@ -25,5 +25,5 @@
 ##FORMAT=<ID=SP,Number=1,Type=Integer,Description="Phred-scaled strand bias P-value">
 ##FORMAT=<ID=PL,Number=G,Type=Integer,Description="List of Phred-scaled genotype likelihoods">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	out.bam
-1	335	.	CACAC	CA	167	.	INDEL;DP=102;VDB=0.0000;AF1=1;AC1=2;DP4=0,0,51,0;MQ=37;FQ=-189	GT:PL:GQ	1/1:208,154,0:99
-1	340	.	ATTCT	ATTCTTCT	167	.	INDEL;DP=102;VDB=0.0001;AF1=1;AC1=2;DP4=0,0,51,0;MQ=37;FQ=-189	GT:PL:GQ	1/1:208,154,0:99
+1	335	.	CACAC	CA	167	.	.	GT:PL:GQ	1/1:208,154,0:99
+1	340	.	ATTCT	ATTCTTCT	167	.	.	GT:PL:GQ	1/1:208,154,0:99

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CustomValue.hpp"
+#include "InfoFields.hpp"
 #include "SampleData.hpp"
 #include "common/CoordinateView.hpp"
 #include "common/LocusCompare.hpp"
@@ -91,7 +92,7 @@ public:
     const std::string& alt(GenotypeIndex const& idx) const;
     double qual() const { return _qual; }
     const std::set<std::string>& failedFilters() const { return _failedFilters; }
-    const CustomValueMap& info() const { return _info; }
+    const CustomValueMap& info() const { return _info.get(header()); }
     const CustomValue* info(std::string const& key) const;
     void setInfo(std::string const& key, CustomValue const& value);
     const SampleData& sampleData() const;
@@ -147,7 +148,7 @@ protected:
     std::vector<std::string> _alt;
     double _qual;
     std::set<std::string> _failedFilters;
-    CustomValueMap _info;
+    InfoFields _info;
     std::string _sampleString;
     mutable bool _parsedSamples;
     mutable SampleData _sampleData;

@@ -91,7 +91,7 @@ protected:
         string line;
         while (getline(vcfss, line)) {
             Entry e(&_header, line);
-            v.push_back(e);
+            v.push_back(std::move(e));
         }
     }
 
@@ -177,11 +177,14 @@ TEST_F(TestVcfEntry, variantAdaptor) {
 }
 
 TEST_F(TestVcfEntry, badCustomTypes) {
-    Entry e;
     string badInfo = "20\t14370\t.\tG\tA\t29\tPASS\tQQ;\tGT:GQ:DP:HQ\n";
     string badFormat = "20\t14370\t.\tG\tA\t29\tPASS\t.;\tQQ\n";
-    ASSERT_THROW(Entry(&_header, badInfo), runtime_error);
-    ASSERT_THROW(Entry(&_header, badFormat), runtime_error);
+
+    Entry e(&_header, badInfo);
+    EXPECT_THROW(e.info(), std::runtime_error);
+
+    e = Entry(&_header, badFormat);
+    EXPECT_THROW(e.sampleData(), std::runtime_error);
 }
 
 TEST_F(TestVcfEntry, swap) {

@@ -55,6 +55,8 @@ set(SOURCES
     vcf/GenotypeMerger.hpp
     vcf/Header.cpp
     vcf/Header.hpp
+    vcf/InfoFields.cpp
+    vcf/InfoFields.hpp
     vcf/Map.cpp
     vcf/Map.hpp
     vcf/MergeStrategy.cpp

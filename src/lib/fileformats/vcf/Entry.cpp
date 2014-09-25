@@ -195,7 +195,7 @@ Entry::Entry(EntryMerger&& merger)
     }
 
     merger.setAltAndGenotypeData(_alt, _sampleData);
-    merger.setInfo(_info);
+    merger.setInfo(_info.get(*_header));
 
     computeStartStop();
 }
@@ -280,29 +280,7 @@ void Entry::parse(const Header* h, const string& s) {
     if (!tok.extract(&beg, &end))
         throw runtime_error("Failed to extract info from vcf entry: " + s);
 
-    vector<string> infoStrings;
-    if (end-beg != 1 || *beg != '.')
-        Tokenizer<char>::split(beg, end, ';', back_inserter(infoStrings));
-
-    // TODO: refactor into function addInfoField(s)
-    for (auto i = infoStrings.begin(); i != infoStrings.end(); ++i) {
-        if (i->empty())
-            continue;
-
-        Tokenizer<char> kv(*i, '=');
-        string key;
-        string value;
-        kv.extract(key);
-        kv.remaining(value);
-        const CustomType* type = header().infoType(key);
-        if (type == NULL)
-            throw runtime_error(str(format("Failed to lookup type for info field '%1%'") %key));
-        CustomValue cv(type, value);
-        cv.setNumAlts(_alt.size());
-        auto inserted = _info.insert(make_pair(key, cv));
-        if (!inserted.second)
-            throw runtime_error(str(format("Duplicate value for info field '%1%'") %key));
-    }
+    _info.fromString(beg, end);
 
     tok.remaining(_sampleString);
     _parsedSamples = false;
@@ -365,8 +343,9 @@ int32_t Entry::altIdx(const string& alt) const {
 }
 
 const CustomValue* Entry::info(const string& key) const {
-    auto i = _info.find(key);
-    if (i == _info.end())
+    auto const& inf = _info.get(*_header);
+    auto i = inf.find(key);
+    if (i == inf.end())
         return 0;
     return &i->second;
 }
@@ -377,9 +356,10 @@ bool Entry::isFiltered() const {
 }
 
 void Entry::setInfo(std::string const& key, CustomValue const& value) {
-    auto i = _info.find(key);
-    if (i == _info.end()) {
-        _info.insert(make_pair(key, value));
+    auto& inf = _info.get(*_header);
+    auto i = inf.find(key);
+    if (i == inf.end()) {
+        inf.insert(make_pair(key, value));
     } else {
         i->second = std::move(value);
     }
@@ -458,24 +438,12 @@ void Entry::allButSamplesToStream(std::ostream& s) const {
         s << '\t' << _qual << '\t';
 
     s << streamJoin(_failedFilters).delimiter(";").emptyString(".");
-    s << '\t';
-
-    if (_info.empty()) {
-        s << '.';
-    } else {
-        for (auto i = _info.begin(); i != _info.end(); ++i) {
-            if (i != _info.begin())
-                s << ';';
-            s << i->second.type().id();
-            if (!i->second.empty()) {
-                s << "=";
-                i->second.toStream(s);
-            }
-        }
-    }
+    s << '\t' << _info;
 }
 
 void Entry::replaceAlts(uint64_t pos, std::string ref, std::vector<std::string> alt) {
+    assert(alt.size() == _alt.size());
+
     _pos = pos;
     _ref = std::move(ref);
     _alt = std::move(alt);
