@@ -22,8 +22,6 @@ set(SOURCES
     Sequence.hpp
     String.hpp
     StringView.hpp
-    TempFile.cpp
-    TempFile.hpp
     Timer.hpp
     Tokenizer.hpp
     UnknownSequenceError.hpp

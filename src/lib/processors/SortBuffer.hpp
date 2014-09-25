@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/LocusCompare.hpp"
-#include "common/TempFile.hpp"
+#include "io/TempFile.hpp"
 #include "io/InputStream.hpp"
 #include "fileformats/StreamFactory.hpp"
 

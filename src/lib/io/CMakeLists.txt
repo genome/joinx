@@ -13,6 +13,8 @@ set(SOURCES
     StreamJoin.hpp
     StreamLineSource.cpp
     StreamLineSource.hpp
+    TempFile.cpp
+    TempFile.hpp
 )
 
 add_library(io ${SOURCES})

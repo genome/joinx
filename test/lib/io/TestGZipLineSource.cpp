@@ -1,6 +1,6 @@
 #include "io/GZipLineSource.hpp"
 
-#include "common/TempFile.hpp"
+#include "io/TempFile.hpp"
 
 #include <gtest/gtest.h>
 

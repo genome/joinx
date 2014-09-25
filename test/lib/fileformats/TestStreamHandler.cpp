@@ -1,7 +1,7 @@
 #include "io/StreamHandler.hpp"
 #include "io/InputStream.hpp"
 
-#include "common/TempFile.hpp"
+#include "io/TempFile.hpp"
 
 #include <gtest/gtest.h>
 
