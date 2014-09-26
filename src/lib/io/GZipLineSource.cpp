@@ -1,5 +1,7 @@
 #include "GZipLineSource.hpp"
 
+#include "common/compat.hpp"
+
 #include <boost/format.hpp>
 
 #include <cstddef>
@@ -85,7 +87,7 @@ private:
 GZipLineSource::GZipLineSource(int fd)
     : _path(str(format("fd%1%") % fd))
     , _fp(gzdopen(fd, "rb"))
-    , _buffer(new LineBuffer(bufferSize()))
+    , _buffer(std::make_unique<LineBuffer>(bufferSize()))
     , _bad(_fp == Z_NULL)
     , _eof(false)
 {
@@ -94,14 +96,13 @@ GZipLineSource::GZipLineSource(int fd)
 GZipLineSource::GZipLineSource(std::string const& path)
     : _path(path)
     , _fp(gzopen(path.c_str(), "rb"))
-    , _buffer(new LineBuffer(bufsz))
+    , _buffer(std::make_unique<LineBuffer>(bufferSize()))
     , _bad(_fp == Z_NULL)
     , _eof(false)
 {
 }
 
 GZipLineSource::~GZipLineSource() {
-    delete _buffer;
     gzclose(_fp);
 }
 

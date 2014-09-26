@@ -5,8 +5,6 @@
 #include "io/StreamHandler.hpp"
 
 #include <boost/program_options.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include <iostream>
 #include <map>
@@ -25,7 +23,7 @@ public:
 
 class CommandBase {
 public:
-    typedef boost::shared_ptr<CommandBase> ptr;
+    typedef std::unique_ptr<CommandBase> ptr;
 
     CommandBase();
     virtual ~CommandBase() {}
@@ -51,7 +49,7 @@ protected:
     bool _optionsParsed;
     boost::program_options::options_description _opts;
     boost::program_options::positional_options_description _posOpts;
-    boost::scoped_ptr<boost::program_options::parsed_options> _parsedArgs;
+    std::unique_ptr<boost::program_options::parsed_options> _parsedArgs;
     boost::program_options::variables_map _varMap;
     StreamHandler _streams;
 };

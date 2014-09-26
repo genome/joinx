@@ -1,7 +1,8 @@
 #include "StreamHandler.hpp"
 
-#include "io/GZipLineSource.hpp"
 #include "common/Exceptions.hpp"
+#include "common/compat.hpp"
+#include "io/GZipLineSource.hpp"
 
 #include <boost/format.hpp>
 
@@ -30,10 +31,10 @@ std::vector<InputStream::ptr> StreamHandler::openForReading(
 InputStream::ptr StreamHandler::openForReading(std::string const& path) {
     ILineSource::ptr lineSource;
     if (path == "-") {
-        lineSource.reset(new GZipLineSource(fileno(stdin)));
+        lineSource = std::make_unique<GZipLineSource>(fileno(stdin));
     }
     else {
-        lineSource.reset(new GZipLineSource(path));
+        lineSource = std::make_unique<GZipLineSource>(path);
     }
     if (!*lineSource) {
         throw IOError(str(format("Failed to open file %1%") %path));

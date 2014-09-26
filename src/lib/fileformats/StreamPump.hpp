@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/compat.hpp"
+
 #include <memory>
 #include <utility>
 
@@ -43,10 +45,10 @@ struct PointerStreamPump {
     }
 
     void execute() {
-        std::unique_ptr<ValueType> entry(new ValueType);
+        auto entry = std::make_unique<ValueType>();
         while (stream_.next(*entry)) {
             out_(std::move(entry));
-            entry.reset(new ValueType);
+            entry = std::make_unique<ValueType>();
         }
         out_.flush();
     }

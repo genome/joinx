@@ -2,11 +2,11 @@
 
 #include "MergeSorted.hpp"
 #include "SortBuffer.hpp"
+#include "common/compat.hpp"
 #include "common/cstdint.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <algorithm>
 #include <cstdlib>
@@ -19,14 +19,14 @@
 template<typename StreamType, typename StreamOpener, typename OutputFunc>
 class Sort {
 public:
-    typedef typename boost::shared_ptr<StreamType> StreamPtr;
+    typedef typename std::unique_ptr<StreamType> StreamPtr;
     typedef typename StreamType::ValueType ValueType;
     typedef typename ValueType::HeaderType HeaderType;
     typedef SortBuffer<StreamType, StreamOpener, OutputFunc> BufferType;
-    typedef boost::shared_ptr<BufferType> BufferPtr;
+    typedef std::unique_ptr<BufferType> BufferPtr;
 
     Sort(
-            const std::vector<StreamPtr>& inputs,
+            std::vector<StreamPtr> inputs,
             StreamOpener& streamOpener,
             OutputFunc& out,
             HeaderType& outputHeader,
@@ -34,7 +34,7 @@ public:
             bool stable,
             CompressionType compression = NONE
         )
-        : _inputs(inputs)
+        : _inputs(std::move(inputs))
         , _streamOpener(streamOpener)
         , _out(out)
         , _outputHeader(outputHeader)
@@ -47,7 +47,8 @@ public:
     void execute() {
         using namespace std;
 
-        BufferPtr buf(new BufferType(_streamOpener, _outputHeader, _stable, _compression));
+        auto buf = std::make_unique<BufferType>(
+            _streamOpener, _outputHeader, _stable, _compression);
 
         for (unsigned idx = 0; idx < _inputs.size(); ++idx) {
 
@@ -61,8 +62,9 @@ public:
                 if (buf->size() >= _maxInMem) {
                     buf->sort();
                     buf->writeTmp();
-                    _buffers.push_back(buf);
-                    buf.reset(new BufferType(_streamOpener, _outputHeader, _stable, _compression));
+                    _buffers.push_back(std::move(buf));
+                    buf = std::make_unique<BufferType>(_streamOpener, _outputHeader,
+                        _stable, _compression);
                 }
             }
         }
@@ -73,9 +75,9 @@ public:
         } else {
             if (!buf->empty()) {
                 buf->sort();
-                _buffers.push_back(buf);
+                _buffers.push_back(std::move(buf));
             }
-            MergeSorted<ValueType, BufferPtr> merger(_buffers);
+            MergeSorted<BufferType> merger(std::move(_buffers));
             ValueType e;
             while (merger.next(e)) {
                 _out(e);

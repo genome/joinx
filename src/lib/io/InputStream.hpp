@@ -2,8 +2,6 @@
 
 #include "io/ILineSource.hpp"
 
-#include <boost/shared_ptr.hpp>
-
 #include <deque>
 #include <istream>
 #include <memory>
@@ -19,7 +17,7 @@ CompressionType compressionTypeFromString(const std::string& s);
 
 class InputStream {
 public:
-    typedef boost::shared_ptr<InputStream> ptr;
+    typedef std::unique_ptr<InputStream> ptr;
 
     static ptr create(const std::string& name, ILineSource::ptr& rawStream);
     static ptr create(const std::string& name, std::istream& rawStream);

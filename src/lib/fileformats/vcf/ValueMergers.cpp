@@ -4,11 +4,11 @@
 #include "CustomValue.hpp"
 #include "Entry.hpp"
 #include "common/Tokenizer.hpp"
+#include "common/compat.hpp"
 #include "io/StreamJoin.hpp"
 
 #include <boost/unordered_set.hpp>
 #include <boost/format.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include <iterator>
 #include <set>
@@ -32,21 +32,21 @@ namespace {
 
 namespace ValueMergers {
 
-boost::scoped_ptr<Registry> Registry::_instance;
+std::unique_ptr<Registry> Registry::_instance;
 
 Registry::Registry() {
-    registerMerger(Base::const_ptr(new UseFirst));
-    registerMerger(Base::const_ptr(new UseEarliest));
-    registerMerger(Base::const_ptr(new EnforceEquality));
-    registerMerger(Base::const_ptr(new EnforceEqualityUnordered));
-    registerMerger(Base::const_ptr(new Ignore));
-    registerMerger(Base::const_ptr(new Sum));
-    registerMerger(Base::const_ptr(new UniqueConcat));
-    registerMerger(Base::const_ptr(new PerAltDelimitedList));
+    registerMerger(std::make_unique<UseFirst const>());
+    registerMerger(std::make_unique<UseEarliest const>());
+    registerMerger(std::make_unique<EnforceEquality const>());
+    registerMerger(std::make_unique<EnforceEqualityUnordered const>());
+    registerMerger(std::make_unique<Ignore const>());
+    registerMerger(std::make_unique<Sum const>());
+    registerMerger(std::make_unique<UniqueConcat const>());
+    registerMerger(std::make_unique<PerAltDelimitedList const>());
 }
 
-void Registry::registerMerger(Base::const_ptr const& merger) {
-    auto inserted = _mergers.insert(make_pair(merger->name(), merger));
+void Registry::registerMerger(Base::const_ptr merger) {
+    auto inserted = _mergers.insert(make_pair(merger->name(), std::move(merger)));
     if (!inserted.second)
         throw runtime_error(str(format("Attempted to register duplicate value merger '%1%'") %merger->name()));
 }
@@ -60,7 +60,7 @@ Base const* Registry::getMerger(const std::string& name) const {
 
 const Registry* Registry::getInstance() {
     if (!_instance)
-        _instance.reset(new Registry);
+        _instance = std::make_unique<Registry>();
     return _instance.get();
 }
 

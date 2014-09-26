@@ -5,8 +5,6 @@
 
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
 
 #include <functional>
@@ -27,7 +25,7 @@ namespace ValueMergers {
     /// These are useful for doing things like merging INFO, FILTER, or FORMAT
     /// records in vcf files.
     struct Base {
-        typedef boost::shared_ptr<const Base> const_ptr;
+        typedef std::unique_ptr<const Base> const_ptr;
         typedef boost::function<const CustomValue*(Entry const*)> FetchFunc;
         virtual ~Base() {};
         /// the name of the merger. this is used when specifying merge
@@ -60,6 +58,8 @@ namespace ValueMergers {
     /// getInstance().
     class Registry : public boost::noncopyable {
     public:
+        Registry();
+
         /// Retrieve a pointer to the instance of this class
         static const Registry* getInstance();
 
@@ -69,12 +69,11 @@ namespace ValueMergers {
         Base const* getMerger(std::string const& name) const;
     protected:
         /// used internally to build the list of all mergers
-        void registerMerger(Base::const_ptr const& merger);
-        /// protected constructor, no outside instantiation allowed!
-        Registry();
+        void registerMerger(Base::const_ptr merger);
+
     protected:
         /// holds a pointer to the singleton instance of this class
-        static boost::scoped_ptr<Registry> _instance;
+        static std::unique_ptr<Registry> _instance;
         /// a map of the available mergers, keyed by name
         boost::unordered_map<std::string, Base::const_ptr> _mergers;
     };

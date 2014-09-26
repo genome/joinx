@@ -1,22 +1,24 @@
 #pragma once
 
 #include "common/LocusCompare.hpp"
+#include "common/RelOps.hpp"
 
 #include <algorithm>
-#include <vector>
 #include <functional>
+#include <memory>
 #include <set>
 #include <utility>
+#include <vector>
 
 namespace {
-    template<typename StreamPtr, typename LessThanCmp>
+    template<typename StreamType, typename LessThanCmp>
     struct StreamLessThan {
         StreamLessThan(LessThanCmp cmp = LessThanCmp())
             : cmp_(cmp)
         {}
 
-        bool operator()(const StreamPtr& a, const StreamPtr& b) const {
-            typedef typename StreamPtr::element_type::ValueType ValueType;
+        bool operator()(StreamType* a, StreamType* b) const {
+            typedef typename StreamType::ValueType ValueType;
             ValueType* pa(0);
             ValueType* pb(0);
             if (a->eof()) return false;
@@ -31,20 +33,24 @@ namespace {
 }
 
 template<
-          typename ValueType_
-        , typename StreamPtr
-        , typename LessThanCmp = CompareToLessThan<typename ValueType_::DefaultCompare>
+          typename StreamType
+        , typename LessThanCmp = CompareToLessThan<
+                typename StreamType::ValueType::DefaultCompare
+                >
         >
 class MergeSorted {
 public:
-    typedef ValueType_ ValueType;
+    typedef typename StreamType::ValueType ValueType;
+    typedef std::unique_ptr<StreamType> StreamPtr;
+    typedef StreamLessThan<StreamType, LessThanCmp> StreamCmp;
 
-    MergeSorted(const std::vector<StreamPtr>& sortedInputs, LessThanCmp cmp = LessThanCmp())
-        : sortedInputs_(StreamLessThan<StreamPtr, LessThanCmp>(cmp))
+    MergeSorted(std::vector<StreamPtr> inputs, LessThanCmp cmp = LessThanCmp())
+        : inputs_(std::move(inputs))
+        , sortedInputs_(StreamCmp(cmp))
     {
-        for (auto i = sortedInputs.begin(); i != sortedInputs.end(); ++i)
+        for (auto i = inputs_.begin(); i != inputs_.end(); ++i)
             if (!(*i)->eof())
-                sortedInputs_.insert(*i);
+                sortedInputs_.insert(i->get());
     }
 
     bool next(ValueType& next) {
@@ -54,7 +60,7 @@ public:
 
         bool rv = false;
         while (rv == false && !sortedInputs_.empty()) {
-            StreamPtr s = *sortedInputs_.begin();
+            StreamType* s = (*sortedInputs_.begin());
             sortedInputs_.erase(sortedInputs_.begin());
             if ((rv = s->next(next))) {
                 ValueType* p;
@@ -67,5 +73,6 @@ public:
     }
 
 protected:
-    std::multiset<StreamPtr, StreamLessThan<StreamPtr, LessThanCmp>> sortedInputs_;
+    std::vector<StreamPtr> inputs_;
+    std::multiset<StreamType*, StreamCmp> sortedInputs_;
 };

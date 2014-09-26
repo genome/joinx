@@ -1,20 +1,17 @@
 #include "VcfCompareGtCommand.hpp"
 
-#include "io/InputStream.hpp"
+#include "common/Tokenizer.hpp"
+#include "common/compat.hpp"
 #include "fileformats/VcfReader.hpp"
+#include "io/InputStream.hpp"
 #include "parse/Kvp.hpp"
 #include "processors/MergeSorted.hpp"
 #include "reports/VcfCompareGt.hpp"
-#include "common/Tokenizer.hpp"
 
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
-#include <boost/program_options.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include <algorithm>
 #include <iostream>
-#include <iterator>
 #include <set>
 #include <stdexcept>
 #include <vector>
@@ -22,8 +19,6 @@
 
 namespace po = boost::program_options;
 using boost::format;
-using boost::scoped_ptr;
-namespace bfs = boost::filesystem;
 
 namespace {
     std::unordered_map<std::string, Vcf::FilterType> const FILTER_STRINGS_{
@@ -168,14 +163,14 @@ void VcfCompareGtCommand::exec() {
     }
 
     VcfCompareGt report(names_, sampleNames_, *out, outputDir_);
-    MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
-    auto cmp = Vcf::makeGenotypeComparator(sampleNames_, headers, filterTypes_, readers.size(), report);
-    Vcf::Entry* e(new Vcf::Entry);
+    std::size_t numReaders = readers.size();
+    auto cmp = Vcf::makeGenotypeComparator(sampleNames_, headers, filterTypes_, numReaders, report);
+    MergeSorted<VcfReader> merger(std::move(readers));
+    auto e = std::make_unique<Vcf::Entry>();
     while (merger.next(*e)) {
-        cmp.push(e);
-        e = new Vcf::Entry;
+        cmp.push(e.release());
+        e = std::make_unique<Vcf::Entry>();
     }
-    delete e;
     cmp.finalize();
     report.finalize();
 }

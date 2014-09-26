@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/compat.hpp"
 #include "common/namespaces.hpp"
 
 #include <memory>
@@ -13,8 +14,11 @@ class Header;
 
 // Store a string representation of an object for optional parsing later.
 //
-// For type T to be used with LazyValue<T>, it should be constructable by
-// at least T(Vcf::Header const&, std::string const& text).
+// For type T to be used with LazyValue<T>, it must have a constructor of
+// the form:
+//   T(Vcf::Header const&, std::string const& text).
+//
+// as well as a copy constructor.
 //
 // It must also overload operator << for output to std::ostream
 //
@@ -39,7 +43,7 @@ public:
     {
         data_.reset();
         if (other.data_)
-            data_.reset(new T(*other.data_));
+            data_ = std::make_unique<T>(*other.data_);
     }
 
 
@@ -53,7 +57,7 @@ public:
         text_ = other.text_;
         data_.reset();
         if (other.data_)
-            data_.reset(new T(*other.data_));
+            data_ = std::make_unique<T>(*other.data_);
         return *this;
     }
 
@@ -104,7 +108,7 @@ private:
         if (data_)
             return;
 
-        data_.reset(new T(header, text_, std::forward<Args>(args)...));
+        data_ = std::make_unique<T>(header, text_, std::forward<Args>(args)...);
         text_.clear();
     }
 

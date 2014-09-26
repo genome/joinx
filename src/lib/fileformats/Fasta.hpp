@@ -33,5 +33,5 @@ protected:
     std::unique_ptr<FastaIndex> _index;
     char const* _data;
     size_t _len;
-    boost::scoped_ptr<boost::iostreams::mapped_file_source> _f;
+    std::unique_ptr<boost::iostreams::mapped_file_source> _f;
 };

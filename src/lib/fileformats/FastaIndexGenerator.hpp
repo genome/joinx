@@ -2,13 +2,15 @@
 
 #include "FastaIndex.hpp"
 
+#include <memory>
+
 class FastaIndexGenerator {
 public:
     typedef FastaIndex::Entry Entry;
 
     FastaIndexGenerator(char const* data, size_t len);
 
-    FastaIndex* generate();
+    std::unique_ptr<FastaIndex> generate();
 
 protected:
     void extractName(Entry& e);

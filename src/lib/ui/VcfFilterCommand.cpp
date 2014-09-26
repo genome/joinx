@@ -50,7 +50,7 @@ void VcfFilterCommand::exec() {
 
     typedef boost::function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
     typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
-    typedef boost::shared_ptr<ReaderType> ReaderPtr;
+    typedef std::unique_ptr<ReaderType> ReaderPtr;
 
     VcfExtractor extractor = boost::bind(&Vcf::Entry::parseLine, _1, _2, _3);
     DefaultPrinter writer(*out);

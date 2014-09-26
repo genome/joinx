@@ -1,8 +1,9 @@
 #pragma once
 
+#include "common/compat.hpp"
 #include "TypedStream.hpp"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class InputStream;
 
@@ -11,14 +12,14 @@ class StreamFactory {
 public:
     typedef ValueClass ValueType;
     typedef TypedStream<ValueType, Extractor> StreamType;
-    typedef boost::shared_ptr<StreamType> StreamPtr;
+    typedef std::unique_ptr<StreamType> StreamPtr;
 
     StreamFactory(Extractor& extractor)
         : _extractor(extractor)
     {}
 
     StreamPtr open(InputStream& in) {
-        return StreamPtr(new StreamType(_extractor, in));
+        return std::make_unique<StreamType>(_extractor, in);
     }
 
 protected:

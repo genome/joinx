@@ -11,6 +11,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace std;
@@ -82,7 +83,7 @@ TEST_F(TestMergeSorted, execute) {
     }
 
     Collector c;
-    MergeSorted<Bed, BedReader::ptr> merger(bedStreams);
+    MergeSorted<BedReader> merger(std::move(bedStreams));
     auto pump = makeStreamPump(merger, c);
     pump.execute();
     ASSERT_EQ(_expectedBeds.size(), c.beds.size());

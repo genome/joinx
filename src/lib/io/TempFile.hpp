@@ -1,6 +1,5 @@
 #pragma once
 
-#include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
 #include <fstream>
@@ -9,7 +8,7 @@
 
 class TempFile : public boost::noncopyable {
 public:
-    typedef boost::shared_ptr<TempFile> ptr;
+    typedef std::unique_ptr<TempFile> ptr;
 
     static const char* sys_tmpdir();
     enum Mode {
@@ -18,6 +17,9 @@ public:
         ANON
     };
 
+    explicit TempFile(Mode mode);
+    TempFile(const std::string& tmpl, Mode mode);
+
     static ptr create(Mode mode);
     static ptr create(const std::string& tmpl, Mode mode);
 
@@ -25,13 +27,10 @@ public:
     const std::string& path() const;
     std::fstream& stream();
 
-protected:
-    explicit TempFile(Mode mode);
-    TempFile(const std::string& tmpl, Mode mode);
-
+private:
     void _mkstemp();
 
-protected:
+private:
     std::fstream _stream;
     std::string _path;
     Mode _mode;
@@ -39,12 +38,15 @@ protected:
 
 class TempDir : public boost::noncopyable {
 public:
-    typedef boost::shared_ptr<TempDir> ptr;
+    typedef std::unique_ptr<TempDir> ptr;
 
     enum Mode {
         LEAVE,
         CLEANUP
     };
+
+    explicit TempDir(Mode mode);
+    TempDir(const std::string& tmpl, Mode mode);
 
     static ptr create(Mode mode);
     static ptr create(const std::string& tmpl, Mode mode);
@@ -53,12 +55,10 @@ public:
     const std::string& path() const;
     TempFile::ptr tempFile(TempFile::Mode mode) const;
 
-protected:
-    explicit TempDir(Mode mode);
-    TempDir(const std::string& tmpl, Mode mode);
+private:
     void _mkdtemp();
 
-protected:
+private:
     std::string _path;
     Mode _mode;
 };

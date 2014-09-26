@@ -1,10 +1,12 @@
 #include "TempFile.hpp"
+#include "common/compat.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
-#include <cstring>
+
 #include <cstdio> // P_tmpdir in glibc
 #include <cstdlib>
+#include <cstring>
 #include <stdexcept>
 
 using namespace std;
@@ -25,11 +27,11 @@ const char* TempFile::sys_tmpdir() {
 }
 
 TempFile::ptr TempFile::create(Mode mode) {
-    return ptr(new TempFile(mode));
+    return std::make_unique<TempFile>(mode);
 }
 
 TempFile::ptr TempFile::create(const std::string& tmpl, Mode mode) {
-    return ptr(new TempFile(tmpl, mode));
+    return std::make_unique<TempFile>(tmpl, mode);
 }
 
 TempFile::TempFile(Mode mode)
@@ -74,11 +76,11 @@ void TempFile::_mkstemp() {
 // TempDir //////////////////////////////
 
 TempDir::ptr TempDir::create(Mode mode) {
-    return ptr(new TempDir(mode));
+    return std::make_unique<TempDir>(mode);
 }
 
 TempDir::ptr TempDir::create(const std::string& tmpl, Mode mode) {
-    return ptr(new TempDir(tmpl, mode));
+    return std::make_unique<TempDir>(tmpl, mode);
 }
 
 TempDir::TempDir(Mode mode)

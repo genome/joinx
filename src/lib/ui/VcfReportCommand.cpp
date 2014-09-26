@@ -2,18 +2,20 @@
 
 #include "common/Exceptions.hpp"
 #include "common/MutationSpectrum.hpp"
-#include "io/InputStream.hpp"
-#include "io/StreamHandler.hpp"
+#include "common/compat.hpp"
+#include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/CustomType.hpp"
 #include "fileformats/vcf/CustomValue.hpp"
+#include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/GenotypeCall.hpp"
 #include "fileformats/vcf/Header.hpp"
-#include "fileformats/vcf/Entry.hpp"
-#include "fileformats/VcfReader.hpp"
+#include "io/InputStream.hpp"
+#include "io/StreamHandler.hpp"
 #include "metrics/Metrics.hpp"
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
+
 #include <functional>
 #include <iostream>
 #include <iterator>
@@ -78,7 +80,7 @@ void VcfReportCommand::exec() {
 
         std::unique_ptr<Metrics::EntryMetrics> pSiteMetrics;
         try {
-            pSiteMetrics.reset(new Metrics::EntryMetrics(entry, _infoFields));
+            pSiteMetrics = std::make_unique<Metrics::EntryMetrics>(entry, _infoFields);
         } catch (InvalidAlleleError const& e) {
             std::cerr << e.what() << "\nSkipping entry " << entry << "\n";
             continue;

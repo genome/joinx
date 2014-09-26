@@ -1,6 +1,7 @@
 #include "VcfCompareCommand.hpp"
 
 #include "common/Tokenizer.hpp"
+#include "common/compat.hpp"
 #include "fileformats/StreamPump.hpp"
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/MultiWriter.hpp"
@@ -230,13 +231,13 @@ void VcfCompareCommand::exec() {
             bfs::path name(streamNames_[i]);
             outputFiles.push_back(str(format("%1%/%2%-%3%") % outputDir_ % i % name.leaf().string()));
         }
-        entryWriter.reset(new Vcf::MultiWriter(outputFiles));
+        entryWriter = std::make_unique<Vcf::MultiWriter>(outputFiles);
 
         entryCb = boost::bind(&Vcf::MultiWriter::write, *entryWriter, _1);
         std::cerr << "Writing output to " << outputDir_ << "\n";
     }
 
-    MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
+    MergeSorted<VcfReader> merger(std::move(readers));
     VcfGenotypeMatcher matcher(
           streamNames_
         , sampleNames_

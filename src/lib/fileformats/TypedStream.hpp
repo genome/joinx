@@ -3,7 +3,6 @@
 #include "io/InputStream.hpp"
 
 #include <boost/format.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <memory>
 #include <stdexcept>
@@ -15,7 +14,7 @@ class TypedStream {
 public:
     typedef typename ValueClass::HeaderType HeaderType;
     typedef ValueClass ValueType;
-    typedef boost::shared_ptr<TypedStream<ValueClass, Extractor> > ptr;
+    typedef std::unique_ptr<TypedStream<ValueClass, Extractor> > ptr;
 
     TypedStream(Extractor& extractor, InputStream& in)
         : extractor_(extractor)

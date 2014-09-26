@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/compat.hpp"
 #include "fileformats/vcf/Compare.hpp"
 #include "fileformats/vcf/CustomType.hpp"
 #include "fileformats/vcf/CustomValue.hpp"
@@ -91,7 +92,7 @@ public:
         else {
             std::unique_ptr<Vcf::CustomValue> newValue;
             if (v.type().tiedToAlleles()) {
-                newValue.reset(new Vcf::CustomValue(&v.type()));
+                newValue = std::make_unique<Vcf::CustomValue>(&v.type());
                 auto const& raw = v.getRaw();
                 std::vector<Vcf::CustomValue::ValueType> newVec;
                 std::size_t offset = 0;
@@ -111,7 +112,7 @@ public:
                 newValue->setRaw(newVec);
             }
             else {
-                newValue.reset(new Vcf::CustomValue(v));
+                newValue = std::make_unique<Vcf::CustomValue>(v);
             }
 
             newValue->setType(txl.newType);

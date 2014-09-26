@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -29,7 +30,7 @@ public:
 private:
     std::string _path;
     gzFile _fp;
-    LineBuffer* _buffer;
+    std::unique_ptr<LineBuffer> _buffer;
     bool _bad;
     bool _eof;
 };

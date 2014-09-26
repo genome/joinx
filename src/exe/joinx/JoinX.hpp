@@ -15,7 +15,7 @@ public:
     std::string description() const { return "joinx"; }
 
     CommandBase::ptr subCommand(const std::string& name, int argc, char** argv) const;
-    void registerSubCommand(const CommandBase::ptr& app);
+    void registerSubCommand(CommandBase::ptr app);
     void describeSubCommands(std::ostream& s, const std::string& indent = "\t");
 
 protected:

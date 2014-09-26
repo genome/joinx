@@ -1,5 +1,7 @@
 #include "CommandBase.hpp"
 
+#include "common/compat.hpp"
+
 #include <boost/format.hpp>
 
 #include <sstream>
@@ -38,7 +40,7 @@ void CommandBase::parseCommandLine(std::vector<std::string> const& args) {
 
         po::store(parsedArgs, _varMap);
 
-        _parsedArgs.reset(new po::parsed_options(parsedArgs));
+        _parsedArgs = std::make_unique<po::parsed_options>(parsedArgs);
 
         po::notify(_varMap);
 

@@ -22,7 +22,6 @@
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 
@@ -31,7 +30,6 @@
 
 namespace po = boost::program_options;
 using boost::format;
-using boost::scoped_ptr;
 using namespace std;
 using Vcf::CustomType;
 
@@ -182,11 +180,11 @@ namespace {
 }
 
 void VcfMergeCommand::exec() {
-    scoped_ptr<Vcf::AltNormalizer> normalizer;
-    scoped_ptr<Fasta> ref;
+    std::unique_ptr<Vcf::AltNormalizer> normalizer;
+    std::unique_ptr<Fasta> ref;
     if (!_fastaFile.empty()) {
-        ref.reset(new Fasta(_fastaFile));
-        normalizer.reset(new Vcf::AltNormalizer(*ref));
+        ref = std::make_unique<Fasta>(_fastaFile);
+        normalizer = std::make_unique<Vcf::AltNormalizer>(*ref);
     }
 
     vector<InputStream::ptr> inputStreams = _streams.openForReading(_filenames);
@@ -195,17 +193,14 @@ void VcfMergeCommand::exec() {
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
 
-    vector<VcfReader::ptr> readers;
-    VcfExtractor extractor = boost::bind(&Vcf::Entry::parseLine, _1, _2, _3);
+    vector<VcfReader::ptr> readers(openVcfs(inputStreams));
 
     Vcf::Header mergedHeader;
     for (size_t i = 0; i < inputStreams.size(); ++i) {
-        readers.push_back(openVcf(*inputStreams[i]));
-
         // if sample duplication is enabled for this file
         auto dupIter = _dupSampleMap.find(inputStreams[i]->name());
         if (dupIter != _dupSampleMap.end()) {
-            auto& header = readers.back()->header();
+            auto& header = readers[i]->header();
             vector<string> sampleNames = header.sampleNames();
             size_t nSamples = sampleNames.size();
             for (size_t sampleIdx = 0; sampleIdx < nSamples; ++sampleIdx) {
@@ -221,22 +216,28 @@ void VcfMergeCommand::exec() {
             }
         }
 
-        mergedHeader.merge(readers.back()->header(), _mergeSamples);
-        readers.back()->header().sourceIndex(_fileOrder[inputStreams[i]->name()]);
+        mergedHeader.merge(readers[i]->header(), _mergeSamples);
+        readers[i]->header().sourceIndex(_fileOrder[inputStreams[i]->name()]);
     }
 
     DefaultPrinter printer(*out);
     auto writer = boost::bind(
-        &writeEntry<DefaultPrinter, scoped_ptr<Vcf::AltNormalizer>, Vcf::Entry>,
+        &writeEntry<DefaultPrinter, std::unique_ptr<Vcf::AltNormalizer>, Vcf::Entry>,
         printer, std::ref(normalizer), _1);
-    scoped_ptr<Vcf::ConsensusFilter> cnsFilt;
+
+    std::unique_ptr<Vcf::ConsensusFilter> cnsFilt;
     if (_consensusRatio > 0) {
         mergedHeader.addFilter(_consensusFilter, _consensusFilterDesc);
         if (mergedHeader.formatType("FT") == NULL) {
             CustomType FT("FT", CustomType::FIXED_SIZE, 1, CustomType::STRING, "Sample filter status");
-            mergedHeader.addFormatType(FT);
+            mergedHeader.addFormatType(std::move(FT));
         }
-        cnsFilt.reset(new Vcf::ConsensusFilter(_consensusRatio, _consensusFilter, &mergedHeader));
+
+        cnsFilt = std::make_unique<Vcf::ConsensusFilter>(
+              _consensusRatio
+            , _consensusFilter
+            , &mergedHeader
+            );
     }
 
     Vcf::MergeStrategy mergeStrategy(&mergedHeader, _samplePriority, cnsFilt.get());
@@ -251,7 +252,7 @@ void VcfMergeCommand::exec() {
     mergeStrategy.primarySampleStreamIndex(0);
 
     *out << mergedHeader;
-    MergeSorted<Vcf::Entry, VcfReader::ptr> merger(readers);
+    MergeSorted<VcfReader> merger(std::move(readers));
 
     LocusCompare<UnpaddedCoordinateView> cmp;
     Vcf::Builder builder(mergeStrategy, &mergedHeader, writer);

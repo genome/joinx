@@ -9,6 +9,7 @@
 #include <iterator>
 #include <memory>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 BEGIN_NAMESPACE(compat)
@@ -57,3 +58,16 @@ void sort(Iter first, Iter last, Compare cmp) {
 #endif
 
 END_NAMESPACE(compat)
+
+#ifdef CXX14_NO_MAKE_UNIQUE
+BEGIN_NAMESPACE(std) // OH NO!
+
+// We don't handle the array cases; this is all we need for now
+template<typename T, typename... Args>
+unique_ptr<T> make_unique(Args&&... args) {
+    return unique_ptr<T>{new T(forward<Args>(args)...)};
+}
+
+END_NAMESPACE(std)
+
+#endif

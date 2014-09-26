@@ -1,9 +1,10 @@
 #include "Fasta.hpp"
 #include "FastaIndexGenerator.hpp"
-#include "io/InputStream.hpp"
 #include "common/Exceptions.hpp"
 #include "common/Tokenizer.hpp"
 #include "common/UnknownSequenceError.hpp"
+#include "common/compat.hpp"
+#include "io/InputStream.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
@@ -33,14 +34,14 @@ Fasta::Fasta(
     , _len(len)
 {
     FastaIndexGenerator gen(data, len);
-    _index.reset(gen.generate());
+    _index = gen.generate();
 }
 
 Fasta::Fasta(std::string const& path)
     : _name(path)
 {
     try {
-        _f.reset(new boost::iostreams::mapped_file_source(path));
+        _f = std::make_unique<boost::iostreams::mapped_file_source>(path);
     } catch (exception const& e) {
         throw IOError(str(format("Failed to memory map fasta '%1%': %2%") %path %e.what()));
     }
@@ -51,10 +52,10 @@ Fasta::Fasta(std::string const& path)
     string faiPath = path + INDEX_EXTENSION;
     ifstream in(faiPath);
     if (in) {
-        _index.reset(new FastaIndex(in));
+        _index = std::make_unique<FastaIndex>(in);
     } else {
         FastaIndexGenerator gen(_data, _len);
-        _index.reset(gen.generate());
+        _index = gen.generate();
         ofstream out(faiPath);
         if (!out) {
             throw IOError(str(format(

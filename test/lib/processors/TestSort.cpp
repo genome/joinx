@@ -14,6 +14,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 #include <functional>
 
@@ -98,7 +99,7 @@ protected:
 
 TEST_F(TestSort, unstable) {
     Collector<Bed> out;
-    SortType sorter(_bedReaders, bedOpener, out, hdr, _expectedBeds.size()/10, false);
+    SortType sorter(std::move(_bedReaders), bedOpener, out, hdr, _expectedBeds.size()/10, false);
     sorter.execute();
     ASSERT_EQ(_expectedStr.str(), out.out.str())
         << "Expected:\n" << _expectedStr.str()
@@ -109,14 +110,14 @@ TEST_F(TestSort, unstable) {
 
 TEST_F(TestSort, gzip) {
     Collector<Bed> out;
-    SortType sorter(_bedReaders, bedOpener, out, hdr, _expectedBeds.size()/10, false, GZIP);
+    SortType sorter(std::move(_bedReaders), bedOpener, out, hdr, _expectedBeds.size()/10, false, GZIP);
     sorter.execute();
     ASSERT_EQ(_expectedStr.str(), out.out.str());
 }
 
 TEST_F(TestSort, stable) {
     Collector<Bed> out;
-    SortType sorter(_bedReaders, bedOpener, out, hdr, _expectedBeds.size()/10, true);
+    SortType sorter(std::move(_bedReaders), bedOpener, out, hdr, _expectedBeds.size()/10, true);
     sorter.execute();
     ASSERT_EQ(_expectedStr.str(), out.out.str());
 }

@@ -1,5 +1,7 @@
 #include "FastaIndexGenerator.hpp"
 
+#include "common/compat.hpp"
+
 #include <boost/format.hpp>
 
 #include <algorithm>
@@ -64,8 +66,8 @@ void FastaIndexGenerator::countLines(Entry& e) {
     }
 }
 
-FastaIndex* FastaIndexGenerator::generate() {
-    FastaIndex* index(new FastaIndex);
+std::unique_ptr<FastaIndex> FastaIndexGenerator::generate() {
+    auto index = std::make_unique<FastaIndex>();
     while (_pos < _end) {
         Entry e;
         extractName(e);
@@ -74,6 +76,6 @@ FastaIndex* FastaIndexGenerator::generate() {
         index->_sequenceOrder.push_back(e.name);
         index->_entries[e.name] = e;
     }
-    return index;
+    return std::move(index);
 }
 

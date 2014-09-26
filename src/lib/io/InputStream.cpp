@@ -1,4 +1,6 @@
 #include "InputStream.hpp"
+
+#include "common/compat.hpp"
 #include "io/StreamLineSource.hpp"
 
 #include <boost/format.hpp>
@@ -17,11 +19,11 @@ CompressionType compressionTypeFromString(const string& s) {
 }
 
 InputStream::ptr InputStream::create(const string& name, ILineSource::ptr& in) {
-    return ptr(new InputStream(name, in));
+    return std::make_unique<InputStream>(name, in);
 }
 
 InputStream::ptr InputStream::create(const string& name, istream& in) {
-    return ptr(new InputStream(name, in));
+    return std::make_unique<InputStream>(name, in);
 }
 
 InputStream::InputStream(const std::string& name, ILineSource::ptr& in)
@@ -37,7 +39,7 @@ InputStream::InputStream(const std::string& name, ILineSource::ptr& in)
 
 InputStream::InputStream(const string& name, istream& in)
     : _name(name)
-    , _inptr(new StreamLineSource(in))
+    , _inptr(std::make_unique<StreamLineSource>(in))
     , _in(*_inptr)
     , _caching(false)
     , _cacheIter(_cache.begin())
