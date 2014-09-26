@@ -6,7 +6,6 @@
 #include "fileformats/ChromPosReader.hpp"
 #include "fileformats/DefaultPrinter.hpp"
 #include "fileformats/InferFileType.hpp"
-#include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "io/InputStream.hpp"
@@ -123,17 +122,15 @@ void SortCommand::exec() {
 
     DefaultPrinter writer(*out);
     if (type == CHROMPOS) {
-        typedef TypedStreamFactory<DefaultParser<ChromPos>>::StreamType StreamType;
         TypedStreamFactory<DefaultParser<ChromPos>> readerFactory;
         auto readers = readerFactory(inputStreams);
         ChromPosHeader hdr;
 
-        auto sorter = makeSort<StreamType>(
+        auto sorter = makeSort(
             readers, readerFactory, writer, hdr, _maxInMem, _stable, compression);
         sorter->execute();
     } else if (type == BED) {
         int extraFields = _unique ? 1 : 0;
-        typedef TypedStreamFactory<BedParser>::StreamType StreamType;
         TypedStreamFactory<BedParser> readerFactory{extraFields};
         auto readers = readerFactory(inputStreams);
         BedHeader hdr;
@@ -144,12 +141,11 @@ void SortCommand::exec() {
         else
             output = writer;
 
-        auto sorter = makeSort<StreamType>(
+        auto sorter = makeSort(
             readers, readerFactory, dedup, hdr, _maxInMem, _stable, compression);
         sorter->execute();
     } else if (type == VCF) {
-        typedef TypedStreamFactory<ReheaderingVcfParser> InputFactory;
-        typedef InputFactory::StreamType StreamType;
+        typedef TypedStreamFactory<Vcf::ReheaderingParser> InputFactory;
         Vcf::Header hdr;
         InputFactory readerFactory(&hdr);
         auto readers = readerFactory(inputStreams);
@@ -159,7 +155,7 @@ void SortCommand::exec() {
 
         *out << hdr;
 
-        auto sorter = makeSort<StreamType>(
+        auto sorter = makeSort(
               readers, readerFactory, writer, hdr, _maxInMem, _stable, compression);
         sorter->execute();
     } else {

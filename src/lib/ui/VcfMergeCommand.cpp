@@ -7,7 +7,6 @@
 #include "fileformats/Fasta.hpp"
 #include "fileformats/StreamPump.hpp"
 #include "fileformats/TypedStream.hpp"
-#include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/AltNormalizer.hpp"
 #include "fileformats/vcf/Builder.hpp"
 #include "fileformats/vcf/ConsensusFilter.hpp"
@@ -192,7 +191,7 @@ void VcfMergeCommand::exec() {
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
 
-    vector<VcfReader::ptr> readers(openVcfs(inputStreams));
+    auto readers = openStreams<Vcf::Entry>(inputStreams);
 
     Vcf::Header mergedHeader;
     for (size_t i = 0; i < inputStreams.size(); ++i) {
@@ -262,7 +261,7 @@ void VcfMergeCommand::exec() {
     mergeStrategy.primarySampleStreamIndex(0);
 
     *out << mergedHeader;
-    MergeSorted<VcfReader> merger(std::move(readers));
+    auto merger = makeMergeSorted(readers);
 
     LocusCompare<UnpaddedCoordinateView> cmp;
     Vcf::Builder builder(mergeStrategy, &mergedHeader, writer);

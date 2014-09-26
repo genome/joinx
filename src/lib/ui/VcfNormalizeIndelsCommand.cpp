@@ -2,15 +2,14 @@
 
 #include "common/UnknownSequenceError.hpp"
 #include "fileformats/Fasta.hpp"
-#include "io/InputStream.hpp"
-#include "fileformats/VcfReader.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/vcf/AltNormalizer.hpp"
 
 #include <boost/format.hpp>
-#include <boost/program_options.hpp>
-#include <functional>
+
+#include <unordered_set>
 #include <stdexcept>
 
 namespace po = boost::program_options;
@@ -44,22 +43,29 @@ void VcfNormalizeIndelsCommand::configureOptions() {
 
 void VcfNormalizeIndelsCommand::exec() {
     Fasta ref(_fastaPath);
-    InputStream::ptr inStream = _streams.openForReading(_inputFile);
+    auto in = _streams.openForReading(_inputFile);
     ostream* out = _streams.get<ostream>(_outputFile);
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
 
-    VcfReader::ptr in = openVcf(*inStream);
-    *out << in->header();
+    auto reader = openStream<Vcf::Entry>(in);
+    *out << reader->header();
     Vcf::Entry e;
     Vcf::AltNormalizer norm(ref);
-    while (in->next(e)) {
+    std::unordered_set<std::string> seqWarnings;
+    while (reader->next(e)) {
         try {
             norm.normalize(e);
         } catch (UnknownSequenceError const& ex) {
-            // We couldn't get reference data for the sequence
-            cerr << "WARNING: at line " << in->lineNum() << " in file " << in->name()
-                << ": sequence " << e.chrom() << " not found in reference " << _fastaPath << "\n";
+            auto inserted = seqWarnings.insert(e.chrom());
+            // only warn the first time for each sequence
+            if (inserted.second) {
+                // We couldn't get reference data for the sequence
+                cerr << "WARNING: at line " << reader->lineNum()
+                    << " in file " << reader->name() << ": sequence "
+                    << e.chrom() << " not found in reference " << _fastaPath << "\n"
+                    ;
+            }
         }
         *out << e << "\n";
     }

@@ -80,7 +80,7 @@ public:
                 buf->sort();
                 _buffers.push_back(std::move(buf));
             }
-            MergeSorted<BufferType> merger(std::move(_buffers));
+            auto merger = makeMergeSorted(_buffers);
             ValueType e;
             while (merger.next(e)) {
                 _out(e);
@@ -101,7 +101,7 @@ protected:
 
 template<typename StreamType, typename StreamOpener, typename OutputFunc>
 typename Sort<StreamType, StreamOpener, OutputFunc>::ptr makeSort(
-          std::vector<typename StreamType::ptr> const& inputs
+          std::vector<std::unique_ptr<StreamType>> const& inputs
         , StreamOpener& streamOpener
         , OutputFunc& out
         , typename StreamType::HeaderType& outputHeader

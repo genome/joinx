@@ -6,6 +6,7 @@
 #include <boost/format.hpp>
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
@@ -13,6 +14,19 @@
 #include <utility>
 #include <vector>
 
+// When opening multiple streams with openStreams, this will get called
+// with each stream and its index. By default, it doesn't do anything, but
+// it can be specialized for any type as needed (in that type's header).
+template<typename ValueType>
+struct SetSourceIndex {
+    template<typename Stream>
+    void operator()(Stream&, size_t) {}
+};
+
+template<typename StreamType>
+void setSourceIndex(StreamType& stream, size_t idx) {
+    SetSourceIndex<typename StreamType::ValueType>{}(stream, idx);
+}
 
 template<typename Parser>
 class TypedStream {
@@ -188,11 +202,13 @@ struct TypedStreamFactory {
         return std::make_unique<StreamType>(parser, *in);
     }
 
-    std::vector<StreamPtr> operator()(std::vector<InputStream::ptr>& ins) {
+    std::vector<StreamPtr> operator()(std::vector<InputStream::ptr> const& ins) {
         std::vector<StreamPtr> rv;
         rv.reserve(ins.size());
-        for (auto i = ins.begin(); i != ins.end(); ++i) {
+        std::size_t idx{0};
+        for (auto i = ins.begin(); i != ins.end(); ++i, ++idx) {
             rv.push_back((*this)(*i));
+            setSourceIndex(*rv.back(), idx);
         }
         // old gcc strikes again
         //std::transform(ins.begin(), ins.end(), std::back_inserter(rv), std::ref(*this));
@@ -201,3 +217,22 @@ struct TypedStreamFactory {
 
     Parser parser;
 };
+
+template<typename ValueType>
+typename TypedStream<DefaultParser<ValueType>>::ptr openStream(InputStream& in) {
+    return TypedStreamFactory<DefaultParser<ValueType>>{}(in);
+}
+
+template<typename ValueType>
+typename TypedStream<DefaultParser<ValueType>>::ptr openStream(InputStream::ptr const& in) {
+    return TypedStreamFactory<DefaultParser<ValueType>>{}(in);
+}
+
+template<typename ValueType>
+std::vector<typename TypedStream<DefaultParser<ValueType>>::ptr> openStreams(
+    std::vector<InputStream::ptr> const& in
+    )
+{
+    return TypedStreamFactory<DefaultParser<ValueType>>{}(in);
+}
+

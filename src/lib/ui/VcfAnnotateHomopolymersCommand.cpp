@@ -2,14 +2,11 @@
 
 #include "annotate/HomopolymerAnnotator.hpp"
 #include "common/Sequence.hpp"
-#include "fileformats/BedReader.hpp"
 #include "fileformats/DefaultPrinter.hpp"
-#include "fileformats/VcfReader.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/RawVariant.hpp"
 #include "processors/IntersectFull.hpp"
-
-#include <boost/program_options.hpp>
 
 #include <cstdlib>
 #include <iostream>
@@ -49,8 +46,10 @@ void VcfAnnotateHomopolymersCommand::configureOptions() {
 void VcfAnnotateHomopolymersCommand::exec() {
     auto bedStream = _streams.openForReading(homopolymerBedFile_);
     auto vcfStream = _streams.openForReading(vcfFile_);
-    auto bedReader = openBed(*bedStream, 1);
-    auto vcfReader = openVcf(*vcfStream);
+
+    // parse 1 additional field (past chr, start stop) in bed files.
+    auto bedReader = TypedStreamFactory<BedParser>{1}(bedStream);
+    auto vcfReader = openStream<Vcf::Entry>(vcfStream);
 
     std::ostream* outStream = _streams.get<std::ostream>(outputFile_);
 

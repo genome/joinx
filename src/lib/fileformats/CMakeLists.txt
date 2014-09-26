@@ -24,8 +24,6 @@ set(SOURCES
     TypedStream.hpp
     Variant.cpp
     Variant.hpp
-    VcfReader.cpp
-    VcfReader.hpp
     WiggleReader.cpp
     WiggleReader.hpp
     vcf/AlleleMerger.cpp

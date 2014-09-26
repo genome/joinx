@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CustomValue.hpp"
+#include "Header.hpp"
 #include "InfoFields.hpp"
 #include "LazyValue.hpp"
 #include "SampleData.hpp"
@@ -9,6 +10,7 @@
 #include "common/Tokenizer.hpp"
 #include "common/cstdint.hpp"
 #include "common/namespaces.hpp"
+#include "fileformats/TypedStream.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <map>
@@ -168,7 +170,23 @@ inline bool containsInsertions(Vcf::Entry const& v) {
     return false;
 }
 
+struct ReheaderingParser {
+    typedef Entry ValueType;
+
+    Header const* newHeader;
+
+    ReheaderingParser(Header const* newHeader);
+    void operator()(Header const* h, std::string& line, Entry& entry);
+};
+
 std::ostream& operator<<(std::ostream& s, const Entry& e);
 
 END_NAMESPACE(Vcf)
 
+template<>
+struct SetSourceIndex<Vcf::Entry> {
+    template<typename Stream>
+    void operator()(Stream& s, size_t idx) {
+        s.header().sourceIndex(idx);
+    }
+};

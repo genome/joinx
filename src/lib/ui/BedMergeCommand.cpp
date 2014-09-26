@@ -2,7 +2,7 @@
 
 #include "common/cstdint.hpp"
 #include "fileformats/Bed.hpp"
-#include "fileformats/BedReader.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "io/InputStream.hpp"
 #include "io/StreamJoin.hpp"
 
@@ -74,7 +74,7 @@ void BedMergeCommand::exec() {
     InputStream::ptr inStream = _streams.openForReading(_inputFile);
     ostream* outStream = _streams.get<ostream>(_outputFile);
 
-    BedReader::ptr in = openBed(*inStream, -1);
+    auto in = openStream<Bed>(inStream);
     Bed bed;
     Bed* peekBuf;
     Bed tmp;

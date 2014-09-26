@@ -2,24 +2,20 @@
 
 #include "common/UnknownSequenceError.hpp"
 #include "fileformats/Fasta.hpp"
-#include "io/InputStream.hpp"
-#include "fileformats/VcfReader.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "fileformats/vcf/CustomValue.hpp"
 #include "fileformats/vcf/Entry.hpp"
+#include "fileformats/vcf/Header.hpp"
 #include "fileformats/vcf/RawVariant.hpp"
+#include "io/InputStream.hpp"
 #include "processors/VariantContig.hpp"
 
-#include <boost/assign/list_of.hpp>
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
-
 #include <boost/format.hpp>
-#include <boost/program_options.hpp>
+
 #include <fstream>
 #include <memory>
 #include <stdexcept>
 
-using boost::assign::list_of;
 using boost::format;
 using namespace std;
 namespace po = boost::program_options;
@@ -69,7 +65,7 @@ void CreateContigsCommand::exec() {
     ostream *outputRemap = _streams.get<ostream>(_outputRemap);
 
     InputStream::ptr in(_streams.openForReading(_variantsFile));
-    auto vcfReader = openVcf(*in);
+    auto vcfReader = openStream<Vcf::Entry>(in);
     auto& reader = *vcfReader;
 
     Vcf::Entry entry;

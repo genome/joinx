@@ -2,8 +2,8 @@
 
 #include "common/Tokenizer.hpp"
 #include "common/compat.hpp"
-#include "fileformats/VcfReader.hpp"
-#include "io/InputStream.hpp"
+#include "fileformats/TypedStream.hpp"
+#include "fileformats/vcf/Entry.hpp"
 #include "parse/Kvp.hpp"
 #include "processors/MergeSorted.hpp"
 #include "reports/VcfCompareGt.hpp"
@@ -125,7 +125,7 @@ void VcfCompareGtCommand::exec() {
         throw std::runtime_error("At least two input files are required");
     }
 
-    std::vector<InputStream::ptr> inputStreams = _streams.openForReading(filenames_);
+    auto inputStreams = _streams.openForReading(filenames_);
     ostream* out = _streams.get<std::ostream>(outputFile_);
 
     if (names_.empty()) {
@@ -137,7 +137,7 @@ void VcfCompareGtCommand::exec() {
             "of names (-n) given");
     }
 
-    auto readers = openVcfs(inputStreams);
+    auto readers = openStreams<Vcf::Entry>(inputStreams);
     std::vector<Vcf::Header const*> headers;
     std::set<std::string> sampleNameSet;
     for (auto i = readers.begin(); i != readers.end(); ++i) {
@@ -165,7 +165,7 @@ void VcfCompareGtCommand::exec() {
     VcfCompareGt report(names_, sampleNames_, *out, outputDir_);
     std::size_t numReaders = readers.size();
     auto cmp = Vcf::makeGenotypeComparator(sampleNames_, headers, filterTypes_, numReaders, report);
-    MergeSorted<VcfReader> merger(std::move(readers));
+    auto merger = makeMergeSorted(readers);
     auto e = std::make_unique<Vcf::Entry>();
     while (merger.next(*e)) {
         cmp.push(e.release());

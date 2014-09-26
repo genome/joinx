@@ -1,21 +1,18 @@
 #include "VcfAnnotateCommand.hpp"
 
 #include "common/Tokenizer.hpp"
-#include "fileformats/VcfReader.hpp"
 #include "fileformats/Bed.hpp"
-#include "io/InputStream.hpp"
 #include "fileformats/DefaultPrinter.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "fileformats/vcf/Compare.hpp"
 #include "fileformats/vcf/CustomType.hpp"
 #include "fileformats/vcf/CustomValue.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
+#include "io/InputStream.hpp"
 #include "processors/IntersectSimple.hpp"
 
-#include <boost/bind.hpp>
 #include <boost/format.hpp>
-#include <boost/function.hpp>
-#include <boost/program_options.hpp>
 
 #include <iterator>
 #include <stdexcept>
@@ -130,8 +127,8 @@ void VcfAnnotateCommand::exec() {
     ostream* out = _streams.get<ostream>(_outputFile);
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
-    auto vcfReader = openVcf(*vcfIn);
-    auto annoReader = openVcf(*annoIn);
+    auto vcfReader = openStream<Vcf::Entry>(*vcfIn);
+    auto annoReader = openStream<Vcf::Entry>(*annoIn);
 
     Vcf::Header& annoHeader = annoReader->header();
     Vcf::Header& header = vcfReader->header();

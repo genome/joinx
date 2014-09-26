@@ -1,20 +1,14 @@
 #include "VcfFilterCommand.hpp"
 
-#include "io/InputStream.hpp"
 #include "fileformats/DefaultPrinter.hpp"
-#include "fileformats/VcfReader.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
-
-#include <boost/bind.hpp>
-#include <boost/format.hpp>
-#include <boost/function.hpp>
-#include <boost/program_options.hpp>
+#include "io/InputStream.hpp"
 
 #include <stdexcept>
 
 namespace po = boost::program_options;
-using boost::format;
 using namespace std;
 
 VcfFilterCommand::VcfFilterCommand()
@@ -49,7 +43,7 @@ void VcfFilterCommand::exec() {
         throw runtime_error("stdin listed more than once!");
 
     DefaultPrinter writer(*out);
-    auto reader = openVcf(*instream);
+    auto reader = openStream<Vcf::Entry>(instream);
     Vcf::Entry e;
     *out << reader->header();
     while (reader->next(e)) {

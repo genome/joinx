@@ -32,20 +32,16 @@ namespace {
     };
 }
 
-template<
-          typename StreamType
-        , typename LessThanCmp = CompareToLessThan<
-                typename StreamType::ValueType::DefaultCompare
-                >
-        >
+
+template<typename StreamType , typename LessThanCmp>
 class MergeSorted {
 public:
     typedef typename StreamType::ValueType ValueType;
     typedef std::unique_ptr<StreamType> StreamPtr;
     typedef StreamLessThan<StreamType, LessThanCmp> StreamCmp;
 
-    MergeSorted(std::vector<StreamPtr> inputs, LessThanCmp cmp = LessThanCmp())
-        : inputs_(std::move(inputs))
+    MergeSorted(std::vector<StreamPtr> const& inputs, LessThanCmp cmp = LessThanCmp())
+        : inputs_(inputs)
         , sortedInputs_(StreamCmp(cmp))
     {
         for (auto i = inputs_.begin(); i != inputs_.end(); ++i)
@@ -73,6 +69,22 @@ public:
     }
 
 protected:
-    std::vector<StreamPtr> inputs_;
+    std::vector<StreamPtr> const& inputs_;
     std::multiset<StreamType*, StreamCmp> sortedInputs_;
 };
+
+
+template<
+          typename StreamType
+        , typename LessThanCmp = CompareToLessThan<
+                typename StreamType::ValueType::DefaultCompare
+                >
+        >
+MergeSorted<StreamType, LessThanCmp>
+makeMergeSorted(
+          std::vector<std::unique_ptr<StreamType>> const& inputs
+        , LessThanCmp cmp = LessThanCmp()
+        )
+{
+    return MergeSorted<StreamType, LessThanCmp>(inputs, cmp);
+}

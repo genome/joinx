@@ -30,3 +30,8 @@ private:
     VcfReader& _reader;
     RawCallback _callback;
 };
+
+template<typename VcfReader, typename RawCallback>
+VcfToRaw<VcfReader, RawCallback> makeVcfToRaw(VcfReader& reader, RawCallback callback) {
+    return VcfToRaw<VcfReader, RawCallback>(reader, callback);
+}

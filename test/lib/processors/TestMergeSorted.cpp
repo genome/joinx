@@ -77,7 +77,7 @@ TEST_F(TestMergeSorted, execute) {
     }
 
     Collector c;
-    MergeSorted<BedReader> merger(std::move(bedStreams));
+    auto merger = makeMergeSorted(bedStreams);
     auto pump = makeStreamPump(merger, c);
     pump.execute();
     ASSERT_EQ(_expectedBeds.size(), c.beds.size());

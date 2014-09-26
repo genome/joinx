@@ -134,5 +134,14 @@ inline bool containsInsertions(Bed const& b) {
     return b.length() == 0;
 }
 
+struct BedParser {
+    typedef Bed ValueType;
+
+    int maxExtraFields;
+
+    BedParser();
+    explicit BedParser(int maxExtraFields);
+    void operator()(BedHeader const* h, std::string& line, Bed& bed);
+};
 
 std::ostream& operator<<(std::ostream& s, const Bed& bed);

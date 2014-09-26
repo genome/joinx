@@ -1,7 +1,8 @@
 #include "VcfRemoveFilteredGtCommand.hpp"
 
+#include "fileformats/TypedStream.hpp"
+#include "fileformats/vcf/Entry.hpp"
 #include "io/InputStream.hpp"
-#include "fileformats/VcfReader.hpp"
 
 #include <boost/program_options.hpp>
 
@@ -45,7 +46,7 @@ void VcfRemoveFilteredGtCommand::exec() {
     InputStream::ptr inStream = _streams.openForReading(inputFile_);
     std::ostream* out = _streams.get<std::ostream>(outputFile_);
 
-    auto reader = openVcf(*inStream);
+    auto reader = openStream<Vcf::Entry>(inStream);
     Vcf::Entry entry;
     *out << reader->header();
     while (reader->next(entry)) {

@@ -2,7 +2,7 @@
 
 #include "io/InputStream.hpp"
 #include "fileformats/DefaultPrinter.hpp"
-#include "fileformats/VcfReader.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 
@@ -63,7 +63,7 @@ void VcfSiteFilterCommand::exec() {
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
 
-    auto readerPtr = openVcf(*instream);
+    auto readerPtr = openStream<Vcf::Entry>(*instream);
     auto& reader = *readerPtr;
 
     DefaultPrinter writer(*out);

@@ -474,4 +474,13 @@ ostream& operator<<(ostream& s, const Entry& e) {
     return s;
 }
 
+
+ReheaderingParser::ReheaderingParser(Header const* newHeader)
+    : newHeader(newHeader)
+{}
+
+void ReheaderingParser::operator()(Header const* h, std::string& line, Entry& entry) {
+    return Entry::parseLineAndReheader(h, newHeader, line, entry);
+}
+
 END_NAMESPACE(Vcf)

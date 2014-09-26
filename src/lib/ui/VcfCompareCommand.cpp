@@ -3,7 +3,7 @@
 #include "common/Tokenizer.hpp"
 #include "common/compat.hpp"
 #include "fileformats/StreamPump.hpp"
-#include "fileformats/VcfReader.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "fileformats/vcf/MultiWriter.hpp"
 #include "io/InputStream.hpp"
 #include "parse/Kvp.hpp"
@@ -15,8 +15,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/format.hpp>
 #include <boost/function.hpp>
-#include <boost/program_options.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -29,7 +27,6 @@
 namespace bfs = boost::filesystem;
 namespace po = boost::program_options;
 using boost::format;
-using boost::scoped_ptr;
 
 namespace {
     std::unordered_map<std::string, Vcf::FilterType> const FILTER_STRINGS_{
@@ -162,7 +159,7 @@ void VcfCompareCommand::exec() {
             "of names (-n) given");
     }
 
-    auto readers = openVcfs(inputStreams);
+    auto readers = openStreams<Vcf::Entry>(inputStreams);
     std::vector<Vcf::Header const*> headers;
 
     Vcf::CustomType exact(exactFormatField_, Vcf::CustomType::FIXED_SIZE,
@@ -237,7 +234,7 @@ void VcfCompareCommand::exec() {
         std::cerr << "Writing output to " << outputDir_ << "\n";
     }
 
-    MergeSorted<VcfReader> merger(std::move(readers));
+    auto merger = makeMergeSorted(readers);
     VcfGenotypeMatcher matcher(
           streamNames_
         , sampleNames_

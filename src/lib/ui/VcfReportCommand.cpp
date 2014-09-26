@@ -3,7 +3,7 @@
 #include "common/Exceptions.hpp"
 #include "common/MutationSpectrum.hpp"
 #include "common/compat.hpp"
-#include "fileformats/VcfReader.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "fileformats/vcf/CustomType.hpp"
 #include "fileformats/vcf/CustomValue.hpp"
 #include "fileformats/vcf/Entry.hpp"
@@ -13,7 +13,6 @@
 #include "io/StreamHandler.hpp"
 #include "metrics/Metrics.hpp"
 
-#include <boost/format.hpp>
 #include <boost/program_options.hpp>
 
 #include <functional>
@@ -25,7 +24,6 @@
 #include <stdexcept>
 
 namespace po = boost::program_options;
-using boost::format;
 using namespace std;
 
 VcfReportCommand::VcfReportCommand()
@@ -64,7 +62,7 @@ void VcfReportCommand::exec() {
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
     uint32_t totalSites = 0;
-    VcfReader::ptr reader = openVcf(*instream);
+    auto reader = openStream<Vcf::Entry>(*instream);
     Vcf::Entry entry;
     Metrics::SampleMetrics sampleMetrics(reader->header().sampleCount());
 

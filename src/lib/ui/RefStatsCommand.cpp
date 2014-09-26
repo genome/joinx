@@ -1,8 +1,8 @@
 #include "RefStatsCommand.hpp"
 
 #include "fileformats/Bed.hpp"
-#include "fileformats/BedReader.hpp"
 #include "fileformats/Fasta.hpp"
+#include "fileformats/TypedStream.hpp"
 #include "io/InputStream.hpp"
 #include "io/StreamJoin.hpp"
 #include "processors/RefStats.hpp"
@@ -68,7 +68,7 @@ void RefStatsCommand::exec() {
     ostream* out = _streams.get<ostream>(_outFile);
 
     InputStream::ptr inStream = _streams.openForReading(_bedFile);
-    auto bedReader = openBed(*inStream);
+    auto bedReader = openStream<Bed>(inStream);
     Fasta refSeq(_fastaFile);
 
     RefStats refStats(_tokens, refSeq);

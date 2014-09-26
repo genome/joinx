@@ -1,14 +1,13 @@
 #include "Vcf2RawCommand.hpp"
 
 #include "fileformats/Fasta.hpp"
-#include "fileformats/VcfReader.hpp"
+#include "fileformats/TypedStream.hpp"
+#include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/AltNormalizer.hpp"
 #include "fileformats/vcf/RawVariant.hpp"
 #include "processors/VcfToRaw.hpp"
 
 #include <boost/format.hpp>
-#include <boost/program_options.hpp>
-#include <functional>
 
 using boost::format;
 using namespace std;
@@ -71,11 +70,10 @@ namespace {
 
 void Vcf2RawCommand::exec() {
     Fasta ref(_refFa);
-
     ostream* out = _streams.get<ostream>(_outFile);
     auto in = _streams.openForReading(_vcfFile);
-    VcfReader::ptr vcfReader = openVcf(*in);
+    auto reader = openStream<Vcf::Entry>(in);
     OutputWriter writer(*out, ref);
-    VcfToRaw<VcfReader, OutputWriter> converter(*vcfReader, writer);
+    auto converter = makeVcfToRaw(*reader, writer);
     converter.convert();
 }

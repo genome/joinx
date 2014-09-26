@@ -1,7 +1,8 @@
 #include "common/Timer.hpp"
+#include "fileformats/TypedStream.hpp"
+#include "fileformats/vcf/Entry.hpp"
 #include "io/InputStream.hpp"
 #include "io/StreamHandler.hpp"
-#include "fileformats/VcfReader.hpp"
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
@@ -10,6 +11,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
+typedef TypedStream<DefaultParser<Vcf::Entry>> VcfReader;
 
 struct IBenchmark {
     virtual ~IBenchmark() {}
@@ -63,7 +66,7 @@ int main(int argc, char** argv) {
     for (auto iter = tests.begin(); iter != tests.end(); ++iter) {
         StreamHandler streams;
         auto in = streams.openForReading(argv[1]);
-        auto reader = openVcf(*in);
+        auto reader = openStream<Vcf::Entry>(*in);
         ostream* out = streams.get<ostream>(argv[2]);
 
         WallTimer timer;

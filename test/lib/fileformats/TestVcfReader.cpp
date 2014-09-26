@@ -1,4 +1,4 @@
-#include "fileformats/VcfReader.hpp"
+#include "fileformats/TypedStream.hpp"
 
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
@@ -76,13 +76,13 @@ public:
     void SetUp() {
         _ss.reset(new std::stringstream(testData));
         _in.reset(new InputStream("test", *_ss));
-        _reader = openVcf(*_in);
+        _reader = openStream<Vcf::Entry>(_in);
     }
 
 protected:
-    boost::scoped_ptr<std::stringstream> _ss;
-    boost::scoped_ptr<InputStream> _in;
-    VcfReader::ptr _reader;
+    std::unique_ptr<std::stringstream> _ss;
+    InputStream::ptr _in;
+    TypedStream<DefaultParser<Vcf::Entry>>::ptr _reader;
 };
 
 TEST_F(TestVcfReader, read) {
