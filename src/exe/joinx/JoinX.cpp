@@ -38,27 +38,27 @@ using boost::format;
 using namespace std;
 
 JoinX::JoinX() {
-    registerSubCommand(std::make_unique<BedMergeCommand>());
-    registerSubCommand(std::make_unique<CheckRefCommand>());
-    registerSubCommand(std::make_unique<CreateContigsCommand>());
-    registerSubCommand(std::make_unique<FindHomopolymersCommand>());
-    registerSubCommand(std::make_unique<GenerateCommand>());
-    registerSubCommand(std::make_unique<IntersectCommand>());
-    registerSubCommand(std::make_unique<RefStatsCommand>());
-    registerSubCommand(std::make_unique<RemapCigarCommand>());
-    registerSubCommand(std::make_unique<SortCommand>());
-    registerSubCommand(std::make_unique<Vcf2RawCommand>());
-    registerSubCommand(std::make_unique<VcfAnnotateCommand>());
-    registerSubCommand(std::make_unique<VcfAnnotateHomopolymersCommand>());
-    registerSubCommand(std::make_unique<VcfCompareCommand>());
-    registerSubCommand(std::make_unique<VcfCompareGtCommand>());
-    registerSubCommand(std::make_unique<VcfFilterCommand>());
-    registerSubCommand(std::make_unique<VcfSiteFilterCommand>());
-    registerSubCommand(std::make_unique<VcfMergeCommand>());
-    registerSubCommand(std::make_unique<VcfNormalizeIndelsCommand>());
-    registerSubCommand(std::make_unique<VcfReportCommand>());
-    registerSubCommand(std::make_unique<VcfRemoveFilteredGtCommand>());
-    registerSubCommand(std::make_unique<Wig2BedCommand>());
+    registerSubCommand(std::shared_ptr<CommandBase>(new BedMergeCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new CheckRefCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new CreateContigsCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new FindHomopolymersCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new GenerateCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new IntersectCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new RefStatsCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new RemapCigarCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new SortCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new Vcf2RawCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new VcfAnnotateCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new VcfAnnotateHomopolymersCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new VcfCompareCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new VcfCompareGtCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new VcfFilterCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new VcfSiteFilterCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new VcfMergeCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new VcfNormalizeIndelsCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new VcfReportCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new VcfRemoveFilteredGtCommand));
+    registerSubCommand(std::shared_ptr<CommandBase>(new Wig2BedCommand));
 }
 
 void JoinX::exec(int argc, char** argv) {
@@ -88,7 +88,7 @@ void JoinX::exec(int argc, char** argv) {
     cmd->exec();
 }
 
-void JoinX::registerSubCommand(CommandBase::ptr app) {
+void JoinX::registerSubCommand(std::shared_ptr<CommandBase> app) {
     auto result = _subCmds.insert(make_pair(app->name(), std::move(app)));
     if (!result.second)
         throw std::runtime_error(str(format(

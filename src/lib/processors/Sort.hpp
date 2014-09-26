@@ -47,8 +47,7 @@ public:
     void execute() {
         using namespace std;
 
-        auto buf = std::make_unique<BufferType>(
-            _streamOpener, _outputHeader, _stable, _compression);
+        std::unique_ptr<BufferType> buf(new BufferType(_streamOpener, _outputHeader, _stable, _compression));
 
         for (unsigned idx = 0; idx < _inputs.size(); ++idx) {
 
@@ -63,8 +62,8 @@ public:
                     buf->sort();
                     buf->writeTmp();
                     _buffers.push_back(std::move(buf));
-                    buf = std::make_unique<BufferType>(_streamOpener, _outputHeader,
-                        _stable, _compression);
+                    buf.reset(new BufferType(_streamOpener, _outputHeader,
+                        _stable, _compression));
                 }
             }
         }

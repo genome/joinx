@@ -183,7 +183,7 @@ void SortCommand::exec() {
                 &Vcf::Entry::parseLineAndReheader, _1, &mergedHeader, _2, _3);
 
         for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i) {
-            readers.push_back(std::make_unique<ReaderType>(extractor, **i));
+            readers.emplace_back(new ReaderType(extractor, **i));
             mergedHeader.merge(readers.back()->header(), true);
         }
 

@@ -6,5 +6,5 @@
 
 VcfReader::ptr openVcf(InputStream& in) {
     VcfExtractor ex(boost::bind(&Vcf::Entry::parseLine, _1, _2, _3));
-    return std::make_unique<VcfReader>(ex, in);
+    return VcfReader::ptr(new VcfReader(ex, in));
 }
