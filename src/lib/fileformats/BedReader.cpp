@@ -2,9 +2,33 @@
 
 #include "common/compat.hpp"
 
-#include <boost/bind.hpp>
+BedParser::BedParser()
+    : maxExtraFields(0)
+{}
+
+BedParser::BedParser(int maxExtraFields)
+    : maxExtraFields(maxExtraFields)
+{}
+
+void BedParser::operator()(BedHeader const* h, std::string& line, Bed& bed) {
+    return Bed::parseLine(h, line, bed, maxExtraFields);
+}
+
+BedOpener::BedOpener()
+    : maxExtraFields(0)
+{
+}
+
+BedOpener::BedOpener(int maxExtraFields)
+    : maxExtraFields(maxExtraFields)
+{
+}
+
+BedReader::ptr BedOpener::operator()(InputStream& in) {
+    BedParser parser(maxExtraFields);
+    return std::make_unique<BedReader>(parser, in);
+}
 
 BedReader::ptr openBed(InputStream& in, int maxExtraFields /* = -1*/) {
-    BedExtractor ex(boost::bind(&Bed::parseLine, _1, _2, _3, maxExtraFields));
-    return std::make_unique<BedReader>(ex, in);
+    return BedOpener{maxExtraFields}(in);
 }

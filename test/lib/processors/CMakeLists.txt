@@ -9,7 +9,6 @@ set(TEST_SOURCES
     TestIntersectFull.cpp
     TestMergeSorted.cpp
     TestRefStats.cpp
-    TestSnvComparator.cpp
     TestSort.cpp
     TestVariantContig.cpp
     TestVcfGenotypeMatcher.cpp

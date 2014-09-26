@@ -2,9 +2,14 @@
 
 #include "common/compat.hpp"
 
-#include <boost/bind.hpp>
+ReheaderingVcfParser::ReheaderingVcfParser(Vcf::Header const* newHeader)
+    : newHeader(newHeader)
+{}
+
+void ReheaderingVcfParser::operator()(Vcf::Header const* h, std::string& line, Vcf::Entry& entry) {
+    return Vcf::Entry::parseLineAndReheader(h, newHeader, line, entry);
+}
 
 VcfReader::ptr openVcf(InputStream& in) {
-    VcfExtractor ex(boost::bind(&Vcf::Entry::parseLine, _1, _2, _3));
-    return VcfReader::ptr(new VcfReader(ex, in));
+    return TypedStreamFactory<DefaultParser<Vcf::Entry>>{}(in);
 }

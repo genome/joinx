@@ -8,7 +8,6 @@ set(TEST_SOURCES
     TestFasta.cpp
     TestInferFileType.cpp
     TestInputStream.cpp
-    TestStreamFactory.cpp
     TestStreamHandler.cpp
     TestVariant.cpp
     TestVcfAlleleMerger.cpp

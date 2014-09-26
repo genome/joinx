@@ -4,17 +4,16 @@
 #include "vcf/Entry.hpp"
 #include "vcf/Header.hpp"
 
-#include <boost/function.hpp>
+typedef TypedStream<DefaultParser<Vcf::Entry>> VcfReader;
 
-#include <functional>
-#include <string>
-#include <vector>
+struct ReheaderingVcfParser {
+    typedef Vcf::Entry ValueType;
 
-namespace {
-typedef boost::function<void(const Vcf::Header*, std::string&, Vcf::Entry&)> VcfExtractor;
-typedef TypedStream<Vcf::Entry, VcfExtractor> VcfReader;
-typedef boost::function<VcfReader::ptr(InputStream&)> VcfOpenerType;
-}
+    Vcf::Header const* newHeader;
+
+    ReheaderingVcfParser(Vcf::Header const* newHeader);
+    void operator()(Vcf::Header const* h, std::string& line, Vcf::Entry& entry);
+};
 
 VcfReader::ptr openVcf(InputStream& in);
 

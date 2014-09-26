@@ -7,9 +7,7 @@
 #include "vcf/Entry.hpp"
 #include "vcf/Header.hpp"
 
-#include <boost/bind.hpp>
 #include <boost/format.hpp>
-#include <boost/function.hpp>
 
 #include <fstream>
 
@@ -38,16 +36,14 @@ namespace {
         return rv;
     }
 
-    template<typename ValueType, typename Extractor>
-    bool testReader(InputStream& in, Extractor& extractor) {
-        typedef TypedStream<ValueType, Extractor> ReaderType;
-
+    template<typename ValueType>
+    bool testReader(InputStream& in) {
         bool rv(false);
         try {
             in.caching(true);
-            ReaderType reader(extractor, in);
-            typename ReaderType::ValueType value;
-            rv = reader.next(value);
+            auto reader = TypedStreamFactory<DefaultParser<ValueType>>{}(in);
+            ValueType value;
+            rv = reader->next(value);
         } catch (...) {
             rv = false;
         }
@@ -76,17 +72,11 @@ namespace {
 FileType inferFileType(InputStream& in) {
     FileType rv(UNKNOWN);
 
-    typedef boost::function<void(const BedHeader*, string&, Bed&)> BedExtractor;
-    BedExtractor bedExtractor = boost::bind(&Bed::parseLine, _1, _2, _3, -1);
-
-    typedef boost::function<void(const ChromPosHeader*, string&, ChromPos&)> ChromPosExtractor;
-    ChromPosExtractor cpExtractor = boost::bind(&ChromPos::parseLine, _1, _2, _3);
-
-    if (testReader<Bed, BedExtractor>(in, bedExtractor)) {
+    if (testReader<Bed>(in)) {
         rv = BED;
     } else if (testVcf(in)) {
         rv = VCF;
-    } else if (testReader<ChromPos, ChromPosExtractor>(in, cpExtractor)) {
+    } else if (testReader<ChromPos>(in)) {
         rv = CHROMPOS;
     } else if (testEmpty(in)) {
         rv = EMPTY;

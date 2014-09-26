@@ -1,10 +1,7 @@
 #include "processors/IntersectFull.hpp"
-#include "fileformats/Bed.hpp"
 #include "io/InputStream.hpp"
 #include "fileformats/TypedStream.hpp"
-
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
+#include "fileformats/BedReader.hpp"
 
 #include <gtest/gtest.h>
 #include <functional>
@@ -57,10 +54,6 @@ namespace {
         vector<Bed> missesA;
         vector<Bed> missesB;
     };
-
-    typedef boost::function<void(const BedHeader*, string&, Bed&)> Extractor;
-    typedef TypedStream<Bed, Extractor> BedReader;
-    Extractor extractor = boost::bind(&Bed::parseLine, _1, _2, _3, 2);
 }
 
 TEST(TestIntersectFull, intersectSelf) {
@@ -69,9 +62,9 @@ TEST(TestIntersectFull, intersectSelf) {
     stringstream ssB(BEDA);
     InputStream streamA("A", ssA);
     InputStream streamB("B", ssB);
-    BedReader s1(extractor, streamA);
-    BedReader s2(extractor, streamB);
-    IntersectFull<BedReader,BedReader,MockCollector> intersector(s1, s2, rc);
+    auto s1 = openBed(streamA);
+    auto s2 = openBed(streamB);
+    auto intersector = makeFullIntersector(*s1, *s2, rc);
     intersector.execute();
 
     // each line hits twice each generating 8 total matches
@@ -87,9 +80,9 @@ TEST(TestIntersectFull, misses) {
     stringstream ssB(BEDB);
     InputStream streamA("A", ssA);
     InputStream streamB("B", ssB);
-    BedReader s1(extractor, streamA);
-    BedReader s2(extractor, streamB);
-    IntersectFull<BedReader,BedReader,MockCollector> intersector(s1, s2, rc);
+    auto s1 = openBed(streamA);
+    auto s2 = openBed(streamB);
+    auto intersector = makeFullIntersector(*s1, *s2, rc);
     intersector.execute();
 
     // first 2 lines hit twice each, last 2 lines once each, total of 6 hits
@@ -105,9 +98,9 @@ TEST(TestIntersectFull, cacheCrash) {
     stringstream ssB(BEDD);
     InputStream streamA("C", ssA);
     InputStream streamB("D", ssB);
-    BedReader s1(extractor, streamA);
-    BedReader s2(extractor, streamB);
-    IntersectFull<BedReader,BedReader,MockCollector> intersector(s1, s2, rc);
+    auto s1 = openBed(streamA);
+    auto s2 = openBed(streamB);
+    auto intersector = makeFullIntersector(*s1, *s2, rc);
     intersector.execute();
 
     // first 2 lines hit twice each, last 2 lines once each, total of 6 hits

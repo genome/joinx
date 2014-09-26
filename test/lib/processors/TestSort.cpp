@@ -1,10 +1,8 @@
 #include "processors/Sort.hpp"
 #include "fileformats/Bed.hpp"
 #include "io/InputStream.hpp"
-#include "fileformats/StreamFactory.hpp"
 #include "fileformats/BedReader.hpp"
 
-#include <boost/bind.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <gtest/gtest.h>
@@ -16,7 +14,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <functional>
 
 using namespace std;
 
@@ -33,13 +30,13 @@ namespace {
         stringstream out;
     };
 
-    BedOpenerType bedOpener = boost::bind(&openBed, _1, 0);
     BedHeader hdr;
+    BedOpener bedOpener;
 }
 
 class TestSort : public ::testing::Test {
 protected:
-    typedef Sort<BedReader, BedOpenerType, Collector<Bed> > SortType;
+    typedef Sort<BedReader, BedOpener, Collector<Bed> > SortType;
 
     TestSort()
     {}

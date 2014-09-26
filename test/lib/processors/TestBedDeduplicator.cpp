@@ -1,7 +1,6 @@
 #include "processors/BedDeduplicator.hpp"
 #include "fileformats/Bed.hpp"
 #include "io/InputStream.hpp"
-#include "fileformats/StreamFactory.hpp"
 #include "fileformats/DefaultPrinter.hpp"
 
 #include <gtest/gtest.h>

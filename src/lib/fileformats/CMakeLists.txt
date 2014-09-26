@@ -20,7 +20,6 @@ set(SOURCES
     FastaIndexGenerator.hpp
     InferFileType.cpp
     InferFileType.hpp
-    StreamFactory.hpp
     StreamPump.hpp
     TypedStream.hpp
     Variant.cpp

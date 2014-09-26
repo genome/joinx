@@ -2,7 +2,7 @@
 
 #include "io/InputStream.hpp"
 #include "fileformats/DefaultPrinter.hpp"
-#include "fileformats/TypedStream.hpp"
+#include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 
@@ -48,16 +48,11 @@ void VcfFilterCommand::exec() {
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
 
-    typedef boost::function<void(const Vcf::Header*, string&, Vcf::Entry&)> VcfExtractor;
-    typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
-    typedef std::unique_ptr<ReaderType> ReaderPtr;
-
-    VcfExtractor extractor = boost::bind(&Vcf::Entry::parseLine, _1, _2, _3);
     DefaultPrinter writer(*out);
-    ReaderType reader(extractor, *instream);
+    auto reader = openVcf(*instream);
     Vcf::Entry e;
-    *out << reader.header();
-    while (reader.next(e)) {
+    *out << reader->header();
+    while (reader->next(e)) {
         e.sampleData().removeLowDepthGenotypes(_minDepth);
         if (e.sampleData().samplesWithData())
             writer(e);

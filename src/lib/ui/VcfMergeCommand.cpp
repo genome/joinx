@@ -232,7 +232,7 @@ void VcfMergeCommand::exec() {
             );
     }
     else {
-        writer = std::ref(printer);
+        writer = printer;
     }
 
     std::unique_ptr<Vcf::ConsensusFilter> cnsFilt;

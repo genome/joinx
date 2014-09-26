@@ -1,10 +1,7 @@
 #include "processors/MergeSorted.hpp"
-#include "fileformats/Bed.hpp"
+#include "fileformats/BedReader.hpp"
 #include "fileformats/StreamPump.hpp"
 #include "fileformats/TypedStream.hpp"
-
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 
 #include <gtest/gtest.h>
 #include <memory>
@@ -20,9 +17,6 @@ namespace {
     const int CHROM_MAX = 22;
     const int START_MAX = 5;
     const int END_MAX   = 5;
-    typedef boost::function<void(const BedHeader*, string&, Bed&)> Extractor;
-    typedef TypedStream<Bed, Extractor> BedReader;
-    Extractor extractor = boost::bind(&Bed::parseLine, _1, _2, _3, -1);
 
     struct Collector {
         void operator()(const Bed& value) {
@@ -78,8 +72,8 @@ TEST_F(TestMergeSorted, execute) {
     vector<InputStream::ptr> inputStreams;
     vector<BedReader::ptr> bedStreams;
     for (int i = 0; i < nStreams; ++i) {
-        inputStreams.push_back(InputStream::ptr(new InputStream("test", streams[i])));
-        bedStreams.push_back(BedReader::ptr(new BedReader(extractor, **inputStreams.rbegin())));
+        inputStreams.push_back(std::make_unique<InputStream>("test", streams[i]));
+        bedStreams.push_back(openBed(*inputStreams.back()));
     }
 
     Collector c;

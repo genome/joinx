@@ -3,7 +3,6 @@
 #include "common/LocusCompare.hpp"
 #include "io/TempFile.hpp"
 #include "io/InputStream.hpp"
-#include "fileformats/StreamFactory.hpp"
 
 #include <boost/format.hpp>
 #include <boost/iostreams/filter/gzip.hpp>

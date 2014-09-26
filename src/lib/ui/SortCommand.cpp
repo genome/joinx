@@ -6,7 +6,6 @@
 #include "fileformats/ChromPosReader.hpp"
 #include "fileformats/DefaultPrinter.hpp"
 #include "fileformats/InferFileType.hpp"
-#include "fileformats/StreamFactory.hpp"
 #include "fileformats/VcfReader.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
@@ -124,13 +123,13 @@ void SortCommand::exec() {
 
     DefaultPrinter writer(*out);
     if (type == CHROMPOS) {
-        ChromPosOpenerType cpOpener = boost::bind(&openChromPos, _1);
+        TypedStreamFactory<DefaultParser<ChromPos>> cpOpener;
         vector<ChromPosReader::ptr> readers;
         for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i)
             readers.push_back(openChromPos(**i));
         ChromPosHeader outputHeader;
 
-        Sort<ChromPosReader, ChromPosOpenerType, DefaultPrinter> sorter(
+        Sort<ChromPosReader, decltype(cpOpener), DefaultPrinter> sorter(
             std::move(readers),
             cpOpener,
             writer,
@@ -142,7 +141,7 @@ void SortCommand::exec() {
         sorter.execute();
     } else if (type == BED) {
         int extraFields = _unique ? 1 : 0;
-        BedOpenerType bedOpener = boost::bind(&openBed, _1, extraFields);
+        BedOpener bedOpener{extraFields};
         vector<BedReader::ptr> readers;
         for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i)
             readers.push_back(openBed(**i, extraFields));
@@ -150,7 +149,7 @@ void SortCommand::exec() {
 
         if (_unique) {
             BedDeduplicator<DefaultPrinter> dedup(writer);
-            Sort<BedReader, BedOpenerType, BedDeduplicator<DefaultPrinter> > sorter(
+            Sort<BedReader, BedOpener, BedDeduplicator<DefaultPrinter> > sorter(
                 std::move(readers),
                 bedOpener,
                 dedup,
@@ -161,7 +160,7 @@ void SortCommand::exec() {
             );
             sorter.execute();
         } else {
-            Sort<BedReader, BedOpenerType, DefaultPrinter> sorter(
+            Sort<BedReader, BedOpener, DefaultPrinter> sorter(
                 std::move(readers),
                 bedOpener,
                 writer,
@@ -174,25 +173,23 @@ void SortCommand::exec() {
         }
     } else if (type == VCF) {
 
-        typedef TypedStream<Vcf::Entry, VcfExtractor> ReaderType;
-        typedef std::unique_ptr<ReaderType> ReaderPtr;
-        std::vector<ReaderPtr> readers;
-
+        typedef TypedStreamFactory<ReheaderingVcfParser> InputFactory;
+        typedef InputFactory::StreamType StreamType;
+        std::vector<StreamType::ptr> readers;
         Vcf::Header mergedHeader;
-        VcfExtractor extractor = boost::bind(
-                &Vcf::Entry::parseLineAndReheader, _1, &mergedHeader, _2, _3);
+        ReheaderingVcfParser parser(&mergedHeader);
+        InputFactory opener(parser);
 
         for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i) {
-            readers.emplace_back(new ReaderType(extractor, **i));
+            readers.push_back(opener(**i));
             mergedHeader.merge(readers.back()->header(), true);
         }
 
         *out << mergedHeader;
 
-        VcfOpenerType vcfOpener = boost::bind(&openVcf, _1);
-        Sort<VcfReader, VcfOpenerType, DefaultPrinter> sorter(
+        Sort<StreamType, decltype(opener), DefaultPrinter> sorter(
             std::move(readers),
-            vcfOpener,
+            opener,
             writer,
             mergedHeader,
             _maxInMem,

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/compat.hpp"
 #include "io/InputStream.hpp"
 
 #include <boost/format.hpp>
@@ -9,12 +10,13 @@
 #include <string>
 #include <vector>
 
-template<typename ValueClass, typename Extractor>
+
+template<typename Extractor>
 class TypedStream {
 public:
-    typedef typename ValueClass::HeaderType HeaderType;
-    typedef ValueClass ValueType;
-    typedef std::unique_ptr<TypedStream<ValueClass, Extractor> > ptr;
+    typedef typename Extractor::ValueType ValueType;
+    typedef typename ValueType::HeaderType HeaderType;
+    typedef std::unique_ptr<TypedStream<Extractor> > ptr;
 
     TypedStream(Extractor& extractor, InputStream& in)
         : extractor_(extractor)
@@ -67,21 +69,21 @@ protected:
     ValueType cachedValue_;
 };
 
-template<typename ValueType, typename Extractor>
-inline std::string const& TypedStream<ValueType, Extractor>::name() const {
+template<typename Extractor>
+inline std::string const& TypedStream<Extractor>::name() const {
     return in_.name();
 }
 
-template<typename ValueType, typename Extractor>
-inline bool TypedStream<ValueType, Extractor>::eof() const {
+template<typename Extractor>
+inline bool TypedStream<Extractor>::eof() const {
     if (cached_)
         return !cachedRv_;
     else
         return in_.eof();
 }
 
-template<typename ValueType, typename Extractor>
-inline bool TypedStream<ValueType, Extractor>::peek(ValueType** value) {
+template<typename Extractor>
+inline bool TypedStream<Extractor>::peek(ValueType** value) {
     // already peeked and have a value to return
     if (cached_) {
         // we peeked but got EOF
@@ -103,8 +105,8 @@ inline bool TypedStream<ValueType, Extractor>::peek(ValueType** value) {
     return cachedRv_;
 }
 
-template<typename ValueType, typename Extractor>
-inline bool TypedStream<ValueType, Extractor>::next(ValueType& value) {
+template<typename Extractor>
+inline bool TypedStream<Extractor>::next(ValueType& value) {
     if (cached_) {
         value.swap(cachedValue_);
         cached_ = false;
@@ -128,8 +130,8 @@ inline bool TypedStream<ValueType, Extractor>::next(ValueType& value) {
     return true;
 }
 
-template<typename ValueType, typename Extractor>
-inline std::string TypedStream<ValueType, Extractor>::nextLine() {
+template<typename Extractor>
+inline std::string TypedStream<Extractor>::nextLine() {
     std::string line;
     do {
         in_.getline(line);
@@ -137,18 +139,45 @@ inline std::string TypedStream<ValueType, Extractor>::nextLine() {
     return line;
 }
 
-template<typename ValueType, typename Extractor>
-inline uint64_t TypedStream<ValueType, Extractor>::valueCount() const {
+template<typename Extractor>
+inline uint64_t TypedStream<Extractor>::valueCount() const {
     return valueCount_;
 }
 
-template<typename ValueType, typename Extractor>
-inline void TypedStream<ValueType, Extractor>::checkEof() const {
+template<typename Extractor>
+inline void TypedStream<Extractor>::checkEof() const {
     if (!cached_ && eof())
         throw std::runtime_error("Attempted to read past eof of stream " + name());
 }
 
-template<typename ValueType, typename Extractor>
-inline uint64_t TypedStream<ValueType, Extractor>::lineNum() const {
+template<typename Extractor>
+inline uint64_t TypedStream<Extractor>::lineNum() const {
     return in_.lineNum();
 }
+
+
+template<typename ValueType_>
+struct DefaultParser {
+    typedef ValueType_ ValueType;
+    typedef typename ValueType::HeaderType HeaderType;
+
+    void operator()(HeaderType const* h, std::string& line, ValueType& entry) {
+        ValueType::parseLine(h, line, entry);
+    }
+};
+
+template<typename Parser>
+struct TypedStreamFactory {
+    typedef typename Parser::ValueType ValueType;
+    typedef TypedStream<Parser> StreamType;
+
+    TypedStreamFactory(Parser parser = Parser())
+        : parser(parser)
+    {}
+
+    typename StreamType::ptr operator()(InputStream& in) {
+        return std::make_unique<StreamType>(parser, in);
+    }
+
+    Parser parser;
+};

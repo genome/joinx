@@ -12,7 +12,6 @@ set(SOURCES
     RefStats.cpp
     RefStats.hpp
     RemapContig.hpp
-    SnvComparator.hpp
     Sort.hpp
     SortBuffer.hpp
     VariantContig.cpp
