@@ -6,8 +6,6 @@
 
 #include <gtest/gtest.h>
 
-#include <boost/assign/list_of.hpp>
-
 #include <functional>
 #include <sstream>
 #include <stdexcept>
@@ -16,7 +14,6 @@
 
 using namespace Vcf;
 using namespace std;
-using boost::assign::list_of;
 
 class TestVcfRawVariant : public ::testing::Test {
 protected:
@@ -150,33 +147,33 @@ TEST_F(TestVcfRawVariant, split_merge_IndelWithSubstitution_noIndel) {
 }
 
 TEST_F(TestVcfRawVariant, combineRefAllelesOverlap) {
-    std::vector<RawVariant> vars = list_of
-        (RawVariant(10, "AC", ""))
-        (RawVariant(11, "CG", ""))
-        (RawVariant(12, "GT", ""))
-        ;
+    std::vector<RawVariant> vars{
+          RawVariant(10, "AC", "")
+        , RawVariant(11, "CG", "")
+        , RawVariant(12, "GT", "")
+        };
 
     std::string result = Vcf::RawVariant::combineRefAlleles(vars);
     EXPECT_EQ("ACGT", result);
 }
 
 TEST_F(TestVcfRawVariant, combineRefAllelesAdjacent) {
-    std::vector<RawVariant> vars = list_of
-        (RawVariant(10, "AC", ""))
-        (RawVariant(12, "CG", ""))
-        (RawVariant(14, "GT", ""))
-        ;
+    std::vector<RawVariant> vars{
+          RawVariant(10, "AC", "")
+        , RawVariant(12, "CG", "")
+        , RawVariant(14, "GT", "")
+        };
 
     std::string result = Vcf::RawVariant::combineRefAlleles(vars);
     EXPECT_EQ("ACCGGT", result);
 }
 
 TEST_F(TestVcfRawVariant, combineRefAllelesGap) {
-    std::vector<RawVariant> vars = list_of
-        (RawVariant(10, "AC", ""))
-        (RawVariant(13, "CG", ""))
-        (RawVariant(16, "GT", ""))
-        ;
+    std::vector<RawVariant> vars{
+          RawVariant(10, "AC", "")
+        , RawVariant(13, "CG", "")
+        , RawVariant(16, "GT", "")
+        };
 
     std::string result = Vcf::RawVariant::combineRefAlleles(vars);
     EXPECT_EQ("AC.CG.GT", result);

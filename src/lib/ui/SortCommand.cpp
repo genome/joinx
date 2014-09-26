@@ -12,17 +12,12 @@
 #include "processors/BedDeduplicator.hpp"
 #include "processors/Sort.hpp"
 
-#include <boost/assign/list_of.hpp>
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
-
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <functional>
 #include <stdexcept>
 
 namespace po = boost::program_options;
-using boost::assign::list_of;
 using boost::format;
 using namespace std;
 
@@ -36,7 +31,7 @@ SortCommand::SortCommand()
 }
 
 void SortCommand::configureOptions() {
-    static std::vector<std::string> const defaultInputs = list_of(_outputFile);
+    static std::vector<std::string> const defaultInputs{_outputFile};
 
     _opts.add_options()
         ("merge-only,m",

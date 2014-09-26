@@ -17,8 +17,9 @@ function(build_boost BOOST_URL BUILD_DIR)
     endforeach(libname ${REQUIRED_BOOST_LIBS})
     set(Boost_LIBRARIES ${BOOST_LIBS} PARENT_SCOPE)
 
+    message(STATUS "Boost build log will be written to ${BOOST_BUILD_LOG}")
     ExternalProject_Add(
-        boost-1.55
+        boost-1.56
         URL ${BOOST_URL}
         SOURCE_DIR ${BOOST_SRC}
         BINARY_DIR ${BOOST_SRC}
@@ -29,7 +30,7 @@ function(build_boost BOOST_URL BUILD_DIR)
         INSTALL_COMMAND ""
     )
 
-    add_dependencies(deps boost-1.55)
+    add_dependencies(deps boost-1.56)
     set(Boost_INCLUDE_DIRS ${BOOST_ROOT}/include PARENT_SCOPE)
 
 endfunction(build_boost BOOST_VERSION BUILD_DIR)

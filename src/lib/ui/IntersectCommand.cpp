@@ -6,11 +6,7 @@
 #include "processors/IntersectFull.hpp"
 #include "processors/IntersectionOutputFormatter.hpp"
 
-#include <boost/assign/list_of.hpp>
-#include <boost/bind.hpp>
 #include <boost/format.hpp>
-#include <boost/function.hpp>
-#include <boost/program_options.hpp>
 
 #include <algorithm>
 #include <cstdio>
@@ -91,10 +87,11 @@ void IntersectCommand::configureOptions() {
 
 void IntersectCommand::finalizeOptions() {
    // check for mutually exclusive formatting options
-    vector<string> exclusiveFormattingOpts = boost::assign::list_of
-        ("output-both")
-        ("format-string")
-        ("full");
+    vector<string> exclusiveFormattingOpts{
+         "output-both"
+        , "format-string"
+        , "full"
+        };
 
     vector<string> formattingOpts;
     for (auto i = exclusiveFormattingOpts.begin(); i != exclusiveFormattingOpts.end(); ++i) {

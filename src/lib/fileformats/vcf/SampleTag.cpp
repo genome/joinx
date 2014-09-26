@@ -2,10 +2,10 @@
 
 #include <boost/format.hpp>
 #include <boost/fusion/include/std_pair.hpp>
-#include <boost/spirit/home/phoenix/container.hpp>
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
+#include <boost/spirit/include/phoenix_container.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <iterator>

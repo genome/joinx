@@ -7,20 +7,12 @@
 #include "io/StreamJoin.hpp"
 #include "processors/RefStats.hpp"
 
-#include <boost/assign/list_of.hpp>
-#include <boost/bind.hpp>
-#include <boost/format.hpp>
-#include <boost/function.hpp>
-#include <boost/program_options.hpp>
-
 #include <algorithm>
 #include <cctype>
 #include <functional>
 #include <locale>
 #include <stdexcept>
 
-using boost::assign::list_of;
-using boost::format;
 using namespace std;
 namespace po = boost::program_options;
 
@@ -31,11 +23,11 @@ RefStatsCommand::RefStatsCommand()
 }
 
 void RefStatsCommand::configureOptions() {
-    std::vector<std::string> defTokens = list_of
-        ("a/t")
-        ("c/g")
-        ("cg")
-        ;
+    std::vector<std::string> defTokens{
+          "a/t"
+        , "c/g"
+        , "cg"
+        };
 
     _opts.add_options()
         ("bed,b",

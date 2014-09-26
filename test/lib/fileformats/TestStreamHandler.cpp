@@ -5,7 +5,6 @@
 
 #include <gtest/gtest.h>
 
-#include <boost/assign/list_of.hpp>
 #include <boost/filesystem.hpp>
 
 #include <cstdio>
@@ -14,14 +13,13 @@
 #include <stdexcept>
 #include <string>
 
-using boost::assign::list_of;
 namespace bfs = boost::filesystem;
 
 namespace {
-    std::vector<std::string> const messages = list_of
-        ("Hello, world!\n")
-        ("Goodbye, world!\n")
-        ;
+    std::vector<std::string> const messages{
+          "Hello, world!\n"
+        , "Goodbye, world!\n"
+        };
 
     struct StdinRedirector {
         StdinRedirector(std::string const& path) {

@@ -6,13 +6,8 @@
 #include "io/InputStream.hpp"
 #include "fileformats/Variant.hpp"
 
-#include <boost/assign/list_of.hpp>
-#include <boost/bind.hpp>
 #include <boost/format.hpp>
-#include <boost/function.hpp>
-#include <boost/program_options.hpp>
 
-using boost::assign::list_of;
 using boost::format;
 using namespace std;
 namespace po = boost::program_options;

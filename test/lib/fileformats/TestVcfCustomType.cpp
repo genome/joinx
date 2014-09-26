@@ -2,8 +2,6 @@
 
 #include <gtest/gtest.h>
 
-#include <boost/assign/list_of.hpp>
-
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -11,24 +9,23 @@
 
 using namespace std;
 using namespace Vcf;
-namespace ba = boost::assign;
 
 namespace {
-    std::vector<std::string> scalars = ba::list_of
-        ("ID=NS,Number=1,Type=Integer,Description=\"desc\"")
-        ("ID=NS,Number=1,Type=String,Description=\"desc\"")
-        ("ID=NS,Number=1,Type=Float,Description=\"desc\"")
-        ("ID=NS,Number=1,Type=Character,Description=\"desc\"")
-        ("ID=NS,Number=1,Type=Flag,Description=\"desc\"")
-        ;
+    std::vector<std::string> scalars{
+          "ID=NS,Number=1,Type=Integer,Description=\"desc\""
+        , "ID=NS,Number=1,Type=String,Description=\"desc\""
+        , "ID=NS,Number=1,Type=Float,Description=\"desc\""
+        , "ID=NS,Number=1,Type=Character,Description=\"desc\""
+        , "ID=NS,Number=1,Type=Flag,Description=\"desc\""
+        };
 
-    std::vector<std::string> nonScalars = ba::list_of
-        ("ID=NS,Number=.,Type=Integer,Description=\"desc\"")
-        ("ID=NS,Number=A,Type=String,Description=\"desc\"")
-        ("ID=NS,Number=G,Type=Float,Description=\"desc\"")
-        ("ID=NS,Number=2,Type=Character,Description=\"desc\"")
-        ("ID=NS,Number=3,Type=Flag,Description=\"desc\"")
-        ;
+    std::vector<std::string> nonScalars{
+          "ID=NS,Number=.,Type=Integer,Description=\"desc\""
+        , "ID=NS,Number=A,Type=String,Description=\"desc\""
+        , "ID=NS,Number=G,Type=Float,Description=\"desc\""
+        , "ID=NS,Number=2,Type=Character,Description=\"desc\""
+        , "ID=NS,Number=3,Type=Flag,Description=\"desc\""
+        };
 }
 
 TEST(TestVcfCustomType, isScalar) {

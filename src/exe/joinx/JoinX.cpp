@@ -26,7 +26,6 @@
 #include "common/Exceptions.hpp"
 #include "common/ProgramDetails.hpp"
 
-#include <boost/assign/list_of.hpp>
 #include <boost/format.hpp>
 
 #include <memory>
