@@ -1,4 +1,5 @@
-#include "processors/GroupOverlapping.hpp"
+#include "processors/grouping/GroupOverlapping.hpp"
+#include "processors/grouping/GroupSorter.hpp"
 
 #include "fileformats/StreamPump.hpp"
 
@@ -164,8 +165,7 @@ TEST_F(TestGroupOverlapping, sort) {
     Collector collector;
     CompareToGreaterThan<LocusCompare<>> cmp;
 
-    //auto sorter = makeGroupSorter(collector, cmp);
-    GroupSorter<MockEntry, decltype(collector), decltype(cmp)> sorter(collector);
+    auto sorter = makeGroupSorter<MockEntry>(collector, cmp);
     auto oer = makeGroupOverlapping<MockEntry>(sorter);
     auto pump = makePointerStreamPump(reader, oer);
     pump.execute();

@@ -15,8 +15,9 @@
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/vcf/SampleTag.hpp"
 #include "io/InputStream.hpp"
-#include "processors/GroupOverlapping.hpp"
 #include "processors/MergeSorted.hpp"
+#include "processors/grouping/GroupOverlapping.hpp"
+#include "processors/grouping/GroupSorter.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>

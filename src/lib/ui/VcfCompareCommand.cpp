@@ -7,9 +7,9 @@
 #include "fileformats/vcf/MultiWriter.hpp"
 #include "io/InputStream.hpp"
 #include "parse/Kvp.hpp"
-#include "processors/GroupOverlapping.hpp"
 #include "processors/MergeSorted.hpp"
 #include "processors/VcfGenotypeMatcher.hpp"
+#include "processors/grouping/GroupOverlapping.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/filesystem/path.hpp>

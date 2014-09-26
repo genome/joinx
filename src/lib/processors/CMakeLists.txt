@@ -19,6 +19,8 @@ set(SOURCES
     VcfGenotypeMatcher.cpp
     VcfGenotypeMatcher.hpp
     VcfToRaw.hpp
+    grouping/GroupOverlapping.hpp
+    grouping/GroupSorter.hpp
 )
 
 add_library(processors ${SOURCES})
