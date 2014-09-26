@@ -172,9 +172,8 @@ void VcfMergeCommand::finalizeOptions() {
 
 namespace {
     template<typename PrinterType, typename NormalizerType, typename EntryType>
-    void writeEntry(PrinterType& writer, NormalizerType& normalizer, EntryType& entry) {
-        if (normalizer)
-            normalizer->normalize(entry);
+    void writeNormalized(PrinterType& writer, NormalizerType& normalizer, EntryType& entry) {
+        normalizer->normalize(entry);
         writer(entry);
     }
 }
@@ -221,9 +220,20 @@ void VcfMergeCommand::exec() {
     }
 
     DefaultPrinter printer(*out);
-    auto writer = boost::bind(
-        &writeEntry<DefaultPrinter, std::unique_ptr<Vcf::AltNormalizer>, Vcf::Entry>,
-        printer, std::ref(normalizer), _1);
+
+
+    boost::function<void(Vcf::Entry&)> writer;
+    if (normalizer) {
+        writer = boost::bind(
+              &writeNormalized<DefaultPrinter, std::unique_ptr<Vcf::AltNormalizer>, Vcf::Entry>
+            , printer
+            , std::ref(normalizer)
+            , _1
+            );
+    }
+    else {
+        writer = std::ref(printer);
+    }
 
     std::unique_ptr<Vcf::ConsensusFilter> cnsFilt;
     if (_consensusRatio > 0) {
