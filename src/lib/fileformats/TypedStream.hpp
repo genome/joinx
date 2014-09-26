@@ -5,20 +5,23 @@
 
 #include <boost/format.hpp>
 
+#include <algorithm>
+#include <iterator>
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 
-template<typename Extractor>
+template<typename Parser>
 class TypedStream {
 public:
-    typedef typename Extractor::ValueType ValueType;
+    typedef typename Parser::ValueType ValueType;
     typedef typename ValueType::HeaderType HeaderType;
-    typedef std::unique_ptr<TypedStream<Extractor> > ptr;
+    typedef std::unique_ptr<TypedStream<Parser>> ptr;
 
-    TypedStream(Extractor& extractor, InputStream& in)
+    TypedStream(Parser& extractor, InputStream& in)
         : extractor_(extractor)
         , in_(in)
         , valueCount_(0)
@@ -57,7 +60,7 @@ protected:
 
 protected:
     HeaderType header_;
-    Extractor extractor_;
+    Parser extractor_;
 
     std::string name_;
     InputStream& in_;
@@ -69,21 +72,21 @@ protected:
     ValueType cachedValue_;
 };
 
-template<typename Extractor>
-inline std::string const& TypedStream<Extractor>::name() const {
+template<typename Parser>
+inline std::string const& TypedStream<Parser>::name() const {
     return in_.name();
 }
 
-template<typename Extractor>
-inline bool TypedStream<Extractor>::eof() const {
+template<typename Parser>
+inline bool TypedStream<Parser>::eof() const {
     if (cached_)
         return !cachedRv_;
     else
         return in_.eof();
 }
 
-template<typename Extractor>
-inline bool TypedStream<Extractor>::peek(ValueType** value) {
+template<typename Parser>
+inline bool TypedStream<Parser>::peek(ValueType** value) {
     // already peeked and have a value to return
     if (cached_) {
         // we peeked but got EOF
@@ -105,8 +108,8 @@ inline bool TypedStream<Extractor>::peek(ValueType** value) {
     return cachedRv_;
 }
 
-template<typename Extractor>
-inline bool TypedStream<Extractor>::next(ValueType& value) {
+template<typename Parser>
+inline bool TypedStream<Parser>::next(ValueType& value) {
     if (cached_) {
         value.swap(cachedValue_);
         cached_ = false;
@@ -130,8 +133,8 @@ inline bool TypedStream<Extractor>::next(ValueType& value) {
     return true;
 }
 
-template<typename Extractor>
-inline std::string TypedStream<Extractor>::nextLine() {
+template<typename Parser>
+inline std::string TypedStream<Parser>::nextLine() {
     std::string line;
     do {
         in_.getline(line);
@@ -139,19 +142,19 @@ inline std::string TypedStream<Extractor>::nextLine() {
     return line;
 }
 
-template<typename Extractor>
-inline uint64_t TypedStream<Extractor>::valueCount() const {
+template<typename Parser>
+inline uint64_t TypedStream<Parser>::valueCount() const {
     return valueCount_;
 }
 
-template<typename Extractor>
-inline void TypedStream<Extractor>::checkEof() const {
+template<typename Parser>
+inline void TypedStream<Parser>::checkEof() const {
     if (!cached_ && eof())
         throw std::runtime_error("Attempted to read past eof of stream " + name());
 }
 
-template<typename Extractor>
-inline uint64_t TypedStream<Extractor>::lineNum() const {
+template<typename Parser>
+inline uint64_t TypedStream<Parser>::lineNum() const {
     return in_.lineNum();
 }
 
@@ -170,13 +173,30 @@ template<typename Parser>
 struct TypedStreamFactory {
     typedef typename Parser::ValueType ValueType;
     typedef TypedStream<Parser> StreamType;
+    typedef typename StreamType::ptr StreamPtr;
 
-    TypedStreamFactory(Parser parser = Parser())
-        : parser(parser)
+    template<typename... Args>
+    TypedStreamFactory(Args&&... args)
+        : parser(std::forward<Args>(args)...)
     {}
 
-    typename StreamType::ptr operator()(InputStream& in) {
+    StreamPtr operator()(InputStream& in) {
         return std::make_unique<StreamType>(parser, in);
+    }
+
+    StreamPtr operator()(InputStream::ptr const& in) {
+        return std::make_unique<StreamType>(parser, *in);
+    }
+
+    std::vector<StreamPtr> operator()(std::vector<InputStream::ptr>& ins) {
+        std::vector<StreamPtr> rv;
+        rv.reserve(ins.size());
+        for (auto i = ins.begin(); i != ins.end(); ++i) {
+            rv.push_back((*this)(*i));
+        }
+        // old gcc strikes again
+        //std::transform(ins.begin(), ins.end(), std::back_inserter(rv), std::ref(*this));
+        return rv;
     }
 
     Parser parser;

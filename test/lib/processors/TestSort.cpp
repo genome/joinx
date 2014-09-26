@@ -31,13 +31,11 @@ namespace {
     };
 
     BedHeader hdr;
-    BedOpener bedOpener;
+    TypedStreamFactory<BedParser> readerFactory;
 }
 
 class TestSort : public ::testing::Test {
 protected:
-    typedef Sort<BedReader, BedOpener, Collector<Bed> > SortType;
-
     TestSort()
     {}
 
@@ -96,8 +94,8 @@ protected:
 
 TEST_F(TestSort, unstable) {
     Collector<Bed> out;
-    SortType sorter(std::move(_bedReaders), bedOpener, out, hdr, _expectedBeds.size()/10, false);
-    sorter.execute();
+    auto sorter = makeSort<BedReader>(_bedReaders, readerFactory, out, hdr, _expectedBeds.size()/10, false);
+    sorter->execute();
     ASSERT_EQ(_expectedStr.str(), out.out.str())
         << "Expected:\n" << _expectedStr.str()
         << "\n\n"
@@ -107,15 +105,15 @@ TEST_F(TestSort, unstable) {
 
 TEST_F(TestSort, gzip) {
     Collector<Bed> out;
-    SortType sorter(std::move(_bedReaders), bedOpener, out, hdr, _expectedBeds.size()/10, false, GZIP);
-    sorter.execute();
+    auto sorter = makeSort<BedReader>(_bedReaders, readerFactory, out, hdr, _expectedBeds.size()/10, false, GZIP);
+    sorter->execute();
     ASSERT_EQ(_expectedStr.str(), out.out.str());
 }
 
 TEST_F(TestSort, stable) {
     Collector<Bed> out;
-    SortType sorter(std::move(_bedReaders), bedOpener, out, hdr, _expectedBeds.size()/10, true);
-    sorter.execute();
+    auto sorter = makeSort<BedReader>(_bedReaders, readerFactory, out, hdr, _expectedBeds.size()/10, true);
+    sorter->execute();
     ASSERT_EQ(_expectedStr.str(), out.out.str());
 }
 

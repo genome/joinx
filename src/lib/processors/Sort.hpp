@@ -24,9 +24,13 @@ public:
     typedef typename ValueType::HeaderType HeaderType;
     typedef SortBuffer<StreamType, StreamOpener, OutputFunc> BufferType;
     typedef std::unique_ptr<BufferType> BufferPtr;
+    typedef std::unique_ptr<Sort> ptr;
+
+    Sort(Sort const&) = delete;
+    Sort& operator=(Sort const&) = delete;
 
     Sort(
-            std::vector<StreamPtr> inputs,
+            std::vector<StreamPtr> const& inputs,
             StreamOpener& streamOpener,
             OutputFunc& out,
             HeaderType& outputHeader,
@@ -34,7 +38,7 @@ public:
             bool stable,
             CompressionType compression = NONE
         )
-        : _inputs(std::move(inputs))
+        : _inputs(inputs)
         , _streamOpener(streamOpener)
         , _out(out)
         , _outputHeader(outputHeader)
@@ -85,7 +89,7 @@ public:
     }
 
 protected:
-    std::vector<StreamPtr> _inputs;
+    std::vector<StreamPtr> const& _inputs;
     StreamOpener& _streamOpener;
     OutputFunc& _out;
     HeaderType& _outputHeader;
@@ -94,3 +98,25 @@ protected:
     bool _stable;
     CompressionType _compression;
 };
+
+template<typename StreamType, typename StreamOpener, typename OutputFunc>
+typename Sort<StreamType, StreamOpener, OutputFunc>::ptr makeSort(
+          std::vector<typename StreamType::ptr> const& inputs
+        , StreamOpener& streamOpener
+        , OutputFunc& out
+        , typename StreamType::HeaderType& outputHeader
+        , uint64_t maxInMem
+        , bool stable
+        , CompressionType compression = NONE
+        )
+{
+    return std::make_unique<Sort<StreamType, StreamOpener, OutputFunc>>(
+          inputs
+        , streamOpener
+        , out
+        , outputHeader
+        , maxInMem
+        , stable
+        , compression
+        );
+}

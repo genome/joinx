@@ -15,6 +15,7 @@
 
 #include <boost/assign/list_of.hpp>
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
@@ -120,83 +121,47 @@ void SortCommand::exec() {
     if (type == EMPTY)
         return;
 
-
     DefaultPrinter writer(*out);
     if (type == CHROMPOS) {
-        TypedStreamFactory<DefaultParser<ChromPos>> cpOpener;
-        vector<ChromPosReader::ptr> readers;
-        for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i)
-            readers.push_back(openChromPos(**i));
-        ChromPosHeader outputHeader;
+        typedef TypedStreamFactory<DefaultParser<ChromPos>>::StreamType StreamType;
+        TypedStreamFactory<DefaultParser<ChromPos>> readerFactory;
+        auto readers = readerFactory(inputStreams);
+        ChromPosHeader hdr;
 
-        Sort<ChromPosReader, decltype(cpOpener), DefaultPrinter> sorter(
-            std::move(readers),
-            cpOpener,
-            writer,
-            outputHeader,
-            _maxInMem,
-            _stable,
-            compression
-        );
-        sorter.execute();
+        auto sorter = makeSort<StreamType>(
+            readers, readerFactory, writer, hdr, _maxInMem, _stable, compression);
+        sorter->execute();
     } else if (type == BED) {
         int extraFields = _unique ? 1 : 0;
-        BedOpener bedOpener{extraFields};
-        vector<BedReader::ptr> readers;
-        for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i)
-            readers.push_back(openBed(**i, extraFields));
-        BedHeader outputHeader;
+        typedef TypedStreamFactory<BedParser>::StreamType StreamType;
+        TypedStreamFactory<BedParser> readerFactory{extraFields};
+        auto readers = readerFactory(inputStreams);
+        BedHeader hdr;
+        BedDeduplicator<DefaultPrinter> dedup(writer);
+        boost::function<void(Bed&)> output;
+        if (_unique)
+            output = BedDeduplicator<DefaultPrinter>(writer);
+        else
+            output = writer;
 
-        if (_unique) {
-            BedDeduplicator<DefaultPrinter> dedup(writer);
-            Sort<BedReader, BedOpener, BedDeduplicator<DefaultPrinter> > sorter(
-                std::move(readers),
-                bedOpener,
-                dedup,
-                outputHeader,
-                _maxInMem,
-                _stable,
-                compression
-            );
-            sorter.execute();
-        } else {
-            Sort<BedReader, BedOpener, DefaultPrinter> sorter(
-                std::move(readers),
-                bedOpener,
-                writer,
-                outputHeader,
-                _maxInMem,
-                _stable,
-                compression
-            );
-            sorter.execute();
-        }
+        auto sorter = makeSort<StreamType>(
+            readers, readerFactory, dedup, hdr, _maxInMem, _stable, compression);
+        sorter->execute();
     } else if (type == VCF) {
-
         typedef TypedStreamFactory<ReheaderingVcfParser> InputFactory;
         typedef InputFactory::StreamType StreamType;
-        std::vector<StreamType::ptr> readers;
-        Vcf::Header mergedHeader;
-        ReheaderingVcfParser parser(&mergedHeader);
-        InputFactory opener(parser);
-
-        for (auto i = inputStreams.begin(); i != inputStreams.end(); ++i) {
-            readers.push_back(opener(**i));
-            mergedHeader.merge(readers.back()->header(), true);
+        Vcf::Header hdr;
+        InputFactory readerFactory(&hdr);
+        auto readers = readerFactory(inputStreams);
+        for (auto i = readers.begin(); i != readers.end(); ++i) {
+            hdr.merge((*i)->header(), true);
         }
 
-        *out << mergedHeader;
+        *out << hdr;
 
-        Sort<StreamType, decltype(opener), DefaultPrinter> sorter(
-            std::move(readers),
-            opener,
-            writer,
-            mergedHeader,
-            _maxInMem,
-            _stable,
-            compression
-        );
-        sorter.execute();
+        auto sorter = makeSort<StreamType>(
+              readers, readerFactory, writer, hdr, _maxInMem, _stable, compression);
+        sorter->execute();
     } else {
         throw runtime_error("Unknown file type!");
     }

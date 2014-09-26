@@ -17,12 +17,4 @@ struct BedParser {
 
 typedef TypedStream<BedParser> BedReader;
 
-struct BedOpener {
-    int maxExtraFields;
-
-    BedOpener();
-    explicit BedOpener(int maxExtraFields);
-    BedReader::ptr operator()(InputStream& in);
-};
-
 BedReader::ptr openBed(InputStream& in, int maxExtraFields = -1);
