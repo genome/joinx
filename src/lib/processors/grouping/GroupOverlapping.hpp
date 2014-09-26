@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/compat.hpp"
 #include "common/CoordinateView.hpp"
 #include "common/LocusCompare.hpp"
 #include "common/Region.hpp"
