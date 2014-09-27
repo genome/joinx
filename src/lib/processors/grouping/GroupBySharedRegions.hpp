@@ -81,8 +81,8 @@ public:
         typedef adjacency_matrix<undirectedS> Graph;
         Graph graph(entries.size());
 
-        for (auto const& x : regionToEntries) {
-            std::vector<std::size_t> xs(x.second.begin(), x.second.end());
+        for (auto x = regionToEntries.begin(); x != regionToEntries.end(); ++x) {
+            std::vector<std::size_t> xs(x->second.begin(), x->second.end());
             add_component(xs, graph);
         }
 
