@@ -293,9 +293,10 @@ void VcfMergeCommand::exec() {
     auto reheader = makeVcfReheaderer(splitter, &mergedHeader);
     auto filterer = makeVcfFilterer(reheader, _rejectFilter);
     auto dedup = makeVcfSourceIndexDeduplicator(entryMerger, filterer);
-    auto stats = makeGroupStats<Vcf::Entry>(dedup, "merge bundle");
-    auto regionGrouper = makeGroupBySharedRegions<Vcf::Entry>(stats);
-    auto finalGrouper = makeGroupOverlapping<Vcf::Entry>(regionGrouper, UnpaddedCoordinateView{});
+    auto smallStats = makeGroupStats<Vcf::Entry>(dedup, "actual merging size");
+    auto regionGrouper = makeGroupBySharedRegions<Vcf::Entry>(smallStats);
+    auto bigStats = makeGroupStats<Vcf::Entry>(regionGrouper, "overlapping size");
+    auto finalGrouper = makeGroupOverlapping<Vcf::Entry>(bigStats, UnpaddedCoordinateView{});
     auto sorter = makeGroupSorter<Vcf::Entry>(finalGrouper, cmp);
     auto initialGrouper = makeGroupOverlapping<Vcf::Entry>(sorter);
     auto pump = makePointerStreamPump(merger, initialGrouper);
@@ -304,6 +305,7 @@ void VcfMergeCommand::exec() {
     initialGrouper.flush();
     finalGrouper.flush();
 
-    if (_printStats)
-        std::cerr << stats << "\n";
+    if (_printStats) {
+        std::cerr << bigStats << smallStats << "\n";
+    }
 }

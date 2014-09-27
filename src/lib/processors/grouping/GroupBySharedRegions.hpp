@@ -37,7 +37,6 @@ struct VcfRegionExtractor {
 template<
           typename ValueType
         , typename OutputFunc
-        , typename CoordView = DefaultCoordinateView
         , typename RegionExtractor = VcfRegionExtractor // FIXME: get rid of default
         >
 class GroupBySharedRegions {
@@ -48,11 +47,9 @@ public:
 
     GroupBySharedRegions(
               OutputFunc& out
-            , CoordView coordView = CoordView()
             , RegionExtractor regionExtractor = RegionExtractor()
             )
         : out_(out)
-        , coordView_(coordView)
         , regionExtractor_(regionExtractor)
     {}
 
@@ -101,24 +98,21 @@ public:
 
 private:
     OutputFunc& out_;
-    CoordView coordView_;
     RegionExtractor regionExtractor_;
 };
 
 template<
           typename ValueType
         , typename OutputFunc
-        , typename CoordView = DefaultCoordinateView
         , typename RegionExtractor = VcfRegionExtractor // FIXME: get rid of default
         >
-GroupBySharedRegions<ValueType, OutputFunc, CoordView, RegionExtractor>
+GroupBySharedRegions<ValueType, OutputFunc, RegionExtractor>
 makeGroupBySharedRegions(
               OutputFunc& out
-            , CoordView coordView = CoordView()
             , RegionExtractor regionExtractor = RegionExtractor()
             )
 {
-    return GroupBySharedRegions<ValueType, OutputFunc, CoordView, RegionExtractor>(
-        out, coordView, regionExtractor
+    return GroupBySharedRegions<ValueType, OutputFunc, RegionExtractor>(
+        out, regionExtractor
         );
 }
