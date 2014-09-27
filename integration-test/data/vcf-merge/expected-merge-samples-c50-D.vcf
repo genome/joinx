@@ -24,6 +24,7 @@
 ##SAMPLE=<ID=S2-B,w=<2,3,4>,x=y,z="two words">
 ##SAMPLE=<ID=S3-B,w=<3,4,5>,x=y,z="two words">
 ##fileDate=20121011
+##FILTER=<ID=MERGE_REJECT,Description="Rejected by vcf-merge (duplicate locus in same source file)">
 ##FILTER=<ID=CNS,Description="Consensus filter">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S1	S2	S3	S1-A	S2-A	S3-A	S1-B	S2-B	S3-B
 1	10	.	C	A,G,T	.	.	CALLER=Samtools,VarScan	GT	0/1	0/0	0/1	0/1	0/0	0/1	0/1	0/3	.

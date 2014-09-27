@@ -42,7 +42,6 @@ class TestVcfMerge(IntegrationTest, unittest.TestCase):
         params.extend(input_files)
         rv, err = self.execute(params)
         self.assertEqual(0, rv)
-        self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file, filter_regex="##fileDate=")
 
     def test_vcf_merge_samples_consensus_50(self):
@@ -62,7 +61,6 @@ class TestVcfMerge(IntegrationTest, unittest.TestCase):
         params.extend(input_files)
         rv, err = self.execute(params)
         self.assertEqual(0, rv)
-        self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file, filter_regex="##fileDate=")
 
     def test_vcf_merge_samples_consensus_50_dup_inputs(self):
@@ -84,7 +82,6 @@ class TestVcfMerge(IntegrationTest, unittest.TestCase):
         ]
         rv, err = self.execute(params)
         self.assertEqual(0, rv)
-        self.assertEqual('', err)
         self.assertFilesEqual(expected_file, output_file, filter_regex="##fileDate=")
 
     def test_vcf_merge_per_alt_list(self):
@@ -101,7 +98,6 @@ class TestVcfMerge(IntegrationTest, unittest.TestCase):
             "-o", output_file
         ] + input_files
         rv, err = self.execute(params)
-        self.assertEqual('', err)
         self.assertEqual(0, rv)
         self.assertFilesEqual(expected_file, output_file, filter_regex="##fileDate=")
 

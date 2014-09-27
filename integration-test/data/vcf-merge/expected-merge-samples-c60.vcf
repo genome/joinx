@@ -18,6 +18,7 @@
 ##FORMAT=<ID=FET,Number=1,Type=String,Description="P-value from Fisher's Exact Test">
 ##FORMAT=<ID=FT,Number=.,Type=String,Description="P-value from Fisher's Exact Test">
 ##fileDate=20121011
+##FILTER=<ID=MERGE_REJECT,Description="Rejected by vcf-merge (duplicate locus in same source file)">
 ##FILTER=<ID=CNS,Description="Consensus filter">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S1	S2	S3
 1	10	.	C	A,G,T	.	CNS	CALLER=Samtools,VarScan	GT:FT	0/1	0/0	0/1:CNS

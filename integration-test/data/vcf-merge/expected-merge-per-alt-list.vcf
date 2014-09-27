@@ -17,6 +17,7 @@
 ##FORMAT=<ID=VAQ,Number=1,Type=Integer,Description="Variant Quality">
 ##FORMAT=<ID=FET,Number=1,Type=String,Description="P-value from Fisher's Exact Test">
 ##FORMAT=<ID=FT,Number=.,Type=String,Description="P-value from Fisher's Exact Test">
+##FILTER=<ID=MERGE_REJECT,Description="Rejected by vcf-merge (duplicate locus in same source file)">
 ##fileDate=20131118
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S1	S2
 1	10	.	C	A,G	.	.	CALLER=Samtools/Strelka,GatkGermline/Varscan	GT	0/1	0/2

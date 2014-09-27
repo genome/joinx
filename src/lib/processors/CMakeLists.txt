@@ -19,6 +19,7 @@ set(SOURCES
     VcfGenotypeMatcher.cpp
     VcfGenotypeMatcher.hpp
     VcfToRaw.hpp
+    grouping/GroupBySharedRegions.hpp
     grouping/GroupOverlapping.hpp
     grouping/GroupSorter.hpp
 )

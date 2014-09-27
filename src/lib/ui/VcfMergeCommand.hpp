@@ -28,6 +28,7 @@ protected:
     bool _clearFilters;
     bool _mergeSamples;
     double _consensusRatio;
+    std::string _rejectFilter;
     std::string _consensusOpts;
     std::string _consensusFilter;
     std::string _consensusFilterDesc;
@@ -37,4 +38,5 @@ protected:
     std::string _samplePrioStr;
     Vcf::MergeStrategy::SamplePriority _samplePriority;
     bool _exactPos;
+    bool _printStats;
 };

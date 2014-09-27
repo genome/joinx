@@ -42,7 +42,7 @@ public:
         uint32_t sampleIdx,
         const std::vector<size_t>& alleleIndices
         ) const;
-        
+
 
     std::string renumberGT(
         const Entry* e,

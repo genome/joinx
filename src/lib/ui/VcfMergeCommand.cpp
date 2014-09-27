@@ -8,16 +8,23 @@
 #include "fileformats/StreamPump.hpp"
 #include "fileformats/TypedStream.hpp"
 #include "fileformats/vcf/AltNormalizer.hpp"
-#include "fileformats/vcf/Builder.hpp"
 #include "fileformats/vcf/ConsensusFilter.hpp"
 #include "fileformats/vcf/CustomType.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/vcf/SampleTag.hpp"
 #include "io/InputStream.hpp"
+#include "processors/Deref.hpp"
 #include "processors/MergeSorted.hpp"
+#include "processors/VcfEntryMerger.hpp"
+#include "processors/VcfFilterer.hpp"
+#include "processors/VcfReheaderer.hpp"
+#include "processors/VcfSourceIndexDeduplicator.hpp"
+#include "processors/grouping/GroupBySharedRegions.hpp"
+#include "processors/grouping/GroupForEach.hpp"
 #include "processors/grouping/GroupOverlapping.hpp"
 #include "processors/grouping/GroupSorter.hpp"
+#include "processors/grouping/GroupStats.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
@@ -89,6 +96,14 @@ void VcfMergeCommand::configureOptions() {
             "When merging samples, require a certain ratio of them to agree, "
             "filtering sites that fail. "
             "The format is -R ratio,filterName,filterDescription")
+
+        ("reject-filter-name",
+            po::value<string>(&_rejectFilter)->default_value("MERGE_REJECT"),
+            "The name of the filter to apply to entries rejected by the merger")
+
+        ("print-stats",
+            po::bool_switch(&_printStats)->default_value(false),
+            "Print statistics about the size of each bundle of entries being merged")
         ;
 
     _posOpts.add("input-file", -1);
@@ -236,6 +251,7 @@ void VcfMergeCommand::exec() {
     }
 
     std::unique_ptr<Vcf::ConsensusFilter> cnsFilt;
+    mergedHeader.addFilter(_rejectFilter, "Rejected by vcf-merge (duplicate locus in same source file)");
     if (_consensusRatio > 0) {
         mergedHeader.addFilter(_consensusFilter, _consensusFilterDesc);
         if (mergedHeader.formatType("FT") == NULL) {
@@ -265,8 +281,21 @@ void VcfMergeCommand::exec() {
     auto merger = makeMergeSorted(readers);
 
     LocusCompare<UnpaddedCoordinateView> cmp;
-    Vcf::Builder builder(mergeStrategy, &mergedHeader, writer);
-    auto finalGrouper = makeGroupOverlapping<Vcf::Entry>(builder, UnpaddedCoordinateView{});
+
+    auto entryMerger = makeVcfEntryMerger(
+              writer
+            , &mergedHeader
+            , mergeStrategy
+            );
+
+    auto deref = makeDeref(writer);
+    auto splitter = makeGroupForEach<Vcf::Entry>(deref);
+    auto reheader = makeVcfReheaderer(splitter, &mergedHeader);
+    auto filterer = makeVcfFilterer(reheader, _rejectFilter);
+    auto dedup = makeVcfSourceIndexDeduplicator(entryMerger, filterer);
+    auto stats = makeGroupStats<Vcf::Entry>(dedup, "merge bundle");
+    auto regionGrouper = makeGroupBySharedRegions<Vcf::Entry>(stats);
+    auto finalGrouper = makeGroupOverlapping<Vcf::Entry>(regionGrouper, UnpaddedCoordinateView{});
     auto sorter = makeGroupSorter<Vcf::Entry>(finalGrouper, cmp);
     auto initialGrouper = makeGroupOverlapping<Vcf::Entry>(sorter);
     auto pump = makePointerStreamPump(merger, initialGrouper);
@@ -274,5 +303,7 @@ void VcfMergeCommand::exec() {
     pump.execute();
     initialGrouper.flush();
     finalGrouper.flush();
-    builder.flush();
+
+    if (_printStats)
+        std::cerr << stats << "\n";
 }
