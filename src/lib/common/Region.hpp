@@ -2,6 +2,8 @@
 
 #include "common/cstdint.hpp"
 
+#include <boost/functional/hash.hpp>
+
 #include <algorithm>
 
 struct Region {
@@ -33,3 +35,11 @@ struct Region {
         return begin != rhs.begin || end != rhs.end;
     }
 };
+
+inline
+size_t hash_value(Region const& r) {
+    size_t seed = 0;
+    boost::hash_combine(seed, r.begin);
+    boost::hash_combine(seed, r.end);
+    return seed;
+}
