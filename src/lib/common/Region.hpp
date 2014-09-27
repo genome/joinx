@@ -24,4 +24,12 @@ struct Region {
 
     int64_t overlap(Region const& that) const;
     int64_t size() const;
+
+    bool operator==(Region const& rhs) const {
+        return begin == rhs.begin && end == rhs.end;
+    }
+
+    bool operator!=(Region const& rhs) const {
+        return begin != rhs.begin || end != rhs.end;
+    }
 };
