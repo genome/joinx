@@ -210,3 +210,14 @@ TEST_F(TestVcfRawVariant, allBasesMatch) {
         match.ref.swap(match.alt);
     }
 }
+
+TEST_F(TestVcfRawVariant, region) {
+    RawVariant ins(10, "", "CAG"); // one based
+    EXPECT_EQ(Region(9, 9), ins.region()); // zero based, point insertion
+
+    RawVariant del(10, "CAG", "");
+    EXPECT_EQ(Region(9, 12), del.region());
+
+    RawVariant snv(10, "C", "G");
+    EXPECT_EQ(Region(9, 10), snv.region());
+}

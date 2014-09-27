@@ -2,7 +2,7 @@
 
 #include "Entry.hpp"
 
-#include "common/Sequence.hpp"
+#include "common/Region.hpp"
 #include "common/namespaces.hpp"
 
 #include <boost/functional/hash.hpp>
@@ -52,6 +52,10 @@ public:
         , alt(alt)
     {
         normalize();
+    }
+
+    Region region() const {
+        return Region(pos - 1, pos - 1 + ref.size());
     }
 
     bool operator==(RawVariant const& rhs) const {
