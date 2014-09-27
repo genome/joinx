@@ -41,6 +41,10 @@ script_dir = os.path.dirname( os.path.abspath( __file__ ) )
 # 'flags' list of compilation flags. Notice that YCM itself uses that approach.
 build_dir = "@CMAKE_CURRENT_BINARY_DIR@"
 
+cmake_inc_dirs = "@TOP_LEVEL_INCLUDE_DIRS@"
+inc_directives = ["-I%s" % x for x in cmake_inc_dirs.split(";")]
+
+
 
 # These are the compilation flags that will be used in case there's no
 # compilation database set (by default, one is not set).
@@ -52,9 +56,10 @@ flags = [
         '-Wno-variadic-macros',
         '-fexceptions',
         '-std=c++0x',
-        '-I', '%s/src/lib' % script_dir,
-        '-I', '%s/vendor/gtest160/include/gtest' % build_dir
+        '-I%s/src/lib' % script_dir,
+        '-I%s/vendor/gtest160/include/gtest' % build_dir
 ]
+flags.extend(inc_directives)
 
 if build_dir:
     database = ycm_core.CompilationDatabase( build_dir )

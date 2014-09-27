@@ -30,10 +30,6 @@ message(STATUS "Doc path: ${INSTALL_DOC_PATH}")
 find_package(Threads REQUIRED)
 link_libraries(${CMAKE_THREAD_LIBS_INIT})
 
-# Dump clang compilation database for use with YCM
-set(CMAKE_EXPORT_COMPILE_COMMANDS on)
-configure_file(.ycm_extra_conf.py.in ${CMAKE_SOURCE_DIR}/.ycm_extra_conf.py @ONLY)
-
 configure_file(version/version.h.in version/version.h @ONLY)
 include_directories(${PROJECT_BINARY_DIR}/version)
 
@@ -127,6 +123,13 @@ add_subdirectory(doc)
 
 include(PackageInfo.cmake)
 
-message(STATUS "CXX FLAGS: ${CMAKE_CXX_FLAGS}")
+message(STATUS "CXX flags: ${CMAKE_CXX_FLAGS}")
 get_directory_property(defs COMPILE_DEFINITIONS)
 message(STATUS "Compile definitions: ${defs}")
+get_directory_property(TOP_LEVEL_INCLUDE_DIRS INCLUDE_DIRECTORIES)
+message(STATUS "INCLUDE DIRS: ${inc_dirs}")
+
+
+# Dump clang compilation database for use with YCM
+set(CMAKE_EXPORT_COMPILE_COMMANDS on)
+configure_file(.ycm_extra_conf.py.in ${CMAKE_SOURCE_DIR}/.ycm_extra_conf.py @ONLY)
