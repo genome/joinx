@@ -19,6 +19,9 @@ struct InfoTranslation {
 template<typename OutputType>
 class SimpleVcfAnnotator {
 public:
+    typedef std::unique_ptr<Vcf::Entry> EntryPtr;
+    typedef std::vector<EntryPtr> EntryPtrVector;
+
     typedef std::vector<Vcf::Entry> HitsType;
     typedef HitsType::const_iterator BestIter;
     typedef std::map<std::string, InfoTranslation> InfoFieldMapping;
@@ -117,6 +120,27 @@ public:
 
             newValue->setType(txl.newType);
             e.setInfo(txl.newType->id(), *newValue);
+        }
+    }
+
+    void operator()(std::vector<std::unique_ptr<Vcf::Entry>> entries) {
+        EntryPtrVector inputs; // entries from the input file
+
+        // FIXME: change this to have HitsType be unique_ptrs so we can just
+        // move those rather than the heavier entry objects.
+        HitsType annos;  // entries from the annotation file
+
+        for (auto i = entries.begin(); i != entries.end(); ++i) {
+            if ((*i)->header().sourceIndex() == 0) {
+                inputs.push_back(std::move(*i));
+            }
+            else {
+                annos.push_back(std::move(**i));
+            }
+        }
+
+        for (auto i = inputs.begin(); i  != inputs.end(); ++i) {
+            (*this)(**i, annos);
         }
     }
 

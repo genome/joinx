@@ -1,16 +1,17 @@
 #include "VcfAnnotateCommand.hpp"
 
 #include "common/Tokenizer.hpp"
-#include "fileformats/Bed.hpp"
 #include "fileformats/DefaultPrinter.hpp"
-#include "fileformats/TypedStream.hpp"
 #include "fileformats/vcf/Compare.hpp"
 #include "fileformats/vcf/CustomType.hpp"
+#include "fileformats/StreamPump.hpp"
 #include "fileformats/vcf/CustomValue.hpp"
 #include "fileformats/vcf/Entry.hpp"
 #include "fileformats/vcf/Header.hpp"
 #include "io/InputStream.hpp"
-#include "processors/IntersectSimple.hpp"
+#include "processors/MergeSorted.hpp"
+#include "processors/grouping/GroupBySharedRegions.hpp"
+#include "processors/grouping/GroupOverlapping.hpp"
 
 #include <boost/format.hpp>
 
@@ -121,24 +122,38 @@ void VcfAnnotateCommand::postProcessArguments(Vcf::Header& header, Vcf::Header c
 void VcfAnnotateCommand::exec() {
     typedef SimpleVcfAnnotator<DefaultPrinter> AnnoType;
 
-    auto vcfIn = _streams.openForReading(_vcfFile);
-    auto annoIn = _streams.openForReading(_annoFile);
+
+    std::vector<std::string> filenames{_vcfFile, _annoFile};
+    vector<InputStream::ptr> inputStreams = _streams.openForReading(filenames);
+    auto readers = openStreams<Vcf::Entry>(inputStreams);
+
 
     ostream* out = _streams.get<ostream>(_outputFile);
     if (_streams.cinReferences() > 1)
         throw runtime_error("stdin listed more than once!");
-    auto vcfReader = openStream<Vcf::Entry>(*vcfIn);
-    auto annoReader = openStream<Vcf::Entry>(*annoIn);
 
-    Vcf::Header& annoHeader = annoReader->header();
-    Vcf::Header& header = vcfReader->header();
+    auto& vcfReader = *readers[0];
+    auto& annoReader = *readers[1];
+
+    Vcf::Header& annoHeader = annoReader.header();
+    Vcf::Header& header = vcfReader.header();
+    header.sourceIndex(0);
+    annoHeader.sourceIndex(1);
+
     header.add(str(format("##annotation=%s") % _annoFile));
 
     postProcessArguments(header, annoHeader);
 
     DefaultPrinter writer(*out);
-    AnnoType c(writer, !_noIdents, _infoMap, header);
-    auto intersector = makeSimpleIntersector(*vcfReader, *annoReader, c);
-    *out << vcfReader->header();
-    intersector.execute();
+    AnnoType annotator(writer, !_noIdents, _infoMap, header);
+
+    *out << vcfReader.header();
+
+    auto merger = makeMergeSorted(readers);
+    auto regionGrouper = makeGroupBySharedRegions<Vcf::Entry>(annotator);
+    auto initialGrouper = makeGroupOverlapping<Vcf::Entry>(regionGrouper);
+    auto pump = makePointerStreamPump(merger, initialGrouper);
+
+    pump.execute();
+    initialGrouper.flush();
 }
