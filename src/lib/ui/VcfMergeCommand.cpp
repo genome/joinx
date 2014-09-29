@@ -1,7 +1,5 @@
 #include "VcfMergeCommand.hpp"
 
-#include "common/CoordinateView.hpp"
-#include "common/LocusCompare.hpp"
 #include "common/Tokenizer.hpp"
 #include "fileformats/DefaultPrinter.hpp"
 #include "fileformats/Fasta.hpp"
@@ -23,7 +21,6 @@
 #include "processors/grouping/GroupBySharedRegions.hpp"
 #include "processors/grouping/GroupForEach.hpp"
 #include "processors/grouping/GroupOverlapping.hpp"
-#include "processors/grouping/GroupSorter.hpp"
 #include "processors/grouping/GroupStats.hpp"
 
 #include <boost/bind.hpp>
@@ -278,32 +275,28 @@ void VcfMergeCommand::exec() {
     mergeStrategy.primarySampleStreamIndex(0);
 
     *out << mergedHeader;
-    auto merger = makeMergeSorted(readers);
 
-    LocusCompare<UnpaddedCoordinateView> cmp;
+    auto entryMerger = makeVcfEntryMerger(writer, &mergedHeader, mergeStrategy);
 
-    auto entryMerger = makeVcfEntryMerger(
-              writer
-            , &mergedHeader
-            , mergeStrategy
-            );
-
+    // Rejection chain
     auto deref = makeDeref(writer);
-    auto splitter = makeGroupForEach<Vcf::Entry>(deref);
+    auto splitter = makeGroupForEach(deref);
     auto reheader = makeVcfReheaderer(splitter, &mergedHeader);
     auto filterer = makeVcfFilterer(reheader, _rejectFilter);
+    // End rejection chain
+
+    // Dedup will branch between the rejection chain (filterer) and the entryMerger
     auto dedup = makeVcfSourceIndexDeduplicator(entryMerger, filterer);
-    auto smallStats = makeGroupStats<Vcf::Entry>(dedup, "actual merging size");
-    auto regionGrouper = makeGroupBySharedRegions<Vcf::Entry>(smallStats);
-    auto bigStats = makeGroupStats<Vcf::Entry>(regionGrouper, "overlapping size");
-    auto finalGrouper = makeGroupOverlapping<Vcf::Entry>(bigStats, UnpaddedCoordinateView{});
-    auto sorter = makeGroupSorter<Vcf::Entry>(finalGrouper, cmp);
-    auto initialGrouper = makeGroupOverlapping<Vcf::Entry>(sorter);
+
+    auto smallStats = makeGroupStats(dedup, "shared allele bundle size");
+    auto regionGrouper = makeGroupBySharedRegions(smallStats);
+    auto bigStats = makeGroupStats(regionGrouper, "overlapping bundle size");
+    auto initialGrouper = makeGroupOverlapping<Vcf::Entry>(bigStats);
+    auto merger = makeMergeSorted(readers);
     auto pump = makePointerStreamPump(merger, initialGrouper);
 
     pump.execute();
     initialGrouper.flush();
-    finalGrouper.flush();
 
     if (_printStats) {
         std::cerr << bigStats << smallStats << "\n";

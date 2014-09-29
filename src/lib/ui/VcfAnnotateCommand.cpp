@@ -149,9 +149,9 @@ void VcfAnnotateCommand::exec() {
 
     *out << vcfReader.header();
 
-    auto merger = makeMergeSorted(readers);
-    auto regionGrouper = makeGroupBySharedRegions<Vcf::Entry>(annotator);
+    auto regionGrouper = makeGroupBySharedRegions(annotator);
     auto initialGrouper = makeGroupOverlapping<Vcf::Entry>(regionGrouper);
+    auto merger = makeMergeSorted(readers);
     auto pump = makePointerStreamPump(merger, initialGrouper);
 
     pump.execute();

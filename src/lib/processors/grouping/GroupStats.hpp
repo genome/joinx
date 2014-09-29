@@ -27,21 +27,16 @@ namespace detail {
         > accum_type;
 }
 
-template<
-          typename ValueType
-        , typename OutputFunc
-        >
+template<typename OutputFunc>
 class GroupStats {
 public:
-    typedef std::unique_ptr<ValueType> ValuePtr;
-    typedef std::vector<ValuePtr> ValuePtrVector;
-
     GroupStats(OutputFunc& out, std::string name)
         : out_(out)
         , name_(name)
     {}
 
-    void operator()(ValuePtrVector entries) {
+    template<typename ValuePtr>
+    void operator()(std::vector<ValuePtr> entries) {
         accum_(entries.size());
         out_(std::move(entries));
     }
@@ -64,11 +59,8 @@ private:
     detail::accum_type accum_;
 };
 
-template<
-          typename ValueType
-        , typename OutputFunc
-        >
-GroupStats<ValueType, OutputFunc>
+template<typename OutputFunc>
+GroupStats<OutputFunc>
 makeGroupStats(OutputFunc& out, std::string name) {
-    return GroupStats<ValueType, OutputFunc>(out, std::move(name));
+    return GroupStats<OutputFunc>(out, std::move(name));
 }

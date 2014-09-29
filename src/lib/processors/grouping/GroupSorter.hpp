@@ -7,8 +7,7 @@
 #include <vector>
 
 template<
-          typename ValueType
-        , typename OutputFunc
+          typename OutputFunc
         , typename Compare
         >
 class GroupSorter {
@@ -18,10 +17,8 @@ public:
         , cmp(cmp)
     {}
 
-    typedef std::unique_ptr<ValueType> ValuePtr;
-    typedef std::vector<ValuePtr> ValuePtrVector;
-
-    void operator()(ValuePtrVector entries) {
+    template<typename ValuePtr>
+    void operator()(std::vector<ValuePtr> entries) {
         DerefBinaryOp<Compare> dcmp(cmp);
         compat::sort(entries.begin(), entries.end(), dcmp);
         out(std::move(entries));
@@ -32,13 +29,12 @@ public:
 };
 
 template<
-          typename ValueType
-        , typename OutputFunc
+          typename OutputFunc
         , typename Compare
         >
-GroupSorter<ValueType, OutputFunc, Compare>
+GroupSorter<OutputFunc, Compare>
 makeGroupSorter(OutputFunc& out, Compare cmp = Compare()) {
-    return GroupSorter<ValueType, OutputFunc, Compare>(out, cmp);
+    return GroupSorter<OutputFunc, Compare>(out, cmp);
 }
 
 

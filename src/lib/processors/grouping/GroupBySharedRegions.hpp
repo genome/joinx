@@ -35,14 +35,11 @@ struct VcfRegionExtractor {
 
 
 template<
-          typename ValueType
-        , typename OutputFunc
+          typename OutputFunc
         , typename RegionExtractor = VcfRegionExtractor // FIXME: get rid of default
         >
 class GroupBySharedRegions {
 public:
-    typedef std::unique_ptr<ValueType> ValuePtr;
-    typedef std::vector<ValuePtr> ValuePtrVector;
     typedef typename RegionExtractor::ReturnType RegionSet;
 
     GroupBySharedRegions(
@@ -63,7 +60,10 @@ public:
         }
     }
 
-    void operator()(ValuePtrVector entries) {
+    template<typename ValuePtr>
+    void operator()(std::vector<ValuePtr> entries) {
+        typedef std::vector<ValuePtr> ValuePtrVector;
+
         std::vector<RegionSet> regions(entries.size());
         boost::unordered_map<Region, boost::unordered_set<std::size_t>> regionToEntries;
         for (std::size_t i = 0; i < entries.size(); ++i) {
@@ -102,17 +102,14 @@ private:
 };
 
 template<
-          typename ValueType
-        , typename OutputFunc
+          typename OutputFunc
         , typename RegionExtractor = VcfRegionExtractor // FIXME: get rid of default
         >
-GroupBySharedRegions<ValueType, OutputFunc, RegionExtractor>
+GroupBySharedRegions<OutputFunc, RegionExtractor>
 makeGroupBySharedRegions(
               OutputFunc& out
             , RegionExtractor regionExtractor = RegionExtractor()
             )
 {
-    return GroupBySharedRegions<ValueType, OutputFunc, RegionExtractor>(
-        out, regionExtractor
-        );
+    return GroupBySharedRegions<OutputFunc, RegionExtractor>(out, regionExtractor);
 }

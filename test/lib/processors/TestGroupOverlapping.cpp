@@ -165,7 +165,7 @@ TEST_F(TestGroupOverlapping, sort) {
     Collector collector;
     CompareToGreaterThan<LocusCompare<>> cmp;
 
-    auto sorter = makeGroupSorter<MockEntry>(collector, cmp);
+    auto sorter = makeGroupSorter(collector, cmp);
     auto oer = makeGroupOverlapping<MockEntry>(sorter);
     auto pump = makePointerStreamPump(reader, oer);
     pump.execute();
