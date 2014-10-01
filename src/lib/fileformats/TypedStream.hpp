@@ -35,8 +35,8 @@ public:
     typedef typename ValueType::HeaderType HeaderType;
     typedef std::unique_ptr<TypedStream<Parser>> ptr;
 
-    TypedStream(Parser& extractor, InputStream& in)
-        : extractor_(extractor)
+    TypedStream(Parser& parser, InputStream& in)
+        : parser_(parser)
         , in_(in)
         , valueCount_(0)
         , cached_(false)
@@ -69,12 +69,16 @@ public:
     void checkEof() const;
     uint64_t lineNum() const;
 
+    Parser& parser() {
+        return parser_;
+    }
+
 protected:
     std::string nextLine();
 
 protected:
     HeaderType header_;
-    Parser extractor_;
+    Parser parser_;
 
     std::string name_;
     InputStream& in_;
@@ -135,7 +139,7 @@ inline bool TypedStream<Parser>::next(ValueType& value) {
         return false;
 
     try {
-        extractor_(&header_, line, value);
+        parser_(&header_, line, value);
     }
     catch (std::exception const& e) {
         using boost::format;
