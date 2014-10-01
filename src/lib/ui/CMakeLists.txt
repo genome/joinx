@@ -32,8 +32,6 @@ set(SOURCES
     VcfAnnotateHomopolymersCommand.hpp
     VcfCompareCommand.cpp
     VcfCompareCommand.hpp
-    VcfCompareGtCommand.cpp
-    VcfCompareGtCommand.hpp
     VcfFilterCommand.cpp
     VcfFilterCommand.hpp
     VcfMergeCommand.cpp

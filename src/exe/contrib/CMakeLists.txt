@@ -4,7 +4,7 @@ project(contrib)
 
 add_executable(mkcontigs MakeContigs.cpp)
 target_link_libraries(mkcontigs
-    processors reports metrics fileformats io common
+    processors metrics fileformats io common
     ${Boost_LIBRARIES} ${ZLIB_LIBRARIES})
 
 

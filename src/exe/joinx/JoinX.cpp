@@ -13,7 +13,6 @@
 #include "ui/VcfAnnotateCommand.hpp"
 #include "ui/VcfAnnotateHomopolymersCommand.hpp"
 #include "ui/VcfCompareCommand.hpp"
-#include "ui/VcfCompareGtCommand.hpp"
 #include "ui/VcfFilterCommand.hpp"
 #include "ui/VcfMergeCommand.hpp"
 #include "ui/VcfNormalizeIndelsCommand.hpp"
@@ -50,7 +49,6 @@ JoinX::JoinX() {
     registerSubCommand(std::shared_ptr<CommandBase>(new VcfAnnotateCommand));
     registerSubCommand(std::shared_ptr<CommandBase>(new VcfAnnotateHomopolymersCommand));
     registerSubCommand(std::shared_ptr<CommandBase>(new VcfCompareCommand));
-    registerSubCommand(std::shared_ptr<CommandBase>(new VcfCompareGtCommand));
     registerSubCommand(std::shared_ptr<CommandBase>(new VcfFilterCommand));
     registerSubCommand(std::shared_ptr<CommandBase>(new VcfSiteFilterCommand));
     registerSubCommand(std::shared_ptr<CommandBase>(new VcfMergeCommand));
