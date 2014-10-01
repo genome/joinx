@@ -235,4 +235,3 @@ std::vector<typename TypedStream<DefaultParser<ValueType>>::ptr> openStreams(
 {
     return TypedStreamFactory<DefaultParser<ValueType>>{}(in);
 }
-

@@ -136,6 +136,7 @@ inline bool containsInsertions(Bed const& b) {
 
 struct BedParser {
     typedef Bed ValueType;
+    typedef Bed::HeaderType HeaderType;
 
     int maxExtraFields;
 
