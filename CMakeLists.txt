@@ -63,7 +63,6 @@ if(NOT CXX_CAN_SORT_UNIQUE_PTRS)
 endif()
 
 check_cxx14_has_make_unique(CXX_HAS_MAKE_UNIQUE)
-message("MAKE_UNIQUE: ${CXX_HAS_MAKE_UNIQUE}")
 if(NOT CXX_HAS_MAKE_UNIQUE)
     add_definitions("-DCXX14_NO_MAKE_UNIQUE")
 endif()
