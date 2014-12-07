@@ -96,9 +96,11 @@ void Header::add(const string& line) {
         } else if (p.first == "FILTER") {
             // TODO: care about duplicates?
             Map m(p.second.substr(1, p.second.size()-2));
-            _filters.insert(
-                make_pair(m["ID"], m["Description"])
-            );
+            auto desc = m["Description"];
+            if (!desc.empty() && desc[0] == '"' && desc[desc.size() - 1] == '"')
+                desc = desc.substr(1, desc.size() - 2);
+
+            _filters.insert(make_pair(m["ID"], desc));
         } else if (p.first == "SAMPLE") {
             SampleTag st(p.second.substr(1, p.second.size()-2));
             auto inserted = _sampleTags.insert(
@@ -116,11 +118,17 @@ void Header::add(const string& line) {
 }
 
 void Header::addFilter(const string& id, const string& desc) {
-    if (_filters.find(id) != _filters.end())
+    auto found = _filters.find(id);
+    if (found != _filters.end()) {
+        if (found->second == desc)
+            return;
+
         throw runtime_error(str(format(
-            "Attempted to add duplicate filter '%1%' to vcf header."
-            ) %id));
-    add(str(format("##FILTER=<ID=%1%,Description=\"%2%\">") %id %desc));
+            "Attempted to add duplicate filter '%1% \"%2%\"' to vcf header (previous description: \"%3%\")."
+            ) % id % desc % found->second));
+    }
+
+    add(str(format("##FILTER=<ID=%1%,Description=\"%2%\">") % id % desc));
 }
 
 void Header::addInfoType(CustomType const& type) {

@@ -192,7 +192,7 @@ TEST(VcfHeader, addFilter) {
     const auto& filters = h.filters();
     auto iter = filters.find("FOO12");
     ASSERT_FALSE(iter == filters.end());
-    ASSERT_EQ("\"Test filter\"", iter->second);
+    ASSERT_EQ("Test filter", iter->second);
     stringstream ss;
     ss << h;
     string expected = "##FILTER=<ID=FOO12,Description=\"Test filter\">";
