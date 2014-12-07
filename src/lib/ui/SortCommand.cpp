@@ -129,16 +129,20 @@ void SortCommand::exec() {
         TypedStreamFactory<BedParser> readerFactory{extraFields};
         auto readers = readerFactory(inputStreams);
         BedHeader hdr;
-        BedDeduplicator<DefaultPrinter> dedup(writer);
-        boost::function<void(Bed&)> output;
-        if (_unique)
-            output = BedDeduplicator<DefaultPrinter>(writer);
-        else
-            output = writer;
+        if (_unique) {
+            auto output = BedDeduplicator<DefaultPrinter>(writer);
+            auto sorter = makeSort(
+                readers, readerFactory, output, hdr, _maxInMem, _stable, compression
+                );
+            sorter->execute();
+        }
+        else {
+            auto sorter = makeSort(
+                readers, readerFactory, writer, hdr, _maxInMem, _stable, compression
+                );
+            sorter->execute();
+        }
 
-        auto sorter = makeSort(
-            readers, readerFactory, dedup, hdr, _maxInMem, _stable, compression);
-        sorter->execute();
     } else if (type == VCF) {
         typedef TypedStreamFactory<Vcf::ReheaderingParser> InputFactory;
         Vcf::Header hdr;
