@@ -4,6 +4,7 @@ project(processors)
 
 set(SOURCES
     BedDeduplicator.hpp
+    Deref.hpp
     IntersectFull.hpp
     IntersectionOutputFormatter.cpp
     IntersectionOutputFormatter.hpp
@@ -15,12 +16,19 @@ set(SOURCES
     SortBuffer.hpp
     VariantContig.cpp
     VariantContig.hpp
+    VcfEntryMerger.hpp
+    VcfFilterer.hpp
     VcfGenotypeMatcher.cpp
     VcfGenotypeMatcher.hpp
+    VcfReheaderer.hpp
+    VcfSourceIndexDeduplicator.hpp
     VcfToRaw.hpp
     grouping/GroupBySharedRegions.hpp
+    grouping/GroupForEach.hpp
     grouping/GroupOverlapping.hpp
     grouping/GroupSorter.hpp
+    grouping/GroupSortingWriter.hpp
+    grouping/GroupStats.hpp
 )
 
 add_library(processors ${SOURCES})
