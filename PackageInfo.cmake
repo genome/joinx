@@ -6,7 +6,8 @@ if(${CMAKE_SIZEOF_VOID_P} MATCHES 8)
     set(ARCH "x86_64")
 endif ()
 
-set(DEFAULT_ETC_ALTERNATIVES_PRIORITY 20)
+# joinx1.9 is currently the default with a priority of 20
+set(DEFAULT_ETC_ALTERNATIVES_PRIORITY 0)
 
 # The format of the description field is a short summary line followed by a
 # longer paragraph indented by a single space on each line
