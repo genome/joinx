@@ -16,7 +16,7 @@ BEGIN_NAMESPACE(compat)
 
 #ifdef CXX11_CANT_SORT_UNIQUE_PTR // old stdlibc++ can't
 
-// we don't need the version without a predicate yet it is omitted
+// we don't need the version without a predicate yet. it is omitted.
 
 template<typename Iter, typename Compare>
 typename std::enable_if<

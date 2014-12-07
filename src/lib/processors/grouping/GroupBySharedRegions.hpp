@@ -28,6 +28,11 @@ struct VcfRegionExtractor {
             // that is a useful option sometimes.
             rv.insert(i->region());
         }
+        // For ref-only entries:
+        if (rawvs.empty()) {
+            Region reg{entry.start(), entry.stop()};
+            rv.insert(reg);
+        }
         return rv;
     }
 };
@@ -60,6 +65,24 @@ public:
         }
     }
 
+    // Sort vectors of entries (all of which should have the same region) by
+    // start/stop position
+    struct SortHelper_ {
+        template<typename GroupType>
+        bool operator()(GroupType const& x, GroupType const& y) const {
+            if (x->empty() || y->empty())
+                return true; // doesn't matter if one or both are empty;
+
+            if ((*x)[0]->start() < (*y)[0]->start())
+                return true;
+
+            if ((*x)[0]->start() > (*y)[0]->start())
+                return false;
+
+            return (*x)[0]->stop() < (*y)[0]->stop();
+        }
+    };
+
     template<typename ValuePtr>
     void operator()(std::vector<ValuePtr> entries) {
         typedef std::vector<ValuePtr> ValuePtrVector;
@@ -69,7 +92,7 @@ public:
         for (std::size_t i = 0; i < entries.size(); ++i) {
             std::size_t entryIdx = i;
             regions[i] = regionExtractor_(*entries[i]);
-            for (auto j = regions[i].begin();j != regions[i].end(); ++j) {
+            for (auto j = regions[i].begin(); j != regions[i].end(); ++j) {
                 regionToEntries[*j].insert(entryIdx);
             }
         }
@@ -91,8 +114,19 @@ public:
             groups[components[i]].push_back(std::move(entries[i]));
         }
 
+        // The groups are not necessarily sorted at this point
+        // Let's fix that...
+        // gcc 4.4 can't deal with sorting std::vector<std::vector<std::unique_ptr<T>>>
+        // using raw pointers instead
+        std::vector<ValuePtrVector*> sortedGroups;
+        sortedGroups.reserve(groups.size());
         for (auto i = groups.begin(); i != groups.end(); ++i) {
-            out_(std::move(i->second));
+            sortedGroups.push_back(&i->second);
+        }
+        std::sort(sortedGroups.begin(), sortedGroups.end(), SortHelper_{});
+
+        for (auto i = sortedGroups.begin(); i != sortedGroups.end(); ++i) {
+            out_(std::move(**i));
         }
     }
 
