@@ -1,7 +1,6 @@
 #include "VcfMergeCommand.hpp"
 
 #include "common/Tokenizer.hpp"
-#include "fileformats/DefaultPrinter.hpp"
 #include "fileformats/Fasta.hpp"
 #include "fileformats/StreamPump.hpp"
 #include "fileformats/TypedStream.hpp"
@@ -21,6 +20,7 @@
 #include "processors/grouping/GroupBySharedRegions.hpp"
 #include "processors/grouping/GroupForEach.hpp"
 #include "processors/grouping/GroupOverlapping.hpp"
+#include "processors/grouping/GroupSortingWriter.hpp"
 #include "processors/grouping/GroupStats.hpp"
 
 #include <boost/bind.hpp>
@@ -231,13 +231,12 @@ void VcfMergeCommand::exec() {
         readers[i]->header().sourceIndex(_fileOrder[inputStreams[i]->name()]);
     }
 
-    DefaultPrinter printer(*out);
-
+    GroupSortingWriter printer(*out);
 
     boost::function<void(Vcf::Entry&)> writer;
     if (normalizer) {
         writer = boost::bind(
-              &writeNormalized<DefaultPrinter, std::unique_ptr<Vcf::AltNormalizer>, Vcf::Entry>
+              &writeNormalized<GroupSortingWriter, std::unique_ptr<Vcf::AltNormalizer>, Vcf::Entry>
             , printer
             , std::ref(normalizer)
             , _1
@@ -291,7 +290,13 @@ void VcfMergeCommand::exec() {
     auto smallStats = makeGroupStats(dedup, "shared allele bundle size");
     auto regionGrouper = makeGroupBySharedRegions(smallStats);
     auto bigStats = makeGroupStats(regionGrouper, "overlapping bundle size");
-    auto initialGrouper = makeGroupOverlapping<Vcf::Entry>(bigStats);
+
+    auto initialGrouper = makeGroupOverlapping<Vcf::Entry>(
+              bigStats
+            , DefaultCoordinateView{}
+            , nothing
+            , std::bind(&GroupSortingWriter::endGroup, std::ref(printer))
+            );
     auto merger = makeMergeSorted(readers);
     auto pump = makePointerStreamPump(merger, initialGrouper);
 

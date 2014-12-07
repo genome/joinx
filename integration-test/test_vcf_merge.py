@@ -5,6 +5,18 @@ import unittest
 
 class TestVcfMerge(IntegrationTest, unittest.TestCase):
 
+    def test_vcf_merge_sort_order(self):
+        input_files = sorted(self.inputFiles("vcf-merge/sorting/merge-[0-9].vcf"))
+        expected_file = self.inputFiles("vcf-merge/sorting/expected.vcf")[0]
+        output_file = self.tempFile("output.vcf")
+
+        params = [ "vcf-merge", "-o", output_file ]
+        params.extend(input_files)
+        rv, err = self.execute(params)
+        self.assertEqual(0, rv)
+        self.assertFilesEqual(expected_file, output_file, filter_regex="##fileDate=")
+
+
     def test_vcf_merge(self):
         merge_strategy_file = self.tempFile("strategy.ms")
         open(merge_strategy_file, "w").write(

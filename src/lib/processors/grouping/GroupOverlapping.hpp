@@ -10,19 +10,32 @@
 #include <utility>
 #include <vector>
 
+namespace {
+    void nothing() {}
+}
+
 template<
           typename ValueType
         , typename OutputFunc
         , typename CoordView = DefaultCoordinateView
+        , typename BeginFunc = void(*)()
+        , typename EndFunc = void(*)()
         >
 class GroupOverlapping {
 public:
     typedef std::unique_ptr<ValueType> ValuePtr;
     typedef std::vector<ValuePtr> ValuePtrVector;
 
-    GroupOverlapping(OutputFunc& out, CoordView coordView = CoordView())
+    GroupOverlapping(
+              OutputFunc& out
+            , CoordView coordView = CoordView()
+            , BeginFunc beginFunc = nothing
+            , EndFunc endFunc = nothing
+            )
         : out_(out)
         , coordView_(coordView)
+        , beginFunc_(beginFunc)
+        , endFunc_(endFunc)
     {
     }
 
@@ -31,9 +44,11 @@ public:
     GroupOverlapping& operator=(GroupOverlapping const&) = delete;
     GroupOverlapping(GroupOverlapping&& rhs)
         : out_(rhs.out_)
+        , coordView_(std::move(rhs.coordView_))
+        , beginFunc_(std::move(rhs.beginFunc_))
+        , endFunc_(std::move(rhs.endFunc_))
         , sequence_(std::move(rhs.sequence_))
         , region_(std::move(rhs.region_))
-        , coordView_(std::move(rhs.coordView_))
         , bundle_(std::move(rhs.bundle_))
     {}
 
@@ -46,7 +61,9 @@ public:
         if (!overlaps(*entry)) {
             assignRegion(*entry);
             if (!bundle_.empty()) {
+                beginFunc_();
                 out_(std::move(bundle_));
+                endFunc_();
                 bundle_.clear();
             }
         }
@@ -78,10 +95,12 @@ private:
 
 private:
     OutputFunc& out_;
+    CoordView coordView_;
+    BeginFunc beginFunc_;
+    EndFunc endFunc_;
 
     std::string sequence_;
     Region region_;
-    CoordView coordView_;
     ValuePtrVector bundle_;
 };
 
@@ -90,8 +109,18 @@ template<
           typename ValueType
         , typename OutputFunc
         , typename CoordView = DefaultCoordinateView
+        , typename BeginFunc = void(*)()
+        , typename EndFunc = void(*)()
         >
-GroupOverlapping<ValueType, OutputFunc, CoordView>
-makeGroupOverlapping(OutputFunc& out, CoordView coordView = CoordView()) {
-    return GroupOverlapping<ValueType, OutputFunc, CoordView>(out, coordView);
+GroupOverlapping<ValueType, OutputFunc, CoordView, BeginFunc, EndFunc>
+makeGroupOverlapping(
+          OutputFunc& out
+        , CoordView coordView = CoordView()
+        , BeginFunc beginFunc = nothing
+        , EndFunc endFunc = nothing
+        )
+{
+    return GroupOverlapping<ValueType, OutputFunc, CoordView, BeginFunc, EndFunc>(
+        out, coordView, beginFunc, endFunc
+        );
 }

@@ -28,10 +28,11 @@ public:
     typedef Vcf::Compare::AltIntersect AltIntersect;
 
 public:
-    SimpleVcfAnnotator(OutputType& out,
-            bool copyIdents,
-            InfoFieldMapping const& infoMap,
-            Vcf::Header const& header
+    SimpleVcfAnnotator(
+              OutputType& out
+            , bool copyIdents
+            , InfoFieldMapping const& infoMap
+            , Vcf::Header const& header
             )
         : _out(out)
         , _copyIdents(copyIdents)
@@ -167,7 +168,7 @@ public:
             }
         }
 
-        _out(copyA);
+        _out(std::move(copyA));
     }
 
 protected:
@@ -176,3 +177,14 @@ protected:
     InfoFieldMapping const& _infoMap;
     Vcf::Header const& _header;
 };
+
+template<typename OutputType, typename ...Xs>
+SimpleVcfAnnotator<OutputType> makeSimpleVcfAnnotator(
+          OutputType& out
+        , bool copyIdents
+        , std::map<std::string, InfoTranslation> const& infoMap
+        , Vcf::Header const& header
+        )
+{
+    return SimpleVcfAnnotator<OutputType>(out, copyIdents, infoMap, header);
+}

@@ -1,0 +1,22 @@
+##fileformat=VCFv4.1
+##fileDate=20110913
+##reference=ftp://ftp.ncbi.nih.gov/genbank/genomes/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37/special_requests/GRCh37-lite.fa.gz
+##phasing=none
+##FILTER=<ID=PASS,Description="Passed all filters">
+##FILTER=<ID=FalseIndel,Description="FalseIndel">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Read Depth">
+##INFO=<ID=CALLER,Number=.,Type=String,Description="Variant caller">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total Read Depth">
+##FORMAT=<ID=BQ,Number=A,Type=Integer,Description="Average Base Quality corresponding to alleles 0/1/2/3... after software and quality filtering">
+##FORMAT=<ID=MQ,Number=1,Type=Integer,Description="Average Mapping Quality">
+##FORMAT=<ID=AD,Number=A,Type=Integer,Description="Allele Depth corresponding to alleles 0/1/2/3... after software and quality filtering">
+##FORMAT=<ID=FA,Number=1,Type=Float,Description="Fraction of reads supporting ALT">
+##FORMAT=<ID=VAQ,Number=1,Type=Integer,Description="Variant Quality">
+##FORMAT=<ID=FET,Number=1,Type=String,Description="P-value from Fisher's Exact Test">
+##FORMAT=<ID=FT,Number=.,Type=String,Description="P-value from Fisher's Exact Test">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S1	S2	S3
+1	10	.	CCC	C,CCT	.	.	DP=3;CALLER=Samtools	GT	0/1	0/0	0/1
+1	11	.	C	G	.	.	DP=3;CALLER=Samtools	GT	0/1	0/0	0/1
+1	12	.	C	T	.	.	DP=3;CALLER=Samtools	GT	0/1	0/0	0/1

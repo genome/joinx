@@ -1,7 +1,6 @@
 #include "VcfAnnotateCommand.hpp"
 
 #include "common/Tokenizer.hpp"
-#include "fileformats/DefaultPrinter.hpp"
 #include "fileformats/vcf/Compare.hpp"
 #include "fileformats/vcf/CustomType.hpp"
 #include "fileformats/StreamPump.hpp"
@@ -12,9 +11,11 @@
 #include "processors/MergeSorted.hpp"
 #include "processors/grouping/GroupBySharedRegions.hpp"
 #include "processors/grouping/GroupOverlapping.hpp"
+#include "processors/grouping/GroupSortingWriter.hpp"
 
 #include <boost/format.hpp>
 
+#include <functional>
 #include <iterator>
 #include <stdexcept>
 
@@ -118,11 +119,7 @@ void VcfAnnotateCommand::postProcessArguments(Vcf::Header& header, Vcf::Header c
     }
 }
 
-
 void VcfAnnotateCommand::exec() {
-    typedef SimpleVcfAnnotator<DefaultPrinter> AnnoType;
-
-
     std::vector<std::string> filenames{_vcfFile, _annoFile};
     vector<InputStream::ptr> inputStreams = _streams.openForReading(filenames);
     auto readers = openStreams<Vcf::Entry>(inputStreams);
@@ -144,13 +141,18 @@ void VcfAnnotateCommand::exec() {
 
     postProcessArguments(header, annoHeader);
 
-    DefaultPrinter writer(*out);
-    AnnoType annotator(writer, !_noIdents, _infoMap, header);
+    GroupSortingWriter writer(*out);
+    auto annotator = makeSimpleVcfAnnotator(writer, !_noIdents, _infoMap, header);
 
     *out << vcfReader.header();
 
     auto regionGrouper = makeGroupBySharedRegions(annotator);
-    auto initialGrouper = makeGroupOverlapping<Vcf::Entry>(regionGrouper);
+    auto initialGrouper = makeGroupOverlapping<Vcf::Entry>(
+              regionGrouper
+            , DefaultCoordinateView{}
+            , nothing
+            , std::bind(&GroupSortingWriter::endGroup, std::ref(writer))
+            );
     auto merger = makeMergeSorted(readers);
     auto pump = makePointerStreamPump(merger, initialGrouper);
 
