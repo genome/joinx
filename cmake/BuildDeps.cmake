@@ -25,7 +25,8 @@ function(build_boost BOOST_URL BUILD_DIR)
         BINARY_DIR ${BOOST_SRC}
         CONFIGURE_COMMAND "./bootstrap.sh"
         BUILD_COMMAND
-            ./b2 --prefix=${BOOST_ROOT} --layout=system link=static threading=multi install
+            ./b2 -d+2 --prefix=${BOOST_ROOT} --layout=system link=static threading=multi install
+                cxxflags=${CMAKE_CXX_FLAGS}
                 ${BOOST_BUILD_LIBS} ${BOOST_BUILD_OPTS} > ${BOOST_BUILD_LOG}
         INSTALL_COMMAND ""
     )
