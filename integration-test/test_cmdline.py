@@ -3,7 +3,13 @@
 from integrationtest import IntegrationTest, main
 import unittest
 
+
 class TestCmdline(IntegrationTest, unittest.TestCase):
+
+    def get_commands(self):
+        rv, err = self.execute([])
+        cmds = [x[1:].split(" - ")[0] for x in err.split("\n") if x and x[0] == '\t']
+        return cmds
 
     def test_help(self):
         params = [ "-h" ]
@@ -18,10 +24,7 @@ class TestCmdline(IntegrationTest, unittest.TestCase):
         self.assertEqual('', err)
 
     def test_command_help(self):
-        cmds = ['bed-merge', 'check-ref', 'create-contigs', 'intersect',
-                'ref-stats', 'sort', 'vcf-annotate', 'vcf-filter', 'vcf-merge',
-                'vcf-normalize-indels', 'vcf-report', 'vcf-site-filter',
-                'vcf2raw', 'wig2bed']
+        cmds = self.get_commands()
 
         for cmd in cmds:
             params = [cmd, '-h']
