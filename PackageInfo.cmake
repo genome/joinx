@@ -19,7 +19,7 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tool for comparing snv bed files
  reports (concordance).")
 set(CPACK_PACKAGE_NAME "joinx${EXE_VERSION_SUFFIX}")
 set(CPACK_PACKAGE_VENDOR "wugc")
-set(CPACK_PACKAGE_VERSION ${FULL_VERSION})
+set(CPACK_PACKAGE_VERSION ${FULL_VERSION}${PACKAGE_VERSION_SUFFIX})
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Travis Abbott <tabbott@genome.wustl.edu>")
 set(CPACK_SYSTEM_NAME "Linux-${ARCH}")
 set(CPACK_TOPLEVEL_TAG "Linux-${ARCH}")

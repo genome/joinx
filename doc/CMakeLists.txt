@@ -7,9 +7,9 @@ set(COPYRIGHT_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/copyright)
 add_custom_command(
     OUTPUT ${MAN_PAGE_OUTPUT}
     DEPENDS ${MAN_PAGE_INPUT}
-    COMMAND pod2man ARGS 
+    COMMAND pod2man ARGS
         --section=1
-        --release='Joinx ${FULL_VERSION}' 
+        --release='Joinx ${FULL_VERSION}'
         --center='Joinx Manual'
         ${MAN_PAGE_INPUT}
         | gzip -9 > ${MAN_PAGE_OUTPUT}
