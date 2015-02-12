@@ -57,6 +57,8 @@ public:
     GenotypeCall const& genotype(uint32_t sampleIdx) const;
 
     uint32_t samplesWithData() const;
+    uint32_t samplesWithGenotypes() const;
+    uint32_t samplesWithoutGenotypes() const;
     bool isSampleFiltered(uint32_t idx, std::string* filterName = 0) const;
     int32_t samplesFailedFilter() const;
     int32_t samplesEvaluatedByFilter() const;

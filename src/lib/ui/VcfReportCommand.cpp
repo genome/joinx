@@ -96,9 +96,9 @@ void VcfReportCommand::exec() {
         *perSiteOut << "\t";
 
         uint32_t nSamples = entry.sampleData().header().sampleCount();
-        *perSiteOut << nSamples << "\t";
-        *perSiteOut << entry.sampleData().samplesFailedFilter() << "\t";
-        *perSiteOut << nSamples - entry.sampleData().samplesWithData() << "\t";
+        *perSiteOut << nSamples << "\t"
+            << entry.sampleData().samplesFailedFilter() << "\t"
+            << entry.sampleData().samplesWithoutGenotypes() << "\t";
 
         std::vector<bool> transitionStatus = siteMetrics.transitionStatusByAlt();
         uint32_t transitionIdx = 0;

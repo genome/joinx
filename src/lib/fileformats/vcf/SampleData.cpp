@@ -339,6 +339,26 @@ uint32_t SampleData::samplesWithData() const {
     return rv;
 }
 
+uint32_t SampleData::samplesWithoutGenotypes() const {
+    auto with = samplesWithGenotypes();
+    auto total = header().sampleCount();
+
+    assert(total >= with);
+    return total - with;
+}
+
+uint32_t SampleData::samplesWithGenotypes() const {
+    uint32_t rv(0);
+    uint32_t nSamples = header().sampleCount();
+
+    for (uint32_t i = 0; i < nSamples; ++i) {
+        auto const& gt = genotype(i);
+        if (!gt.empty() && !gt.null())
+            ++rv;
+    }
+    return rv;
+}
+
 bool SampleData::isSampleFiltered(uint32_t idx, std::string* filterName) const {
     CustomValue const* ft = get(idx, "FT");
     if (!ft || ft->empty())

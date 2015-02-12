@@ -3,6 +3,7 @@
 #include "fileformats/vcf/Header.hpp"
 #include "fileformats/vcf/CustomType.hpp"
 #include "fileformats/vcf/CustomValue.hpp"
+#include "io/StreamJoin.hpp"
 
 #include <gtest/gtest.h>
 
@@ -176,6 +177,59 @@ TEST_F(TestVcfSampleData, addFilterReflectedSamples) {
     EXPECT_TRUE(sd.isSampleFiltered(mainIdx, &filterName));
     EXPECT_EQ("HATE", filterName);
     EXPECT_FALSE(sd.isSampleFiltered(copyIdx));
+}
+
+TEST_F(TestVcfSampleData, samplesWithGenotypes) {
+    {
+        std::vector<std::string> samples{
+            "0/1",
+            ".:.:.:.",
+            "./.",
+            "0/0:.",
+            "1/1:.:."
+            };
+
+        std::stringstream ss;
+        ss << format << "\t" << streamJoin(samples).delimiter("\t");
+
+        Vcf::SampleData sd(&header, ss.str());
+        EXPECT_EQ(3u, sd.samplesWithGenotypes());
+        EXPECT_EQ(2u, sd.samplesWithoutGenotypes());
+    }
+
+    {
+        std::vector<std::string> samples{
+            "0/1",
+            "1/1",
+            "0/1",
+            "1/1",
+            "0/1",
+            };
+
+        std::stringstream ss;
+        ss << format << "\t" << streamJoin(samples).delimiter("\t");
+
+        Vcf::SampleData sd(&header, ss.str());
+        EXPECT_EQ(5u, sd.samplesWithGenotypes());
+        EXPECT_EQ(0u, sd.samplesWithoutGenotypes());
+    }
+
+    {
+        std::vector<std::string> samples{
+            "./././.",
+            ".:.:.:.",
+            ".|.",
+            ".|.|.|.|.:.:.:.",
+            ".",
+            };
+
+        std::stringstream ss;
+        ss << format << "\t" << streamJoin(samples).delimiter("\t");
+
+        Vcf::SampleData sd(&header, ss.str());
+        EXPECT_EQ(0u, sd.samplesWithGenotypes());
+        EXPECT_EQ(5u, sd.samplesWithoutGenotypes());
+    }
 }
 
 
