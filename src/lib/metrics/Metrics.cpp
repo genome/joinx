@@ -204,8 +204,18 @@ void EntryMetrics::identifyNovelAlleles() {
 
 double EntryMetrics::minorAlleleFrequency() const {
     if(!_allelicDistribution.empty()) {
-        uint32_t totalAlleles = accumulate(_allelicDistribution.begin(), _allelicDistribution.end(), 0);
-        return (double) *min_element(_allelicDistribution.begin(), _allelicDistribution.end(), minorAlleleSort) / totalAlleles; 
+
+        // this is iterator guaranteed to be valid since _allelicDistribution cannot be empty
+        auto minorAlleleIter = min_element(
+            _allelicDistribution.begin(), _allelicDistribution.end(),
+            minorAlleleSort);
+
+        auto num = *minorAlleleIter;
+        auto totalAlleles = accumulate(_allelicDistribution.begin(), _allelicDistribution.end(), 0);
+        if (num == 0 || totalAlleles == 0)
+            return 0;
+
+        return double(num)/totalAlleles;
     }
     else {
         throw runtime_error("Unable to calculate minorAlleleFrequency if the allelic distribution is empty");
@@ -217,7 +227,11 @@ const std::vector<double> EntryMetrics::alleleFrequencies() const {
         uint32_t totalAlleles = accumulate(_allelicDistribution.begin(), _allelicDistribution.end(), 0);
         std::vector<double> frequencies;
         for(auto allele = _allelicDistribution.begin(); allele != _allelicDistribution.end(); ++allele) {
-            frequencies.push_back((double) *allele / totalAlleles);
+            double value = 0.0;
+            if (totalAlleles != 0) {
+                value = (double) *allele / totalAlleles;
+            }
+            frequencies.push_back(value);
         }
         return frequencies;
     }

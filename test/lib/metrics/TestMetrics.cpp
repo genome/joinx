@@ -78,8 +78,19 @@ namespace {
         "0/1:DIE\t"
         "0/1:DIE\t"
 
-        //,
+        ,
         // ENTRY 4
+        "2\t3500\t.\tA\tG,C,T\t.\t.\t.\tGT:FT\t"
+        "0/3:DIE\t"
+        "0/0:DIE\t"
+        "0/0:DIE\t"
+        "0/0:DIE\t"
+
+        "0/0:DIE\t"
+        "0/0:DIE\t"
+        "0/0:DIE\t"
+        "0/0:DIE\t"
+
 
     };
 }
@@ -238,6 +249,10 @@ TEST_F(TestMetrics, minorAlleleFrequency) {
     // the minor allele is 2, which shows up 5 times in the data.
     // (see the definition of entries[0])
     ASSERT_NEAR(5.0/18.0, _metrics[0].minorAlleleFrequency(), 1e-14);
+}
+
+TEST_F(TestMetrics, allHomRef) {
+    ASSERT_EQ(0.0, _metrics[3].minorAlleleFrequency());
 }
 
 // The next test probably warrants an explanation.
