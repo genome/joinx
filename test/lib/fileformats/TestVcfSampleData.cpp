@@ -185,7 +185,7 @@ TEST_F(TestVcfSampleData, samplesWithGenotypes) {
             "0/1",
             ".:.:.:.",
             "./.",
-            "0/0:.",
+            "0/.:.",
             "1/1:.:."
             };
 
@@ -200,9 +200,9 @@ TEST_F(TestVcfSampleData, samplesWithGenotypes) {
     {
         std::vector<std::string> samples{
             "0/1",
-            "1/1",
-            "0/1",
-            "1/1",
+            "1/.",
+            "./1",
+            "1/1/.",
             "0/1",
             };
 
