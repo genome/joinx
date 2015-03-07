@@ -39,4 +39,5 @@ protected:
     Vcf::MergeStrategy::SamplePriority _samplePriority;
     bool _exactPos;
     bool _printStats;
+    bool _allowSameFile;
 };

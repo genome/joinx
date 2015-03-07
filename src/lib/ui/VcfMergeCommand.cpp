@@ -44,6 +44,7 @@ VcfMergeCommand::VcfMergeCommand()
     , _consensusRatio(0.0)
     , _samplePriority(Vcf::MergeStrategy::eORDER)
     , _exactPos(false)
+    , _allowSameFile(false)
 {
 }
 
@@ -93,6 +94,10 @@ void VcfMergeCommand::configureOptions() {
             "When merging samples, require a certain ratio of them to agree, "
             "filtering sites that fail. "
             "The format is -R ratio,filterName,filterDescription")
+
+        ("allow-same-file",
+            po::bool_switch(&_allowSameFile)->default_value(false),
+            "Allow merging entries from the same file")
 
         ("reject-filter-name",
             po::value<string>(&_rejectFilter)->default_value("MERGE_REJECT"),
@@ -285,7 +290,7 @@ void VcfMergeCommand::exec() {
     // End rejection chain
 
     // Dedup will branch between the rejection chain (filterer) and the entryMerger
-    auto dedup = makeVcfSourceIndexDeduplicator(entryMerger, filterer);
+    auto dedup = makeVcfSourceIndexDeduplicator(entryMerger, filterer, !_allowSameFile);
 
     auto smallStats = makeGroupStats(dedup, "shared allele bundle size");
     auto regionGrouper = makeGroupBySharedRegions(smallStats);
