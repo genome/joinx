@@ -1,0 +1,205 @@
+=head1 NAME
+
+joinx vcf-merge - merge overlapping entries in one or more vcf files
+
+=head1 SYNOPSIS
+
+joinx vcf-merge [OPTION]... FILE1 [... FILEn]
+
+joinx [--version|-v] SUBCOMMAND [SUBCOMMAND-ARGS]
+
+=head1 DESCRIPTION
+
+Merge lines from pre-sorted vcf files that share overlapping entries.
+
+-h, --help
+    Display help message
+
+-i <path>, --input-file <arg>
+    Input file(s) (positional arguments work also).
+
+-e, --exact-pos
+    Legacy option retained for compatibility (has no effect).
+
+-D <file.vcf=tag>, --duplicate-samples <file.vcf=tag>
+    Input file(s) specified as file.vcf=tag. each sample in file.vcf
+    will be duplicated with the name <sample_name>-tag.
+
+-o <path>, --output-file <path>
+    Output file (omit or use '-' for stdout).
+
+-M <path>, --merge-strategy-file <path>
+    Merge strategy file for vcf INFO fields (see MERGE STRATEGY for details).
+
+-c, --clear-filters
+    When set, merged entries will have FILTER data stripped out.
+
+-s, --merge-samples
+    Allow input files with overlapping samples.
+
+-N <fasta>, --normalize-indels <fasta>
+    Normalize indels using the given reference fasta (may cause output to
+    become unsorted).
+
+-P {o|u|f}, --sample-priority {o|u|f}
+    Sample priority (o=Order, u=Unfiltered, f=Filtered).
+    When merging entries with conflicting sample data, this argument controls
+    which takes precedent.
+
+    'o' means give precedence to entries that come from source files that appear
+    earlier on the command line
+
+    'u' means give precedence to unfiltered data (ties broken by command line
+    order)
+
+    'f' means give precedence to filtered data (ties broken by command line
+    order)
+
+-R <spec>, --require-consensus <spec>
+    When merging samples (-s), require a certain ratio of them to agree on the
+    genotype, applying a filter to sites that fail.
+    The format is of <spec> is ratio,filterName,filterDescription
+
+--reject-filter-name <name> (=MERGE_REJECT)
+    The name of the filter to apply to entries rejected by the merger.
+    Currently, the only reason entries are rejected is if they come
+    from the same source file (see --allow-same file).
+
+--allow-same-file
+    By default, entries that come from the same file will never be merged.
+    The first of them to appear will be emitted followed by the rest with
+    the filter specified by --reject-filter-name applied.
+
+    Specifying --allow-same-file removes this restriction. This is useful
+    for collapsing records within a single input file containing the same
+    site.
+
+    When a single input file is specified, you almost certainly want to
+    pass this option as well. Failure to do so will result in no merging
+    taking place. That would only make sense for counting the number of
+    duplicate records.
+
+--print-stats
+    Print statistics about the size of each bundle of entries being merged.
+    (See MERGING ALGORITHM for a description of how bundles are formed)
+
+=head1 MERGING ALGORITHM
+
+This section describes how sets of entries to merge are selected.
+
+The relevant vcf fields involved in this calculation are CHROM, POS, REF,
+and ALT (sample/genotype data is not considered).
+
+Single vcf records can define multiple variants. Furthermore, the set of
+variants defined in a record may not all edit the same reference bases. e.g.,
+
+    CHROM   POS ID  REF ALT ...
+    chrAB   100 .   ACT AC,A,CT ...
+
+This record defines three variants (in the order they appear in the ALT field):
+
+=over 3
+
+=item 1. the deletion of T at POS=102
+
+=item 2. the deletion of CT starting at POS=101
+
+=item 3. the deletion of A at POS=100.
+
+=back
+
+The first deletion in the above example edits the range of reference bases
+[102, 102], the second edits [101, 102], and the third edits [100, 100]
+(in one-based inclusive coords). The range of edited reference bases is
+the basis of the merging algorithm.
+
+Specifically, two variants are considered "compatible" if they edit the same
+set of reference bases. Two vcf entries (lines if you prefer) are considered
+"mergeable" if they contain one or more "compatible" variants (and either do
+not come from the same source file, or the --allow-same-file option was
+passed).
+
+The current algorithm merges all "mergeable" vcf entries.
+
+To be precise, if we define an equivalence relation ~ on vcf records where
+rec1 ~ rec2 iff rec1 and rec2 share a "compatible variant", then the output
+of joinx vcf-merge comprises the result of applying the merge operation to
+each equivalence class induced by ~. Since the input files are required to
+be sorted (e.g., by joinx sort), this can be done efficiently in practice
+by caching vcf records until a coordinate gap is observed and processing all
+cached records (pathological cases can be constructed, but don't arise in
+practice).
+
+=head1 MERGE STRATEGY
+
+When vcf records are merged, we have to decide what to do with the INFO
+fields that each contains. The relevant behavior can be configured by
+providing a "merge strategy" file.
+
+This is a simple KEY=VALUE file that specifies:
+
+=over 3
+
+=item a) a default action
+
+=item b) any specific customizations for particular info fields
+
+=back
+
+Valid actions are:
+
+    ignore
+        REQUIRES: nothing.
+        PRODUCES: removes the given info field.
+
+    first
+        REQUIRES: nothing.
+        PRODUCES: uses the first value seen for this field (even if null).
+
+    earliest
+        REQUIRES: nothing.
+        PRODUCES: retain the first non-null value (if any) for this field.
+
+    uniq-concat
+        REQUIRES: variable length field (i.e., Number=. in vcf parlance).
+        PRODUCES: a deduplicated set of values.
+
+    enforce-equal
+        REQUIRES: nothing.
+        PRODUCES: if an attempt is made to merge two records with different
+            values for this field, an exception is raised
+
+    enforce-equal-unordered
+        REQUIRES: nothing.
+        PRODUCES: same as enforce-equal, but non-scalar values are not required
+            to have the same ordering (e.g., [1,2,3] == [2,1,3])
+
+    sum
+        REQUIRES: numeric vcf Type (Integer or Float)
+        PRODUCES: sum the values for this field
+
+    per-alt-delimited-list
+        REQUIRES: vcf Type=String, vcf Number={A|R}.
+        PRODUCES: a '/' delimited list of per-allele strings comprising the
+            union of all input values being merged (calculated per-allele,
+            of course).
+
+An example merge strategy that by default takes info fields from the
+first entry, sums up DP (depth) values, and concatenates information
+in a field called caller in a deduplicated list is:
+
+ default=first
+ info.DP=sum
+ info.CALLER=uniq-concat
+
+=head1 AUTHORS
+
+Written by Travis Abbott.
+
+Full contributor information is available at the canonical repository:
+L<https://github.com/genome/joinx/>.
+
+=head1 COPYRIGHT
+
+Joinx is free software, distributed under the terms of the GNU GPL v3 or later:
+L<http://gnu.org/licenses/gpl.html>.
