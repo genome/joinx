@@ -10,7 +10,7 @@ joinx [--version|-v] SUBCOMMAND [SUBCOMMAND-ARGS]
 
 =head1 DESCRIPTION
 
-Merge lines from pre-sorted vcf files that share overlapping entries.
+Merge lines from pre-sorted vcf files that enjoy common alleles.
 
 -h, --help
     Display help message
