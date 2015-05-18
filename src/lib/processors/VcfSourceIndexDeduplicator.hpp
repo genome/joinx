@@ -50,7 +50,7 @@ template<typename PassOutputFunc, typename FailOutputFunc>
 VcfSourceIndexDeduplicator<PassOutputFunc, FailOutputFunc>
 makeVcfSourceIndexDeduplicator(
           PassOutputFunc& passOut
-        , FailOutputFunc failOut
+        , FailOutputFunc& failOut
         , bool active
         )
 {
