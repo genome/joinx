@@ -24,9 +24,8 @@
 #include "processors/grouping/GroupStats.hpp"
 
 #include <boost/bind.hpp>
-#include <boost/function.hpp>
-
 #include <boost/format.hpp>
+#include <boost/function.hpp>
 #include <boost/program_options.hpp>
 
 #include <memory>
@@ -236,7 +235,8 @@ void VcfMergeCommand::exec() {
         readers[i]->header().sourceIndex(_fileOrder[inputStreams[i]->name()]);
     }
 
-    GroupSortingWriter printer(*out);
+    GroupSortingWriter printer_raw(*out);
+    auto printer = std::ref(printer_raw);
 
     boost::function<void(Vcf::Entry&)> writer;
     if (normalizer) {
@@ -300,7 +300,7 @@ void VcfMergeCommand::exec() {
               bigStats
             , DefaultCoordinateView{}
             , nothing
-            , std::bind(&GroupSortingWriter::endGroup, std::ref(printer))
+            , std::bind(&GroupSortingWriter::endGroup, printer)
             );
     auto merger = makeMergeSorted(readers);
     auto pump = makePointerStreamPump(merger, initialGrouper);

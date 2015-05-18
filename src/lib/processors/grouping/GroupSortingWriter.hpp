@@ -2,10 +2,14 @@
 
 #include "fileformats/vcf/Entry.hpp"
 
+#include <boost/noncopyable.hpp>
+
 #include <ostream>
 #include <vector>
 
-struct GroupSortingWriter {
+struct GroupSortingWriter : public boost::noncopyable {
+    typedef void result_type;
+
     struct SortHelper_ {
         bool operator()(Vcf::Entry const& x, Vcf::Entry const& y) const {
             if (x.start() < y.start())
