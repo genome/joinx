@@ -384,7 +384,7 @@ void SampleMetrics::processEntry(Vcf::Entry& e, EntryMetrics& m) {
             //determine if novel which is by allele
             std::vector<bool> novelByAlt = m.novelStatusByAlt();
             for(auto j = gt.indexSet().begin(); j != gt.indexSet().end(); ++j) {
-                if(*j == 0)
+                if(isRefOrNull(*j))
                     continue;
                 if(novelByAlt[j->value - 1]) {    //need to subtract one because reference is not an Alt
                     ++_perSampleNovelVariants[sampleIdx];
