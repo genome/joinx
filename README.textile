@@ -43,6 +43,11 @@ Joinx does not support in source builds. Create a new build directory, enter it,
 Running ctest with run both unit and integration tests. you can run one or the other with
 @ctest -L <unit|integration>@
 
+h3. One-liner installer
+
+If you have "conda":https://conda.io/docs/intro.html installed:   
+@conda install -c pwwang joinx@
+
 h2. LICENSE
 
 "GPL v3.0":http://www.gnu.org/licenses/gpl.html
