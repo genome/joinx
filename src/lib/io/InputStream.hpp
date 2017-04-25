@@ -54,5 +54,5 @@ inline bool InputStream::good() const {
 }
 
 inline bool getline(InputStream& s, std::string& line) {
-    return s.getline(line);
+    return bool(s.getline(line));
 }

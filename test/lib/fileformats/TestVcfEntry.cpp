@@ -414,7 +414,7 @@ TEST_F(TestVcfEntry, sampleDataPrintCertainSample) {
 TEST_F(TestVcfEntry, multipleFilters) {
     stringstream vcfss(filteredTwiceLine);
     string line;
-    ASSERT_TRUE(getline(vcfss, line));
+    ASSERT_TRUE(bool(getline(vcfss, line)));
     Entry e(&_header, line);
 
     EXPECT_EQ(2u, e.failedFilters().size());
@@ -424,7 +424,7 @@ TEST_F(TestVcfEntry, multipleFilters) {
 TEST_F(TestVcfEntry, multipleFiltersWhitelist) {
     stringstream vcfss(filteredTwiceLine);
     string line;
-    ASSERT_TRUE(getline(vcfss, line));
+    ASSERT_TRUE(bool(getline(vcfss, line)));
     Entry e(&_header, line);
 
     EXPECT_EQ(2u, e.failedFilters().size());
