@@ -75,7 +75,7 @@ bool InputStream::getline(string& line) {
         _cacheIter = _cache.end();
     }
 
-    return _in;
+    return bool(_in);
 }
 
 char InputStream::peek() {
